@@ -104,4 +104,3 @@ Pre-commit：`lint-staged` + `pnpm check-types`（Husky）。
 | C4             | [c4-model/](./c4-model/)                                                 |
 | Glossary       | [../Glossary.md](../Glossary.md)                                         |
 | User Story Map | [../product-owner/User-Story-Map.md](../product-owner/User-Story-Map.md) |
-| TOGAF          | [../product-owner/togaf/](../product-owner/togaf/)                       |

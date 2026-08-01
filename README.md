@@ -178,7 +178,6 @@ WhatsFeed 采用 C4 模型进行架构可视化，详见 [docs/developer/c4-mode
 - [C4 模型](docs/developer/c4-model/README.md)
 - [Glossary](docs/Glossary.md)
 - [User Story Map](docs/product-owner/User-Story-Map.md)
-- [TOGAF Business Architecture](docs/product-owner/togaf/README.md)
 
 ## Clean Architecture（2026-04）
 

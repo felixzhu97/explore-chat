@@ -74,7 +74,6 @@ When a change matches the trigger matrix, update the matching living docs in the
 | Glossary       | [docs/Glossary.md](../../../docs/Glossary.md)                                         |
 | C4             | [docs/developer/c4-model/](../../../docs/developer/c4-model/)                         |
 | User Story Map | [docs/product-owner/User-Story-Map.md](../../../docs/product-owner/User-Story-Map.md) |
-| TOGAF          | [docs/product-owner/togaf/](../../../docs/product-owner/togaf/)                       |
 
 | Change                                                                                                     | Must update                                           |
 | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
@@ -253,7 +252,6 @@ PR **References** must match the commit References (same links). No Test plan. N
 | Glossary                 | [Glossary](../../../docs/Glossary.md)                           |
 | C4 model                 | [c4-model](../../../docs/developer/c4-model/README.md)          |
 | User Story Map           | [User-Story-Map](../../../docs/product-owner/User-Story-Map.md) |
-| TOGAF                    | [togaf](../../../docs/product-owner/togaf/README.md)            |
 | Testing core             | [testing](references/testing.md)                                |
 | Business / tech strategy | [business-tech-analysis](../business-tech-analysis/SKILL.md)    |
 | Research / OSS watchlist | [sources.md](../business-tech-analysis/references/sources.md)   |
