@@ -1,0 +1,127 @@
+---
+description: Core project constraints — Clean Architecture layers, monorepo layout, UI stack, test naming. Deep guides live in skills.
+alwaysApply: true
+---
+
+# Architecture & WhatsFeed Core
+
+## Dependency Rule
+
+```
+presentation → application → domain
+                    ↑
+infrastructure ─────┘
+```
+
+**Domain has NO dependencies on other layers** (no Nest/Next/Expo/HTTP/DB imports).
+
+## Monorepo Layout
+
+```
+apps/web          # Next.js (Instagram-style feed)
+apps/admin        # Next.js admin
+apps/mobile       # Expo / React Native
+services/server   # NestJS API (:3001, prefix /api/v1)
+services/recommendation
+services/vision
+services/rag
+services/media-gen
+packages/*        # shared-types, im, analytics
+```
+
+Clients (web / mobile / admin) call **only** NestJS. Do not call Python microservices or explore-ai from the browser.
+
+## Layers (TypeScript)
+
+| Layer | Contains | Typical paths |
+|-------|----------|---------------|
+| `domain/` | Entities, VOs, repository/gateway interfaces | `*/src/domain/` |
+| `application/` | Use cases, application services, DTOs | `*/src/application/` |
+| `infrastructure/` | Adapters, HTTP clients, persistence, config | `*/src/infrastructure/` |
+| `presentation/` | Controllers, UI, Nest modules that expose HTTP | `*/src/presentation/` or `apps/*/app/` |
+
+### NestJS (`services/server`)
+
+```
+services/server/src/
+├── domain/
+├── application/
+├── infrastructure/
+└── presentation/     # controllers, guards, filters
+```
+
+Global API prefix: `/api/v1`.
+
+### Web / Admin
+
+```
+apps/web/src/
+├── domain/
+├── application/
+├── infrastructure/   # ApiClient, *ApiAdapter
+└── presentation/     # components, screens
+```
+
+### Mobile
+
+Same Clean Architecture + repository adapters; Expo public env `EXPO_PUBLIC_API_URL`.
+
+## Forbidden in New Code
+
+- `domain/port/` packages or `*Port` interface suffix — prefer `*Repository` / `*Gateway`
+- Hexagonal `adapter/in` / `adapter/out` package names — use `presentation` / `infrastructure`
+- Browser / mobile direct calls to Python services or explore-ai
+
+**Legacy note:** existing `*ApiAdapter` classes under `infrastructure/adapters` may remain; new domain-facing interfaces still live in `domain/` as Repository/Gateway.
+
+## Domain Rules
+
+- No framework annotations in domain
+- Prefer rich models (behavior on entities); avoid anemic getters-only types
+- Repository/Gateway: interface in domain, implementation in infrastructure
+- Names align with [Glossary](../../docs/Glossary.md) Preferred Terms
+
+## UI & Client Stack (always)
+
+- Visual language: **Instagram-consistent** and **Apple HIG-consistent**
+- Styling: **Emotion** (`@emotion/styled` / project emotion helpers)
+- State optimisation: **Redux Toolkit** where client state applies
+- Utilities: prefer **lodash** for collection/object helpers when it clarifies code
+
+## TypeScript Naming
+
+| Type | Rule | Example |
+|------|------|---------|
+| Domain model | PascalCase | `Post`, `FeedEntry` |
+| Value object | PascalCase | `PostId` |
+| Repository | PascalCase + Repository | `FeedRepository` |
+| Use case / service | PascalCase + descriptive | `ExploreService`, `GetFeedUseCase` |
+| Controller | PascalCase + Controller | `PostController` |
+| Adapter (infra) | PascalCase + Adapter | `FeedApiAdapter` |
+| Methods | camelCase | `getExplore` |
+| Constants | UPPER_SNAKE_CASE | `MAX_PAGE_SIZE` |
+
+## REST / API
+
+- Nest routes under `/api/v1/...`
+- Controllers stay thin; business rules in application/domain
+- Explore AI upstream goes through Nest BFF (`/ai/explore/*`), not the client
+
+## Tests
+
+- Name: `should_expectedResult_when_condition`
+- Pyramid: Unit ~70% / Integration ~20% / E2E ~10%
+- Details: [developer skill → testing](../skills/developer/references/testing.md)
+
+## Commit (summary)
+
+Conventional commits: `feat` | `fix` | `refactor` | `docs` | `test` | `chore` | `perf` | `ci`.  
+Full branch / commit / PR / References rules: [developer skill §6](../skills/developer/SKILL.md).
+
+## Skills Index
+
+| Need | Skill |
+|------|-------|
+| Feature / TDD / DDD / commit / UX | [developer](../skills/developer/SKILL.md) |
+| User stories / Jira | [product-owner](../skills/product-owner/SKILL.md) |
+| Business + tech analysis | [business-tech-analysis](../skills/business-tech-analysis/SKILL.md) |
