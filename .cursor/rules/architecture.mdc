@@ -107,20 +107,31 @@ Same Clean Architecture + repository adapters; Expo public env `EXPO_PUBLIC_API_
 - Controllers stay thin; business rules in application/domain
 - Explore AI upstream goes through Nest BFF (`/ai/explore/*`), not the client
 
-## Tests
+## Test Naming
 
-- Name: `should_expectedResult_when_condition`
-- Pyramid: Unit ~70% / Integration ~20% / E2E ~10%
-- Details: [developer skill → testing](../skills/developer/references/testing.md)
+```
+should_expectedResult_when_condition
+```
 
-## Commit (summary)
+Pyramid: Unit ~70% / Integration ~20% / E2E ~10%.  
+Details: [developer skill → testing](../skills/developer/references/testing.md)
 
-Conventional commits: `feat` | `fix` | `refactor` | `docs` | `test` | `chore` | `perf` | `ci`.  
-Full branch / commit / PR / References rules: [developer skill §6](../skills/developer/SKILL.md).
+## Checklist
 
-## Skills Index
+- [ ] Domain has no outward dependencies
+- [ ] No circular dependencies
+- [ ] Entities encapsulate behavior
+- [ ] Clients call only NestJS (`/api/v1`)
 
-| Need | Skill |
+## Hard constraints (delivery)
+
+When **creating a Jira ticket**, **branching**, **committing**, or **opening a PR**: always follow [developer](../skills/developer/SKILL.md) §6 (`<type>/<slug>`, Chain PRs, commit/PR templates) and [Product Owner](../skills/product-owner/SKILL.md). **References** must prefer official documentation and research links ([dependency-docs](../skills/developer/references/dependency-docs.md), [sources](../skills/business-tech-analysis/references/sources.md)).
+
+Living BA (TOGAF Phase A/B) and User Story Map live under `docs/product-owner/`; software architecture under `docs/developer/c4-model/`. See [living-docs](../skills/developer/references/living-docs.md).
+
+## Skills (on demand)
+
+| Task | Skill |
 |------|-------|
 | Feature / TDD / DDD / commit / UX | [developer](../skills/developer/SKILL.md) |
 | User stories / Jira | [product-owner](../skills/product-owner/SKILL.md) |

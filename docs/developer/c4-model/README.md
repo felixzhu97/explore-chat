@@ -2,7 +2,7 @@
 
 使用 PlantUML（C4-PlantUML）描述 WhatsFeed 软件架构。`.puml` 为源文件；`png/` 为导出预览。
 
-企业架构视点见 [TOGAF](../../product-owner/togaf/)（ArchiMate）。本目录聚焦 **C4 软件架构**。
+企业架构视点见 [TOGAF](../../product-owner/togaf/)（ADM Phase A/B Markdown）。本目录聚焦 **C4 软件架构**。
 
 ## 文件
 

@@ -1,7 +1,0 @@
----
-description: 
-alwaysApply: true
----
-
-- Use Redux Toolkit to optimise code.
-- Use lodash to optimise code.
