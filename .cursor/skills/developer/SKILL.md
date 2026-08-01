@@ -203,7 +203,12 @@ References:
 PR body (no markdown headings — plain sections only):
 
 ```
-This change … (why)
+<why paragraph>
+
+<what paragraph>
+
+Test plan:
+- [ ] …
 
 References:
 - [Title](URL)
@@ -212,7 +217,7 @@ Jira:
 - https://felixzhu.atlassian.net/browse/AI-XXX
 ```
 
-PR **References** must match the commit References (same links).
+PR **References** must match the commit References (same links). No `Made with` / `Co-authored-by` footers.
 
 ## Checklist
 
