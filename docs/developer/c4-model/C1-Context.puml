@@ -1,0 +1,33 @@
+@startuml C1-Context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title 系统上下文图 (C1) - WhatsFeed
+
+Person(user_web, "Web 用户", "浏览器使用信息流、聊天、通话与探索")
+Person(user_mobile, "移动端用户", "移动应用使用信息流、Reels、聊天与通话")
+Person(admin_user, "管理员", "管理后台运营用户、内容与配置")
+
+System_Boundary(whatsfeed, "WhatsFeed") {
+  System(whatsfeed_sys, "WhatsFeed", "社交与即时通讯：聊天、音视频、信息流、帖子、评论、关注、推荐与探索、内容审核、群组")
+}
+
+System_Ext(email, "邮件服务", "事务邮件（SMTP/SES）")
+System_Ext(push, "推送服务", "推送通知（FCM/APNs）")
+System_Ext(storage, "文件存储", "本地或对象存储媒体文件")
+System_Ext(webrtc, "STUN/TURN", "WebRTC NAT 穿透")
+System_Ext(explore_ai, "Explore AI", "可选：经 Nest BFF 代理的 AI 能力")
+System_Ext(growthbook, "GrowthBook", "A/B 与功能开关（可选）")
+
+Rel(user_web, whatsfeed_sys, "使用", "HTTPS、WebSocket、WebRTC")
+Rel(user_mobile, whatsfeed_sys, "使用", "HTTPS、WebSocket、WebRTC")
+Rel(admin_user, whatsfeed_sys, "管理", "HTTPS")
+Rel(whatsfeed_sys, email, "发送邮件")
+Rel(whatsfeed_sys, push, "发送推送")
+Rel(whatsfeed_sys, storage, "存储/读取文件")
+Rel(whatsfeed_sys, webrtc, "媒体中继")
+Rel(whatsfeed_sys, explore_ai, "服务间调用", "X-Service-Key")
+Rel(whatsfeed_sys, growthbook, "功能开关", "HTTPS")
+
+@enduml

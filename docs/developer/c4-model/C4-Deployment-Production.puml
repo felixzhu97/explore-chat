@@ -1,0 +1,31 @@
+@startuml C4-Deployment-Production
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+
+LAYOUT_WITH_LEGEND()
+
+title 部署图 (C4) - 生产（当前状态 / 计划）
+
+note as N1
+  **现状**：WhatsFeed API 尚未作为托管 Web Service 上线。
+  下图描述 **目标 MVP** 拓扑（Docker 镜像 + 托管 Postgres/Redis），
+  非已运行生产证明。
+end note
+
+Deployment_Node(cdn_edge, "静态托管（计划）", "Vercel 或同类") {
+  Container(web_prod, "Web / Admin", "Next.js", "静态 / SSR 前端")
+}
+
+Deployment_Node(cloud, "容器平台（计划）", "Render / Railway / 自建 Docker") {
+  Container(api_prod, "API 服务", "NestJS Docker", "绑定 0.0.0.0:$PORT；健康检查 /api/v1/health")
+  ContainerDb(pg_prod, "PostgreSQL", "托管 Postgres", "Prisma migrate deploy")
+  ContainerDb(redis_prod, "Redis", "托管 Redis", "会话与缓存")
+}
+
+System_Ext(explore_ai_prod, "Explore AI", "已部署 Render", "可选 BFF：EXPLORE_AI_BASE_URL + SERVICE_KEY")
+
+Rel(web_prod, api_prod, "HTTPS / WSS")
+Rel(api_prod, pg_prod, "DATABASE_URL")
+Rel(api_prod, redis_prod, "REDIS_URL")
+Rel(api_prod, explore_ai_prod, "服务间 HTTPS", "可选")
+
+@enduml

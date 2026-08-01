@@ -1,0 +1,57 @@
+@startuml C2-Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title 容器图 (C2) - WhatsFeed
+
+Person(user_web, "Web 用户", "浏览器客户端")
+Person(user_mobile, "移动端用户", "移动客户端")
+Person(admin_user, "管理员", "运营后台")
+
+System_Boundary(whatsfeed, "WhatsFeed") {
+  Container(web_app, "Web 应用", "Next.js、React、TypeScript、Emotion", "信息流、Reels、探索、聊天、通知；Redux Toolkit")
+  Container(admin_app, "管理端", "Next.js、React、TypeScript", "用户、内容安全、运营与分析")
+  Container(mobile_app, "移动端", "React Native、Expo、TypeScript", "信息流、Reels、聊天、探索、个人主页")
+  Container(api_server, "API 服务", "NestJS、TypeScript", "REST / GraphQL / Socket.IO；Explore AI BFF；Cleaner Architecture")
+  Container(media_gen, "媒体生成", "Python、FastAPI", "图片 / 视频 / TTS，:3456")
+  Container(recommendation_svc, "推荐服务", "Python、Celery、FastAPI", "Feed/Explore/Reels 排序与召回，:8000")
+  Container(vision_svc, "视觉服务", "Python、FastAPI", "标签与 NSFW 审核，:8001")
+  Container(rag_svc, "RAG 服务", "Python、FastAPI、Qdrant", "语义搜索与问答，:8002")
+  ContainerDb(postgres, "PostgreSQL", "关系库", "用户、聊天、消息、关注（必需）")
+  ContainerDb(redis, "Redis", "缓存 / PubSub", "会话、在线状态、Feed 缓存（必需）")
+  ContainerDb(kafka, "Kafka", "消息队列", "可选：post.created 等事件")
+  ContainerDb(cassandra, "Cassandra", "宽表", "可选：帖子 / Feed / 互动")
+  ContainerDb(mongodb, "MongoDB", "文档库", "可选：评论、活动通知")
+  ContainerDb(elasticsearch, "Elasticsearch", "搜索", "可选：用户 / 帖子搜索")
+  ContainerDb(qdrant, "Qdrant", "向量库", "可选：RAG 嵌入")
+  Container_Ext(file_storage, "文件存储", "本地盘 / 对象存储", "上传媒体")
+  Container_Ext(ollama, "Ollama", "本地 LLM", "可选聊天流")
+  Container_Ext(explore_ai, "Explore AI", "外部 AI 平台", "可选：BFF 代理")
+}
+
+Rel(user_web, web_app, "使用", "HTTPS、WS、WebRTC")
+Rel(user_mobile, mobile_app, "使用", "HTTPS、WS、WebRTC")
+Rel(admin_user, admin_app, "使用", "HTTPS")
+Rel(web_app, api_server, "API / GraphQL / WS", "HTTPS")
+Rel(mobile_app, api_server, "API / GraphQL / WS", "HTTPS")
+Rel(admin_app, api_server, "API", "HTTPS")
+Rel(api_server, postgres, "读写", "Prisma")
+Rel(api_server, redis, "缓存、Pub/Sub")
+Rel(api_server, kafka, "事件", "可选")
+Rel(api_server, cassandra, "帖子 / Feed", "可选")
+Rel(api_server, mongodb, "评论 / 通知", "可选")
+Rel(api_server, elasticsearch, "搜索", "可选")
+Rel(api_server, file_storage, "上传 / 下载")
+Rel(api_server, media_gen, "媒体生成", "HTTP :3456")
+Rel(api_server, vision_svc, "审核 / 标签", "HTTP :8001")
+Rel(api_server, recommendation_svc, "排序 / 召回", "HTTP :8000")
+Rel(api_server, ollama, "本地聊天", "可选")
+Rel(api_server, explore_ai, "AI BFF", "可选")
+Rel(recommendation_svc, redis, "缓存 / broker")
+Rel(recommendation_svc, postgres, "ETL")
+Rel(rag_svc, qdrant, "向量", "HTTP")
+Rel(rag_svc, ollama, "嵌入 / LLM")
+Rel(web_app, rag_svc, "RAG", "可选 REST")
+
+@enduml

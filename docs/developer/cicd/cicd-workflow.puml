@@ -1,0 +1,48 @@
+@startuml cicd-workflow
+!pragma activityFlow
+skinparam activityBackgroundColor #FAFAFA
+skinparam activityBorderColor #333333
+skinparam arrowColor #333333
+skinparam packageStyle rectangle
+
+title CI/CD Workflow Overview - WhatsFeed (GitHub Actions)
+
+|#palegreen|**Workflow: ci.yml**|
+start
+note right
+**Trigger:** push | pull_request → main
+**Jobs:** ci
+end note
+:**CI**
+(pnpm install
+ → build packages
+ → check-types
+ → lint);
+stop
+
+|#lightblue|**Workflow: coverage.yml**|
+start
+note right
+**Trigger:** 见 .github/workflows/coverage.yml
+end note
+:**coverage**
+(测试覆盖率相关步骤);
+stop
+
+|#orange|**Workflow: codeql（计划）**|
+start
+note right
+仓库当前无独立 codeql.yml。
+本泳道为占位，落地后与 explore-ai 对齐。
+end note
+:**codeql（planned）**
+(matrix: javascript-typescript);
+stop
+
+legend right
+| Workflow | Status |
+| ci.yml | active |
+| coverage.yml | active |
+| codeql | planned |
+endlegend
+@enduml

@@ -4,43 +4,46 @@ Code that changes architecture, domain language, or product capabilities must up
 
 ## Documents
 
-| Document        | Path                                                                                            | Owns                                                           |
-| --------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Domain Glossary | [docs/Glossary.md](../../../../docs/Glossary.md)                                                | Preferred Terms, modules, routes, API prefixes                 |
-| C4 model        | [docs/zh/rd/c4/](../../../../docs/zh/rd/c4/) (EN: [docs/en/rd/c4/](../../../../docs/en/rd/c4/)) | Context / containers / components (`.puml` is source of truth) |
-| User Story Map  | [docs/zh/product/User-Story-Map.md](../../../../docs/zh/product/User-Story-Map.md)              | Delivered / In Progress / Future capabilities                  |
+| Document        | Path                                                                                     | Owns                                                                        |
+| --------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Domain Glossary | [docs/Glossary.md](../../../../docs/Glossary.md)                                         | Preferred Terms, modules, routes, API prefixes                              |
+| C4 model        | [docs/developer/c4-model/](../../../../docs/developer/c4-model/)                         | Context / containers / components / deployment (`.puml` is source of truth) |
+| User Story Map  | [docs/product-owner/User-Story-Map.md](../../../../docs/product-owner/User-Story-Map.md) | Delivered / In Progress / Future capabilities                               |
+| TOGAF           | [docs/product-owner/togaf/](../../../../docs/product-owner/togaf/)                       | Enterprise architecture domains (ArchiMate)                                 |
 
 ## Trigger matrix
 
 If **any** row matches, update the listed doc(s) in the same PR. If none match, mark N/A on the checklist.
 
-| Change                                                                                          | Update                               |
-| ----------------------------------------------------------------------------------------------- | ------------------------------------ |
-| New or renamed Preferred Term, business concept, package/module, frontend route, API prefix     | Glossary                             |
-| New subdomain / service, container boundary, external system, or cross-cutting platform service | C2 (+ C1 if actors/systems change)   |
-| NestJS layering or major server component structure                                             | C3 API Server diagram                |
-| Web / Admin / Mobile shell or feature structure                                                 | Matching C3 app diagram              |
-| Local or production deploy topology, ports, hosting                                             | Deployment-related C4 / README notes |
-| New user-visible capability, nav/module add/remove, delivery status change                      | User Story Map                       |
-| Pure unit/integration tests, formatting, dependency bump with no product/architecture semantics | None (N/A)                           |
+| Change                                                                                          | Update                                        |
+| ----------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| New or renamed Preferred Term, business concept, package/module, frontend route, API prefix     | Glossary                                      |
+| New subdomain / service, container boundary, external system, or cross-cutting platform service | C2 (+ C1 if actors/systems change)            |
+| NestJS layering or major server component structure                                             | C3-Component-Backend                          |
+| Web / Admin / Mobile shell or feature structure                                                 | C3-Component-Frontend (and C2 for new apps)   |
+| Local or production deploy topology, ports, hosting                                             | C4-Deployment and/or C4-Deployment-Production |
+| Business capability, value stream, or enterprise data/tech platform principles                  | TOGAF matching domain diagram(s)              |
+| New user-visible capability, nav/module add/remove, delivery status change                      | User Story Map                                |
+| Pure unit/integration tests, formatting, dependency bump with no product/architecture semantics | None (N/A)                                    |
 
-### C4 layer cheat sheet (WhatsFeed)
+### C4 layer cheat sheet
 
-| Artifact                                  | Update when                                        |
-| ----------------------------------------- | -------------------------------------------------- |
-| System context (`system-context`)         | New external actor/system or system purpose change |
-| Containers                                | New app/service container / major data store       |
-| `components-api-server`                   | New Nest modules or layer wiring                   |
-| `components-web-app` / `admin` / `mobile` | New feature routes or shell structure              |
+| File                         | Update when                                        |
+| ---------------------------- | -------------------------------------------------- |
+| `C1-Context.puml`            | New external actor/system or system purpose change |
+| `C2-Container.puml`          | New app/service container / major data store       |
+| `C3-Component-Backend.puml`  | New Nest modules or layer wiring                   |
+| `C3-Component-Frontend.puml` | New feature routes or shell structure              |
+| `C4-Deployment*.puml`        | Port, host, or runtime topology change             |
 
-`.puml` first under `docs/zh/rd/c4/` (and EN twin when applicable). Regenerate PNGs when PlantUML is available; otherwise note in the PR that images are stale.
+`.puml` first under `docs/developer/c4-model/`. Regenerate `png/` when PlantUML is available; otherwise note in the PR that images are stale.
 
 ## Workflow
 
 1. Implement the code change.
 2. Run the trigger matrix; update every matched doc.
 3. Include doc updates in the same PR (same commit or a follow-up docs commit on the same branch).
-4. Checklist: Glossary / C4 / Story Map — done or N/A per matrix.
+4. Checklist: Glossary / C4 / Story Map / TOGAF — done or N/A per matrix.
 
 ## Example — Explore AI BFF
 
