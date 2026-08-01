@@ -149,12 +149,6 @@ NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
 ADMIN_EMAILS=admin@whatschat.com
 ```
 
-## 沃德利地图 (Wardley Map)
-
-WhatsFeed 采用沃德利地图进行战略规划，可视化系统组件在价值链和演化轴上的位置。
-
-[查看沃德利地图](./docs/Wardley-Map.md)
-
 ## C4 模型架构图
 
 WhatsFeed 采用 C4 模型进行架构可视化，详见 [docs/developer/c4-model/](./docs/developer/c4-model/)。
@@ -184,7 +178,7 @@ WhatsFeed 采用 C4 模型进行架构可视化，详见 [docs/developer/c4-mode
 - [C4 模型](docs/developer/c4-model/README.md)
 - [Glossary](docs/Glossary.md)
 - [User Story Map](docs/product-owner/User-Story-Map.md)
-- [TOGAF (ArchiMate)](docs/product-owner/togaf/README.md)
+- [TOGAF Business Architecture](docs/product-owner/togaf/README.md)
 
 ## Clean Architecture（2026-04）
 

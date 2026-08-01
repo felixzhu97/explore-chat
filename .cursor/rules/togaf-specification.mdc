@@ -10,14 +10,14 @@ architecture development. It consists of:
 3. **Architecture content framework** – standard structure for architecture deliverables
 4. **Architecture capability framework** – capabilities for governing enterprise architecture
 
-## Notation (mandatory)
+## Notation (mandatory) — Product Owner BA set
 
-- Diagrams under `docs/product-owner/togaf/` **must** use **ArchiMate 3.x** elements
-  via PlantUML `archimate` (Business Actor/Capability/Process, Application Component/
-  Interface/Data Object, Technology Node/System Software, and standard relationships).
-- Do **not** draw TOGAF domains with ad-hoc `component` boxes.
-- Software structure and deploy topology details belong in C4 (`docs/developer/c4-model/`);
-  TOGAF owns enterprise viewpoints (capabilities, application portfolio, logical data, platform).
+- Living BA deliverables live under `docs/product-owner/togaf/` as **flat Markdown**
+  (ADM **Phase A/B** minimal set), aligned with explore-ai.
+- Diagrams are **Mermaid** embedded in Markdown. Do **not** add `.puml` / `.png` /
+  `.archimate` binaries under `docs/product-owner/togaf/`.
+- Phase C–D (Application / Data / Technology catalogs and deploy topology) belong in
+  C4 (`docs/developer/c4-model/`), not in the PO TOGAF folder.
 
 ## Four Architecture Domains
 
@@ -28,12 +28,12 @@ and value streams.
 
 **In this project**:
 
-- Capabilities: identity, messaging, calls, feed/posts, explore/recommendation,
-  social graph, moderation, platform operations
-- Processes: register/login, publish content, consume feed, chat/call, discover/follow,
-  moderate
+- Capabilities: identity, messaging, feed/publishing, discovery, engagement, calls,
+  platform operations, AI proxy, platform reliability
+- Value streams: consume/create content, real-time communicate, operate & augment with AI
 
-**Diagram** – `docs/product-owner/togaf/business-architecture.puml`
+**Artifacts** – `docs/product-owner/togaf/` (see README index: Vision, Principles,
+Capabilities, Value Streams, Stakeholders, matrices, Mermaid diagrams)
 
 ### Application Architecture
 
@@ -51,7 +51,7 @@ and their interactions.
 - Data access layer: data repository, cache service
 - Infrastructure services: PostgreSQL, Redis, file storage, search service
 
-**Diagram** – `docs/product-owner/togaf/application-architecture.puml`
+**Diagram** – C4 containers/components under `docs/developer/c4-model/`
 
 **Code mapping**:
 
@@ -72,7 +72,7 @@ and their interactions.
   MinIO/S3 file storage
 - Data flows: write flows, read flows, realtime flows (Redis Pub/Sub + WebSocket)
 
-**Diagram** – `docs/product-owner/togaf/data-architecture.puml`
+**Diagram** – C4 + Prisma/schema notes under `docs/developer/c4-model/` / server code
 
 **Code mapping**:
 
@@ -96,7 +96,7 @@ and deployment architecture.
 - Message queue: Redis Pub/Sub, Bull Queue
 - Deployment: Docker, Docker Compose, Nginx, load balancing
 
-**Diagram** – `docs/product-owner/togaf/technology-architecture.puml`
+**Diagram** – C4 deployment under `docs/developer/c4-model/C4-Deployment*.puml`
 
 ## ADM Core Flow
 
@@ -207,11 +207,17 @@ ADM is TOGAF’s architecture development method, with 9 phases (simplified view
 
 ```text
 docs/product-owner/togaf/
-├── overview.puml                  # Overall architecture overview
-├── business-architecture.puml     # Business architecture
-├── application-architecture.puml  # Application architecture
-├── data-architecture.puml         # Data architecture
-└── technology-architecture.puml   # Technology architecture
+├── README.md
+├── architecture-vision.md
+├── architecture-principles.md
+├── business-capabilities.md
+├── business-capability-map.md
+├── value-streams.md
+├── value-stream-diagrams.md
+├── stakeholders.md
+├── stakeholder-map.md
+├── capability-value-stream.md
+└── capability-stakeholder.md
 ```
 
 ### Code Structure Mapping
@@ -284,6 +290,7 @@ Business Architecture → Application Architecture → Data Architecture → Tec
 
 ## References
 
-- [TOGAF official documentation](https://www.opengroup.org/togaf)
-- [Project TOGAF diagrams](../../docs/product-owner/togaf/README.md)
-- [Architecture overview diagram](../../docs/product-owner/togaf/overview.puml)
+- [TOGAF Standard, 10th Edition](https://publications.opengroup.org/c220)
+- [Project TOGAF BA set](../../docs/product-owner/togaf/README.md)
+- [Architecture Vision](../../docs/product-owner/togaf/architecture-vision.md)
+- [C4 model](../../docs/developer/c4-model/README.md)

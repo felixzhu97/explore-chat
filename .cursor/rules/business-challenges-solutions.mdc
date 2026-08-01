@@ -443,7 +443,7 @@
 ## 8. 相关资源
 
 - [User Story Map](../../docs/product-owner/User-Story-Map.md)
-- [业务架构图 (TOGAF)](../../docs/product-owner/togaf/business-architecture.puml)
+- [TOGAF Business Architecture](../../docs/product-owner/togaf/README.md)
 - [C4 模型](../../docs/developer/c4-model/README.md)
 - [Glossary](../../docs/Glossary.md)
 
