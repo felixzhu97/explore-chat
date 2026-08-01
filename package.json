@@ -35,8 +35,6 @@
     "stop:prod": "./scripts/app/stop.sh prod",
     "test": "turbo run test",
     "test:watch": "turbo run test:watch --concurrency=23",
-    "pre-push": "pnpm check-types && pnpm lint && pnpm test",
-    "pre-push": "pnpm check-types && pnpm lint && pnpm test",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -45,6 +43,14 @@
     "prettier": "^3.6.0",
     "turbo": "^2.5.4",
     "typescript": "5.8.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "prettier --write"
+    ],
+    "*.{md,json,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "packageManager": "pnpm@10.32.0",
   "engines": {

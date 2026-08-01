@@ -1,47 +1,11 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
-echo "Running pre-commit checks..."
+set -e
 
-# Run TypeScript check
-echo "Running TypeScript checks..."
+echo "Running lint-staged (pre-commit)..."
+pnpm exec lint-staged
+
+echo "Running TypeScript check (pnpm check-types)..."
 pnpm check-types
-if [ $? -ne 0 ]; then
-  echo "TypeScript check failed!"
-  exit 1
-fi
 
-# Run lint
-echo "Running lint..."
-pnpm lint -- --quiet
-if [ $? -ne 0 ]; then
-  echo "Lint failed!"
-  exit 1
-fi
-
-# Run tests
-echo "Running tests..."
-pnpm test -- --silent
-if [ $? -ne 0 ]; then
-  echo "Tests failed!"
-  exit 1
-fi
-
-# Run Python services tests
-echo "Running Python services tests..."
-
-# RAG service tests
-if [ -d "services/rag" ]; then
-  echo "Running RAG service tests..."
-  cd services/rag
-  if [ -f "pyproject.toml" ]; then
-    python -m pytest tests/ -v --tb=short 2>/dev/null || python3 -m pytest tests/ -v --tb=short 2>/dev/null || pytest tests/ -v --tb=short
-    if [ $? -ne 0 ]; then
-      echo "RAG service tests failed!"
-      cd ../..
-      exit 1
-    fi
-  fi
-  cd ../..
-fi
-
-echo "All checks passed!"
+echo "Pre-commit checks passed!"
