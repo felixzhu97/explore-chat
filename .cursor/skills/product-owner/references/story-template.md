@@ -4,12 +4,19 @@ Every ticket must include: **Background**, **User Story**, **Acceptance Criteria
 
 **Hard rule:** `## Background` **must be the first section** of the ticket description. Do not start with User Story, Acceptance Criteria, or any other heading. Write why the work is needed before the story itself.
 
+**Language:**
+
+- Jira **summary**: English (`As a … I want … so that …`) — business outcome, not tool names
+- **Description**: English for section headings, body prefixes, body content, and Definition of Done
+
+**Tone:** stakeholder-ready. Pain, impact, desired experience. Tooling only in optional trailing references. See Product Owner skill → Business language.
+
 ## User Story Format
 
 ```
-**As a** [role]
-**I want** [action/feature]
-**So that** [benefit/value]
+**As a** [business role]
+**I want** [perceivable capability / experience]
+**So that** [business benefit: smoother / more predictable / less rework / more trust…]
 ```
 
 ## Full Template
@@ -17,38 +24,38 @@ Every ticket must include: **Background**, **User Story**, **Acceptance Criteria
 ```
 ## Background
 
-[Explain why this work is needed — first section; put why before the story]
+[1–3 sentences: who is affected, pain, desired outcome — first section; do not open with frameworks/commands]
 
 ## User Story
 
-**As a** [role]
-**I want** [action/feature]
-**So that** [benefit/value]
+**As a** [business role]
+**I want** [perceivable capability / experience]
+**So that** [business benefit]
 
 ## Acceptance Criteria
 
 1.
-   **Scenario** [name]
+   **Scenario** [business outcome name]
    **GIVEN** [precondition]
    **WHEN** [action]
-   **THEN** [outcome]
+   **THEN** [observable result]
 
 2.
-   **Scenario** [name]
+   **Scenario** [business outcome name]
    **GIVEN** [precondition]
    **WHEN** [action]
-   **THEN** [outcome]
-   **AND** [outcome]
+   **THEN** [observable result]
+   **AND** [observable result]
 
 3.
-   **Scenario** [name]
+   **Scenario** [business outcome name]
    **GIVEN** [precondition]
    **WHEN** [action]
-   **THEN** [outcome]
+   **THEN** [observable result]
 
 ## Definition of Done
 
-- [ ] Acceptance Criteria scenarios pass (manual and/or automated)
+- [ ] Acceptance criteria scenarios pass (manual and/or automated)
 - [ ] Unit / relevant tests added or updated (`should_…_when_…`)
 - [ ] Code follows architecture + Domain Glossary Preferred Terms
 - [ ] No new lint/build failures
@@ -58,13 +65,13 @@ Every ticket must include: **Background**, **User Story**, **Acceptance Criteria
 - [ ] External citations use official or research URLs (not random blogs)
 ```
 
-Add ticket-specific Done items when needed (e.g. a11y check, migration run, feature flag off by default).
+Add ticket-specific Done items when needed (e.g. a11y check, migration run, feature flag off by default). Prefer a short DoD (3–5 items) when many defaults are N/A.
 
 ## Definition of Done (Default Checklist)
 
 Replace free-form Notes. Keep all that apply:
 
-- Acceptance Criteria scenarios pass (manual and/or automated)
+- Acceptance criteria scenarios pass (manual and/or automated)
 - Unit / relevant tests added or updated (`should_…_when_…`)
 - Code follows architecture + Domain Glossary Preferred Terms
 - No new lint/build failures
@@ -75,9 +82,9 @@ Replace free-form Notes. Keep all that apply:
 
 ## Checklist
 
-- [ ] Background is the first section of the description
+- [ ] `## Background` is the first section of the description
 - [ ] Contains Background, User Story, Acceptance Criteria, and Definition of Done
-- [ ] User story follows As a / I want / So that format
+- [ ] Summary and description are fully English and business-facing
 - [ ] At least 3 numbered scenarios with **Scenario** / GIVEN / WHEN / THEN
 - [ ] Definition of Done checkboxes are concrete and testable
 - [ ] **Story Point is filled in** (`customfield_10016`)

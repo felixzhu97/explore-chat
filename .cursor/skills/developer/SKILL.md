@@ -96,13 +96,13 @@ Detail: [apple-minimal-ux](references/apple-minimal-ux.md)
 
 #### Language (same as explore-ai)
 
-| Artifact                                 | Language                                   |
-| ---------------------------------------- | ------------------------------------------ |
-| Branch name                              | English kebab-case (`feat/explore-ai-bff`) |
-| Commit subject + why + References        | English                                    |
-| PR title + body                          | English                                    |
-| Jira **summary**                         | Chinese (`作为…我希望…以便…`)              |
-| Jira description (Background / AC / DoD) | English (same template as explore-ai)      |
+| Artifact                          | Language                                               |
+| --------------------------------- | ------------------------------------------------------ |
+| Branch name                       | English kebab-case (`feat/explore-ai-bff`)             |
+| Commit subject + why + References | English                                                |
+| PR title + body                   | English                                                |
+| Jira **summary**                  | English (`As a … I want … so that …`)                  |
+| Jira description                  | English (headings, prefixes, body, Definition of Done) |
 
 #### Branch naming
 
