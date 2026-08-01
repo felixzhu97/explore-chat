@@ -46,6 +46,8 @@ export class ExploreAiClientService {
       "X-Service-Key": this.config.exploreAi.serviceKey,
       "X-Client-Id": userIdToClientId(userId),
       "X-Request-Id": randomUUID(),
+      // explore-ai CsrfProtectionFilter requires this on state-changing /api/* calls
+      "X-Requested-With": "XMLHttpRequest",
     };
   }
 

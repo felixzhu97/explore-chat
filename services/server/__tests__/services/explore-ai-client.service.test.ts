@@ -43,12 +43,13 @@ describe("ExploreAiClientService", () => {
   });
 
   describe("buildHeaders", () => {
-    it("should include service key, client id, and request id", () => {
+    it("should include service key, client id, CSRF and request id", () => {
       const service = new ExploreAiClientService();
       const headers = service.buildHeaders("user-abc");
 
       expect(headers["X-Service-Key"]).toBe("test-service-key");
       expect(headers["X-Client-Id"]).toBe(userIdToClientId("user-abc"));
+      expect(headers["X-Requested-With"]).toBe("XMLHttpRequest");
       expect(headers["X-Request-Id"]).toMatch(
         /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
       );

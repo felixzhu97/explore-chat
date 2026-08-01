@@ -35,6 +35,34 @@ function checkChatRateLimit(userId: string): boolean {
   return true;
 }
 
+function writeNormalizedSseLine(line: string, res: Response): void {
+  // explore-ai may emit `data:{...}` (no space) or `data: {...}`
+  if (!line.startsWith("data:")) return;
+  const payload = line.slice(5).trimStart().trimEnd();
+  if (!payload) return;
+
+  if (payload === "[DONE]") {
+    res.write("data: [DONE]\n\n");
+    return;
+  }
+
+  try {
+    const parsed = JSON.parse(payload) as {
+      type?: string;
+      token?: string;
+      error?: string;
+    };
+
+    if (parsed.type === "message" && typeof parsed.token === "string") {
+      res.write(`data: ${JSON.stringify({ text: parsed.token })}\n\n`);
+    } else if (typeof parsed.error === "string") {
+      res.write(`data: ${JSON.stringify({ error: parsed.error })}\n\n`);
+    }
+  } catch {
+    res.write(`data: ${payload}\n\n`);
+  }
+}
+
 async function pipeNormalizedSse(upstream: globalThis.Response, res: Response): Promise<void> {
   const reader = upstream.body?.getReader();
   if (!reader) {
@@ -55,34 +83,17 @@ async function pipeNormalizedSse(upstream: globalThis.Response, res: Response): 
       buffer = lines.pop() ?? "";
 
       for (const line of lines) {
-        if (!line.startsWith("data: ")) continue;
-
-        const payload = line.slice(6).trim();
-        if (payload === "[DONE]") {
-          res.write("data: [DONE]\n\n");
-          continue;
-        }
-
-        try {
-          const parsed = JSON.parse(payload) as {
-            type?: string;
-            token?: string;
-            error?: string;
-          };
-
-          if (parsed.type === "message" && typeof parsed.token === "string") {
-            res.write(`data: ${JSON.stringify({ text: parsed.token })}\n\n`);
-          } else if (typeof parsed.error === "string") {
-            res.write(`data: ${JSON.stringify({ error: parsed.error })}\n\n`);
-          }
-        } catch {
-          res.write(`${line}\n\n`);
-        }
+        writeNormalizedSseLine(line.replace(/\r$/, ""), res);
       }
 
       if (typeof (res as Response & { flush?: () => void }).flush === "function") {
         (res as Response & { flush?: () => void }).flush!();
       }
+    }
+
+    buffer += decoder.decode();
+    if (buffer.trim()) {
+      writeNormalizedSseLine(buffer.replace(/\r$/, ""), res);
     }
   } finally {
     reader.releaseLock();
