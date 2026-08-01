@@ -134,13 +134,15 @@ main
 
 #### Commit message
 
-**Always** use this format. No alternate layouts.
+**Always** use this format. No alternate layouts. Same as explore-ai: `type: subject` with **no** Conventional Commit scope (`feat(ai):` is wrong; use `feat:`).
 
 1. One complete change per commit  
-2. Subject ≤ 50 chars, imperative, no trailing period  
-3. After the subject, add a **short why** (1–3 sentences)  
-4. Always add **References** (see priority below)  
-5. Never: `Co-authored-by`, `Made with`, emoji in subject  
+2. Subject ≤ 50 chars, imperative, no trailing period; form `type: subject` only (no `(scope)`)  
+3. After the subject, add a **short why** (1–3 sentences); each Reference must corroborate a claim in that why  
+4. Always add **References** (see priority below); PR body must use the **same** References links  
+5. Never: `Co-authored-by`, `Made with`, emoji in subject, markdown `##` headings in PR body  
+
+PR body (plain sections only, matching explore-ai): why paragraph → what paragraph → `Test plan:` → `References:` → `Jira:`
 
 #### References priority (required)
 
