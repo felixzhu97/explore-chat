@@ -15,7 +15,7 @@ export class AiApiAdapter {
 
   async postChat(
     messages: AiChatMessage[],
-    model?: string
+    model?: string,
   ): Promise<ApiResponse<AiChatResponse>> {
     return this.apiClient.post<AiChatResponse>("/ai/chat", {
       messages,
@@ -26,12 +26,33 @@ export class AiApiAdapter {
   async postChatStream(
     messages: AiChatMessage[],
     onChunk: (text: string) => void,
-    model?: string
+    model?: string,
   ): Promise<void> {
     const res = await this.apiClient.postStream("/ai/chat/stream", {
       messages,
       ...(model != null && { model }),
     });
+    await this.consumeTextSse(res, onChunk);
+  }
+
+  async postExploreChatStream(
+    messages: AiChatMessage[],
+    onChunk: (text: string) => void,
+    opts?: { model?: string; provider?: string; sessionId?: string },
+  ): Promise<void> {
+    const res = await this.apiClient.postStream("/ai/explore/chat/stream", {
+      messages,
+      ...(opts?.model != null && { model: opts.model }),
+      ...(opts?.provider != null && { provider: opts.provider }),
+      ...(opts?.sessionId != null && { sessionId: opts.sessionId }),
+    });
+    await this.consumeTextSse(res, onChunk);
+  }
+
+  private async consumeTextSse(
+    res: Response,
+    onChunk: (text: string) => void,
+  ): Promise<void> {
     if (!res.ok) throw new Error(`Stream error: ${res.status}`);
     const reader = res.body?.getReader();
     if (!reader) throw new Error("No body");
@@ -45,13 +66,18 @@ export class AiApiAdapter {
         const lines = buffer.split("\n");
         buffer = lines.pop() ?? "";
         for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            try {
-              const payload = JSON.parse(line.slice(6)) as { text?: string };
-              if (typeof payload.text === "string") onChunk(payload.text);
-            } catch {
-              //
-            }
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const payload = JSON.parse(line.slice(6)) as {
+              text?: string;
+              error?: string;
+            };
+            if (typeof payload.error === "string")
+              throw new Error(payload.error);
+            if (typeof payload.text === "string") onChunk(payload.text);
+          } catch (e) {
+            if (e instanceof SyntaxError) continue;
+            throw e;
           }
         }
       }
