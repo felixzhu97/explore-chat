@@ -9,7 +9,6 @@ Code that changes architecture, domain language, or product capabilities must up
 | Domain Glossary | [docs/Glossary.md](../../../../docs/Glossary.md)                                                                                                         | Preferred Terms, modules, routes, API prefixes                              |
 | C4 model        | [docs/developer/c4-model/](../../../../docs/developer/c4-model/)                                                                                         | Context / containers / components / deployment (`.puml` is source of truth) |
 | User Story Map  | [docs/product-owner/User-Story-Map.md](../../../../docs/product-owner/User-Story-Map.md) + [user-stories/](../../../../docs/product-owner/user-stories/) | Jeff Patton map index; epic files own GWT stories                           |
-| TOGAF           | [docs/product-owner/togaf/](../../../../docs/product-owner/togaf/)                                                                                       | ADM Phase A/B Markdown + Mermaid (BA only; C4 for SBB)                      |
 
 ## Trigger matrix
 
@@ -22,7 +21,6 @@ If **any** row matches, update the listed doc(s) in the same PR. If none match, 
 | NestJS layering or major server component structure                                             | C3-Component-Backend                             |
 | Web / Admin / Mobile shell or feature structure                                                 | C3-Component-Frontend (and C2 for new apps)      |
 | Local or production deploy topology, ports, hosting                                             | C4-Deployment and/or C4-Deployment-Production    |
-| Business capability, value stream, stakeholder, or BA principles                                | Matching `docs/product-owner/togaf/*.md`         |
 | New user-visible capability, nav/module add/remove, delivery status change                      | User Story Map + epic file under `user-stories/` |
 | Pure unit/integration tests, formatting, dependency bump with no product/architecture semantics | None (N/A)                                       |
 
@@ -43,7 +41,7 @@ If **any** row matches, update the listed doc(s) in the same PR. If none match, 
 1. Implement the code change.
 2. Run the trigger matrix; update every matched doc.
 3. Include doc updates in the same PR (same commit or a follow-up docs commit on the same branch).
-4. Checklist: Glossary / C4 / Story Map / TOGAF — done or N/A per matrix.
+4. Checklist: Glossary / C4 / Story Map — done or N/A per matrix.
 
 ## Example — Explore AI BFF
 

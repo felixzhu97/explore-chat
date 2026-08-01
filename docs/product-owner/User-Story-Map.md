@@ -107,6 +107,6 @@ journey
 
 ## 参考
 
-- [TOGAF Business Architecture](./togaf/README.md) — Capability / Value Stream（与本地图 Epic 对齐）
 - [User Story Mapping — Jeff Patton](https://www.jpattonassociates.com/user-story-mapping/)
 - [Domain Glossary](../Glossary.md)
+- [C4 模型](../developer/c4-model/README.md)

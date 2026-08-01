@@ -127,7 +127,7 @@ Details: [developer skill → testing](../skills/developer/references/testing.md
 
 When **creating a Jira ticket**, **branching**, **committing**, or **opening a PR**: always follow [developer](../skills/developer/SKILL.md) §6 (`<type>/<slug>`, Chain PRs, commit/PR templates) and [Product Owner](../skills/product-owner/SKILL.md). **References** must prefer official documentation and research links ([dependency-docs](../skills/developer/references/dependency-docs.md), [sources](../skills/business-tech-analysis/references/sources.md)).
 
-Living BA (TOGAF Phase A/B) and User Story Map live under `docs/product-owner/`; software architecture under `docs/developer/c4-model/`. See [living-docs](../skills/developer/references/living-docs.md).
+User Story Map lives under `docs/product-owner/`; software architecture under `docs/developer/c4-model/`. See [living-docs](../skills/developer/references/living-docs.md).
 
 ## Skills (on demand)
 

@@ -45,7 +45,7 @@ pnpm exec expo start
 
 - 仓库根 [README.md](../../README.md)
 - C4 容器 / 前端组件：[docs/developer/c4-model/](../../docs/developer/c4-model/)（Mobile 见 C2；Web 主 C3）
-- TOGAF 应用架构：[docs/product-owner/togaf/application-architecture.puml](../../docs/product-owner/togaf/application-architecture.puml)
+- User Story Map：[docs/product-owner/User-Story-Map.md](../../docs/product-owner/User-Story-Map.md)
 
 ## 许可证
 
