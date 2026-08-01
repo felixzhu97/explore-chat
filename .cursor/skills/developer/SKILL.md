@@ -69,11 +69,12 @@ Detail: [clean-code-naming](references/clean-code-naming.md)
 
 When a change matches the trigger matrix, update the matching living docs in the **same PR** (same commit or a docs commit on the same branch). Unmatched rows → N/A. Do not skip with “optional” or “later”.
 
-| Document       | Path                                                                                      |
-| -------------- | ----------------------------------------------------------------------------------------- |
-| Glossary       | [docs/Glossary.md](../../../docs/Glossary.md)                                             |
-| C4             | [docs/zh/rd/c4/](../../../docs/zh/rd/c4/) (EN: [docs/en/rd/c4/](../../../docs/en/rd/c4/)) |
-| User Story Map | [docs/zh/product/User-Story-Map.md](../../../docs/zh/product/User-Story-Map.md)           |
+| Document       | Path                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------- |
+| Glossary       | [docs/Glossary.md](../../../docs/Glossary.md)                                         |
+| C4             | [docs/developer/c4-model/](../../../docs/developer/c4-model/)                         |
+| User Story Map | [docs/product-owner/User-Story-Map.md](../../../docs/product-owner/User-Story-Map.md) |
+| TOGAF          | [docs/product-owner/togaf/](../../../docs/product-owner/togaf/)                       |
 
 | Change                                                                                                     | Must update                                           |
 | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
@@ -244,15 +245,16 @@ PR **References** must match the commit References (same links). No Test plan. N
 
 ## Related
 
-| Need                     | Where                                                         |
-| ------------------------ | ------------------------------------------------------------- |
-| Extreme Programming      | [extreme-programming](references/extreme-programming.md)      |
-| Living docs sync         | [living-docs](references/living-docs.md)                      |
-| Architecture             | [architecture rule](../../rules/architecture.mdc)             |
-| Glossary                 | [Glossary](../../../docs/Glossary.md)                         |
-| C4 model                 | [zh C4](../../../docs/zh/rd/c4/README.md)                     |
-| User Story Map           | [User-Story-Map](../../../docs/zh/product/User-Story-Map.md)  |
-| Testing core             | [testing](references/testing.md)                              |
-| Business / tech strategy | [business-tech-analysis](../business-tech-analysis/SKILL.md)  |
-| Research / OSS watchlist | [sources.md](../business-tech-analysis/references/sources.md) |
-| Product Owner            | [Product Owner](../product-owner/SKILL.md)                    |
+| Need                     | Where                                                           |
+| ------------------------ | --------------------------------------------------------------- |
+| Extreme Programming      | [extreme-programming](references/extreme-programming.md)        |
+| Living docs sync         | [living-docs](references/living-docs.md)                        |
+| Architecture             | [architecture rule](../../rules/architecture.mdc)               |
+| Glossary                 | [Glossary](../../../docs/Glossary.md)                           |
+| C4 model                 | [c4-model](../../../docs/developer/c4-model/README.md)          |
+| User Story Map           | [User-Story-Map](../../../docs/product-owner/User-Story-Map.md) |
+| TOGAF                    | [togaf](../../../docs/product-owner/togaf/README.md)            |
+| Testing core             | [testing](references/testing.md)                                |
+| Business / tech strategy | [business-tech-analysis](../business-tech-analysis/SKILL.md)    |
+| Research / OSS watchlist | [sources.md](../business-tech-analysis/references/sources.md)   |
+| Product Owner            | [Product Owner](../product-owner/SKILL.md)                      |

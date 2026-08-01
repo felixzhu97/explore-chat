@@ -12,17 +12,17 @@ React Native + Expo（SDK 55+）客户端，与 `services/server` API 对接；U
 
 ## Tab 与主要路由
 
-| Tab / 路由 | 说明 |
-|------------|------|
-| `(tabs)/status` | 首页：Stories + 纵向 Feed（多媒体轮播） |
-| `(tabs)/reels` | Reels 竖屏流 |
-| `(tabs)/chats` | 私信列表（Ins 风格行） |
-| `(tabs)/explore` | 搜索 / Explore：探索网格 + Elasticsearch 搜索 |
-| `(tabs)/profile` | **Profile**：个人主页网格与 Discover |
-| `settings-menu` | **Settings and activity**：分组设置、主题、语言、登出 |
-| `create-post` | 发帖（先上传媒体再提交） |
-| `media-viewer` | 全屏媒体；可按 `postId` 单独拉帖 |
-| `notifications`、`inbox`、`chat-detail` 等 | 通知、收件箱、会话详情 |
+| Tab / 路由                                 | 说明                                                  |
+| ------------------------------------------ | ----------------------------------------------------- |
+| `(tabs)/status`                            | 首页：Stories + 纵向 Feed（多媒体轮播）               |
+| `(tabs)/reels`                             | Reels 竖屏流                                          |
+| `(tabs)/chats`                             | 私信列表（Ins 风格行）                                |
+| `(tabs)/explore`                           | 搜索 / Explore：探索网格 + Elasticsearch 搜索         |
+| `(tabs)/profile`                           | **Profile**：个人主页网格与 Discover                  |
+| `settings-menu`                            | **Settings and activity**：分组设置、主题、语言、登出 |
+| `create-post`                              | 发帖（先上传媒体再提交）                              |
+| `media-viewer`                             | 全屏媒体；可按 `postId` 单独拉帖                      |
+| `notifications`、`inbox`、`chat-detail` 等 | 通知、收件箱、会话详情                                |
 
 ## 运行
 
@@ -44,8 +44,8 @@ pnpm exec expo start
 ## 文档
 
 - 仓库根 [README.md](../../README.md)
-- C4 移动端组件图：[docs/en/rd/c4/components-mobile-app.puml](../../docs/en/rd/c4/components-mobile-app.puml)
-- TOGAF 应用架构：[docs/en/rd/togaf/application-architecture.puml](../../docs/en/rd/togaf/application-architecture.puml)
+- C4 容器 / 前端组件：[docs/developer/c4-model/](../../docs/developer/c4-model/)（Mobile 见 C2；Web 主 C3）
+- TOGAF 应用架构：[docs/product-owner/togaf/application-architecture.puml](../../docs/product-owner/togaf/application-architecture.puml)
 
 ## 许可证
 

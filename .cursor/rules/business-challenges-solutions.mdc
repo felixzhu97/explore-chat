@@ -208,7 +208,7 @@
 **相关文件**：
 - `services/server/src/application/services/enterprise.service.ts` - 企业服务
 - `services/server/src/infrastructure/security/` - 安全基础设施
-- `docs/api/` - API 文档
+- `docs/developer/api.md` - API 文档
 
 ## 3. 技术架构挑战解决方案
 
@@ -299,7 +299,7 @@
 **相关文件**：
 - `services/server/src/infrastructure/database/` - 数据库基础设施
 - `services/server/src/infrastructure/cache/` - 缓存基础设施
-- `docs/distributed-systems/` - 分布式系统文档
+- `docs/developer/c4-model/` - C4 架构（含数据/部署拓扑）
 
 ## 4. 产品功能挑战解决方案
 
@@ -442,10 +442,10 @@
 
 ## 8. 相关资源
 
-- [用户旅程地图](../../docs/user-journey-map/user-journey-map.puml)
-- [用户角色地图](../../docs/user-journey-map/user-persona-map.puml)
-- [业务架构图](../../docs/en/rd/togaf/business-architecture.puml)
-- [架构文档](../../docs/README.md)
+- [User Story Map](../../docs/product-owner/User-Story-Map.md)
+- [业务架构图 (TOGAF)](../../docs/product-owner/togaf/business-architecture.puml)
+- [C4 模型](../../docs/developer/c4-model/README.md)
+- [Glossary](../../docs/Glossary.md)
 
 ## 9. 更新记录
 

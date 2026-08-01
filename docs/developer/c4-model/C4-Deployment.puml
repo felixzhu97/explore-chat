@@ -1,0 +1,39 @@
+@startuml C4-Deployment
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+
+LAYOUT_WITH_LEGEND()
+
+title 部署图 (C4) - 本地开发
+
+Deployment_Node(dev_machine, "开发机", "macOS / Linux") {
+  Deployment_Node(browser, "浏览器", "Chrome / Safari") {
+    Container(web, "Web 应用", "Next.js", "pnpm start:web，通常 :3000")
+  }
+  Deployment_Node(node_api, "Node 进程", "NestJS") {
+    Container(api, "API 服务", "NestJS", "HOST=0.0.0.0 PORT=3001")
+  }
+  Deployment_Node(compose, "Docker Compose", "services/server/docker-compose.yml") {
+    ContainerDb(pg, "PostgreSQL", "postgres:18", "主机 :5433 → 5432")
+    ContainerDb(redis, "Redis", "redis:7", ":6379")
+    ContainerDb(kafka, "Kafka", "可选", ":9092")
+    ContainerDb(cassandra, "Cassandra", "可选", ":9042")
+    ContainerDb(mongo, "MongoDB", "可选", ":27017")
+    ContainerDb(es, "Elasticsearch", "可选", ":9200")
+    ContainerDb(qdrant, "Qdrant", "可选", ":6333")
+  }
+  Deployment_Node(py_svcs, "Python 服务（可选）", "venv") {
+    Container(rec, "Recommendation", "FastAPI/Celery", ":8000")
+    Container(vision, "Vision", "FastAPI", ":8001")
+    Container(rag, "RAG", "FastAPI", ":8002")
+    Container(media, "Media Gen", "FastAPI", ":3456")
+  }
+}
+
+Rel(web, api, "REST / GraphQL / WS", "localhost:3001")
+Rel(api, pg, "DATABASE_URL")
+Rel(api, redis, "REDIS_URL")
+Rel(api, rec, "HTTP", "可选")
+Rel(api, vision, "HTTP", "可选")
+Rel(api, media, "HTTP", "可选")
+
+@enduml

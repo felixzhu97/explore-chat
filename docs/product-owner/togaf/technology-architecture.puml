@@ -1,0 +1,45 @@
+@startuml togaf-technology
+title TOGAF 技术架构（Phase D）- WhatsFeed
+skinparam shadowing false
+
+archimate #Application "Web / Admin" as AppWeb <<application-component>>
+archimate #Application "Mobile" as AppMobile <<application-component>>
+archimate #Application "NestJS API" as AppApi <<application-component>>
+
+package "本地开发环境" {
+  archimate #Technology "开发机" as DevHost <<technology-node>>
+  archimate #Technology "Node.js 22 + pnpm" as NodeRt <<system-software>>
+  archimate #Technology "Docker Compose" as Compose <<system-software>>
+  archimate #Technology "PostgreSQL 18" as PgDev <<system-software>>
+  archimate #Technology "Redis 7" as RedisDev <<system-software>>
+}
+
+package "生产目标（计划）" {
+  archimate #Technology "静态托管" as Edge <<technology-node>>
+  archimate #Technology "容器平台" as Cloud <<technology-node>>
+  archimate #Technology "Nest Docker\n0.0.0.0:$PORT" as NestProd <<system-software>>
+  archimate #Technology "托管 PostgreSQL" as PgProd <<system-software>>
+  archimate #Technology "托管 Redis" as RedisProd <<system-software>>
+}
+
+DevHost --> NodeRt : Realization
+DevHost --> Compose : Realization
+Compose --> PgDev : Realization
+Compose --> RedisDev : Realization
+NodeRt --> AppApi : Assignment
+NodeRt --> AppWeb : Assignment
+
+Cloud --> NestProd : Realization
+Cloud --> PgProd : Realization
+Cloud --> RedisProd : Realization
+NestProd --> AppApi : Assignment
+Edge --> AppWeb : Assignment
+
+AppMobile ..> AppApi : Serving
+
+note bottom of Cloud
+  生产拓扑为计划态，非已部署证明。
+  详见 docs/developer/c4-model/C4-Deployment-Production.puml
+end note
+
+@enduml

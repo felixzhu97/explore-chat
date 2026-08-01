@@ -1,0 +1,48 @@
+@startuml togaf-application
+title TOGAF 应用架构（Phase C）- WhatsFeed
+skinparam shadowing false
+
+archimate #Business "信息流与帖子" as CapFeed <<business-capability>>
+archimate #Business "即时通讯" as CapMsg <<business-capability>>
+archimate #Business "探索与推荐" as CapExplore <<business-capability>>
+
+archimate #Application "Web App" as Web <<application-component>>
+archimate #Application "Mobile App" as Mobile <<application-component>>
+archimate #Application "Admin App" as Admin <<application-component>>
+archimate #Application "NestJS API" as Api <<application-component>>
+archimate #Application "Recommendation" as Rec <<application-component>>
+archimate #Application "Vision" as Vision <<application-component>>
+archimate #Application "Media Gen" as Media <<application-component>>
+archimate #Application "Explore AI BFF" as Bff <<application-function>>
+
+archimate #Application "REST API" as IfRest <<application-interface>>
+archimate #Application "GraphQL" as IfGql <<application-interface>>
+archimate #Application "WebSocket" as IfWs <<application-interface>>
+
+Web --> IfRest : Serving
+Web --> IfGql : Serving
+Web --> IfWs : Serving
+Mobile --> IfRest : Serving
+Mobile --> IfGql : Serving
+Mobile --> IfWs : Serving
+Admin --> IfRest : Serving
+
+IfRest --> Api : Serving
+IfGql --> Api : Serving
+IfWs --> Api : Serving
+
+Api --> CapFeed : Realization
+Api --> CapMsg : Realization
+Rec --> CapExplore : Realization
+Api --> Rec : Serving
+Api --> Vision : Serving
+Api --> Media : Serving
+Api --> Bff : Serving
+
+note right of Api
+  与 C4 Container 对齐：
+  apps/web、apps/mobile、apps/admin、
+  services/server 及旁路 Python 服务
+end note
+
+@enduml

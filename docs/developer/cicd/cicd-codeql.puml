@@ -1,0 +1,30 @@
+@startuml cicd-codeql
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+title CodeQL Workflow - Planned for WhatsFeed
+
+rectangle "Trigger" as T {
+  rectangle "push / pull_request (main)" as T1
+  rectangle "cron weekly (planned)" as T2
+}
+
+rectangle "Job: analyze" as J {
+  rectangle "Checkout" as S1
+  rectangle "Initialize CodeQL\nlanguage: javascript-typescript" as S2
+  rectangle "Autobuild / custom build" as S3
+  rectangle "Perform CodeQL Analysis" as S4
+}
+
+T1 --> S1
+T2 --> S1
+S1 --> S2
+S2 --> S3
+S3 --> S4
+
+note bottom of J
+  Status: Planned — not yet present under .github/workflows/.
+  When added, keep branch filters consistent with ci.yml.
+end note
+
+@enduml

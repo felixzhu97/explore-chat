@@ -10,6 +10,15 @@ architecture development. It consists of:
 3. **Architecture content framework** – standard structure for architecture deliverables
 4. **Architecture capability framework** – capabilities for governing enterprise architecture
 
+## Notation (mandatory)
+
+- Diagrams under `docs/product-owner/togaf/` **must** use **ArchiMate 3.x** elements
+  via PlantUML `archimate` (Business Actor/Capability/Process, Application Component/
+  Interface/Data Object, Technology Node/System Software, and standard relationships).
+- Do **not** draw TOGAF domains with ad-hoc `component` boxes.
+- Software structure and deploy topology details belong in C4 (`docs/developer/c4-model/`);
+  TOGAF owns enterprise viewpoints (capabilities, application portfolio, logical data, platform).
+
 ## Four Architecture Domains
 
 ### Business Architecture
@@ -19,12 +28,12 @@ and value streams.
 
 **In this project**:
 
-- Capabilities: user management, instant messaging, voice & video calls, file sharing,
-  group management, contact management, notification management, status sharing
-- Processes: user registration/login, send message, start call, create group,
-  share status, upload file, add contact
+- Capabilities: identity, messaging, calls, feed/posts, explore/recommendation,
+  social graph, moderation, platform operations
+- Processes: register/login, publish content, consume feed, chat/call, discover/follow,
+  moderate
 
-**Diagram** – `docs/en/rd/togaf/business-architecture.puml`
+**Diagram** – `docs/product-owner/togaf/business-architecture.puml`
 
 ### Application Architecture
 
@@ -42,7 +51,7 @@ and their interactions.
 - Data access layer: data repository, cache service
 - Infrastructure services: PostgreSQL, Redis, file storage, search service
 
-**Diagram** – `docs/en/rd/togaf/application-architecture.puml`
+**Diagram** – `docs/product-owner/togaf/application-architecture.puml`
 
 **Code mapping**:
 
@@ -63,7 +72,7 @@ and their interactions.
   MinIO/S3 file storage
 - Data flows: write flows, read flows, realtime flows (Redis Pub/Sub + WebSocket)
 
-**Diagram** – `docs/en/rd/togaf/data-architecture.puml`
+**Diagram** – `docs/product-owner/togaf/data-architecture.puml`
 
 **Code mapping**:
 
@@ -87,7 +96,7 @@ and deployment architecture.
 - Message queue: Redis Pub/Sub, Bull Queue
 - Deployment: Docker, Docker Compose, Nginx, load balancing
 
-**Diagram** – `docs/en/rd/togaf/technology-architecture.puml`
+**Diagram** – `docs/product-owner/togaf/technology-architecture.puml`
 
 ## ADM Core Flow
 
@@ -197,7 +206,7 @@ ADM is TOGAF’s architecture development method, with 9 phases (simplified view
 ### Architecture Documents
 
 ```text
-docs/en/rd/togaf/
+docs/product-owner/togaf/
 ├── overview.puml                  # Overall architecture overview
 ├── business-architecture.puml     # Business architecture
 ├── application-architecture.puml  # Application architecture
@@ -276,5 +285,5 @@ Business Architecture → Application Architecture → Data Architecture → Tec
 ## References
 
 - [TOGAF official documentation](https://www.opengroup.org/togaf)
-- [Project TOGAF diagrams](../../docs/en/rd/togaf/README.md)
-- [Architecture overview diagram](../../docs/en/rd/togaf/overview.puml)
+- [Project TOGAF diagrams](../../docs/product-owner/togaf/README.md)
+- [Architecture overview diagram](../../docs/product-owner/togaf/overview.puml)

@@ -1,0 +1,58 @@
+@startuml togaf-business
+title TOGAF 业务架构（Phase B）- WhatsFeed
+skinparam shadowing false
+
+archimate #Business "终端用户" as EndUser <<business-actor>>
+archimate #Business "内容创作者" as Creator <<business-role>>
+archimate #Business "平台管理员" as Admin <<business-actor>>
+
+package "业务能力地图" {
+  archimate #Business "身份与账号" as CapAuth <<business-capability>>
+  archimate #Business "即时通讯" as CapMsg <<business-capability>>
+  archimate #Business "音视频通话" as CapCall <<business-capability>>
+  archimate #Business "信息流与帖子" as CapFeed <<business-capability>>
+  archimate #Business "探索与推荐" as CapExplore <<business-capability>>
+  archimate #Business "社交关系" as CapSocial <<business-capability>>
+  archimate #Business "内容审核" as CapMod <<business-capability>>
+  archimate #Business "平台运营" as CapOps <<business-capability>>
+}
+
+package "价值流 / 关键流程" {
+  archimate #Business "注册与登录" as PAuth <<business-process>>
+  archimate #Business "发布内容" as PPost <<business-process>>
+  archimate #Business "消费信息流" as PFeed <<business-process>>
+  archimate #Business "私信与通话" as PChat <<business-process>>
+  archimate #Business "发现与关注" as PDiscover <<business-process>>
+  archimate #Business "审核与处置" as PMod <<business-process>>
+}
+
+EndUser --> Creator : Assignment
+EndUser --> CapAuth : Serving
+EndUser --> CapMsg : Serving
+EndUser --> CapFeed : Serving
+EndUser --> CapExplore : Serving
+EndUser --> CapSocial : Serving
+EndUser --> CapCall : Serving
+Admin --> CapOps : Serving
+Admin --> CapMod : Serving
+
+PAuth ..> CapAuth : Realization
+PPost ..> CapFeed : Realization
+PFeed ..> CapFeed : Realization
+PChat ..> CapMsg : Realization
+PChat ..> CapCall : Realization
+PDiscover ..> CapExplore : Realization
+PDiscover ..> CapSocial : Realization
+PMod ..> CapMod : Realization
+
+Creator --> PPost : Triggering
+EndUser --> PFeed : Triggering
+EndUser --> PChat : Triggering
+Admin --> PMod : Triggering
+
+note bottom of CapFeed
+  业务层不出现技术栈名称。
+  应用实现见 application-architecture.puml
+end note
+
+@enduml

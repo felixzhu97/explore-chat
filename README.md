@@ -27,17 +27,21 @@ WhatsFeed – 集即时聊天、社交动态、AI 助手与内容创作为一体
 ## 技术栈
 
 ### 前端
+
 - Next.js · React · TypeScript · Emotion · Redux Toolkit
 - Tailwind CSS（Web）· Bootstrap · react-bootstrap（Admin）
 - lodash（Admin）· React Native · Expo · AG Grid · Recharts · i18next
 
 ### 后端
+
 - NestJS · Prisma · PostgreSQL · Redis · Socket.IO · Kafka · Cassandra · MongoDB · Elasticsearch · GraphQL
 
 ### AI / 媒体
+
 - Ollama（文本流式）· FastAPI · Stable Diffusion · CogVideoX · edge-tts · Qdrant
 
 ### 视觉 / 推荐
+
 - Python 服务（Vision/Recommendation/RAG）· NudeNet · ResNet50 · LightFM · implicit · Annoy · Celery
 
 ## 项目结构
@@ -149,46 +153,38 @@ ADMIN_EMAILS=admin@whatschat.com
 
 WhatsFeed 采用沃德利地图进行战略规划，可视化系统组件在价值链和演化轴上的位置。
 
-![沃德利地图](./docs/zh/product/wardley-map/images/Wardley_Map_WhatsFeed.png)
-
-[查看完整沃德利地图](./docs/zh/product/wardley-map/README.md)
+[查看沃德利地图](./docs/Wardley-Map.md)
 
 ## C4 模型架构图
 
-WhatsFeed 采用 C4 模型进行架构可视化设计，从系统上下文、容器、组件三个层级描述系统架构。
+WhatsFeed 采用 C4 模型进行架构可视化，详见 [docs/developer/c4-model/](./docs/developer/c4-model/)。
 
 ### C1 系统上下文图
 
-![C1 系统上下文](./docs/zh/rd/c4/images/system-context.png)
+![C1 系统上下文](./docs/developer/c4-model/png/C1-Context.png)
 
 ### C2 容器图
 
-![C2 容器](./docs/zh/rd/c4/images/containers.png)
+![C2 容器](./docs/developer/c4-model/png/C2-Container.png)
 
 ### C3 组件图
 
 #### API Server
 
-![C3 API Server](./docs/zh/rd/c4/images/components-api-server.png)
+![C3 API Server](./docs/developer/c4-model/png/C3-Component-Backend.png)
 
 #### Web App
 
-![C3 Web App](./docs/zh/rd/c4/images/components-web-app.png)
-
-#### Mobile App
-
-![C3 Mobile App](./docs/zh/rd/c4/images/components-mobile-app.png)
-
-#### Admin App
-
-![C3 Admin App](./docs/zh/rd/c4/images/components-admin-app.png)
+![C3 Web App](./docs/developer/c4-model/png/C3-Component-Frontend.png)
 
 ## 文档
 
-- [文档索引](docs/README.md)
-- [C4 模型（中文）](docs/zh/rd/c4/README.md)
-- [C4 Model (English)](docs/en/rd/c4/README.md)
-- [TOGAF](docs/en/rd/togaf/README.md)
+- [Quick Start](docs/developer/QUICKSTART.md)
+- [API](docs/developer/api.md)
+- [C4 模型](docs/developer/c4-model/README.md)
+- [Glossary](docs/Glossary.md)
+- [User Story Map](docs/product-owner/User-Story-Map.md)
+- [TOGAF (ArchiMate)](docs/product-owner/togaf/README.md)
 
 ## Clean Architecture（2026-04）
 
