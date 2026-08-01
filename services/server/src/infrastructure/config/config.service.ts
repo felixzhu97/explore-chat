@@ -147,6 +147,12 @@ export interface AppConfig {
     maxImagesPerPost: number;
     moderationEnabled: boolean;
   };
+  exploreAi: {
+    enabled: boolean;
+    baseUrl: string;
+    serviceKey: string;
+    timeoutMs: number;
+  };
 }
 
 @Injectable()
@@ -380,6 +386,12 @@ export class ConfigService {
         timeoutMs: parseInt(process.env["VISION_TIMEOUT_MS"] || "15000", 10),
         maxImagesPerPost: parseInt(process.env["VISION_MAX_IMAGES_PER_POST"] || "3", 10),
         moderationEnabled: process.env["VISION_MODERATION_ENABLED"] !== "false",
+      },
+      exploreAi: {
+        enabled: process.env["EXPLORE_AI_ENABLED"] === "true",
+        baseUrl: (process.env["EXPLORE_AI_BASE_URL"] || "http://localhost:9000").replace(/\/$/, ""),
+        serviceKey: process.env["EXPLORE_AI_SERVICE_KEY"] || "",
+        timeoutMs: parseInt(process.env["EXPLORE_AI_TIMEOUT_MS"] || "60000", 10),
       },
     };
 

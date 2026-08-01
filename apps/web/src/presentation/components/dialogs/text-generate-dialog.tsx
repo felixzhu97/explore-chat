@@ -57,6 +57,25 @@ const PrimaryButton = styled(Button)`
   }
 `;
 
+const BackendSelect = styled.select`
+  margin-top: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgb(229 231 235);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  background: white;
+  color: rgb(17 24 39);
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+type TextBackend = "local" | "explore";
+
 interface TextGenerateDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -77,6 +96,7 @@ export function TextGenerateDialog({
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [backend, setBackend] = useState<TextBackend>("local");
 
   const handleSubmit = async () => {
     if (!prompt.trim() || isSubmitting) return;
@@ -84,11 +104,14 @@ export function TextGenerateDialog({
     setStatus("生成中...");
     setOutput("");
     setIsSubmitting(true);
+    const messages = [{ role: "user", content: prompt.trim() }];
+    const onChunk = (chunk: string) => setOutput((prev) => prev + chunk);
     try {
-      await service.postChatStream(
-        [{ role: "user", content: prompt.trim() }],
-        (chunk) => setOutput((prev) => prev + chunk)
-      );
+      if (backend === "explore" && service.postExploreChatStream) {
+        await service.postExploreChatStream(messages, onChunk);
+      } else {
+        await service.postChatStream(messages, onChunk);
+      }
       setStatus("");
       onTrackGenerateSuccess?.();
     } catch (e) {
@@ -124,6 +147,7 @@ export function TextGenerateDialog({
       setOutput("");
       setError("");
       setStatus("");
+      setBackend("local");
       onClose();
     }
   };
@@ -135,7 +159,19 @@ export function TextGenerateDialog({
           <DialogTitle>文本生成</DialogTitle>
         </DialogHeader>
         <div>
-          <Label htmlFor="text-prompt">描述</Label>
+          <Label htmlFor="text-backend">后端</Label>
+          <BackendSelect
+            id="text-backend"
+            value={backend}
+            onChange={(e) => setBackend(e.target.value as TextBackend)}
+            disabled={isSubmitting}
+          >
+            <option value="local">本地</option>
+            <option value="explore">Explore AI</option>
+          </BackendSelect>
+          <Label htmlFor="text-prompt" style={{ display: "block", marginTop: "0.75rem" }}>
+            描述
+          </Label>
           <textarea
             id="text-prompt"
             value={prompt}

@@ -4,6 +4,11 @@ export interface ITextGenerateService {
     onChunk: (text: string) => void,
     model?: string
   ): Promise<void>;
+  postExploreChatStream?(
+    messages: Array<{ role: string; content: string }>,
+    onChunk: (text: string) => void,
+    opts?: { model?: string; provider?: string; sessionId?: string }
+  ): Promise<void>;
 }
 
 export interface IImageGenerateService {
