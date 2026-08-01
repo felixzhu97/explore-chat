@@ -37,41 +37,15 @@ const OutputBox = styled.div`
   margin-top: 0.5rem;
   background: rgb(249 250 251);
 
-  & h1,
-  & h2,
-  & h3 {
-    font-weight: 600;
-    margin: 0.75em 0 0.25em;
-  }
-  & h1 {
-    font-size: 1.125rem;
-  }
-  & h2 {
-    font-size: 1rem;
-  }
-  & h3 {
-    font-size: 0.9375rem;
-  }
-  & p {
-    margin: 0.5em 0;
-  }
-  & ul,
-  & ol {
-    margin: 0.5em 0;
-    padding-left: 1.5rem;
-  }
-  & li {
-    margin: 0.25em 0;
-  }
-  & strong {
-    font-weight: 600;
-  }
-  & code {
-    font-size: 0.8125rem;
-    background: rgb(229 231 235);
-    padding: 0.125rem 0.25rem;
-    border-radius: 0.25rem;
-  }
+  & h1, & h2, & h3 { font-weight: 600; margin: 0.75em 0 0.25em; }
+  & h1 { font-size: 1.125rem; }
+  & h2 { font-size: 1rem; }
+  & h3 { font-size: 0.9375rem; }
+  & p { margin: 0.5em 0; }
+  & ul, & ol { margin: 0.5em 0; padding-left: 1.5rem; }
+  & li { margin: 0.25em 0; }
+  & strong { font-weight: 600; }
+  & code { font-size: 0.8125rem; background: rgb(229 231 235); padding: 0.125rem 0.25rem; border-radius: 0.25rem; }
 `;
 
 const PrimaryButton = styled(Button)`
@@ -82,25 +56,6 @@ const PrimaryButton = styled(Button)`
     background-color: #16a34a;
   }
 `;
-
-const BackendSelect = styled.select`
-  margin-top: 0.5rem;
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid rgb(229 231 235);
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  background: white;
-  color: rgb(17 24 39);
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-`;
-
-type TextBackend = "local" | "explore";
 
 interface TextGenerateDialogProps {
   isOpen: boolean;
@@ -122,7 +77,6 @@ export function TextGenerateDialog({
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [backend, setBackend] = useState<TextBackend>("local");
 
   const handleSubmit = async () => {
     if (!prompt.trim() || isSubmitting) return;
@@ -130,14 +84,11 @@ export function TextGenerateDialog({
     setStatus("生成中...");
     setOutput("");
     setIsSubmitting(true);
-    const messages = [{ role: "user", content: prompt.trim() }];
-    const onChunk = (chunk: string) => setOutput((prev) => prev + chunk);
     try {
-      if (backend === "explore" && service.postExploreChatStream) {
-        await service.postExploreChatStream(messages, onChunk);
-      } else {
-        await service.postChatStream(messages, onChunk);
-      }
+      await service.postChatStream(
+        [{ role: "user", content: prompt.trim() }],
+        (chunk) => setOutput((prev) => prev + chunk)
+      );
       setStatus("");
       onTrackGenerateSuccess?.();
     } catch (e) {
@@ -173,7 +124,6 @@ export function TextGenerateDialog({
       setOutput("");
       setError("");
       setStatus("");
-      setBackend("local");
       onClose();
     }
   };
@@ -185,22 +135,7 @@ export function TextGenerateDialog({
           <DialogTitle>文本生成</DialogTitle>
         </DialogHeader>
         <div>
-          <Label htmlFor="text-backend">后端</Label>
-          <BackendSelect
-            id="text-backend"
-            value={backend}
-            onChange={(e) => setBackend(e.target.value as TextBackend)}
-            disabled={isSubmitting}
-          >
-            <option value="local">本地</option>
-            <option value="explore">Explore AI</option>
-          </BackendSelect>
-          <Label
-            htmlFor="text-prompt"
-            style={{ display: "block", marginTop: "0.75rem" }}
-          >
-            描述
-          </Label>
+          <Label htmlFor="text-prompt">描述</Label>
           <textarea
             id="text-prompt"
             value={prompt}
@@ -226,28 +161,18 @@ export function TextGenerateDialog({
           {status ? <StatusText>{status}</StatusText> : null}
         </div>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleClose}
-            disabled={isSubmitting}
-          >
+          <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>
             取消
           </Button>
           {output && !isSubmitting ? (
             <>
-              <Button
-                variant="outline"
-                onClick={handleRegenerate}
-                disabled={!prompt.trim()}
-              >
+              <Button variant="outline" onClick={handleRegenerate} disabled={!prompt.trim()}>
                 重新生成
               </Button>
               <Button variant="outline" onClick={handleCopy}>
                 复制
               </Button>
-              <PrimaryButton onClick={handleSendToChat}>
-                发送到聊天
-              </PrimaryButton>
+              <PrimaryButton onClick={handleSendToChat}>发送到聊天</PrimaryButton>
             </>
           ) : (
             <PrimaryButton

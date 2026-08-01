@@ -147,12 +147,6 @@ export interface AppConfig {
     maxImagesPerPost: number;
     moderationEnabled: boolean;
   };
-  exploreAi: {
-    enabled: boolean;
-    baseUrl: string;
-    serviceKey: string;
-    timeoutMs: number;
-  };
 }
 
 @Injectable()
@@ -190,23 +184,15 @@ export class ConfigService {
           const raw = process.env["KAFKA_BROKERS"];
           if (raw === undefined || raw === null) return ["localhost:9092"];
           if (!raw.trim()) return [];
-          return raw
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean);
+          return raw.split(",").map((s) => s.trim()).filter(Boolean);
         })(),
         topicOfflineMessages:
           process.env["KAFKA_TOPIC_OFFLINE_MESSAGES"] || "offline-messages",
-        topicPostCreated:
-          process.env["KAFKA_TOPIC_POST_CREATED"] || "post.created",
-        topicPostDeleted:
-          process.env["KAFKA_TOPIC_POST_DELETED"] || "post.deleted",
-        topicFeedFanout:
-          process.env["KAFKA_TOPIC_FEED_FANOUT"] || "feed.fanout",
-        topicCommentCreated:
-          process.env["KAFKA_TOPIC_COMMENT_CREATED"] || "comment.created",
-        topicAnalyticsEvents:
-          process.env["KAFKA_TOPIC_ANALYTICS_EVENTS"] || "analytics.events",
+        topicPostCreated: process.env["KAFKA_TOPIC_POST_CREATED"] || "post.created",
+        topicPostDeleted: process.env["KAFKA_TOPIC_POST_DELETED"] || "post.deleted",
+        topicFeedFanout: process.env["KAFKA_TOPIC_FEED_FANOUT"] || "feed.fanout",
+        topicCommentCreated: process.env["KAFKA_TOPIC_COMMENT_CREATED"] || "comment.created",
+        topicAnalyticsEvents: process.env["KAFKA_TOPIC_ANALYTICS_EVENTS"] || "analytics.events",
       },
       jwt: {
         secret: process.env["JWT_SECRET"] || "your-super-secret-jwt-key-here",
@@ -323,7 +309,7 @@ export class ConfigService {
         rateLimit: {
           windowMs: parseInt(
             process.env["RATE_LIMIT_WINDOW_MS"] || "900000",
-            10,
+            10
           ), // 15 minutes
           max: parseInt(process.env["RATE_LIMIT_MAX_REQUESTS"] || "100", 10),
         },
@@ -346,20 +332,16 @@ export class ConfigService {
           .filter(Boolean),
       },
       ai: {
-        ollamaBaseUrl:
-          process.env["OLLAMA_BASE_URL"] || "http://localhost:11434",
-        defaultModel: process.env["OLLAMA_DEFAULT_MODEL"] || "qwen3-coder:30b",
+        ollamaBaseUrl: process.env["OLLAMA_BASE_URL"] || "http://localhost:11434",
+        defaultModel:
+          process.env["OLLAMA_DEFAULT_MODEL"] || "qwen3-coder:30b",
       },
       video: {
         ...(process.env["REPLICATE_API_TOKEN"] && {
           replicateApiToken: process.env["REPLICATE_API_TOKEN"],
         }),
         ...(process.env["MEDIA_GENERATION_API_URL"]
-          ? {
-              videoApiBaseUrl:
-                process.env["MEDIA_GENERATION_API_URL"].replace(/\/$/, "") +
-                "/video",
-            }
+          ? { videoApiBaseUrl: process.env["MEDIA_GENERATION_API_URL"].replace(/\/$/, "") + "/video" }
           : process.env["VIDEO_GENERATION_API_URL"] && {
               videoApiBaseUrl: process.env["VIDEO_GENERATION_API_URL"],
             }),
@@ -369,22 +351,14 @@ export class ConfigService {
           replicateApiToken: process.env["REPLICATE_API_TOKEN"],
         }),
         ...(process.env["MEDIA_GENERATION_API_URL"]
-          ? {
-              imageApiBaseUrl:
-                process.env["MEDIA_GENERATION_API_URL"].replace(/\/$/, "") +
-                "/image",
-            }
+          ? { imageApiBaseUrl: process.env["MEDIA_GENERATION_API_URL"].replace(/\/$/, "") + "/image" }
           : process.env["IMAGE_GENERATION_API_URL"] && {
               imageApiBaseUrl: process.env["IMAGE_GENERATION_API_URL"],
             }),
       },
       voice: {
         ...(process.env["MEDIA_GENERATION_API_URL"]
-          ? {
-              voiceApiBaseUrl:
-                process.env["MEDIA_GENERATION_API_URL"].replace(/\/$/, "") +
-                "/voice",
-            }
+          ? { voiceApiBaseUrl: process.env["MEDIA_GENERATION_API_URL"].replace(/\/$/, "") + "/voice" }
           : process.env["VOICE_GENERATION_API_URL"] && {
               voiceApiBaseUrl: process.env["VOICE_GENERATION_API_URL"],
             }),
@@ -398,31 +372,14 @@ export class ConfigService {
         statusRetentionHours: 24,
       },
       recommendation: {
-        apiBaseUrl:
-          process.env["RECOMMENDATION_API_URL"] || "http://localhost:8000",
+        apiBaseUrl: process.env["RECOMMENDATION_API_URL"] || "http://localhost:8000",
       },
       vision: {
         enabled: process.env["VISION_ENABLED"] !== "false",
-        serviceUrl: (
-          process.env["VISION_SERVICE_URL"] || "http://localhost:8001"
-        ).replace(/\/$/, ""),
+        serviceUrl: (process.env["VISION_SERVICE_URL"] || "http://localhost:8001").replace(/\/$/, ""),
         timeoutMs: parseInt(process.env["VISION_TIMEOUT_MS"] || "15000", 10),
-        maxImagesPerPost: parseInt(
-          process.env["VISION_MAX_IMAGES_PER_POST"] || "3",
-          10,
-        ),
+        maxImagesPerPost: parseInt(process.env["VISION_MAX_IMAGES_PER_POST"] || "3", 10),
         moderationEnabled: process.env["VISION_MODERATION_ENABLED"] !== "false",
-      },
-      exploreAi: {
-        enabled: process.env["EXPLORE_AI_ENABLED"] === "true",
-        baseUrl: (
-          process.env["EXPLORE_AI_BASE_URL"] || "http://localhost:9000"
-        ).replace(/\/$/, ""),
-        serviceKey: process.env["EXPLORE_AI_SERVICE_KEY"] || "",
-        timeoutMs: parseInt(
-          process.env["EXPLORE_AI_TIMEOUT_MS"] || "60000",
-          10,
-        ),
       },
     };
 
@@ -459,16 +416,14 @@ export class ConfigService {
       ];
 
       const invalidConfigs = requiredConfigs.filter(
-        ({ value, validator }) => !value || !validator(value),
+        ({ value, validator }) => !value || !validator(value)
       );
 
       if (invalidConfigs.length > 0) {
         const errorMessages = invalidConfigs.map(
-          ({ key, message }) => `${key}: ${message}`,
+          ({ key, message }) => `${key}: ${message}`
         );
-        throw new Error(
-          `Configuration validation failed:\n${errorMessages.join("\n")}`,
-        );
+        throw new Error(`Configuration validation failed:\n${errorMessages.join("\n")}`);
       }
     } else {
       // Development environment: only check if environment variables are set, don't validate format
@@ -478,27 +433,21 @@ export class ConfigService {
         !process.env["JWT_SECRET"] ||
         config.jwt?.secret === "your-super-secret-jwt-key-here"
       ) {
-        warnings.push(
-          "Warning: Using default JWT_SECRET, please set a strong key for production",
-        );
+        warnings.push("Warning: Using default JWT_SECRET, please set a strong key for production");
       }
 
       if (
         !process.env["DATABASE_URL"] ||
         config.database?.url?.includes("username:password")
       ) {
-        warnings.push(
-          "Warning: Using default DATABASE_URL, please set correct database connection",
-        );
+        warnings.push("Warning: Using default DATABASE_URL, please set correct database connection");
       }
 
       if (
         !process.env["REDIS_URL"] ||
         config.redis?.url === "redis://localhost:6379"
       ) {
-        warnings.push(
-          "Warning: Using default REDIS_URL, please set correct Redis connection",
-        );
+        warnings.push("Warning: Using default REDIS_URL, please set correct Redis connection");
       }
 
       if (warnings.length > 0) {
