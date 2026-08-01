@@ -34,6 +34,8 @@ When Background or DoD cites external standards, APIs, or papers: use **official
 
 ## Minimal Template
 
+Background must come first (first section of the description).
+
 ```
 ## Background
 [why]

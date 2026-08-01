@@ -2,6 +2,8 @@
 
 Every ticket must include: **Background**, **User Story**, **Acceptance Criteria**, **Definition of Done**.
 
+**Hard rule:** `## Background` **must be the first section** of the ticket description. Do not start with User Story, Acceptance Criteria, or any other heading. Write why the work is needed before the story itself.
+
 ## User Story Format
 
 ```
@@ -15,7 +17,7 @@ Every ticket must include: **Background**, **User Story**, **Acceptance Criteria
 ```
 ## Background
 
-[Explain why this work is needed]
+[Explain why this work is needed — first section; put why before the story]
 
 ## User Story
 
@@ -73,6 +75,7 @@ Replace free-form Notes. Keep all that apply:
 
 ## Checklist
 
+- [ ] Background is the first section of the description
 - [ ] Contains Background, User Story, Acceptance Criteria, and Definition of Done
 - [ ] User story follows As a / I want / So that format
 - [ ] At least 3 numbered scenarios with **Scenario** / GIVEN / WHEN / THEN
