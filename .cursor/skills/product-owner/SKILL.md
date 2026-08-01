@@ -11,6 +11,8 @@ Use this skill when shaping backlog items into clear user stories, acceptance cr
 
 **Every** new or edited ticket **must** follow [story-template](references/story-template.md). Do not invent alternate structures.
 
+**Language (same as explore-ai):** Jira **summary** in Chinese (`作为…我希望…以便…`); description sections (Background, User Story, AC, DoD) in English.
+
 ## Role
 
 - Clarify user value before solution details
@@ -58,13 +60,13 @@ Full template: [story-template](references/story-template.md)
 
 ## Playbooks
 
-| Topic | Reference |
-|-------|-----------|
-| Ticket template + DoD | [story-template](references/story-template.md) |
-| GIVEN / WHEN / THEN + UI patterns | [acceptance-criteria](references/acceptance-criteria.md) |
-| Story Points (`customfield_10016`) | [story-points](references/story-points.md) |
-| Agile Manifesto | [agile-manifesto](references/agile-manifesto.md) |
-| Jira MCP + project config | [mcp](references/mcp.md) |
+| Topic                              | Reference                                                |
+| ---------------------------------- | -------------------------------------------------------- |
+| Ticket template + DoD              | [story-template](references/story-template.md)           |
+| GIVEN / WHEN / THEN + UI patterns  | [acceptance-criteria](references/acceptance-criteria.md) |
+| Story Points (`customfield_10016`) | [story-points](references/story-points.md)               |
+| Agile Manifesto                    | [agile-manifesto](references/agile-manifesto.md)         |
+| Jira MCP + project config          | [mcp](references/mcp.md)                                 |
 
 ## Quick Checklist
 
