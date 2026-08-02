@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import flatMap from "lodash/flatMap";
 import orderBy from "lodash/orderBy";
 import { PrismaService } from "../../infrastructure/database/prisma.service";
+import logger from "@/shared/utils/logger";
 
 export interface AdRequestContext {
   userId: string;
@@ -44,74 +45,87 @@ export class AdService {
     if (!client.adGroup || typeof client.adGroup.findMany !== "function") {
       return [];
     }
-    const activeGroups = await client.adGroup.findMany({
-      where: {
-        status: "ACTIVE",
-        placement: context.placement,
-        campaign: {
+    try {
+      const activeGroups = await client.adGroup.findMany({
+        where: {
           status: "ACTIVE",
-          startAt: {
-            lte: now,
-          },
-          OR: [
-            {
-              endAt: null,
-            },
-            {
-              endAt: {
-                gte: now,
-              },
-            },
-          ],
-          account: {
+          placement: context.placement,
+          campaign: {
             status: "ACTIVE",
+            startAt: {
+              lte: now,
+            },
+            OR: [
+              {
+                endAt: null,
+              },
+              {
+                endAt: {
+                  gte: now,
+                },
+              },
+            ],
+            account: {
+              status: "ACTIVE",
+            },
           },
         },
-      },
-      include: {
-        campaign: {
-          include: {
-            account: true,
+        include: {
+          campaign: {
+            include: {
+              account: true,
+            },
           },
+          creatives: true,
         },
-        creatives: true,
-      },
-      take: context.limit * 4,
-    });
-    const flat = flatMap(activeGroups, (group) =>
-      group.creatives.map(
-        (creative: any): AdCandidate => ({
-          accountId: group.campaign.accountId,
-          campaignId: group.campaignId,
-          groupId: group.id,
-          creativeId: creative.id,
-          placement: group.placement,
-          bidCents: group.bidCents,
-          billingEvent: group.billingEvent,
-        })
-      )
-    );
-    if (flat.length === 0) {
+        take: context.limit * 4,
+      });
+      const flat = flatMap(activeGroups, (group) =>
+        group.creatives.map(
+          (creative: any): AdCandidate => ({
+            accountId: group.campaign.accountId,
+            campaignId: group.campaignId,
+            groupId: group.id,
+            creativeId: creative.id,
+            placement: group.placement,
+            bidCents: group.bidCents,
+            billingEvent: group.billingEvent,
+          }),
+        ),
+      );
+      if (flat.length === 0) {
+        return [];
+      }
+      return orderBy(flat, ["bidCents"], ["desc"]).slice(0, context.limit);
+    } catch (err) {
+      // Ads tables may be absent in local/dev DBs; never fail Feed/Explore for ads.
+      logger.warn(
+        `Ad candidate query failed, skipping ads: ${err instanceof Error ? err.message : String(err)}`,
+      );
       return [];
     }
-    return orderBy(flat, ["bidCents"], ["desc"]).slice(0, context.limit);
   }
 
   async recordDelivery(records: AdDeliveryRecord[]): Promise<void> {
     if (records.length === 0) {
       return;
     }
-    await (this.prisma as any).adSpend.createMany({
-      data: records.map((record) => ({
-        accountId: record.accountId,
-        campaignId: record.campaignId,
-        groupId: record.groupId,
-        creativeId: record.creativeId,
-        eventType: record.billingEvent,
-        costCents: record.costCents,
-        analyticsEventId: record.analyticsEventId ?? null,
-      })),
-    });
+    try {
+      await (this.prisma as any).adSpend.createMany({
+        data: records.map((record) => ({
+          accountId: record.accountId,
+          campaignId: record.campaignId,
+          groupId: record.groupId,
+          creativeId: record.creativeId,
+          eventType: record.billingEvent,
+          costCents: record.costCents,
+          analyticsEventId: record.analyticsEventId ?? null,
+        })),
+      });
+    } catch (err) {
+      logger.warn(
+        `Ad delivery record failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
   }
 }
-

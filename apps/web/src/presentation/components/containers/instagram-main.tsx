@@ -23,6 +23,7 @@ import { StatusPage } from "../pages/status-page";
 import { StarredMessagesPage } from "../pages/starred-messages-page";
 import { MessageSearchPage } from "../pages/message-search-page";
 import { SearchDrawer } from "../instagram/search-drawer";
+import { GlobalSearchPage } from "../pages/global-search-page";
 import { SettingsPage } from "../pages/settings-page";
 import { CreateGroupDialog } from "../dialogs/create-group-dialog";
 import { AddFriendDialog } from "../dialogs/add-friend-dialog";
@@ -35,7 +36,18 @@ import { RealIncomingCall } from "../call/real-incoming-call";
 import { RealCallInterface } from "../call/real-call-interface";
 import { useRealCall } from "../../hooks/use-real-call";
 import { useMessages } from "../../hooks/use-messages";
-import { useAnalytics, PAGE_VIEW, CHAT_OPEN, SEND_MESSAGE, CALL_START, CALL_END, AI_ACTION, POST_VIEW, POST_LIKE, POST_SAVE } from "@whatschat/analytics";
+import {
+  useAnalytics,
+  PAGE_VIEW,
+  CHAT_OPEN,
+  SEND_MESSAGE,
+  CALL_START,
+  CALL_END,
+  AI_ACTION,
+  POST_VIEW,
+  POST_LIKE,
+  POST_SAVE,
+} from "@whatschat/analytics";
 import { useSearch } from "../../hooks/use-search";
 import { useDialogs } from "../../hooks/use-dialogs";
 import { useNavigation } from "../../hooks/use-navigation";
@@ -54,8 +66,17 @@ import {
   mockUser,
 } from "@/infrastructure/data/mock-data";
 import { getMessagesForContact } from "@/shared/utils/message-utils";
-import type { Contact, User, Message, FeedPost, StoryItem } from "@/shared/types";
-import type { FollowListItem, IFollowListService } from "../dialogs/dialog-services.types";
+import type {
+  Contact,
+  User,
+  Message,
+  FeedPost,
+  StoryItem,
+} from "@/shared/types";
+import type {
+  FollowListItem,
+  IFollowListService,
+} from "../dialogs/dialog-services.types";
 import { AiApiAdapter } from "@/infrastructure/adapters/api/ai-api.adapter";
 import { ImageApiAdapter } from "@/infrastructure/adapters/api/image-api.adapter";
 import { VideoApiAdapter } from "@/infrastructure/adapters/api/video-api.adapter";
@@ -153,7 +174,9 @@ export function InstagramMain({
   profileUserId?: string;
 }) {
   const router = useRouter();
-  const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
+  const [selectedContactId, setSelectedContactId] = useState<string | null>(
+    null,
+  );
   const [instagramView, setInstagramView] = useState<InstagramView>("feed");
   const [showVideoDialog, setShowVideoDialog] = useState(false);
   const [showTextDialog, setShowTextDialog] = useState(false);
@@ -163,16 +186,22 @@ export function InstagramMain({
   const [showCreatePostDialog, setShowCreatePostDialog] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [searchDrawerOpen, setSearchDrawerOpen] = useState(false);
-  const [followListModal, setFollowListModal] = useState<"followers" | "following" | null>(null);
+  const [followListModal, setFollowListModal] = useState<
+    "followers" | "following" | null
+  >(null);
   const feedScrollRef = useRef<HTMLDivElement>(null);
   const analytics = useAnalytics();
   const { user: currentUser } = useAuth();
   const viewedUserId = profileUserId ?? currentUser?.id;
-  const isSelfProfile = viewedUserId != null && currentUser?.id === viewedUserId;
+  const isSelfProfile =
+    viewedUserId != null && currentUser?.id === viewedUserId;
   const feed = useFeed(currentUser?.id);
   const explore = useExplore(currentUser?.id);
   const profileStats = useProfileStats(viewedUserId);
-  const otherUserProfile = useUserProfileView(viewedUserId, routePage === "profile" && !isSelfProfile);
+  const otherUserProfile = useUserProfileView(
+    viewedUserId,
+    routePage === "profile" && !isSelfProfile,
+  );
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -181,7 +210,8 @@ export function InstagramMain({
   }, [currentUser?.id, analytics]);
 
   useEffect(() => {
-    if (selectedContactId) analytics.track(CHAT_OPEN, { chatId: selectedContactId });
+    if (selectedContactId)
+      analytics.track(CHAT_OPEN, { chatId: selectedContactId });
   }, [selectedContactId, analytics]);
 
   useEffect(() => {
@@ -201,14 +231,16 @@ export function InstagramMain({
 
   const chatsWithLive = useChatsWithLiveMessages(
     selectedContactId,
-    currentUser?.id
+    currentUser?.id,
   );
 
   const contactsForList: Contact[] =
-    chatsWithLive.apiChats.length > 0 ? (chatsWithLive.apiChats as Contact[]) : (mockContacts as Contact[]);
+    chatsWithLive.apiChats.length > 0
+      ? (chatsWithLive.apiChats as Contact[])
+      : (mockContacts as Contact[]);
   const selectedContact =
     selectedContactId != null
-      ? contactsForList.find((c) => c.id === selectedContactId) ?? null
+      ? (contactsForList.find((c) => c.id === selectedContactId) ?? null)
       : null;
 
   const {
@@ -219,15 +251,17 @@ export function InstagramMain({
     handleCallsClick,
     handleStarredClick,
     handleSettingsClick,
+    handleSearchPageClick,
     handleBackToChat,
   } = useNavigation();
-  const currentPage = routePage === "home" || routePage === "messages" ? "chat" : routePage;
+  const currentPage =
+    routePage === "home" || routePage === "messages" ? "chat" : routePage;
   const handleUserClick = useCallback(
     (userId: string) => {
       if (!userId) return;
       router.push(`/profile/${userId}`);
     },
-    [router]
+    [router],
   );
 
   useEffect(() => {
@@ -266,12 +300,11 @@ export function InstagramMain({
     closeAdvancedSearchDialog,
   } = useDialogs();
 
-  const messagesForSelected =
-    chatsWithLive.isApiChat
-      ? chatsWithLive.messagesForSelected
-      : selectedContact
-        ? [...getMessagesForContact(selectedContact.id, mockMessages)]
-        : [];
+  const messagesForSelected = chatsWithLive.isApiChat
+    ? chatsWithLive.messagesForSelected
+    : selectedContact
+      ? [...getMessagesForContact(selectedContact.id, mockMessages)]
+      : [];
 
   const {
     messageText,
@@ -306,15 +339,19 @@ export function InstagramMain({
   type SendMessageFn = (
     content: string,
     type?: "text" | "image" | "video" | "audio" | "file",
-    options?: { mediaUrl?: string }
+    options?: { mediaUrl?: string },
   ) => void;
   const handleSendMessageWrapper = (
     content: string,
     type: "text" | "image" | "video" | "audio" | "file" = "text",
-    options?: { mediaUrl?: string }
+    options?: { mediaUrl?: string },
   ) => {
     if (chatsWithLive.isApiChat) {
-      (chatsWithLive.handleSendMessage as SendMessageFn)(content, type, options);
+      (chatsWithLive.handleSendMessage as SendMessageFn)(
+        content,
+        type,
+        options,
+      );
       clearInput();
     } else {
       handleSendMessage(content, type);
@@ -326,16 +363,38 @@ export function InstagramMain({
 
   const apiClient = useMemo(() => getApiClient(), []);
   const aiApi = useMemo(() => new AiApiAdapter(apiClient), [apiClient]);
-  const imageGenerateService = useMemo(() => new ImageApiAdapter(apiClient), [apiClient]);
-  const videoGenerateService = useMemo(() => new VideoApiAdapter(apiClient), [apiClient]);
-  const voiceGenerateService = useMemo(() => new VoiceApiAdapter(apiClient), [apiClient]);
+  const imageGenerateService = useMemo(
+    () => new ImageApiAdapter(apiClient),
+    [apiClient],
+  );
+  const videoGenerateService = useMemo(
+    () => new VideoApiAdapter(apiClient),
+    [apiClient],
+  );
+  const voiceGenerateService = useMemo(
+    () => new VoiceApiAdapter(apiClient),
+    [apiClient],
+  );
   const feedApi = useMemo(() => new FeedApiAdapter(apiClient), [apiClient]);
-  const followListService = useMemo((): IFollowListService => ({
-    getFollowers: (userId, limit, pageState) =>
-      feedApi.getFollowers(userId, limit, pageState).then((r) => ({ list: r.list as FollowListItem[], pageState: r.pageState })),
-    getFollowing: (userId, limit, pageState) =>
-      feedApi.getFollowing(userId, limit, pageState).then((r) => ({ list: r.list as FollowListItem[], pageState: r.pageState })),
-  }), [feedApi]);
+  const followListService = useMemo(
+    (): IFollowListService => ({
+      getFollowers: (userId, limit, pageState) =>
+        feedApi
+          .getFollowers(userId, limit, pageState)
+          .then((r) => ({
+            list: r.list as FollowListItem[],
+            pageState: r.pageState,
+          })),
+      getFollowing: (userId, limit, pageState) =>
+        feedApi
+          .getFollowing(userId, limit, pageState)
+          .then((r) => ({
+            list: r.list as FollowListItem[],
+            pageState: r.pageState,
+          })),
+    }),
+    [feedApi],
+  );
   const handleSmartReplyClick = () => {
     const recent = chatsWithLive.messagesForSelected.slice(-10).map((m) => ({
       role: m.senderId === currentUser?.id ? "user" : "assistant",
@@ -345,44 +404,77 @@ export function InstagramMain({
     aiApi
       .postChat(recent)
       .then((res) => {
-        if (res.success && res.data?.content) handleMessageChange(res.data.content);
+        if (res.success && res.data?.content)
+          handleMessageChange(res.data.content);
       })
       .catch(() => {});
   };
   const chatIdForAnalytics = selectedContactId ?? undefined;
   const handleGenerateVideoClick = () => {
-    analytics.track(AI_ACTION, { action: "video", step: "open", chatId: chatIdForAnalytics });
+    analytics.track(AI_ACTION, {
+      action: "video",
+      step: "open",
+      chatId: chatIdForAnalytics,
+    });
     setShowVideoDialog(true);
   };
   const handleVideoGenerateSuccess = (videoUrl: string) => {
-    analytics.track(AI_ACTION, { action: "video", step: "send_to_chat", chatId: chatIdForAnalytics });
+    analytics.track(AI_ACTION, {
+      action: "video",
+      step: "send_to_chat",
+      chatId: chatIdForAnalytics,
+    });
     handleSendMessageWrapper("", "video", { mediaUrl: videoUrl });
     setShowVideoDialog(false);
   };
   const handleGenerateTextClick = () => {
-    analytics.track(AI_ACTION, { action: "text", step: "open", chatId: chatIdForAnalytics });
+    analytics.track(AI_ACTION, {
+      action: "text",
+      step: "open",
+      chatId: chatIdForAnalytics,
+    });
     setShowTextDialog(true);
   };
   const handleTextGenerateSuccess = (content: string) => {
-    analytics.track(AI_ACTION, { action: "text", step: "send_to_chat", chatId: chatIdForAnalytics });
+    analytics.track(AI_ACTION, {
+      action: "text",
+      step: "send_to_chat",
+      chatId: chatIdForAnalytics,
+    });
     handleSendMessageWrapper(content, "text");
     setShowTextDialog(false);
   };
   const handleGenerateImageClick = () => {
-    analytics.track(AI_ACTION, { action: "image", step: "open", chatId: chatIdForAnalytics });
+    analytics.track(AI_ACTION, {
+      action: "image",
+      step: "open",
+      chatId: chatIdForAnalytics,
+    });
     setShowImageDialog(true);
   };
   const handleImageGenerateSuccess = (imageUrl: string) => {
-    analytics.track(AI_ACTION, { action: "image", step: "send_to_chat", chatId: chatIdForAnalytics });
+    analytics.track(AI_ACTION, {
+      action: "image",
+      step: "send_to_chat",
+      chatId: chatIdForAnalytics,
+    });
     handleSendMessageWrapper("", "image", { mediaUrl: imageUrl });
     setShowImageDialog(false);
   };
   const handleGenerateVoiceClick = () => {
-    analytics.track(AI_ACTION, { action: "voice", step: "open", chatId: chatIdForAnalytics });
+    analytics.track(AI_ACTION, {
+      action: "voice",
+      step: "open",
+      chatId: chatIdForAnalytics,
+    });
     setShowVoiceDialog(true);
   };
   const handleVoiceGenerateSuccess = (audioUrl: string) => {
-    analytics.track(AI_ACTION, { action: "voice", step: "send_to_chat", chatId: chatIdForAnalytics });
+    analytics.track(AI_ACTION, {
+      action: "voice",
+      step: "send_to_chat",
+      chatId: chatIdForAnalytics,
+    });
     handleSendMessageWrapper("", "audio", { mediaUrl: audioUrl });
     setShowVoiceDialog(false);
   };
@@ -451,31 +543,42 @@ export function InstagramMain({
       return new Set();
     }
   };
-  const [seenStoryUserIds, setSeenStoryUserIds] = useState<Set<string>>(() => new Set());
+  const [seenStoryUserIds, setSeenStoryUserIds] = useState<Set<string>>(
+    () => new Set(),
+  );
   useEffect(() => {
     setSeenStoryUserIds(getSeenStoryUserIdsFromStorage());
   }, []);
   const displayStorySlides = useMemo(
-    () => storySlidesWithPost.filter((s) => !seenStoryUserIds.has(s.story.userId)),
-    [storySlidesWithPost, seenStoryUserIds]
+    () =>
+      storySlidesWithPost.filter((s) => !seenStoryUserIds.has(s.story.userId)),
+    [storySlidesWithPost, seenStoryUserIds],
   );
   const displayStories: StoryItem[] = useMemo(
     () => displayStorySlides.map((s) => s.story),
-    [displayStorySlides]
+    [displayStorySlides],
   );
 
-  const [storyOverlayIndex, setStoryOverlayIndex] = useState<number | null>(null);
-  const handleStoryClick = useCallback((story: StoryItem) => {
-    const i = displayStorySlides.findIndex((s) => s.story.id === story.id);
-    if (i >= 0) setStoryOverlayIndex(i);
-  }, [displayStorySlides]);
+  const [storyOverlayIndex, setStoryOverlayIndex] = useState<number | null>(
+    null,
+  );
+  const handleStoryClick = useCallback(
+    (story: StoryItem) => {
+      const i = displayStorySlides.findIndex((s) => s.story.id === story.id);
+      if (i >= 0) setStoryOverlayIndex(i);
+    },
+    [displayStorySlides],
+  );
   const handleStoryOverlayClose = useCallback((viewedUserIds: string[]) => {
     setStoryOverlayIndex(null);
     setSeenStoryUserIds((prev) => {
       const next = new Set([...prev, ...viewedUserIds]);
       if (typeof window !== "undefined") {
         try {
-          window.localStorage.setItem(SEEN_STORIES_KEY, JSON.stringify([...next]));
+          window.localStorage.setItem(
+            SEEN_STORIES_KEY,
+            JSON.stringify([...next]),
+          );
         } catch {
           /**/
         }
@@ -497,12 +600,12 @@ export function InstagramMain({
         ...(positionInFeed >= 0 && { positionInFeed }),
       });
     },
-    [analytics, feed.posts]
+    [analytics, feed.posts],
   );
 
   const handleContactSelect = (contact: Contact) => {
     setSelectedContactId(contact.id);
-    handleBackToChat();
+    setInstagramView("messages");
   };
 
   const handleStartCall = (callType: "voice" | "video") => {
@@ -511,12 +614,22 @@ export function InstagramMain({
     const name = selectedContact.name ?? "";
     const avatar = selectedContact.avatar ?? "";
     analytics.track(CALL_START, { chatId: id, callType });
-    startCall(id, name, avatar, callType, isConnected ? { chatId: id } : undefined);
+    startCall(
+      id,
+      name,
+      avatar,
+      callType,
+      isConnected ? { chatId: id } : undefined,
+    );
   };
 
   const handleEndCallWrapper = () => {
     if (callState?.contactId) {
-      analytics.track(CALL_END, { chatId: callState.contactId, callType: callState.callType, duration: callState.duration });
+      analytics.track(CALL_END, {
+        chatId: callState.contactId,
+        callType: callState.callType,
+        duration: callState.duration,
+      });
     }
     endCall();
   };
@@ -558,10 +671,6 @@ export function InstagramMain({
     setSearchDrawerOpen(true);
     handleBackToChat();
     setInstagramView("feed");
-  };
-
-  const openSearchDrawer = () => {
-    setSearchDrawerOpen(true);
   };
 
   const handleSelectMessage = (contactId: string, messageId: string) => {
@@ -609,7 +718,10 @@ export function InstagramMain({
             onUserClick={handleUserClick}
             onCommentClick={(post) => {
               setCommentPost(post);
-              analytics.track(POST_VIEW, { postId: post.id, authorId: post.userId });
+              analytics.track(POST_VIEW, {
+                postId: post.id,
+                authorId: post.userId,
+              });
             }}
             onLikeClick={(post) => {
               feed.toggleLike(post.id);
@@ -714,7 +826,10 @@ export function InstagramMain({
                 if (post.isSponsored) {
                   trackAdClick(post);
                 } else {
-                  analytics.track(POST_VIEW, { postId: post.id, authorId: post.userId });
+                  analytics.track(POST_VIEW, {
+                    postId: post.id,
+                    authorId: post.userId,
+                  });
                 }
               }}
               onFollow={feed.followUser}
@@ -740,12 +855,16 @@ export function InstagramMain({
         return (
           <CenterColumn style={{ overflow: "auto" }}>
             <ProfilePage
-              user={isSelfProfile ? currentUser ?? null : otherUserProfile.user}
+              user={
+                isSelfProfile ? (currentUser ?? null) : otherUserProfile.user
+              }
               posts={isSelfProfile ? feed.posts : otherUserProfile.posts}
               followersCount={profileStats.followersCount}
               followingCount={profileStats.followingCount}
               onEditProfile={isSelfProfile ? handleSettingsClick : undefined}
-              onNewPost={isSelfProfile ? () => setShowCreatePostDialog(true) : undefined}
+              onNewPost={
+                isSelfProfile ? () => setShowCreatePostDialog(true) : undefined
+              }
               onPostClick={setCommentPost}
               onFollowersClick={() => setFollowListModal("followers")}
               onFollowingClick={() => setFollowListModal("following")}
@@ -793,36 +912,14 @@ export function InstagramMain({
       case "search":
         return (
           <CenterColumn style={{ overflow: "auto" }}>
-            <InstagramFeed
-              stories={displayStories}
-              posts={feed.posts}
-              loading={feed.loading}
-              error={feed.error}
-              currentUser={currentUser ?? undefined}
-              onStoryClick={handleStoryClick}
+            <GlobalSearchPage
+              variant="page"
+              onBack={handleBackToChat}
               onUserClick={handleUserClick}
-              onCommentClick={(post) => {
-                setCommentPost(post);
-                if (post.isSponsored) {
-                  trackAdClick(post);
-                } else {
-                  analytics.track(POST_VIEW, { postId: post.id, authorId: post.userId });
-                }
+              onPostClick={(postId) => {
+                const post = feed.posts.find((p) => p.id === postId);
+                if (post) setCommentPost(post);
               }}
-              onLikeClick={(post) => {
-                feed.toggleLike(post.id);
-                analytics.track(POST_LIKE, { postId: post.id });
-              }}
-              onSaveClick={(post) => {
-                feed.toggleSave(post.id);
-                analytics.track(POST_SAVE, { postId: post.id });
-              }}
-            />
-            <FeedCommentsDialog
-              post={commentPost}
-              open={!!commentPost}
-              onClose={() => setCommentPost(null)}
-              currentUser={currentUser ?? undefined}
             />
           </CenterColumn>
         );
@@ -847,7 +944,10 @@ export function InstagramMain({
                 if (post.isSponsored) {
                   trackAdClick(post);
                 } else {
-                  analytics.track(POST_VIEW, { postId: post.id, authorId: post.userId });
+                  analytics.track(POST_VIEW, {
+                    postId: post.id,
+                    authorId: post.userId,
+                  });
                 }
               }}
             />
@@ -875,7 +975,10 @@ export function InstagramMain({
                 if (post.isSponsored) {
                   trackAdClick(post);
                 } else {
-                  analytics.track(POST_VIEW, { postId: post.id, authorId: post.userId });
+                  analytics.track(POST_VIEW, {
+                    postId: post.id,
+                    authorId: post.userId,
+                  });
                 }
               }}
               onLikeClick={(post) => {
@@ -909,9 +1012,9 @@ export function InstagramMain({
             ? "search"
             : currentPage === "search"
               ? "search"
-            : currentPage === "chat" && instagramView === "messages"
-              ? "messages"
-              : "home";
+              : currentPage === "chat" && instagramView === "messages"
+                ? "messages"
+                : "home";
 
   return (
     <AppShell>
@@ -929,8 +1032,10 @@ export function InstagramMain({
         onProfileClick={handleProfileClick}
         onReelsClick={handleReelsClick}
         onExploreClick={handleExploreClick}
-        onSearchClick={openSearchDrawer}
-        onCreateClick={currentUser ? () => setShowCreatePostDialog(true) : undefined}
+        onSearchClick={handleSearchPageClick}
+        onCreateClick={
+          currentUser ? () => setShowCreatePostDialog(true) : undefined
+        }
         onNotificationsClick={() => setNotificationsOpen(true)}
       />
 
@@ -960,7 +1065,8 @@ export function InstagramMain({
         />
       )}
 
-      {((currentPage === "chat" && instagramView === "feed") || currentPage === "explore") && (
+      {((currentPage === "chat" && instagramView === "feed") ||
+        currentPage === "explore") && (
         <FloatingMessagesBtn
           type="button"
           onClick={() => {
@@ -1012,7 +1118,7 @@ export function InstagramMain({
               avatar: currentUser?.avatar,
             },
             mediaFiles,
-            coverFile
+            coverFile,
           );
         }}
         currentUser={currentUser ?? undefined}
@@ -1036,7 +1142,11 @@ export function InstagramMain({
         onClose={() => setShowVideoDialog(false)}
         onSuccess={handleVideoGenerateSuccess}
         onTrackGenerateSuccess={() =>
-          analytics.track(AI_ACTION, { action: "video", step: "generate_success", chatId: chatIdForAnalytics })
+          analytics.track(AI_ACTION, {
+            action: "video",
+            step: "generate_success",
+            chatId: chatIdForAnalytics,
+          })
         }
         service={videoGenerateService}
       />
@@ -1046,7 +1156,11 @@ export function InstagramMain({
         onClose={() => setShowTextDialog(false)}
         onSuccess={handleTextGenerateSuccess}
         onTrackGenerateSuccess={() =>
-          analytics.track(AI_ACTION, { action: "text", step: "generate_success", chatId: chatIdForAnalytics })
+          analytics.track(AI_ACTION, {
+            action: "text",
+            step: "generate_success",
+            chatId: chatIdForAnalytics,
+          })
         }
         service={aiApi}
       />
@@ -1056,7 +1170,11 @@ export function InstagramMain({
         onClose={() => setShowImageDialog(false)}
         onSuccess={handleImageGenerateSuccess}
         onTrackGenerateSuccess={() =>
-          analytics.track(AI_ACTION, { action: "image", step: "generate_success", chatId: chatIdForAnalytics })
+          analytics.track(AI_ACTION, {
+            action: "image",
+            step: "generate_success",
+            chatId: chatIdForAnalytics,
+          })
         }
         service={imageGenerateService}
       />
@@ -1066,7 +1184,11 @@ export function InstagramMain({
         onClose={() => setShowVoiceDialog(false)}
         onSuccess={handleVoiceGenerateSuccess}
         onTrackGenerateSuccess={() =>
-          analytics.track(AI_ACTION, { action: "voice", step: "generate_success", chatId: chatIdForAnalytics })
+          analytics.track(AI_ACTION, {
+            action: "voice",
+            step: "generate_success",
+            chatId: chatIdForAnalytics,
+          })
         }
         service={voiceGenerateService}
       />

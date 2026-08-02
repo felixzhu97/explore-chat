@@ -1,5 +1,8 @@
 # Recommendation Service (Python)
 
+Layout (same as other Python helpers): `main.py` / `config.py` / `api.py` / `service.py` / `domain/` / `tests/`.
+Start: `uvicorn main:app --host 0.0.0.0 --port 8000`.
+
 Offline and online recommendation stack for WhatsChat:
 
 - Batch jobs for follow suggestions, explore hot list, and vector embeddings (LightFM + implicit + PyTorch towers)
@@ -51,7 +54,8 @@ python -m models.pytorch_towers
 Run the FastAPI service (used by NestJS `RecommendationService`):
 
 ```bash
-python run_service.py
+uvicorn main:app --host 0.0.0.0 --port 8000
+# or: python main.py
 ```
 
 By default it listens on `http://localhost:8000` and exposes:
@@ -99,4 +103,3 @@ run_explore.delay()
 ```
 
 Set `CELERY_BROKER_URL` in `.env` (defaults to `REDIS_URL`).
-

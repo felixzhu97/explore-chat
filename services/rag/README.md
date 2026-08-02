@@ -1,5 +1,8 @@
 # RAG Service
 
+Layout (same as other Python helpers): `main.py` / `config.py` / `api.py` / `service.py` / `domain/` / `tests/`.
+Start: `uvicorn main:app --host 0.0.0.0 --port 8002`.
+
 Retrieval Augmented Generation (RAG) service for WhatsChat, providing semantic search and AI-powered question answering capabilities.
 
 ## Features
@@ -13,7 +16,7 @@ Retrieval Augmented Generation (RAG) service for WhatsChat, providing semantic s
 
 ## Tech Stack
 
-- **Framework**: FastAPI (Python 3.9+)
+- **Framework**: FastAPI (Python 3.11+ recommended)
 - **Vector Database**: Qdrant
 - **Embedding Models**: Ollama (local) or OpenAI (cloud)
 - **LLM**: Ollama (qwen3-coder:30b, deepseek-r1:70b, etc.) or OpenAI for answer generation
@@ -24,6 +27,7 @@ Retrieval Augmented Generation (RAG) service for WhatsChat, providing semantic s
 ### Prerequisites
 
 1. **Ollama** (for local embeddings and LLM):
+
 ```bash
 # Install Ollama
 brew install ollama
@@ -37,11 +41,13 @@ ollama serve
 ```
 
 2. **Qdrant** (vector database):
+
 ```bash
 docker run -d -p 6333:6333 -p 6334:6334 qdrant/qdrant
 ```
 
 3. **Redis** (optional, for caching):
+
 ```bash
 docker run -d -p 6379:6379 redis:alpine
 ```
@@ -56,46 +62,51 @@ docker-compose up -d
 ### Manual Setup
 
 1. **Install dependencies**:
+
 ```bash
 cd services/rag
 pip install -r requirements.txt
 ```
 
 2. **Configure environment**:
+
 ```bash
 cp .env.example .env
 # Edit .env with your settings
 ```
 
 3. **Start the service**:
+
 ```bash
 cd services/rag
-PYTHONPATH=. uvicorn src.main:app --host 0.0.0.0 --port 8002
+uvicorn main:app --host 0.0.0.0 --port 8002
 ```
 
 ## Configuration
 
 Configure via environment variables or `.env` file:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `QDRANT_URL` | Qdrant server URL | `http://localhost:6333` |
-| `OLLAMA_BASE_URL` | Ollama server URL | `http://localhost:11434` |
-| `OPENAI_API_KEY` | OpenAI API key | (empty) |
-| `EMBEDDING_PROVIDER` | `ollama` or `openai` | `ollama` |
-| `LLM_PROVIDER` | `ollama` or `openai` | `ollama` |
-| `EMBEDDING_MODEL` | Ollama embedding model | `nomic-embed-text` |
-| `LLM_MODEL` | Ollama LLM model | `qwen3-coder:30b` |
-| `LLM_TIMEOUT` | LLM request timeout (seconds) | `120` |
-| `CHUNK_SIZE` | Text chunk size (tokens) | `256` |
-| `CHUNK_OVERLAP` | Overlap between chunks | `50` |
+| Variable             | Description                   | Default                  |
+| -------------------- | ----------------------------- | ------------------------ |
+| `QDRANT_URL`         | Qdrant server URL             | `http://localhost:6333`  |
+| `OLLAMA_BASE_URL`    | Ollama server URL             | `http://localhost:11434` |
+| `OPENAI_API_KEY`     | OpenAI API key                | (empty)                  |
+| `EMBEDDING_PROVIDER` | `ollama` or `openai`          | `ollama`                 |
+| `LLM_PROVIDER`       | `ollama` or `openai`          | `ollama`                 |
+| `EMBEDDING_MODEL`    | Ollama embedding model        | `nomic-embed-text`       |
+| `LLM_MODEL`          | Ollama LLM model              | `qwen3-coder:30b`        |
+| `LLM_TIMEOUT`        | LLM request timeout (seconds) | `120`                    |
+| `CHUNK_SIZE`         | Text chunk size (tokens)      | `256`                    |
+| `CHUNK_OVERLAP`      | Overlap between chunks        | `50`                     |
 
 ### Recommended Ollama Models
 
 **Embedding Models:**
+
 - `nomic-embed-text` (default, ~137M params)
 
 **LLM Models:**
+
 - `qwen3-coder:30b` (recommended, good for code and general tasks)
 - `deepseek-r1:70b` (powerful, larger model)
 - `qwen3.5:35b` (balanced performance)
@@ -216,6 +227,7 @@ curl -s "http://localhost:8002/api/v1/query/collections" | python3 -m json.tool
 ## API Documentation
 
 Once running, visit:
+
 - Swagger UI: http://localhost:8002/docs
 - ReDoc: http://localhost:8002/redoc
 
@@ -270,7 +282,7 @@ pytest tests/ -v
 ### Run with Hot Reload
 
 ```bash
-PYTHONPATH=. uvicorn src.main:app --reload
+uvicorn main:app --reload
 ```
 
 ### Environment Variables for Development

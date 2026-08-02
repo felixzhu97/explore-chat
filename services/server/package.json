@@ -21,6 +21,7 @@
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
     "db:seed": "ts-node -r tsconfig-paths/register src/database/seed.ts",
+    "db:seed:posts": "ts-node -r tsconfig-paths/register src/database/seed-posts.ts",
     "db:reset": "prisma migrate reset --force",
     "search:sync-users": "ts-node -r tsconfig-paths/register src/scripts/sync-users-to-elasticsearch.ts",
     "db:push": "prisma db push"

@@ -1,5 +1,7 @@
 # Media Gen (Image + Video + Voice)
 
+Layout (same as other Python helpers): `main.py` / `config.py` / `api.py` / `service.py` / `domain/` / `tests/`.
+
 Single service for image generation (Stable Diffusion), video generation (CogVideoX), and voice synthesis (edge-tts). Port: 3456.
 
 ## Setup
@@ -9,7 +11,8 @@ cd services/media-gen
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python app.py
+uvicorn main:app --host 0.0.0.0 --port 3456
+# or: python main.py
 ```
 
 ## Env (optional)
