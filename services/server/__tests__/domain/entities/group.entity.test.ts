@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { Group, ParticipantRole, GroupParticipant, GroupSettings } from "@/domain/entities/group.entity";
+import {
+  Group,
+  ParticipantRole,
+  GroupParticipant,
+  GroupSettings,
+} from "@/groups/domain/group.entity";
 import {
   GROUP_DOMAIN,
   USER_DOMAIN,
@@ -20,7 +25,10 @@ const createGroup = (overrides?: Parameters<typeof Group.create>[0]) =>
     ...overrides,
   });
 
-const createGroupWithParticipants = (count: number, overrides?: Parameters<typeof Group.create>[0]) =>
+const createGroupWithParticipants = (
+  count: number,
+  overrides?: Parameters<typeof Group.create>[0],
+) =>
   createGroup({
     participants: createTestParticipants(count),
     ...overrides,
@@ -56,7 +64,7 @@ describe("Group Entity", () => {
         participants,
         settings,
         createdAt,
-        updatedAt
+        updatedAt,
       );
 
       expect(group.id).toBe(GROUP_DOMAIN.VALID.id);
@@ -72,7 +80,11 @@ describe("Group Entity", () => {
     });
 
     it("should use default values for optional fields", () => {
-      const group = new Group(GROUP_DOMAIN.VALID.id, GROUP_DOMAIN.VALID.name, USER_DOMAIN.VALID.id);
+      const group = new Group(
+        GROUP_DOMAIN.VALID.id,
+        GROUP_DOMAIN.VALID.name,
+        USER_DOMAIN.VALID.id,
+      );
 
       expect(group.description).toBeUndefined();
       expect(group.avatar).toBeUndefined();
@@ -92,7 +104,7 @@ describe("Group Entity", () => {
         USER_DOMAIN.VALID.id,
         undefined,
         undefined,
-        participants
+        participants,
       );
 
       expect(group.participants).toHaveLength(2);
@@ -114,7 +126,7 @@ describe("Group Entity", () => {
         undefined,
         undefined,
         [],
-        settings
+        settings,
       );
 
       expect(group.settings).toEqual(settings);
@@ -174,8 +186,12 @@ describe("Group Entity", () => {
       const group = createGroup();
       const afterCreate = new Date();
 
-      expect(group.createdAt.getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime() - 1000);
-      expect(group.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime() - 1000);
+      expect(group.createdAt.getTime()).toBeGreaterThanOrEqual(
+        beforeCreate.getTime() - 1000,
+      );
+      expect(group.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeCreate.getTime() - 1000,
+      );
     });
   });
 
@@ -233,7 +249,10 @@ describe("Group Entity", () => {
 
     it("should create group with onlyAdminsCanSendMessages enabled", () => {
       const group = createGroup({
-        settings: { ...GROUP_DOMAIN.SETTINGS.default, onlyAdminsCanSendMessages: true },
+        settings: {
+          ...GROUP_DOMAIN.SETTINGS.default,
+          onlyAdminsCanSendMessages: true,
+        },
       });
 
       expect(group.settings.onlyAdminsCanSendMessages).toBe(true);
@@ -241,7 +260,10 @@ describe("Group Entity", () => {
 
     it("should create group with onlyAdminsCanEditInfo enabled", () => {
       const group = createGroup({
-        settings: { ...GROUP_DOMAIN.SETTINGS.default, onlyAdminsCanEditInfo: true },
+        settings: {
+          ...GROUP_DOMAIN.SETTINGS.default,
+          onlyAdminsCanEditInfo: true,
+        },
       });
 
       expect(group.settings.onlyAdminsCanEditInfo).toBe(true);
@@ -249,7 +271,10 @@ describe("Group Entity", () => {
 
     it("should create group with onlyAdminsCanAddParticipants enabled", () => {
       const group = createGroup({
-        settings: { ...GROUP_DOMAIN.SETTINGS.default, onlyAdminsCanAddParticipants: true },
+        settings: {
+          ...GROUP_DOMAIN.SETTINGS.default,
+          onlyAdminsCanAddParticipants: true,
+        },
       });
 
       expect(group.settings.onlyAdminsCanAddParticipants).toBe(true);
@@ -264,7 +289,11 @@ describe("Group Entity", () => {
       const group = createGroupWithParticipants(1);
       const newUserId = "user-new";
 
-      const updatedGroup = group.addParticipant(newUserId, USER_DOMAIN.VALID.id, "MEMBER");
+      const updatedGroup = group.addParticipant(
+        newUserId,
+        USER_DOMAIN.VALID.id,
+        "MEMBER",
+      );
 
       expect(updatedGroup.participants).toHaveLength(2);
       expect(updatedGroup.participants[1].userId).toBe(newUserId);
@@ -291,7 +320,11 @@ describe("Group Entity", () => {
     it("should accept ADMIN as role", () => {
       const group = createGroup();
 
-      const updatedGroup = group.addParticipant("user-2", USER_DOMAIN.VALID.id, "ADMIN");
+      const updatedGroup = group.addParticipant(
+        "user-2",
+        USER_DOMAIN.VALID.id,
+        "ADMIN",
+      );
 
       expect(updatedGroup.participants[0].role).toBe("ADMIN");
     });
@@ -301,7 +334,11 @@ describe("Group Entity", () => {
         participants: [createAdminParticipant(USER_DOMAIN.VALID.id)],
       });
 
-      const updatedGroup = group.addParticipant(USER_DOMAIN.VALID.id, USER_DOMAIN.VALID.id, "ADMIN");
+      const updatedGroup = group.addParticipant(
+        USER_DOMAIN.VALID.id,
+        USER_DOMAIN.VALID.id,
+        "ADMIN",
+      );
 
       expect(updatedGroup.participants).toHaveLength(1);
     });
@@ -320,16 +357,24 @@ describe("Group Entity", () => {
       const group = createGroup({ createdAt, updatedAt: createdAt });
       const beforeUpdate = new Date();
 
-      const updatedGroup = group.addParticipant("user-new", USER_DOMAIN.VALID.id);
+      const updatedGroup = group.addParticipant(
+        "user-new",
+        USER_DOMAIN.VALID.id,
+      );
 
-      expect(updatedGroup.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeUpdate.getTime() - 1000);
+      expect(updatedGroup.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeUpdate.getTime() - 1000,
+      );
     });
 
     it("should preserve existing participants when adding new one", () => {
       const existingParticipant = createAdminParticipant("user-existing");
       const group = createGroup({ participants: [existingParticipant] });
 
-      const updatedGroup = group.addParticipant("user-new", USER_DOMAIN.VALID.id);
+      const updatedGroup = group.addParticipant(
+        "user-new",
+        USER_DOMAIN.VALID.id,
+      );
 
       expect(updatedGroup.participants).toHaveLength(2);
       expect(updatedGroup.participants[0].userId).toBe("user-existing");
@@ -340,9 +385,14 @@ describe("Group Entity", () => {
       const group = createGroup();
       const beforeAdd = new Date();
 
-      const updatedGroup = group.addParticipant("user-new", USER_DOMAIN.VALID.id);
+      const updatedGroup = group.addParticipant(
+        "user-new",
+        USER_DOMAIN.VALID.id,
+      );
 
-      expect(updatedGroup.participants[0].joinedAt.getTime()).toBeGreaterThanOrEqual(beforeAdd.getTime() - 1000);
+      expect(
+        updatedGroup.participants[0].joinedAt.getTime(),
+      ).toBeGreaterThanOrEqual(beforeAdd.getTime() - 1000);
     });
   });
 
@@ -378,12 +428,17 @@ describe("Group Entity", () => {
 
     it("should update the updatedAt timestamp", () => {
       const createdAt = new Date("2024-01-01");
-      const group = createGroupWithParticipants(1, { createdAt, updatedAt: createdAt });
+      const group = createGroupWithParticipants(1, {
+        createdAt,
+        updatedAt: createdAt,
+      });
       const beforeUpdate = new Date();
 
       const updatedGroup = group.removeParticipant("user_0");
 
-      expect(updatedGroup.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeUpdate.getTime() - 1000);
+      expect(updatedGroup.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeUpdate.getTime() - 1000,
+      );
     });
 
     it("should handle removing non-existent participant", () => {
@@ -409,7 +464,10 @@ describe("Group Entity", () => {
   describe("promoteToAdmin", () => {
     it("should promote a member to admin", () => {
       const group = createGroupWithParticipants(2, {
-        participants: [createAdminParticipant("user-0"), createMemberParticipant("user-1")],
+        participants: [
+          createAdminParticipant("user-0"),
+          createMemberParticipant("user-1"),
+        ],
       });
 
       const updatedGroup = group.promoteToAdmin("user-1");
@@ -439,7 +497,9 @@ describe("Group Entity", () => {
 
       const updatedGroup = group.promoteToAdmin("user-0");
 
-      expect(updatedGroup.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeUpdate.getTime() - 1000);
+      expect(updatedGroup.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeUpdate.getTime() - 1000,
+      );
     });
 
     it("should only update the specified participant", () => {
@@ -627,7 +687,10 @@ describe("Group Entity", () => {
       };
       const group = createGroup({ settings });
 
-      const withParticipant = group.addParticipant("user-new", USER_DOMAIN.VALID.id);
+      const withParticipant = group.addParticipant(
+        "user-new",
+        USER_DOMAIN.VALID.id,
+      );
       const withoutParticipant = withParticipant.removeParticipant("user-new");
 
       expect(withoutParticipant.settings).toEqual(settings);

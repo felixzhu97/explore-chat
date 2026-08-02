@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { NotificationRepositoryAdapter } from "@/infrastructure/adapters/repositories/notification-repository.adapter";
-import { MongoNotificationRepository } from "@/infrastructure/database/mongo-notification.repository";
+import { NotificationRepositoryAdapter } from "@/notifications/infrastructure/notification-repository.adapter";
+import { MongoNotificationRepository } from "@/core/database/mongo-notification.repository";
 
 describe("NotificationRepositoryAdapter", () => {
   let adapter: NotificationRepositoryAdapter;
@@ -33,9 +33,17 @@ describe("NotificationRepositoryAdapter", () => {
       };
       mockImpl.upsertLike.mockResolvedValue(notification);
 
-      const result = await adapter.upsertLike("recipient-1", "actor-1", "post-1");
+      const result = await adapter.upsertLike(
+        "recipient-1",
+        "actor-1",
+        "post-1",
+      );
 
-      expect(mockImpl.upsertLike).toHaveBeenCalledWith("recipient-1", "actor-1", "post-1");
+      expect(mockImpl.upsertLike).toHaveBeenCalledWith(
+        "recipient-1",
+        "actor-1",
+        "post-1",
+      );
       expect(result).toEqual(notification);
     });
   });
@@ -64,9 +72,21 @@ describe("NotificationRepositoryAdapter", () => {
       };
       mockImpl.insertComment.mockResolvedValue(notification);
 
-      const result = await adapter.insertComment("recipient-1", "actor-1", "post-1", "comment-1", "Great!");
+      const result = await adapter.insertComment(
+        "recipient-1",
+        "actor-1",
+        "post-1",
+        "comment-1",
+        "Great!",
+      );
 
-      expect(mockImpl.insertComment).toHaveBeenCalledWith("recipient-1", "actor-1", "post-1", "comment-1", "Great!");
+      expect(mockImpl.insertComment).toHaveBeenCalledWith(
+        "recipient-1",
+        "actor-1",
+        "post-1",
+        "comment-1",
+        "Great!",
+      );
       expect(result).toEqual(notification);
     });
   });
@@ -86,13 +106,21 @@ describe("NotificationRepositoryAdapter", () => {
     it("should delegate to implementation", async () => {
       const result = await adapter.findByRecipient("recipient-1", 10);
 
-      expect(mockImpl.findByRecipient).toHaveBeenCalledWith("recipient-1", 10, undefined);
+      expect(mockImpl.findByRecipient).toHaveBeenCalledWith(
+        "recipient-1",
+        10,
+        undefined,
+      );
     });
 
     it("should pass cursor when provided", async () => {
       await adapter.findByRecipient("recipient-1", 10, "cursor");
 
-      expect(mockImpl.findByRecipient).toHaveBeenCalledWith("recipient-1", 10, "cursor");
+      expect(mockImpl.findByRecipient).toHaveBeenCalledWith(
+        "recipient-1",
+        10,
+        "cursor",
+      );
     });
   });
 
@@ -102,7 +130,10 @@ describe("NotificationRepositoryAdapter", () => {
 
       const result = await adapter.markRead("recipient-1", "notification-1");
 
-      expect(mockImpl.markRead).toHaveBeenCalledWith("recipient-1", "notification-1");
+      expect(mockImpl.markRead).toHaveBeenCalledWith(
+        "recipient-1",
+        "notification-1",
+      );
       expect(result).toBe(true);
     });
   });
@@ -111,9 +142,15 @@ describe("NotificationRepositoryAdapter", () => {
     it("should delegate to implementation", async () => {
       mockImpl.markReadMany.mockResolvedValue(5);
 
-      const result = await adapter.markReadMany("recipient-1", ["id-1", "id-2"]);
+      const result = await adapter.markReadMany("recipient-1", [
+        "id-1",
+        "id-2",
+      ]);
 
-      expect(mockImpl.markReadMany).toHaveBeenCalledWith("recipient-1", ["id-1", "id-2"]);
+      expect(mockImpl.markReadMany).toHaveBeenCalledWith("recipient-1", [
+        "id-1",
+        "id-2",
+      ]);
       expect(result).toBe(5);
     });
   });

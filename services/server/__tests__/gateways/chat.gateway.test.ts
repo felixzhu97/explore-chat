@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ChatGateway } from "@/presentation/websocket/chat.gateway";
+import { ChatGateway } from "@/websocket/presentation/chat.gateway";
 import { JwtService } from "@nestjs/jwt";
-import { PrismaService } from "@/infrastructure/database/prisma.service";
-import { CacheService } from "@/infrastructure/cache/cache.service";
-import { OfflineMessageQueueService } from "@/application/services/offline-message-queue.service";
+import { PrismaService } from "@/core/database/prisma.service";
+import { CacheService } from "@/core/cache/cache.service";
+import { OfflineMessageQueueService } from "@/messages/application/offline-message-queue.service";
 import { Server, Socket } from "socket.io";
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => ({
       jwt: { secret: "test-secret" },
@@ -94,7 +94,7 @@ describe("ChatGateway", () => {
       mockJwtService as JwtService,
       mockPrisma as PrismaService,
       mockCache as CacheService,
-      mockOfflineQueue as OfflineMessageQueueService
+      mockOfflineQueue as OfflineMessageQueueService,
     );
 
     chatGateway.server = {
@@ -175,7 +175,10 @@ describe("ChatGateway", () => {
       await chatGateway.handleConnection(socket as any);
 
       expect(mockOfflineQueue.getAndClear).toHaveBeenCalledWith("user-1");
-      expect(socket.emit).toHaveBeenCalledWith("message:received", pendingMessages[0]);
+      expect(socket.emit).toHaveBeenCalledWith(
+        "message:received",
+        pendingMessages[0],
+      );
     });
   });
 
@@ -233,13 +236,16 @@ describe("ChatGateway", () => {
         content: "Hello, World!",
         sender: { id: "user-1", username: "testuser", avatar: null },
       };
-      mockPrisma.chatParticipant!.findUnique = vi.fn().mockResolvedValue({ chatId: "chat-1", userId: "user-1" });
+      mockPrisma.chatParticipant!.findUnique = vi
+        .fn()
+        .mockResolvedValue({ chatId: "chat-1", userId: "user-1" });
       mockPrisma.message!.create = vi.fn().mockResolvedValue(mockMessage);
-      mockPrisma.chatParticipant!.findMany = vi.fn().mockResolvedValue([
-        { userId: "user-1" },
-        { userId: "user-2" },
-      ]);
-      vi.spyOn(chatGateway, "deliverToParticipants" as any).mockResolvedValue(undefined);
+      mockPrisma.chatParticipant!.findMany = vi
+        .fn()
+        .mockResolvedValue([{ userId: "user-1" }, { userId: "user-2" }]);
+      vi.spyOn(chatGateway, "deliverToParticipants" as any).mockResolvedValue(
+        undefined,
+      );
 
       await chatGateway.handleMessage(socket as any, messageData);
 
@@ -278,7 +284,9 @@ describe("ChatGateway", () => {
 
       await chatGateway.handleMessage(socket as any, messageData);
 
-      expect(socket.emit).toHaveBeenCalledWith("error", { message: "Unauthorized" });
+      expect(socket.emit).toHaveBeenCalledWith("error", {
+        message: "Unauthorized",
+      });
     });
   });
 
@@ -324,7 +332,10 @@ describe("ChatGateway", () => {
     it("should broadcast typing event to chat room", async () => {
       const socket = createMockSocket({ userId: "user-1" });
 
-      chatGateway.handleTyping(socket as any, { chatId: "chat-1", isTyping: true });
+      chatGateway.handleTyping(socket as any, {
+        chatId: "chat-1",
+        isTyping: true,
+      });
 
       expect(socket.to).toHaveBeenCalledWith("chat:chat-1");
     });
@@ -338,7 +349,9 @@ describe("ChatGateway", () => {
         userId: "user-1",
         emoji: "👍",
       };
-      mockPrisma.messageReaction!.upsert = vi.fn().mockResolvedValue(mockReaction);
+      mockPrisma.messageReaction!.upsert = vi
+        .fn()
+        .mockResolvedValue(mockReaction);
 
       await chatGateway.handleReaction(socket as any, {
         messageId: "msg-1",
@@ -371,12 +384,15 @@ describe("ChatGateway", () => {
   describe("deliverToParticipants", () => {
     it("should deliver message to online users", async () => {
       const message = { id: "msg-1", content: "Hello" };
-      mockPrisma.chatParticipant!.findMany = vi.fn().mockResolvedValue([
-        { userId: "user-1" },
-        { userId: "user-2" },
-      ]);
+      mockPrisma.chatParticipant!.findMany = vi
+        .fn()
+        .mockResolvedValue([{ userId: "user-1" }, { userId: "user-2" }]);
 
-      await chatGateway.deliverToParticipants(message as any, "chat-1", "user-1");
+      await chatGateway.deliverToParticipants(
+        message as any,
+        "chat-1",
+        "user-1",
+      );
 
       expect(mockOfflineQueue.enqueue).toHaveBeenCalled();
     });
@@ -396,7 +412,9 @@ describe("ChatGateway", () => {
     it("should handle incoming call by looking up target user", async () => {
       const socket = createMockSocket({ userId: "user-1" });
 
-      await chatGateway.handleCallIncoming(socket as any, { targetUserId: "user-2" });
+      await chatGateway.handleCallIncoming(socket as any, {
+        targetUserId: "user-2",
+      });
 
       expect(socket.broadcast.emit).not.toHaveBeenCalled();
     });
@@ -487,7 +505,10 @@ describe("ChatGateway", () => {
         type: "TEXT",
       });
 
-      expect(socket.broadcast.emit).toHaveBeenCalledWith("status:create", mockStatus);
+      expect(socket.broadcast.emit).toHaveBeenCalledWith(
+        "status:create",
+        mockStatus,
+      );
     });
   });
 

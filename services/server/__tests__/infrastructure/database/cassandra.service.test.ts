@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { CassandraService } from "@/infrastructure/database/cassandra.service";
-import { ConfigService } from "@/infrastructure/config/config.service";
+import { CassandraService } from "@/core/database/cassandra.service";
+import { ConfigService } from "@/core/config/config.service";
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => ({
       cassandra: {

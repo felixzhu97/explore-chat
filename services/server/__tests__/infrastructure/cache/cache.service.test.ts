@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { CacheService } from "@/infrastructure/cache/cache.service";
+import { CacheService } from "@/core/cache/cache.service";
 
 describe("CacheService", () => {
   beforeEach(() => {
@@ -55,7 +55,7 @@ describe("CacheService", () => {
       expect(mockRedisService.set).toHaveBeenCalledWith(
         "cache:test-key",
         { data: "test" },
-        300
+        300,
       );
     });
 
@@ -70,7 +70,7 @@ describe("CacheService", () => {
       expect(mockRedisService.set).toHaveBeenCalledWith(
         "cache:test-key",
         { data: "test" },
-        600
+        600,
       );
     });
   });

@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { SearchService } from "@/application/services/search.service";
-import { USER_DOMAIN, STRING_VALUES } from "@whatschat/shared-types/test-utils/domain-values";
+import { SearchService } from "@/search/application/search.service";
+import {
+  USER_DOMAIN,
+  STRING_VALUES,
+} from "@whatschat/shared-types/test-utils/domain-values";
 
 // =============================================================================
 // MOCK FACTORIES
@@ -16,7 +19,9 @@ const createMockEsClient = (searchResponse?: any) => ({
 /**
  * Creates a mock Elasticsearch service
  */
-const createMockElasticsearchService = (client: ReturnType<typeof createMockEsClient> | null) => ({
+const createMockElasticsearchService = (
+  client: ReturnType<typeof createMockEsClient> | null,
+) => ({
   getClient: vi.fn().mockReturnValue(client),
 });
 
@@ -44,7 +49,12 @@ describe("SearchService", () => {
       it("should use Prisma fallback when Elasticsearch returns null client", async () => {
         const mockEs = createMockElasticsearchService(null);
         const mockPrisma = createMockPrismaUsers([
-          { id: TEST_USER_ID, username: TEST_USERNAME, avatar: null, createdAt: new Date() },
+          {
+            id: TEST_USER_ID,
+            username: TEST_USERNAME,
+            avatar: null,
+            createdAt: new Date(),
+          },
         ]);
         service = new SearchService(mockEs as any, mockPrisma as any);
 
@@ -108,7 +118,7 @@ describe("SearchService", () => {
             index: "users",
             query: expect.any(Object),
             size: 11,
-          })
+          }),
         );
         expect(result.hits).toHaveLength(1);
         expect(result.hits[0].id).toBe(TEST_USER_ID);
@@ -135,7 +145,7 @@ describe("SearchService", () => {
                 ]),
               }),
             }),
-          })
+          }),
         );
       });
 
@@ -147,11 +157,14 @@ describe("SearchService", () => {
         const mockPrisma = createMockPrismaUsers([]);
         service = new SearchService(mockEs as any, mockPrisma as any);
 
-        const cursor = Buffer.from(JSON.stringify([new Date().toISOString(), TEST_USER_ID]), "utf8").toString("base64url");
+        const cursor = Buffer.from(
+          JSON.stringify([new Date().toISOString(), TEST_USER_ID]),
+          "utf8",
+        ).toString("base64url");
         await service.searchUsers(TEST_USERNAME, 10, cursor);
 
         expect(mockClient.search).toHaveBeenCalledWith(
-          expect.objectContaining({ search_after: expect.any(Array) })
+          expect.objectContaining({ search_after: expect.any(Array) }),
         );
       });
 
@@ -217,15 +230,27 @@ describe("SearchService", () => {
             query: expect.any(Object),
             size: 11,
             track_total_hits: 10000,
-          })
+          }),
         );
         expect(result.hits).toHaveLength(1);
       });
 
       it.each([
-        { label: "caption field", caption: "Hello World", expectedFields: ["caption", "hashtags", "autoTags"] },
-        { label: "hashtag search", caption: "#whatsfeed", expectedFields: ["caption", "hashtags", "autoTags"] },
-        { label: "unicode content", caption: STRING_VALUES.UNICODE_EMOJI, expectedFields: ["caption", "hashtags", "autoTags"] },
+        {
+          label: "caption field",
+          caption: "Hello World",
+          expectedFields: ["caption", "hashtags", "autoTags"],
+        },
+        {
+          label: "hashtag search",
+          caption: "#whatsfeed",
+          expectedFields: ["caption", "hashtags", "autoTags"],
+        },
+        {
+          label: "unicode content",
+          caption: STRING_VALUES.UNICODE_EMOJI,
+          expectedFields: ["caption", "hashtags", "autoTags"],
+        },
       ])("should search across fields for $label", async ({ caption }) => {
         const mockClient = createMockEsClient({
           hits: { hits: [], total: { value: 0 } },
@@ -239,9 +264,11 @@ describe("SearchService", () => {
         expect(mockClient.search).toHaveBeenCalledWith(
           expect.objectContaining({
             query: expect.objectContaining({
-              multi_match: expect.objectContaining({ fields: expect.arrayContaining(["caption", "hashtags"]) }),
+              multi_match: expect.objectContaining({
+                fields: expect.arrayContaining(["caption", "hashtags"]),
+              }),
             }),
-          })
+          }),
         );
       });
 
@@ -307,30 +334,30 @@ describe("SearchService", () => {
             query: expect.objectContaining({
               prefix: expect.objectContaining({ tag: "test" }),
             }),
-          })
+          }),
         );
         expect(result.hits).toHaveLength(1);
       });
 
-it("should strip single leading hash from query", async () => {
-      const mockClient = createMockEsClient({
-        hits: { hits: [] },
-      });
-      const mockEs = createMockElasticsearchService(mockClient);
-      const mockPrisma = createMockPrismaUsers([]);
-      service = new SearchService(mockEs as any, mockPrisma as any);
+      it("should strip single leading hash from query", async () => {
+        const mockClient = createMockEsClient({
+          hits: { hits: [] },
+        });
+        const mockEs = createMockElasticsearchService(mockClient);
+        const mockPrisma = createMockPrismaUsers([]);
+        service = new SearchService(mockEs as any, mockPrisma as any);
 
-      await service.searchHashtags("##multiple", 10);
+        await service.searchHashtags("##multiple", 10);
 
-      // Only strips one leading #
-      expect(mockClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            prefix: expect.objectContaining({ tag: "#multiple" }),
+        // Only strips one leading #
+        expect(mockClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              prefix: expect.objectContaining({ tag: "#multiple" }),
+            }),
           }),
-        })
-      );
-    });
+        );
+      });
 
       it("should lowercase hashtag query", async () => {
         const mockClient = createMockEsClient({
@@ -347,7 +374,7 @@ it("should strip single leading hash from query", async () => {
             query: expect.objectContaining({
               prefix: expect.objectContaining({ tag: "uppercase" }),
             }),
-          })
+          }),
         );
       });
 

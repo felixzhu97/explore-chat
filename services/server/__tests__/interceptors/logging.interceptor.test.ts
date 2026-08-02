@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { of } from "rxjs";
-import { LoggingInterceptor } from "@/presentation/interceptors/logging.interceptor";
+import { LoggingInterceptor } from "@/core/interceptors/logging.interceptor";
 
 describe("LoggingInterceptor", () => {
   let interceptor: LoggingInterceptor;

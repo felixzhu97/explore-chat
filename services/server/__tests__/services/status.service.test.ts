@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { StatusService, CreateStatusData } from "@/application/services/status.service";
+import {
+  StatusService,
+  CreateStatusData,
+} from "@/status/application/status.service";
 
 describe("StatusService", () => {
   let service: StatusService;
@@ -97,7 +100,9 @@ describe("StatusService", () => {
     it("should throw NotFoundException when status not found", async () => {
       mockPrisma.status.findUnique.mockResolvedValue(null);
 
-      await expect(service.deleteStatus("non-existent", "user-1")).rejects.toThrow();
+      await expect(
+        service.deleteStatus("non-existent", "user-1"),
+      ).rejects.toThrow();
     });
 
     it("should throw NotFoundException when user is not owner", async () => {
@@ -106,7 +111,9 @@ describe("StatusService", () => {
         userId: "other-user",
       });
 
-      await expect(service.deleteStatus("status-1", "user-1")).rejects.toThrow();
+      await expect(
+        service.deleteStatus("status-1", "user-1"),
+      ).rejects.toThrow();
     });
 
     it("should delete status successfully", async () => {
@@ -125,7 +132,9 @@ describe("StatusService", () => {
     it("should throw NotFoundException when status not found", async () => {
       mockPrisma.status.findUnique.mockResolvedValue(null);
 
-      await expect(service.viewStatus("non-existent", "user-1")).rejects.toThrow();
+      await expect(
+        service.viewStatus("non-existent", "user-1"),
+      ).rejects.toThrow();
     });
 
     it("should mark status as viewed", async () => {

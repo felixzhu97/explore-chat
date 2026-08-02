@@ -4,14 +4,14 @@ import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import helmet from "helmet";
 import compression from "compression";
 import { AppModule } from "./app.module";
-import { AllExceptionsFilter } from "./presentation/filters/all-exceptions.filter";
-import { HttpExceptionFilter } from "./presentation/filters/http-exception.filter";
-import { ValidationExceptionFilter } from "./presentation/filters/validation-exception.filter";
-import { LoggingInterceptor } from "./presentation/interceptors/logging.interceptor";
-import { TransformInterceptor } from "./presentation/interceptors/transform.interceptor";
+import { AllExceptionsFilter } from "@/core/filters/all-exceptions.filter";
+import { HttpExceptionFilter } from "@/core/filters/http-exception.filter";
+import { ValidationExceptionFilter } from "@/core/filters/validation-exception.filter";
+import { LoggingInterceptor } from "@/core/interceptors/logging.interceptor";
+import { TransformInterceptor } from "@/core/interceptors/transform.interceptor";
 import logger from "@/shared/utils/logger";
 import path from "path";
-import { ConfigService } from "@/infrastructure/config/config.service";
+import { ConfigService } from "@/core/config/config.service";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bodyParser: false });
@@ -22,7 +22,7 @@ async function bootstrap() {
   app.use(express.urlencoded({ extended: true, limit: bodyLimit }));
   app.use(
     "/uploads/media",
-    express.static(path.resolve(process.cwd(), config.storage.local.uploadDir))
+    express.static(path.resolve(process.cwd(), config.storage.local.uploadDir)),
   );
 
   // 全局前缀
@@ -34,7 +34,10 @@ async function bootstrap() {
 
   // CORS配置
   const corsOptions = {
-    origin: process.env["CORS_ORIGIN"]?.split(",") || ["http://localhost:4000", "http://localhost:4001"],
+    origin: process.env["CORS_ORIGIN"]?.split(",") || [
+      "http://localhost:4000",
+      "http://localhost:4001",
+    ],
     credentials: true,
   };
   app.enableCors(corsOptions);
@@ -48,20 +51,20 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true,
       },
-    })
+    }),
   );
 
   // 全局拦截器
   app.useGlobalInterceptors(
     new LoggingInterceptor(),
-    new TransformInterceptor()
+    new TransformInterceptor(),
   );
 
   // 全局异常过滤器
   app.useGlobalFilters(
     new AllExceptionsFilter(),
     new HttpExceptionFilter(),
-    new ValidationExceptionFilter()
+    new ValidationExceptionFilter(),
   );
 
   // Swagger文档配置
@@ -82,7 +85,9 @@ async function bootstrap() {
   await app.listen(port, host);
 
   logger.info(`🚀 WhatsChat服务器启动成功 (body limit: 10mb)`);
-  logger.info(`📍 监听: ${host}:${port} (本机: http://localhost:${port}, 局域网: http://<本机IP>:${port})`);
+  logger.info(
+    `📍 监听: ${host}:${port} (本机: http://localhost:${port}, 局域网: http://<本机IP>:${port})`,
+  );
   if (host === "0.0.0.0") {
     logger.info(`📍 真机访问请用本机局域网 IP，并确保防火墙放行 ${port} 端口`);
   }

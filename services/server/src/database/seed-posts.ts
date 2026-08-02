@@ -2,7 +2,7 @@ import { Client } from "cassandra-driver";
 import { Client as EsClient } from "@elastic/elasticsearch";
 import { v4 as uuidv4 } from "uuid";
 import { prisma } from "./client";
-import { ConfigService } from "../infrastructure/config/config.service";
+import { ConfigService } from "@/core/config/config.service";
 import logger from "@/shared/utils/logger";
 
 if (!process.env["DATABASE_URL"]) {

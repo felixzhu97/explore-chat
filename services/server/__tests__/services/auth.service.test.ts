@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ConflictException, UnauthorizedException } from "@nestjs/common";
-import { AuthService } from "@/application/services/auth.service";
-import { IUserRepository } from "@/domain/interfaces/repositories/user.repository.interface";
+import { AuthService } from "@/auth/application/auth.service";
+import { IUserRepository } from "@/users/domain/user.repository.interface";
 import { JwtService } from "@nestjs/jwt";
-import { PrismaService } from "@/infrastructure/database/prisma.service";
-import { ElasticsearchService } from "@/infrastructure/database/elasticsearch.service";
-import { ConfigService } from "@/infrastructure/config/config.service";
-import { User } from "@/domain/entities/user.entity";
+import { PrismaService } from "@/core/database/prisma.service";
+import { ElasticsearchService } from "@/core/database/elasticsearch.service";
+import { ConfigService } from "@/core/config/config.service";
+import { User } from "@/users/domain/user.entity";
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => ({
       jwt: {
@@ -79,7 +79,7 @@ describe("AuthService", () => {
       mockUserRepository as IUserRepository,
       mockJwtService as JwtService,
       mockPrisma as PrismaService,
-      mockElasticsearch as ElasticsearchService
+      mockElasticsearch as ElasticsearchService,
     );
   });
 
@@ -95,10 +95,10 @@ describe("AuthService", () => {
       mockUserRepository.findByEmail = vi.fn().mockResolvedValue(mockUser);
 
       await expect(authService.register(registerData)).rejects.toThrow(
-        ConflictException
+        ConflictException,
       );
       await expect(authService.register(registerData)).rejects.toThrow(
-        "User already exists"
+        "User already exists",
       );
     });
 
@@ -106,7 +106,8 @@ describe("AuthService", () => {
       mockUserRepository.findByEmail = vi.fn().mockResolvedValue(null);
       mockPrisma.user!.create = vi.fn().mockResolvedValue(mockUser);
       mockElasticsearch.indexUser = vi.fn().mockResolvedValue(undefined);
-      mockJwtService.signAsync = vi.fn()
+      mockJwtService.signAsync = vi
+        .fn()
         .mockResolvedValueOnce("mock-access-token")
         .mockResolvedValueOnce("mock-refresh-token");
 
@@ -130,11 +131,15 @@ describe("AuthService", () => {
         });
       });
       mockElasticsearch.indexUser = vi.fn().mockResolvedValue(undefined);
-      mockJwtService.signAsync = vi.fn()
+      mockJwtService.signAsync = vi
+        .fn()
         .mockResolvedValueOnce("mock-access-token")
         .mockResolvedValueOnce("mock-refresh-token");
 
-      const dataWithoutUsername = { email: registerData.email, password: registerData.password };
+      const dataWithoutUsername = {
+        email: registerData.email,
+        password: registerData.password,
+      };
 
       await authService.register(dataWithoutUsername);
     });
@@ -143,7 +148,8 @@ describe("AuthService", () => {
       mockUserRepository.findByEmail = vi.fn().mockResolvedValue(null);
       mockPrisma.user!.create = vi.fn().mockResolvedValue(mockUser);
       mockElasticsearch.indexUser = vi.fn().mockResolvedValue(undefined);
-      mockJwtService.signAsync = vi.fn()
+      mockJwtService.signAsync = vi
+        .fn()
         .mockResolvedValueOnce("mock-access-token")
         .mockResolvedValueOnce("mock-refresh-token");
 
@@ -161,7 +167,8 @@ describe("AuthService", () => {
       mockUserRepository.findByEmail = vi.fn().mockResolvedValue(null);
       mockPrisma.user!.create = vi.fn().mockResolvedValue(mockUser);
       mockElasticsearch.indexUser = vi.fn().mockResolvedValue(undefined);
-      mockJwtService.signAsync = vi.fn()
+      mockJwtService.signAsync = vi
+        .fn()
         .mockResolvedValueOnce("mock-access-token")
         .mockResolvedValueOnce("mock-refresh-token");
 
@@ -172,7 +179,7 @@ describe("AuthService", () => {
           data: expect.objectContaining({
             password: expect.not.stringContaining(registerData.password),
           }),
-        })
+        }),
       );
     });
   });
@@ -187,10 +194,10 @@ describe("AuthService", () => {
       mockPrisma.user!.findUnique = vi.fn().mockResolvedValue(null);
 
       await expect(authService.login(loginData)).rejects.toThrow(
-        UnauthorizedException
+        UnauthorizedException,
       );
       await expect(authService.login(loginData)).rejects.toThrow(
-        "Invalid email or password"
+        "Invalid email or password",
       );
     });
 
@@ -199,14 +206,15 @@ describe("AuthService", () => {
       vi.spyOn(authService, "comparePassword").mockResolvedValue(false);
 
       await expect(authService.login(loginData)).rejects.toThrow(
-        UnauthorizedException
+        UnauthorizedException,
       );
     });
 
     it("should return user and tokens on successful login", async () => {
       mockPrisma.user!.findUnique = vi.fn().mockResolvedValue(mockUser);
       vi.spyOn(authService, "comparePassword").mockResolvedValue(true);
-      mockJwtService.signAsync = vi.fn()
+      mockJwtService.signAsync = vi
+        .fn()
         .mockResolvedValueOnce("mock-access-token")
         .mockResolvedValueOnce("mock-refresh-token");
 
@@ -226,9 +234,9 @@ describe("AuthService", () => {
         throw new Error("Invalid token");
       });
 
-      await expect(
-        authService.refreshToken("invalid-token")
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(authService.refreshToken("invalid-token")).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it("should throw UnauthorizedException if user not found", async () => {
@@ -239,9 +247,9 @@ describe("AuthService", () => {
       });
       mockUserRepository.findById = vi.fn().mockResolvedValue(null);
 
-      await expect(
-        authService.refreshToken("valid-token")
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(authService.refreshToken("valid-token")).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it("should return new tokens on valid refresh token", async () => {
@@ -257,7 +265,8 @@ describe("AuthService", () => {
         username: mockUser.username,
       });
       mockUserRepository.findById = vi.fn().mockResolvedValue(mockDomainUser);
-      mockJwtService.signAsync = vi.fn()
+      mockJwtService.signAsync = vi
+        .fn()
         .mockResolvedValueOnce("new-access-token")
         .mockResolvedValueOnce("new-refresh-token");
 
@@ -275,7 +284,7 @@ describe("AuthService", () => {
       });
 
       await expect(authService.validateToken("invalid-token")).rejects.toThrow(
-        UnauthorizedException
+        UnauthorizedException,
       );
     });
 
@@ -288,7 +297,7 @@ describe("AuthService", () => {
       mockUserRepository.findById = vi.fn().mockResolvedValue(null);
 
       await expect(authService.validateToken("valid-token")).rejects.toThrow(
-        UnauthorizedException
+        UnauthorizedException,
       );
     });
 
@@ -340,7 +349,10 @@ describe("AuthService", () => {
       const password = "testPassword123";
       const hashedPassword = await authService.hashPassword(password);
 
-      const result = await authService.comparePassword(password, hashedPassword);
+      const result = await authService.comparePassword(
+        password,
+        hashedPassword,
+      );
 
       expect(result).toBe(true);
     });
@@ -352,7 +364,7 @@ describe("AuthService", () => {
 
       const result = await authService.comparePassword(
         wrongPassword,
-        hashedPassword
+        hashedPassword,
       );
 
       expect(result).toBe(false);
@@ -373,7 +385,8 @@ describe("AuthService", () => {
         phone: null,
       });
       mockElasticsearch.indexUser = vi.fn().mockResolvedValue(undefined);
-      mockJwtService.signAsync = vi.fn()
+      mockJwtService.signAsync = vi
+        .fn()
         .mockResolvedValueOnce("mock-access-token")
         .mockResolvedValueOnce("mock-refresh-token");
 
@@ -391,7 +404,8 @@ describe("AuthService", () => {
       mockUserRepository.findByEmail = vi.fn().mockResolvedValue(null);
       mockPrisma.user!.create = vi.fn().mockResolvedValue(mockUser);
       mockElasticsearch.indexUser = vi.fn().mockResolvedValue(undefined);
-      mockJwtService.signAsync = vi.fn()
+      mockJwtService.signAsync = vi
+        .fn()
         .mockResolvedValueOnce("mock-access-token")
         .mockResolvedValueOnce("mock-refresh-token");
 

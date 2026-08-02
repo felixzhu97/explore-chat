@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { AdPacingService, AdPacingContext } from "@/application/services/ad-pacing.service";
+import {
+  AdPacingService,
+  AdPacingContext,
+} from "@/ads/application/ad-pacing.service";
 
 describe("AdPacingService", () => {
   let service: AdPacingService;
@@ -28,7 +31,9 @@ describe("AdPacingService", () => {
     };
 
     it("should return true when campaign has no budget limits", async () => {
-      mockPrisma.adSpend.aggregate.mockResolvedValue({ _sum: { costCents: 0 } });
+      mockPrisma.adSpend.aggregate.mockResolvedValue({
+        _sum: { costCents: 0 },
+      });
       mockPrisma.adCampaign.findUnique.mockResolvedValue({
         dailyBudgetCents: null,
         totalBudgetCents: null,
@@ -40,7 +45,9 @@ describe("AdPacingService", () => {
     });
 
     it("should return false when daily budget is exceeded", async () => {
-      mockPrisma.adSpend.aggregate.mockResolvedValue({ _sum: { costCents: 100 } });
+      mockPrisma.adSpend.aggregate.mockResolvedValue({
+        _sum: { costCents: 100 },
+      });
       mockPrisma.adCampaign.findUnique.mockResolvedValue({
         dailyBudgetCents: 50,
         totalBudgetCents: null,
@@ -52,7 +59,9 @@ describe("AdPacingService", () => {
     });
 
     it("should return true when daily spending is below budget", async () => {
-      mockPrisma.adSpend.aggregate.mockResolvedValue({ _sum: { costCents: 30 } });
+      mockPrisma.adSpend.aggregate.mockResolvedValue({
+        _sum: { costCents: 30 },
+      });
       mockPrisma.adCampaign.findUnique.mockResolvedValue({
         dailyBudgetCents: 100,
         totalBudgetCents: null,
@@ -92,7 +101,9 @@ describe("AdPacingService", () => {
     });
 
     it("should handle null daily budget (no daily limit)", async () => {
-      mockPrisma.adSpend.aggregate.mockResolvedValue({ _sum: { costCents: 0 } });
+      mockPrisma.adSpend.aggregate.mockResolvedValue({
+        _sum: { costCents: 0 },
+      });
       mockPrisma.adCampaign.findUnique.mockResolvedValue({
         dailyBudgetCents: null,
         totalBudgetCents: null,
@@ -104,7 +115,9 @@ describe("AdPacingService", () => {
     });
 
     it("should handle null total budget (no total limit)", async () => {
-      mockPrisma.adSpend.aggregate.mockResolvedValue({ _sum: { costCents: 100 } });
+      mockPrisma.adSpend.aggregate.mockResolvedValue({
+        _sum: { costCents: 100 },
+      });
       mockPrisma.adCampaign.findUnique.mockResolvedValue({
         dailyBudgetCents: null,
         totalBudgetCents: null,
@@ -117,7 +130,9 @@ describe("AdPacingService", () => {
 
     it("should use provided now date instead of current date", async () => {
       const specificDate = new Date("2024-01-15T10:00:00Z");
-      mockPrisma.adSpend.aggregate.mockResolvedValue({ _sum: { costCents: 0 } });
+      mockPrisma.adSpend.aggregate.mockResolvedValue({
+        _sum: { costCents: 0 },
+      });
       mockPrisma.adCampaign.findUnique.mockResolvedValue({
         dailyBudgetCents: null,
         totalBudgetCents: null,
@@ -131,7 +146,9 @@ describe("AdPacingService", () => {
     });
 
     it("should return true when daily budget equals spent amount (boundary)", async () => {
-      mockPrisma.adSpend.aggregate.mockResolvedValue({ _sum: { costCents: 100 } });
+      mockPrisma.adSpend.aggregate.mockResolvedValue({
+        _sum: { costCents: 100 },
+      });
       mockPrisma.adCampaign.findUnique.mockResolvedValue({
         dailyBudgetCents: 100,
         totalBudgetCents: null,

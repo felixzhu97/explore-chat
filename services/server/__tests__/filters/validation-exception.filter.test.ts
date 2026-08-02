@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ValidationExceptionFilter } from "@/presentation/filters/validation-exception.filter";
+import { ValidationExceptionFilter } from "@/core/filters/validation-exception.filter";
 import { BadRequestException } from "@nestjs/common";
 
 describe("ValidationExceptionFilter", () => {
@@ -21,7 +21,10 @@ describe("ValidationExceptionFilter", () => {
   });
 
   it("should handle string message", () => {
-    const mockResponse = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
     const host = createMockHost(mockResponse);
 
     const exception = new BadRequestException("Validation error");
@@ -33,12 +36,15 @@ describe("ValidationExceptionFilter", () => {
       expect.objectContaining({
         success: false,
         code: "VALIDATION_ERROR",
-      })
+      }),
     );
   });
 
   it("should handle object message", () => {
-    const mockResponse = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
     const host = createMockHost(mockResponse);
 
     const exception = new BadRequestException({
@@ -51,18 +57,18 @@ describe("ValidationExceptionFilter", () => {
       expect.objectContaining({
         message: "Field is required",
         code: "VALIDATION_ERROR",
-      })
+      }),
     );
   });
 
   it("should handle array message", () => {
-    const mockResponse = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
     const host = createMockHost(mockResponse);
 
-    const exception = new BadRequestException([
-      "First error",
-      "Second error",
-    ]);
+    const exception = new BadRequestException(["First error", "Second error"]);
 
     filter.catch(exception, host);
 
@@ -70,7 +76,7 @@ describe("ValidationExceptionFilter", () => {
       expect.objectContaining({
         message: "First error, Second error",
         code: "VALIDATION_ERROR",
-      })
+      }),
     );
   });
 

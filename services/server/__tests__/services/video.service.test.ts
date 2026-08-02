@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { VideoService } from "@/application/services/video.service";
+import { VideoService } from "@/ai/application/video.service";
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => ({
       video: {
@@ -15,7 +15,12 @@ vi.mock("@/infrastructure/config/config.service", () => ({
 vi.mock("@/lib/video-generation", () => ({
   createClient: vi.fn(() => ({
     generate: vi.fn().mockResolvedValue({ jobId: "job-1" }),
-    getResult: vi.fn().mockResolvedValue({ status: "succeeded", videoUrl: "http://example.com/video.mp4" }),
+    getResult: vi
+      .fn()
+      .mockResolvedValue({
+        status: "succeeded",
+        videoUrl: "http://example.com/video.mp4",
+      }),
   })),
 }));
 
@@ -31,16 +36,14 @@ describe("VideoService", () => {
   describe("generate", () => {
     it("should throw BadRequestException when video generation not configured", async () => {
       await expect(
-        service.generate({ prompt: "a flying cat" })
+        service.generate({ prompt: "a flying cat" }),
       ).rejects.toThrow();
     });
   });
 
   describe("getResult", () => {
     it("should throw BadRequestException when video generation not configured", async () => {
-      await expect(
-        service.getResult("job-1")
-      ).rejects.toThrow();
+      await expect(service.getResult("job-1")).rejects.toThrow();
     });
   });
 });

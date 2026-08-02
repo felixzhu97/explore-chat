@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { AnalyticsService } from "@/application/services/analytics.service";
+import { AnalyticsService } from "@/analytics/application/analytics.service";
 
 describe("AnalyticsService", () => {
   let service: AnalyticsService;
@@ -90,7 +90,13 @@ describe("AnalyticsService", () => {
   describe("getEvents", () => {
     it("should return paginated events", async () => {
       mockPrisma.analyticsEvent.findMany.mockResolvedValue([
-        { id: "1", eventName: "test", userId: "user-1", createdAt: new Date(), properties: {} },
+        {
+          id: "1",
+          eventName: "test",
+          userId: "user-1",
+          createdAt: new Date(),
+          properties: {},
+        },
       ]);
       mockPrisma.analyticsEvent.count.mockResolvedValue(1);
 

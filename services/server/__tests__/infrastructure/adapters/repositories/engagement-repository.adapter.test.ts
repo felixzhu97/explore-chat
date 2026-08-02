@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { EngagementRepositoryAdapter } from "@/infrastructure/adapters/repositories/engagement-repository.adapter";
-import { CassandraEngagementRepository } from "@/infrastructure/database/cassandra-engagement.repository";
+import { EngagementRepositoryAdapter } from "@/post/infrastructure/engagement-repository.adapter";
+import { CassandraEngagementRepository } from "@/core/database/cassandra-engagement.repository";
 
 describe("EngagementRepositoryAdapter", () => {
   let adapter: EngagementRepositoryAdapter;
@@ -15,7 +15,9 @@ describe("EngagementRepositoryAdapter", () => {
       unsave: vi.fn().mockResolvedValue(true),
       isLiked: vi.fn().mockResolvedValue(false),
       isSaved: vi.fn().mockResolvedValue(false),
-      getEngagementCounts: vi.fn().mockResolvedValue({ likeCount: 0, commentCount: 0, saveCount: 0 }),
+      getEngagementCounts: vi
+        .fn()
+        .mockResolvedValue({ likeCount: 0, commentCount: 0, saveCount: 0 }),
       getEngagementCountsBatch: vi.fn().mockResolvedValue(new Map()),
       incrementCommentCount: vi.fn().mockResolvedValue(undefined),
       decrementCommentCount: vi.fn().mockResolvedValue(undefined),
@@ -95,12 +97,20 @@ describe("EngagementRepositoryAdapter", () => {
 
   describe("getEngagementCountsBatch", () => {
     it("should delegate to implementation", async () => {
-      const batchResult = new Map([["post-1", { likeCount: 10, commentCount: 5, saveCount: 2 }]]);
+      const batchResult = new Map([
+        ["post-1", { likeCount: 10, commentCount: 5, saveCount: 2 }],
+      ]);
       mockImpl.getEngagementCountsBatch.mockResolvedValue(batchResult);
 
-      const result = await adapter.getEngagementCountsBatch(["post-1", "post-2"]);
+      const result = await adapter.getEngagementCountsBatch([
+        "post-1",
+        "post-2",
+      ]);
 
-      expect(mockImpl.getEngagementCountsBatch).toHaveBeenCalledWith(["post-1", "post-2"]);
+      expect(mockImpl.getEngagementCountsBatch).toHaveBeenCalledWith([
+        "post-1",
+        "post-2",
+      ]);
       expect(result).toEqual(batchResult);
     });
   });

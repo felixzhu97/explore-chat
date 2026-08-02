@@ -1,8 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { MongoCommentRepository } from "@/infrastructure/database/mongo-comment.repository";
+import { MongoCommentRepository } from "@/core/database/mongo-comment.repository";
 
 const createMockCollection = () => ({
-  insertOne: vi.fn().mockResolvedValue({ insertedId: { toString: () => "comment-1" } }),
+  insertOne: vi
+    .fn()
+    .mockResolvedValue({ insertedId: { toString: () => "comment-1" } }),
   find: vi.fn().mockReturnValue({
     sort: vi.fn().mockReturnValue({
       skip: vi.fn().mockReturnValue({
@@ -45,7 +47,7 @@ describe("MongoCommentRepository", () => {
           postId: "post-1",
           userId: "user-1",
           content: "Great post!",
-        })
+        }),
       ).rejects.toThrow("MongoDB not connected");
     });
 

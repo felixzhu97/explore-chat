@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { AdminService } from "@/application/services/admin.service";
+import { AdminService } from "@/admin/application/admin.service";
 
 describe("AdminService", () => {
   let service: AdminService;
@@ -8,7 +8,10 @@ describe("AdminService", () => {
       count: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
     };
-    chat: { count: ReturnType<typeof vi.fn>; findMany: ReturnType<typeof vi.fn> };
+    chat: {
+      count: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
+    };
     group: { count: ReturnType<typeof vi.fn> };
     message: {
       count: ReturnType<typeof vi.fn>;
@@ -43,7 +46,10 @@ describe("AdminService", () => {
         count: vi.fn().mockResolvedValue(100),
         findMany: vi.fn().mockResolvedValue([]),
       },
-      chat: { count: vi.fn().mockResolvedValue(50), findMany: vi.fn().mockResolvedValue([]) },
+      chat: {
+        count: vi.fn().mockResolvedValue(50),
+        findMany: vi.fn().mockResolvedValue([]),
+      },
       group: { count: vi.fn().mockResolvedValue(25) },
       message: {
         count: vi.fn().mockResolvedValue(1000),
@@ -63,7 +69,9 @@ describe("AdminService", () => {
     };
 
     mockEngagementRepo = {
-      getEngagementCounts: vi.fn().mockResolvedValue({ likeCount: 0, commentCount: 0, saveCount: 0 }),
+      getEngagementCounts: vi
+        .fn()
+        .mockResolvedValue({ likeCount: 0, commentCount: 0, saveCount: 0 }),
     };
 
     mockCommentRepo = {
@@ -72,7 +80,9 @@ describe("AdminService", () => {
     };
 
     mockVisionClient = {
-      moderateFromUrl: vi.fn().mockResolvedValue({ safe: true, categories: [] }),
+      moderateFromUrl: vi
+        .fn()
+        .mockResolvedValue({ safe: true, categories: [] }),
     };
 
     service = new AdminService(
@@ -81,7 +91,7 @@ describe("AdminService", () => {
       mockPostRepo as never,
       mockEngagementRepo as never,
       mockCommentRepo as never,
-      mockVisionClient as never
+      mockVisionClient as never,
     );
   });
 

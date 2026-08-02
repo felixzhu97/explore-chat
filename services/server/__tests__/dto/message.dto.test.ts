@@ -1,7 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { validate } from "class-validator";
 import { plainToInstance } from "class-transformer";
-import { CreateMessageDto, GetMessagesDto, UpdateMessageDto } from "@/application/dto/message.dto";
+import {
+  CreateMessageDto,
+  GetMessagesDto,
+  UpdateMessageDto,
+} from "@/messages/application/message.dto";
 
 describe("CreateMessageDto", () => {
   it("should pass with valid TEXT message", async () => {
@@ -110,7 +114,9 @@ describe("GetMessagesDto", () => {
 
 describe("UpdateMessageDto", () => {
   it("should pass with valid content update", async () => {
-    const dto = plainToInstance(UpdateMessageDto, { content: "Updated message" });
+    const dto = plainToInstance(UpdateMessageDto, {
+      content: "Updated message",
+    });
     const errors = await validate(dto);
     expect(errors.length).toBe(0);
   });

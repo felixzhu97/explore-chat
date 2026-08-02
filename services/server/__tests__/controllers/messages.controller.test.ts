@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MessagesController } from "@/presentation/messages/messages.controller";
+import { MessagesController } from "@/messages/presentation/messages.controller";
 import { NotFoundException } from "@nestjs/common";
 
 describe("MessagesController", () => {
@@ -38,7 +38,7 @@ describe("MessagesController", () => {
 
     messagesController = new MessagesController(
       mockMessagesService,
-      mockChatGateway
+      mockChatGateway,
     );
   });
 
@@ -109,7 +109,7 @@ describe("MessagesController", () => {
 
       const result = await messagesController.createMessage(
         mockUser,
-        createMessageDto
+        createMessageDto,
       );
 
       expect(result).toEqual({
@@ -126,7 +126,7 @@ describe("MessagesController", () => {
       expect(mockChatGateway.deliverToParticipants).toHaveBeenCalledWith(
         mockMessage,
         mockMessage.chatId,
-        mockMessage.senderId
+        mockMessage.senderId,
       );
     });
 
@@ -178,11 +178,11 @@ describe("MessagesController", () => {
 
     it("should throw NotFoundException when chat does not exist", async () => {
       mockMessagesService.createMessage.mockRejectedValue(
-        new NotFoundException("聊天不存在")
+        new NotFoundException("聊天不存在"),
       );
 
       await expect(
-        messagesController.createMessage(mockUser, createMessageDto)
+        messagesController.createMessage(mockUser, createMessageDto),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -203,7 +203,7 @@ describe("MessagesController", () => {
       });
       expect(mockMessagesService.updateMessage).toHaveBeenCalledWith(
         "message-1",
-        { content: "Updated content" }
+        { content: "Updated content" },
       );
     });
 
@@ -219,7 +219,11 @@ describe("MessagesController", () => {
     });
 
     it("should update both content and type", async () => {
-      const updatedMessage = { ...mockMessage, content: "New content", type: "IMAGE" };
+      const updatedMessage = {
+        ...mockMessage,
+        content: "New content",
+        type: "IMAGE",
+      };
       mockMessagesService.updateMessage.mockResolvedValue(updatedMessage);
 
       const result = await messagesController.updateMessage("message-1", {
@@ -242,7 +246,9 @@ describe("MessagesController", () => {
         success: true,
         message: "消息删除成功",
       });
-      expect(mockMessagesService.deleteMessage).toHaveBeenCalledWith("message-1");
+      expect(mockMessagesService.deleteMessage).toHaveBeenCalledWith(
+        "message-1",
+      );
     });
   });
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { VisionClientService } from "@/application/services/vision-client.service";
+import { VisionClientService } from "@/ai/application/vision-client.service";
 
 const mockConfigResult = {
   vision: {
@@ -10,7 +10,7 @@ const mockConfigResult = {
   },
 };
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => mockConfigResult),
   },

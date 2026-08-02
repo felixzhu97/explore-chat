@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { Message, MessageType } from "@/domain/entities/message.entity";
+import { Message, MessageType } from "@/messages/domain/message.entity";
 import type { MessageReaction, ContactInfo } from "@whatschat/shared-types";
 import {
   MESSAGE_DOMAIN,
@@ -89,7 +89,7 @@ describe("Message Entity", () => {
         reactions,
         ["user-2", "user-3"],
         createdAt,
-        updatedAt
+        updatedAt,
       );
 
       expect(message.id).toBe(MESSAGE_DOMAIN.VALID.id);
@@ -110,7 +110,7 @@ describe("Message Entity", () => {
         MESSAGE_DOMAIN.VALID.chatId,
         MESSAGE_DOMAIN.VALID.senderId,
         "TEXT",
-        MESSAGE_DOMAIN.VALID.content
+        MESSAGE_DOMAIN.VALID.content,
       );
 
       expect(message.mediaUrl).toBeUndefined();
@@ -157,14 +157,17 @@ describe("Message Entity", () => {
       expect(message.content).toBe(content);
     });
 
-    it.each(["IMAGE", "VIDEO", "AUDIO", "FILE"])("should create a %s message with media", (type) => {
-      const message = createMediaMessage(type as MessageType);
+    it.each(["IMAGE", "VIDEO", "AUDIO", "FILE"])(
+      "should create a %s message with media",
+      (type) => {
+        const message = createMediaMessage(type as MessageType);
 
-      expect(message.type).toBe(type);
-      expect(message.mediaUrl).toBe(MESSAGE_DOMAIN.VALID.mediaUrl);
-      expect(message.thumbnailUrl).toBe(MESSAGE_DOMAIN.VALID.thumbnailUrl);
-      expect(message.size).toBe(MESSAGE_DOMAIN.VALID.size);
-    });
+        expect(message.type).toBe(type);
+        expect(message.mediaUrl).toBe(MESSAGE_DOMAIN.VALID.mediaUrl);
+        expect(message.thumbnailUrl).toBe(MESSAGE_DOMAIN.VALID.thumbnailUrl);
+        expect(message.size).toBe(MESSAGE_DOMAIN.VALID.size);
+      },
+    );
 
     it("should create a video message with duration", () => {
       const message = createMediaMessage("VIDEO");
@@ -208,7 +211,9 @@ describe("Message Entity", () => {
       const message = createForwardedMessage();
 
       expect(message.isForwarded).toBe(true);
-      expect(message.originalMessageId).toBe(MESSAGE_DOMAIN.VALID.originalMessageId);
+      expect(message.originalMessageId).toBe(
+        MESSAGE_DOMAIN.VALID.originalMessageId,
+      );
     });
 
     it("should allow forwarded text messages", () => {
@@ -223,7 +228,9 @@ describe("Message Entity", () => {
     it("should link to original message", () => {
       const message = createReplyMessage();
 
-      expect(message.replyToMessageId).toBe(MESSAGE_DOMAIN.VALID.replyToMessageId);
+      expect(message.replyToMessageId).toBe(
+        MESSAGE_DOMAIN.VALID.replyToMessageId,
+      );
     });
 
     it("should preserve reply content", () => {
@@ -234,7 +241,9 @@ describe("Message Entity", () => {
       });
 
       expect(message.content).toBe(content);
-      expect(message.replyToMessageId).toBe(MESSAGE_DOMAIN.VALID.replyToMessageId);
+      expect(message.replyToMessageId).toBe(
+        MESSAGE_DOMAIN.VALID.replyToMessageId,
+      );
     });
   });
 
@@ -311,8 +320,12 @@ describe("Message Entity", () => {
       const message = createMessage();
       const afterCreate = new Date();
 
-      expect(message.createdAt.getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime());
-      expect(message.createdAt.getTime()).toBeLessThanOrEqual(afterCreate.getTime());
+      expect(message.createdAt.getTime()).toBeGreaterThanOrEqual(
+        beforeCreate.getTime(),
+      );
+      expect(message.createdAt.getTime()).toBeLessThanOrEqual(
+        afterCreate.getTime(),
+      );
     });
   });
 
@@ -364,7 +377,9 @@ describe("Message Entity", () => {
 
       const editedMessage = message.edit("Edited");
 
-      expect(editedMessage.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeEdit.getTime() - 1000);
+      expect(editedMessage.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeEdit.getTime() - 1000,
+      );
     });
 
     it("should not modify isDeleted when editing", () => {
@@ -419,7 +434,9 @@ describe("Message Entity", () => {
 
       const deletedMessage = message.delete();
 
-      expect(deletedMessage.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeDelete.getTime() - 1000);
+      expect(deletedMessage.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeDelete.getTime() - 1000,
+      );
     });
 
     it("should not modify isEdited when deleting", () => {
@@ -491,7 +508,9 @@ describe("Message Entity", () => {
 
       const reactedMessage = message.addReaction("user-1", "👍");
 
-      expect(reactedMessage.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeReaction.getTime() - 1000);
+      expect(reactedMessage.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeReaction.getTime() - 1000,
+      );
     });
 
     it("should add reaction with timestamp", () => {
@@ -509,7 +528,7 @@ describe("Message Entity", () => {
         const reactedMessage = message.addReaction("user-1", emoji);
 
         expect(reactedMessage.reactions[0].emoji).toBe(emoji);
-      }
+      },
     );
   });
 
@@ -575,7 +594,9 @@ describe("Message Entity", () => {
 
       const readMessage = message.markAsRead("user-1");
 
-      expect(readMessage.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeRead.getTime() - 1000);
+      expect(readMessage.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeRead.getTime() - 1000,
+      );
     });
   });
 
@@ -609,7 +630,9 @@ describe("Message Entity", () => {
         const maxContent = "a".repeat(MESSAGE_DOMAIN.BOUNDARY.maxContentLength);
         const message = createMessage({ content: maxContent });
 
-        expect(message.content).toHaveLength(MESSAGE_DOMAIN.BOUNDARY.maxContentLength);
+        expect(message.content).toHaveLength(
+          MESSAGE_DOMAIN.BOUNDARY.maxContentLength,
+        );
       });
     });
 
@@ -703,12 +726,15 @@ describe("Message Entity", () => {
       });
     });
 
-    it.each(MESSAGE_DOMAIN.TYPES)("should support lowercase type: %s", (type) => {
-      const lowerType = type.toLowerCase();
-      const message = createMessage({ type: lowerType as MessageType });
+    it.each(MESSAGE_DOMAIN.TYPES)(
+      "should support lowercase type: %s",
+      (type) => {
+        const lowerType = type.toLowerCase();
+        const message = createMessage({ type: lowerType as MessageType });
 
-      expect(message.type).toBe(lowerType);
-    });
+        expect(message.type).toBe(lowerType);
+      },
+    );
   });
 
   // ==========================================================================

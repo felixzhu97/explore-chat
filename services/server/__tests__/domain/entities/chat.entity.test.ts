@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { Chat, ChatType } from "@/domain/entities/chat.entity";
-import { Message } from "@/domain/entities/message.entity";
-import { User } from "@/domain/entities/user.entity";
+import { Chat, ChatType } from "@/chats/domain/chat.entity";
+import { Message } from "@/messages/domain/message.entity";
+import { User } from "@/users/domain/user.entity";
 import {
   CHAT_DOMAIN,
   MESSAGE_DOMAIN,
@@ -28,7 +28,10 @@ const createPrivateChat = (overrides?: Parameters<typeof Chat.create>[0]) =>
 const createGroupChat = (overrides?: Parameters<typeof Chat.create>[0]) =>
   createChat({ type: "GROUP", ...overrides });
 
-const createUser = (id: string = USER_DOMAIN.VALID.id, username: string = USER_DOMAIN.VALID.username) =>
+const createUser = (
+  id: string = USER_DOMAIN.VALID.id,
+  username: string = USER_DOMAIN.VALID.username,
+) =>
   User.create({
     id,
     username,
@@ -39,7 +42,7 @@ const createMessage = (
   id: string = MESSAGE_DOMAIN.VALID.id,
   chatId: string = CHAT_DOMAIN.VALID.id,
   senderId: string = USER_DOMAIN.VALID.id,
-  content: string = MESSAGE_DOMAIN.VALID.content
+  content: string = MESSAGE_DOMAIN.VALID.content,
 ) =>
   Message.create({
     id,
@@ -55,7 +58,7 @@ const createParticipants = (count: number) =>
       id: user.id,
       username: user.username,
       email: user.email,
-    })
+    }),
   );
 
 describe("Chat Entity", () => {
@@ -67,7 +70,12 @@ describe("Chat Entity", () => {
       const createdAt = new Date("2024-01-01");
       const updatedAt = new Date("2024-01-02");
       const participants = createParticipants(2);
-      const lastMessage = createMessage("msg-1", CHAT_DOMAIN.VALID.id, USER_DOMAIN.VALID.id, "Hello!");
+      const lastMessage = createMessage(
+        "msg-1",
+        CHAT_DOMAIN.VALID.id,
+        USER_DOMAIN.VALID.id,
+        "Hello!",
+      );
 
       const chat = new Chat(
         CHAT_DOMAIN.VALID.id,
@@ -78,7 +86,7 @@ describe("Chat Entity", () => {
         lastMessage,
         CHAT_DOMAIN.VALID.unreadCount,
         createdAt,
-        updatedAt
+        updatedAt,
       );
 
       expect(chat.id).toBe(CHAT_DOMAIN.VALID.id);
@@ -140,7 +148,9 @@ describe("Chat Entity", () => {
     });
 
     it("should create a private chat with avatar", () => {
-      const chat = createPrivateChat({ avatar: "https://example.com/avatar.jpg" });
+      const chat = createPrivateChat({
+        avatar: "https://example.com/avatar.jpg",
+      });
 
       expect(chat.type).toBe("PRIVATE");
       expect(chat.avatar).toBe("https://example.com/avatar.jpg");
@@ -164,7 +174,10 @@ describe("Chat Entity", () => {
     });
 
     it("should create a group chat with description", () => {
-      const chat = createGroupChat({ name: "Group", avatar: CHAT_DOMAIN.VALID.avatar });
+      const chat = createGroupChat({
+        name: "Group",
+        avatar: CHAT_DOMAIN.VALID.avatar,
+      });
 
       expect(chat.type).toBe("GROUP");
       expect(chat.avatar).toBe(CHAT_DOMAIN.VALID.avatar);
@@ -189,8 +202,12 @@ describe("Chat Entity", () => {
       const chat = createChat();
       const afterCreate = new Date();
 
-      expect(chat.createdAt.getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime());
-      expect(chat.createdAt.getTime()).toBeLessThanOrEqual(afterCreate.getTime());
+      expect(chat.createdAt.getTime()).toBeGreaterThanOrEqual(
+        beforeCreate.getTime(),
+      );
+      expect(chat.createdAt.getTime()).toBeLessThanOrEqual(
+        afterCreate.getTime(),
+      );
     });
   });
 
@@ -214,7 +231,9 @@ describe("Chat Entity", () => {
     });
 
     it("should accept maximum unreadCount", () => {
-      const chat = createChat({ unreadCount: CHAT_DOMAIN.BOUNDARY.maxUnreadCount });
+      const chat = createChat({
+        unreadCount: CHAT_DOMAIN.BOUNDARY.maxUnreadCount,
+      });
 
       expect(chat.unreadCount).toBe(CHAT_DOMAIN.BOUNDARY.maxUnreadCount);
     });
@@ -259,7 +278,12 @@ describe("Chat Entity", () => {
   // ==========================================================================
   describe("Chat.create - lastMessage", () => {
     it("should store the last message", () => {
-      const lastMessage = createMessage("msg-1", CHAT_DOMAIN.VALID.id, USER_DOMAIN.VALID.id, "Last message");
+      const lastMessage = createMessage(
+        "msg-1",
+        CHAT_DOMAIN.VALID.id,
+        USER_DOMAIN.VALID.id,
+        "Last message",
+      );
       const chat = createChat({ lastMessage });
 
       expect(chat.lastMessage).toBeDefined();
@@ -274,7 +298,12 @@ describe("Chat Entity", () => {
     });
 
     it("should preserve last message properties", () => {
-      const lastMessage = createMessage("msg-1", CHAT_DOMAIN.VALID.id, USER_DOMAIN.VALID.id, "Hello!");
+      const lastMessage = createMessage(
+        "msg-1",
+        CHAT_DOMAIN.VALID.id,
+        USER_DOMAIN.VALID.id,
+        "Hello!",
+      );
       const chat = createChat({ lastMessage });
 
       expect(chat.lastMessage?.type).toBe("TEXT");
@@ -288,7 +317,12 @@ describe("Chat Entity", () => {
   describe("updateLastMessage", () => {
     it("should update the last message", () => {
       const chat = createChat();
-      const newMessage = createMessage("msg-2", CHAT_DOMAIN.VALID.id, "user-2", "New message");
+      const newMessage = createMessage(
+        "msg-2",
+        CHAT_DOMAIN.VALID.id,
+        "user-2",
+        "New message",
+      );
 
       const updatedChat = chat.updateLastMessage(newMessage);
 
@@ -304,7 +338,12 @@ describe("Chat Entity", () => {
         participants,
         unreadCount: 5,
       });
-      const newMessage = createMessage("msg-2", CHAT_DOMAIN.VALID.id, USER_DOMAIN.VALID.id, "New message");
+      const newMessage = createMessage(
+        "msg-2",
+        CHAT_DOMAIN.VALID.id,
+        USER_DOMAIN.VALID.id,
+        "New message",
+      );
 
       const updatedChat = chat.updateLastMessage(newMessage);
 
@@ -317,7 +356,12 @@ describe("Chat Entity", () => {
 
     it("should preserve original chat unchanged (immutability)", () => {
       const chat = createChat();
-      const newMessage = createMessage("msg-2", CHAT_DOMAIN.VALID.id, USER_DOMAIN.VALID.id, "New message");
+      const newMessage = createMessage(
+        "msg-2",
+        CHAT_DOMAIN.VALID.id,
+        USER_DOMAIN.VALID.id,
+        "New message",
+      );
 
       const updatedChat = chat.updateLastMessage(newMessage);
 
@@ -328,17 +372,34 @@ describe("Chat Entity", () => {
     it("should update the updatedAt timestamp", () => {
       const createdAt = new Date("2024-01-01");
       const chat = createChat({ createdAt, updatedAt: createdAt });
-      const newMessage = createMessage("msg-2", CHAT_DOMAIN.VALID.id, USER_DOMAIN.VALID.id, "New");
+      const newMessage = createMessage(
+        "msg-2",
+        CHAT_DOMAIN.VALID.id,
+        USER_DOMAIN.VALID.id,
+        "New",
+      );
       const beforeUpdate = new Date();
 
       const updatedChat = chat.updateLastMessage(newMessage);
 
-      expect(updatedChat.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeUpdate.getTime() - 1000);
+      expect(updatedChat.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeUpdate.getTime() - 1000,
+      );
     });
 
     it("should replace existing last message", () => {
-      const firstMessage = createMessage("msg-1", CHAT_DOMAIN.VALID.id, USER_DOMAIN.VALID.id, "First");
-      const secondMessage = createMessage("msg-2", CHAT_DOMAIN.VALID.id, USER_DOMAIN.VALID.id, "Second");
+      const firstMessage = createMessage(
+        "msg-1",
+        CHAT_DOMAIN.VALID.id,
+        USER_DOMAIN.VALID.id,
+        "First",
+      );
+      const secondMessage = createMessage(
+        "msg-2",
+        CHAT_DOMAIN.VALID.id,
+        USER_DOMAIN.VALID.id,
+        "Second",
+      );
       const chat = createChat({ lastMessage: firstMessage });
 
       const updatedChat = chat.updateLastMessage(secondMessage);
@@ -384,12 +445,19 @@ describe("Chat Entity", () => {
 
       const updatedChat = chat.incrementUnreadCount();
 
-      expect(updatedChat.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeUpdate.getTime() - 1000);
+      expect(updatedChat.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeUpdate.getTime() - 1000,
+      );
     });
 
     it("should preserve other chat properties when incrementing", () => {
       const participants = createParticipants(1);
-      const lastMessage = createMessage("msg-1", CHAT_DOMAIN.VALID.id, USER_DOMAIN.VALID.id, "Hello!");
+      const lastMessage = createMessage(
+        "msg-1",
+        CHAT_DOMAIN.VALID.id,
+        USER_DOMAIN.VALID.id,
+        "Hello!",
+      );
       const chat = createChat({
         name: CHAT_DOMAIN.VALID.name,
         participants,
@@ -439,18 +507,29 @@ describe("Chat Entity", () => {
 
     it("should update the updatedAt timestamp", () => {
       const createdAt = new Date("2024-01-01");
-      const chat = createChat({ createdAt, updatedAt: createdAt, unreadCount: 10 });
+      const chat = createChat({
+        createdAt,
+        updatedAt: createdAt,
+        unreadCount: 10,
+      });
       const beforeUpdate = new Date();
 
       const updatedChat = chat.resetUnreadCount();
 
       expect(updatedChat.unreadCount).toBe(0);
-      expect(updatedChat.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeUpdate.getTime() - 1000);
+      expect(updatedChat.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeUpdate.getTime() - 1000,
+      );
     });
 
     it("should preserve other chat properties when resetting", () => {
       const participants = createParticipants(1);
-      const lastMessage = createMessage("msg-1", CHAT_DOMAIN.VALID.id, USER_DOMAIN.VALID.id, "Hello!");
+      const lastMessage = createMessage(
+        "msg-1",
+        CHAT_DOMAIN.VALID.id,
+        USER_DOMAIN.VALID.id,
+        "Hello!",
+      );
       const chat = createChat({
         name: CHAT_DOMAIN.VALID.name,
         participants,
@@ -504,13 +583,17 @@ describe("Chat Entity", () => {
   describe("boundary values", () => {
     describe("unreadCount", () => {
       it("should accept minimum unreadCount (0)", () => {
-        const chat = createChat({ unreadCount: CHAT_DOMAIN.BOUNDARY.minUnreadCount });
+        const chat = createChat({
+          unreadCount: CHAT_DOMAIN.BOUNDARY.minUnreadCount,
+        });
 
         expect(chat.unreadCount).toBe(0);
       });
 
       it("should accept maximum unreadCount", () => {
-        const chat = createChat({ unreadCount: CHAT_DOMAIN.BOUNDARY.maxUnreadCount });
+        const chat = createChat({
+          unreadCount: CHAT_DOMAIN.BOUNDARY.maxUnreadCount,
+        });
 
         expect(chat.unreadCount).toBe(CHAT_DOMAIN.BOUNDARY.maxUnreadCount);
       });
@@ -530,10 +613,14 @@ describe("Chat Entity", () => {
       });
 
       it("should accept maximum participant count", () => {
-        const participants = createParticipants(CHAT_DOMAIN.BOUNDARY.maxMemberCount);
+        const participants = createParticipants(
+          CHAT_DOMAIN.BOUNDARY.maxMemberCount,
+        );
         const chat = createChat({ participants });
 
-        expect(chat.participants).toHaveLength(CHAT_DOMAIN.BOUNDARY.maxMemberCount);
+        expect(chat.participants).toHaveLength(
+          CHAT_DOMAIN.BOUNDARY.maxMemberCount,
+        );
       });
     });
   });
@@ -569,7 +656,12 @@ describe("Chat Entity", () => {
 
     it("should handle message with special content in lastMessage", () => {
       const specialContent = "Message with <script>alert('xss')</script>";
-      const lastMessage = createMessage("msg-1", CHAT_DOMAIN.VALID.id, USER_DOMAIN.VALID.id, specialContent);
+      const lastMessage = createMessage(
+        "msg-1",
+        CHAT_DOMAIN.VALID.id,
+        USER_DOMAIN.VALID.id,
+        specialContent,
+      );
       const chat = createChat({ lastMessage });
 
       expect(chat.lastMessage?.content).toBe(specialContent);

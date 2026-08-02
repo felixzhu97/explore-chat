@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { NotificationService } from "@/application/services/notification.service";
-import { USER_DOMAIN, BOUNDARY, STRING_VALUES } from "@whatschat/shared-types/test-utils/domain-values";
+import { NotificationService } from "@/notifications/application/notification.service";
+import {
+  USER_DOMAIN,
+  BOUNDARY,
+  STRING_VALUES,
+} from "@whatschat/shared-types/test-utils/domain-values";
 
 // =============================================================================
 // MOCK FACTORIES
@@ -10,7 +14,9 @@ import { USER_DOMAIN, BOUNDARY, STRING_VALUES } from "@whatschat/shared-types/te
  * Creates a mock notification repository with default implementations
  */
 const createMockNotificationRepo = (overrides = {}) => ({
-  findByRecipient: vi.fn().mockResolvedValue({ items: [], nextCursor: undefined }),
+  findByRecipient: vi
+    .fn()
+    .mockResolvedValue({ items: [], nextCursor: undefined }),
   markRead: vi.fn().mockResolvedValue(true),
   markReadMany: vi.fn().mockResolvedValue(5),
   markAllRead: vi.fn().mockResolvedValue(10),
@@ -40,7 +46,11 @@ describe("NotificationService", () => {
 
       await service.list(TEST_RECIPIENT_ID, 20);
 
-      expect(mockRepo.findByRecipient).toHaveBeenCalledWith(TEST_RECIPIENT_ID, 20, undefined);
+      expect(mockRepo.findByRecipient).toHaveBeenCalledWith(
+        TEST_RECIPIENT_ID,
+        20,
+        undefined,
+      );
     });
 
     describe("limit boundary tests", () => {
@@ -48,14 +58,21 @@ describe("NotificationService", () => {
         { input: 0, expected: 1, label: "zero limit" },
         { input: -1, expected: 1, label: "negative limit" },
         { input: -100, expected: 1, label: "large negative limit" },
-      ])("should enforce minimum limit of 1 for $label", async ({ input, expected }) => {
-        const mockRepo = createMockNotificationRepo();
-        service = new NotificationService(mockRepo as any);
+      ])(
+        "should enforce minimum limit of 1 for $label",
+        async ({ input, expected }) => {
+          const mockRepo = createMockNotificationRepo();
+          service = new NotificationService(mockRepo as any);
 
-        await service.list(TEST_RECIPIENT_ID, input);
+          await service.list(TEST_RECIPIENT_ID, input);
 
-        expect(mockRepo.findByRecipient).toHaveBeenCalledWith(TEST_RECIPIENT_ID, expected, undefined);
-      });
+          expect(mockRepo.findByRecipient).toHaveBeenCalledWith(
+            TEST_RECIPIENT_ID,
+            expected,
+            undefined,
+          );
+        },
+      );
 
       it.each([
         { input: 51, expected: 50, label: "just over max" },
@@ -67,7 +84,11 @@ describe("NotificationService", () => {
 
         await service.list(TEST_RECIPIENT_ID, input);
 
-        expect(mockRepo.findByRecipient).toHaveBeenCalledWith(TEST_RECIPIENT_ID, expected, undefined);
+        expect(mockRepo.findByRecipient).toHaveBeenCalledWith(
+          TEST_RECIPIENT_ID,
+          expected,
+          undefined,
+        );
       });
 
       it.each([
@@ -80,7 +101,11 @@ describe("NotificationService", () => {
 
         await service.list(TEST_RECIPIENT_ID, input);
 
-        expect(mockRepo.findByRecipient).toHaveBeenCalledWith(TEST_RECIPIENT_ID, input, undefined);
+        expect(mockRepo.findByRecipient).toHaveBeenCalledWith(
+          TEST_RECIPIENT_ID,
+          input,
+          undefined,
+        );
       });
     });
 
@@ -91,23 +116,34 @@ describe("NotificationService", () => {
 
       await service.list(TEST_RECIPIENT_ID, 20, cursor);
 
-      expect(mockRepo.findByRecipient).toHaveBeenCalledWith(TEST_RECIPIENT_ID, 20, cursor);
+      expect(mockRepo.findByRecipient).toHaveBeenCalledWith(
+        TEST_RECIPIENT_ID,
+        20,
+        cursor,
+      );
     });
   });
 
   describe("markRead", () => {
     it("should mark notification as read", async () => {
-      const mockRepo = createMockNotificationRepo({ markRead: vi.fn().mockResolvedValue(true) });
+      const mockRepo = createMockNotificationRepo({
+        markRead: vi.fn().mockResolvedValue(true),
+      });
       service = new NotificationService(mockRepo as any);
 
       const result = await service.markRead(TEST_RECIPIENT_ID, "notif-1");
 
-      expect(mockRepo.markRead).toHaveBeenCalledWith(TEST_RECIPIENT_ID, "notif-1");
+      expect(mockRepo.markRead).toHaveBeenCalledWith(
+        TEST_RECIPIENT_ID,
+        "notif-1",
+      );
       expect(result).toEqual({ success: true });
     });
 
     it("should return success false when markRead fails", async () => {
-      const mockRepo = createMockNotificationRepo({ markRead: vi.fn().mockResolvedValue(false) });
+      const mockRepo = createMockNotificationRepo({
+        markRead: vi.fn().mockResolvedValue(false),
+      });
       service = new NotificationService(mockRepo as any);
 
       const result = await service.markRead(TEST_RECIPIENT_ID, "notif-1");
@@ -118,18 +154,25 @@ describe("NotificationService", () => {
 
   describe("markReadMany", () => {
     it("should mark multiple notifications as read", async () => {
-      const mockRepo = createMockNotificationRepo({ markReadMany: vi.fn().mockResolvedValue(3) });
+      const mockRepo = createMockNotificationRepo({
+        markReadMany: vi.fn().mockResolvedValue(3),
+      });
       service = new NotificationService(mockRepo as any);
       const ids = ["notif-1", "notif-2", "notif-3"];
 
       const result = await service.markReadMany(TEST_RECIPIENT_ID, ids);
 
-      expect(mockRepo.markReadMany).toHaveBeenCalledWith(TEST_RECIPIENT_ID, ids);
+      expect(mockRepo.markReadMany).toHaveBeenCalledWith(
+        TEST_RECIPIENT_ID,
+        ids,
+      );
       expect(result).toEqual({ success: true, modified: 3 });
     });
 
     it("should handle empty ids array", async () => {
-      const mockRepo = createMockNotificationRepo({ markReadMany: vi.fn().mockResolvedValue(0) });
+      const mockRepo = createMockNotificationRepo({
+        markReadMany: vi.fn().mockResolvedValue(0),
+      });
       service = new NotificationService(mockRepo as any);
 
       const result = await service.markReadMany(TEST_RECIPIENT_ID, []);
@@ -140,7 +183,9 @@ describe("NotificationService", () => {
 
   describe("markAllRead", () => {
     it("should mark all notifications as read", async () => {
-      const mockRepo = createMockNotificationRepo({ markAllRead: vi.fn().mockResolvedValue(25) });
+      const mockRepo = createMockNotificationRepo({
+        markAllRead: vi.fn().mockResolvedValue(25),
+      });
       service = new NotificationService(mockRepo as any);
 
       const result = await service.markAllRead(TEST_RECIPIENT_ID);
@@ -150,7 +195,9 @@ describe("NotificationService", () => {
     });
 
     it("should return zero modified when no notifications exist", async () => {
-      const mockRepo = createMockNotificationRepo({ markAllRead: vi.fn().mockResolvedValue(0) });
+      const mockRepo = createMockNotificationRepo({
+        markAllRead: vi.fn().mockResolvedValue(0),
+      });
       service = new NotificationService(mockRepo as any);
 
       const result = await service.markAllRead(TEST_RECIPIENT_ID);
@@ -166,17 +213,31 @@ describe("NotificationService", () => {
       });
       service = new NotificationService(mockRepo as any);
 
-      const result = await service.upsertLike(TEST_RECIPIENT_ID, TEST_ACTOR_ID, TEST_POST_ID);
+      const result = await service.upsertLike(
+        TEST_RECIPIENT_ID,
+        TEST_ACTOR_ID,
+        TEST_POST_ID,
+      );
 
-      expect(mockRepo.upsertLike).toHaveBeenCalledWith(TEST_RECIPIENT_ID, TEST_ACTOR_ID, TEST_POST_ID);
+      expect(mockRepo.upsertLike).toHaveBeenCalledWith(
+        TEST_RECIPIENT_ID,
+        TEST_ACTOR_ID,
+        TEST_POST_ID,
+      );
       expect(result).toEqual({ id: "notif_like_123" });
     });
 
     it("should return null when upsert fails", async () => {
-      const mockRepo = createMockNotificationRepo({ upsertLike: vi.fn().mockResolvedValue(null) });
+      const mockRepo = createMockNotificationRepo({
+        upsertLike: vi.fn().mockResolvedValue(null),
+      });
       service = new NotificationService(mockRepo as any);
 
-      const result = await service.upsertLike(TEST_RECIPIENT_ID, TEST_ACTOR_ID, TEST_POST_ID);
+      const result = await service.upsertLike(
+        TEST_RECIPIENT_ID,
+        TEST_ACTOR_ID,
+        TEST_POST_ID,
+      );
 
       expect(result).toBeNull();
     });
@@ -184,17 +245,24 @@ describe("NotificationService", () => {
 
   describe("deleteLike", () => {
     it("should delete like notification", async () => {
-      const mockRepo = createMockNotificationRepo({ deleteLike: vi.fn().mockResolvedValue(true) });
+      const mockRepo = createMockNotificationRepo({
+        deleteLike: vi.fn().mockResolvedValue(true),
+      });
       service = new NotificationService(mockRepo as any);
 
       const result = await service.deleteLike(TEST_ACTOR_ID, TEST_POST_ID);
 
-      expect(mockRepo.deleteLike).toHaveBeenCalledWith(TEST_ACTOR_ID, TEST_POST_ID);
+      expect(mockRepo.deleteLike).toHaveBeenCalledWith(
+        TEST_ACTOR_ID,
+        TEST_POST_ID,
+      );
       expect(result).toBe(true);
     });
 
     it("should return false when delete fails", async () => {
-      const mockRepo = createMockNotificationRepo({ deleteLike: vi.fn().mockResolvedValue(false) });
+      const mockRepo = createMockNotificationRepo({
+        deleteLike: vi.fn().mockResolvedValue(false),
+      });
       service = new NotificationService(mockRepo as any);
 
       const result = await service.deleteLike(TEST_ACTOR_ID, TEST_POST_ID);
@@ -211,14 +279,20 @@ describe("NotificationService", () => {
       service = new NotificationService(mockRepo as any);
       const content = "Great post!";
 
-      const result = await service.insertComment(TEST_RECIPIENT_ID, TEST_ACTOR_ID, TEST_POST_ID, TEST_COMMENT_ID, content);
+      const result = await service.insertComment(
+        TEST_RECIPIENT_ID,
+        TEST_ACTOR_ID,
+        TEST_POST_ID,
+        TEST_COMMENT_ID,
+        content,
+      );
 
       expect(mockRepo.insertComment).toHaveBeenCalledWith(
         TEST_RECIPIENT_ID,
         TEST_ACTOR_ID,
         TEST_POST_ID,
         TEST_COMMENT_ID,
-        content
+        content,
       );
       expect(result).toEqual({ id: TEST_COMMENT_ID });
     });
@@ -229,22 +303,35 @@ describe("NotificationService", () => {
         { length: 121, shouldTruncate: true, label: "one over limit" },
         { length: 200, shouldTruncate: true, label: "well over limit" },
         { length: 1000, shouldTruncate: true, label: "very long content" },
-      ])("should $shouldTruncate ? 'truncate' : 'preserve' content of length $length", async ({ length, shouldTruncate }) => {
-        const longContent = "a".repeat(length);
-        const expectedContent = shouldTruncate ? "a".repeat(120) : longContent;
-        const mockRepo = createMockNotificationRepo({ insertComment: vi.fn().mockResolvedValue({ id: "notif_1" }) });
-        service = new NotificationService(mockRepo as any);
+      ])(
+        "should $shouldTruncate ? 'truncate' : 'preserve' content of length $length",
+        async ({ length, shouldTruncate }) => {
+          const longContent = "a".repeat(length);
+          const expectedContent = shouldTruncate
+            ? "a".repeat(120)
+            : longContent;
+          const mockRepo = createMockNotificationRepo({
+            insertComment: vi.fn().mockResolvedValue({ id: "notif_1" }),
+          });
+          service = new NotificationService(mockRepo as any);
 
-        await service.insertComment(TEST_RECIPIENT_ID, TEST_ACTOR_ID, TEST_POST_ID, TEST_COMMENT_ID, longContent);
+          await service.insertComment(
+            TEST_RECIPIENT_ID,
+            TEST_ACTOR_ID,
+            TEST_POST_ID,
+            TEST_COMMENT_ID,
+            longContent,
+          );
 
-        expect(mockRepo.insertComment).toHaveBeenCalledWith(
-          TEST_RECIPIENT_ID,
-          TEST_ACTOR_ID,
-          TEST_POST_ID,
-          TEST_COMMENT_ID,
-          expectedContent
-        );
-      });
+          expect(mockRepo.insertComment).toHaveBeenCalledWith(
+            TEST_RECIPIENT_ID,
+            TEST_ACTOR_ID,
+            TEST_POST_ID,
+            TEST_COMMENT_ID,
+            expectedContent,
+          );
+        },
+      );
     });
 
     it("should handle undefined content", async () => {
@@ -253,14 +340,20 @@ describe("NotificationService", () => {
       });
       service = new NotificationService(mockRepo as any);
 
-      const result = await service.insertComment(TEST_RECIPIENT_ID, TEST_ACTOR_ID, TEST_POST_ID, TEST_COMMENT_ID, undefined);
+      const result = await service.insertComment(
+        TEST_RECIPIENT_ID,
+        TEST_ACTOR_ID,
+        TEST_POST_ID,
+        TEST_COMMENT_ID,
+        undefined,
+      );
 
       expect(mockRepo.insertComment).toHaveBeenCalledWith(
         TEST_RECIPIENT_ID,
         TEST_ACTOR_ID,
         TEST_POST_ID,
         TEST_COMMENT_ID,
-        undefined
+        undefined,
       );
       expect(result).toEqual({ id: TEST_COMMENT_ID });
     });
@@ -271,23 +364,37 @@ describe("NotificationService", () => {
       });
       service = new NotificationService(mockRepo as any);
 
-      await service.insertComment(TEST_RECIPIENT_ID, TEST_ACTOR_ID, TEST_POST_ID, TEST_COMMENT_ID, STRING_VALUES.EMPTY);
+      await service.insertComment(
+        TEST_RECIPIENT_ID,
+        TEST_ACTOR_ID,
+        TEST_POST_ID,
+        TEST_COMMENT_ID,
+        STRING_VALUES.EMPTY,
+      );
 
       expect(mockRepo.insertComment).toHaveBeenCalledWith(
         TEST_RECIPIENT_ID,
         TEST_ACTOR_ID,
         TEST_POST_ID,
         TEST_COMMENT_ID,
-        STRING_VALUES.EMPTY
+        STRING_VALUES.EMPTY,
       );
     });
 
     it("should preserve unicode in truncated content", async () => {
       const unicodeContent = STRING_VALUES.UNICODE_EMOJI + "a".repeat(115);
-      const mockRepo = createMockNotificationRepo({ insertComment: vi.fn().mockResolvedValue({ id: "notif_1" }) });
+      const mockRepo = createMockNotificationRepo({
+        insertComment: vi.fn().mockResolvedValue({ id: "notif_1" }),
+      });
       service = new NotificationService(mockRepo as any);
 
-      await service.insertComment(TEST_RECIPIENT_ID, TEST_ACTOR_ID, TEST_POST_ID, TEST_COMMENT_ID, unicodeContent);
+      await service.insertComment(
+        TEST_RECIPIENT_ID,
+        TEST_ACTOR_ID,
+        TEST_POST_ID,
+        TEST_COMMENT_ID,
+        unicodeContent,
+      );
 
       expect(mockRepo.insertComment).toHaveBeenCalled();
     });
@@ -295,7 +402,9 @@ describe("NotificationService", () => {
 
   describe("deleteByCommentId", () => {
     it("should delete comment notification", async () => {
-      const mockRepo = createMockNotificationRepo({ deleteByCommentId: vi.fn().mockResolvedValue(true) });
+      const mockRepo = createMockNotificationRepo({
+        deleteByCommentId: vi.fn().mockResolvedValue(true),
+      });
       service = new NotificationService(mockRepo as any);
 
       const result = await service.deleteByCommentId(TEST_COMMENT_ID);
@@ -305,7 +414,9 @@ describe("NotificationService", () => {
     });
 
     it("should return false when delete fails", async () => {
-      const mockRepo = createMockNotificationRepo({ deleteByCommentId: vi.fn().mockResolvedValue(false) });
+      const mockRepo = createMockNotificationRepo({
+        deleteByCommentId: vi.fn().mockResolvedValue(false),
+      });
       service = new NotificationService(mockRepo as any);
 
       const result = await service.deleteByCommentId(TEST_COMMENT_ID);

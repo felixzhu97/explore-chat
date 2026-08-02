@@ -35,22 +35,42 @@ Clients (web / mobile / admin) call **only** NestJS. Do not call Python microser
 
 | Layer | Contains | Typical paths |
 |-------|----------|---------------|
-| `domain/` | Entities, VOs, repository/gateway interfaces | `*/src/domain/` |
-| `application/` | Use cases, application services, DTOs | `*/src/application/` |
-| `infrastructure/` | Adapters, HTTP clients, persistence, config | `*/src/infrastructure/` |
-| `presentation/` | Controllers, UI, Nest modules that expose HTTP | `*/src/presentation/` or `apps/*/app/` |
+| `domain/` | Entities, VOs, repository/gateway interfaces | Nest: `<domain>/domain/`; others: `*/src/domain/` |
+| `application/` | Use cases, application services, DTOs | Nest: `<domain>/application/` |
+| `infrastructure/` | Adapters, HTTP clients, persistence, config | Nest: `core/` + `<domain>/infrastructure/` |
+| `presentation/` | Controllers, UI, Nest modules that expose HTTP | Nest: `<domain>/presentation/`; web/mobile: feature folders or `app/` |
 
 ### NestJS (`services/server`)
 
+Business-domain vertical slices with Clean Architecture layers **inside** each domain (unlike web/mobile, which omit CA layer folders):
+
 ```
 services/server/src/
-├── domain/
-├── application/
-├── infrastructure/
-└── presentation/     # controllers, guards, filters
+├── core/                 # cross-cutting: config, database, cache, messaging, storage, filters, interceptors
+├── shared/               # utils / logger
+├── auth/                 # presentation / application / domain
+├── users/
+├── follow/
+├── chats/
+├── messages/
+├── groups/
+├── calls/
+├── post/                 # post + feed + explore + engagement (+ reels via graphql)
+├── comments/
+├── search/
+├── status/
+├── notifications/
+├── media/
+├── ai/                   # ai + explore-ai BFF + image/video/voice/vision modules
+├── admin/
+├── ads/
+├── analytics/
+├── health/
+├── websocket/
+└── graphql/
 ```
 
-Global API prefix: `/api/v1`.
+Each domain keeps `presentation → application → domain ← infrastructure`. Controllers, application services, domain contracts, and repository adapters remain. Global API prefix: `/api/v1`.
 
 ### Web (`apps/web`)
 

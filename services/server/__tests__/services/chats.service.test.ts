@@ -1,10 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NotFoundException, BadRequestException } from "@nestjs/common";
-import { ChatsService, CreateChatData, UpdateChatData } from "@/application/services/chats.service";
-import { PrismaService } from "@/infrastructure/database/prisma.service";
-import { CacheService } from "@/infrastructure/cache/cache.service";
+import {
+  ChatsService,
+  CreateChatData,
+  UpdateChatData,
+} from "@/chats/application/chats.service";
+import { PrismaService } from "@/core/database/prisma.service";
+import { CacheService } from "@/core/cache/cache.service";
 
-vi.mock("@/infrastructure/cache/cache.service", () => ({
+vi.mock("@/core/cache/cache.service", () => ({
   CacheService: vi.fn().mockImplementation(() => ({
     get: vi.fn(),
     set: vi.fn(),
@@ -74,7 +78,7 @@ describe("ChatsService", () => {
 
     chatsService = new ChatsService(
       mockPrisma as PrismaService,
-      mockCache as CacheService
+      mockCache as CacheService,
     );
   });
 
@@ -240,12 +244,12 @@ describe("ChatsService", () => {
         participantIds: [],
       };
 
-      await expect(chatsService.createChat("user-1", invalidData)).rejects.toThrow(
-        BadRequestException
-      );
-      await expect(chatsService.createChat("user-1", invalidData)).rejects.toThrow(
-        "至少需要一个参与者"
-      );
+      await expect(
+        chatsService.createChat("user-1", invalidData),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        chatsService.createChat("user-1", invalidData),
+      ).rejects.toThrow("至少需要一个参与者");
     });
 
     it("should throw BadRequestException if some participants do not exist", async () => {
@@ -255,13 +259,13 @@ describe("ChatsService", () => {
         chatsService.createChat("user-1", {
           ...createPrivateChatData,
           participantIds: ["user-2", "user-nonexistent"],
-        })
+        }),
       ).rejects.toThrow(BadRequestException);
       await expect(
         chatsService.createChat("user-1", {
           ...createPrivateChatData,
           participantIds: ["user-2", "user-nonexistent"],
-        })
+        }),
       ).rejects.toThrow("部分参与者不存在");
     });
 
@@ -271,24 +275,23 @@ describe("ChatsService", () => {
         {
           id: "existing-chat",
           type: "PRIVATE",
-          participants: [
-            { userId: "user-1" },
-            { userId: "user-2" },
-          ],
+          participants: [{ userId: "user-1" }, { userId: "user-2" }],
         },
       ]);
 
-      const result = await chatsService.createChat("user-1", createPrivateChatData);
+      const result = await chatsService.createChat(
+        "user-1",
+        createPrivateChatData,
+      );
 
       expect(result.id).toBe("existing-chat");
       expect(mockPrisma.chat!.create).not.toHaveBeenCalled();
     });
 
     it("should create a new group chat", async () => {
-      mockPrisma.user!.findMany = vi.fn().mockResolvedValue([
-        { id: "user-2" },
-        { id: "user-3" },
-      ]);
+      mockPrisma.user!.findMany = vi
+        .fn()
+        .mockResolvedValue([{ id: "user-2" }, { id: "user-3" }]);
       mockPrisma.chat!.findMany = vi.fn().mockResolvedValue([]);
       mockPrisma.chat!.create = vi.fn().mockResolvedValue({
         id: "new-chat",
@@ -326,7 +329,10 @@ describe("ChatsService", () => {
         ],
       });
 
-      const result = await chatsService.createChat("user-1", createGroupChatData);
+      const result = await chatsService.createChat(
+        "user-1",
+        createGroupChatData,
+      );
 
       expect(result.id).toBe("new-chat");
       expect(result.type).toBe("GROUP");
@@ -352,7 +358,10 @@ describe("ChatsService", () => {
         ],
       });
 
-      const result = await chatsService.createChat("user-1", createPrivateChatData);
+      const result = await chatsService.createChat(
+        "user-1",
+        createPrivateChatData,
+      );
 
       expect(result.id).toBe("new-private-chat");
       expect(mockPrisma.chat!.create).toHaveBeenCalled();
@@ -363,12 +372,12 @@ describe("ChatsService", () => {
     it("should throw NotFoundException if chat does not exist", async () => {
       mockPrisma.chat!.findUnique = vi.fn().mockResolvedValue(null);
 
-      await expect(chatsService.getChatById("chat-1", "user-1")).rejects.toThrow(
-        NotFoundException
-      );
-      await expect(chatsService.getChatById("chat-1", "user-1")).rejects.toThrow(
-        "聊天不存在"
-      );
+      await expect(
+        chatsService.getChatById("chat-1", "user-1"),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        chatsService.getChatById("chat-1", "user-1"),
+      ).rejects.toThrow("聊天不存在");
     });
 
     it("should throw BadRequestException if user is not a participant", async () => {
@@ -379,12 +388,12 @@ describe("ChatsService", () => {
         messages: [],
       });
 
-      await expect(chatsService.getChatById("chat-1", "user-1")).rejects.toThrow(
-        BadRequestException
-      );
-      await expect(chatsService.getChatById("chat-1", "user-1")).rejects.toThrow(
-        "无权访问此聊天"
-      );
+      await expect(
+        chatsService.getChatById("chat-1", "user-1"),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        chatsService.getChatById("chat-1", "user-1"),
+      ).rejects.toThrow("无权访问此聊天");
     });
 
     it("should return chat when user is a participant", async () => {
@@ -406,7 +415,7 @@ describe("ChatsService", () => {
       mockPrisma.chat!.findUnique = vi.fn().mockResolvedValue(null);
 
       await expect(
-        chatsService.updateChat("chat-1", "user-1", { name: "New Name" })
+        chatsService.updateChat("chat-1", "user-1", { name: "New Name" }),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -418,7 +427,7 @@ describe("ChatsService", () => {
       });
 
       await expect(
-        chatsService.updateChat("chat-1", "user-1", { name: "New Name" })
+        chatsService.updateChat("chat-1", "user-1", { name: "New Name" }),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -430,15 +439,18 @@ describe("ChatsService", () => {
       });
 
       await expect(
-        chatsService.updateChat("chat-1", "user-1", { name: "New Name" })
+        chatsService.updateChat("chat-1", "user-1", { name: "New Name" }),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        chatsService.updateChat("chat-1", "user-1", { name: "New Name" })
+        chatsService.updateChat("chat-1", "user-1", { name: "New Name" }),
       ).rejects.toThrow("私聊不能修改名称和头像");
     });
 
     it("should update group chat successfully", async () => {
-      const updateData: UpdateChatData = { name: "Updated Name", avatar: "new-avatar.png" };
+      const updateData: UpdateChatData = {
+        name: "Updated Name",
+        avatar: "new-avatar.png",
+      };
 
       mockPrisma.chat!.findUnique = vi.fn().mockResolvedValue({
         id: "chat-1",
@@ -453,7 +465,11 @@ describe("ChatsService", () => {
         participants: [],
       });
 
-      const result = await chatsService.updateChat("chat-1", "user-1", updateData);
+      const result = await chatsService.updateChat(
+        "chat-1",
+        "user-1",
+        updateData,
+      );
 
       expect(result.name).toBe("Updated Name");
       expect(mockCache.delMany).toHaveBeenCalled();
@@ -465,7 +481,7 @@ describe("ChatsService", () => {
       mockPrisma.chat!.findUnique = vi.fn().mockResolvedValue(null);
 
       await expect(chatsService.deleteChat("chat-1", "user-1")).rejects.toThrow(
-        NotFoundException
+        NotFoundException,
       );
     });
 
@@ -477,7 +493,7 @@ describe("ChatsService", () => {
       });
 
       await expect(chatsService.deleteChat("chat-1", "user-1")).rejects.toThrow(
-        BadRequestException
+        BadRequestException,
       );
     });
 
@@ -492,7 +508,9 @@ describe("ChatsService", () => {
       const result = await chatsService.deleteChat("chat-1", "user-1");
 
       expect(result).toEqual({ message: "聊天已删除" });
-      expect(mockPrisma.chat!.delete).toHaveBeenCalledWith({ where: { id: "chat-1" } });
+      expect(mockPrisma.chat!.delete).toHaveBeenCalledWith({
+        where: { id: "chat-1" },
+      });
     });
   });
 
@@ -500,9 +518,9 @@ describe("ChatsService", () => {
     it("should throw NotFoundException if participant not found", async () => {
       mockPrisma.chatParticipant!.findUnique = vi.fn().mockResolvedValue(null);
 
-      await expect(chatsService.archiveChat("chat-1", "user-1")).rejects.toThrow(
-        NotFoundException
-      );
+      await expect(
+        chatsService.archiveChat("chat-1", "user-1"),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it("should archive chat successfully", async () => {
@@ -533,7 +551,7 @@ describe("ChatsService", () => {
       mockPrisma.chatParticipant!.findUnique = vi.fn().mockResolvedValue(null);
 
       await expect(chatsService.muteChat("chat-1", "user-1")).rejects.toThrow(
-        NotFoundException
+        NotFoundException,
       );
     });
 
@@ -565,7 +583,7 @@ describe("ChatsService", () => {
       mockPrisma.chatParticipant!.findUnique = vi.fn().mockResolvedValue(null);
 
       await expect(chatsService.unmuteChat("chat-1", "user-1")).rejects.toThrow(
-        NotFoundException
+        NotFoundException,
       );
     });
 

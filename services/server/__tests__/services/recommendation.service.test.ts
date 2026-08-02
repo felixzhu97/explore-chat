@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { RecommendationService } from "@/application/services/recommendation.service";
+import { RecommendationService } from "@/post/application/recommendation.service";
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => ({
       recommendation: {
@@ -52,7 +52,7 @@ describe("RecommendationService", () => {
             candidateIds: ["post-1", "post-2"],
             limit: 10,
           }),
-        })
+        }),
       );
       expect(result.items).toHaveLength(1);
     });
@@ -81,7 +81,7 @@ describe("RecommendationService", () => {
           body: expect.stringContaining('"language":"en"'),
           body: expect.stringContaining('"experimentId":"exp-1"'),
           body: expect.stringContaining('"variantId":"var-1"'),
-        })
+        }),
       );
     });
 
@@ -145,7 +145,7 @@ describe("RecommendationService", () => {
 
       expect(global.fetch).toHaveBeenCalledWith(
         "https://api.example.com/v1/explore/rank",
-        expect.any(Object)
+        expect.any(Object),
       );
       expect(result.items).toHaveLength(1);
     });
@@ -169,7 +169,7 @@ describe("RecommendationService", () => {
 
       expect(global.fetch).toHaveBeenCalledWith(
         "https://api.example.com/v1/reels/rank",
-        expect.any(Object)
+        expect.any(Object),
       );
       expect(result.items).toHaveLength(1);
     });

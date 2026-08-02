@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { HttpExceptionFilter } from "@/presentation/filters/http-exception.filter";
+import { HttpExceptionFilter } from "@/core/filters/http-exception.filter";
 import { HttpException, HttpStatus } from "@nestjs/common";
 
 describe("HttpExceptionFilter", () => {
@@ -21,7 +21,10 @@ describe("HttpExceptionFilter", () => {
   });
 
   it("should handle string message", () => {
-    const mockResponse = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
     const host = createMockHost(mockResponse);
 
     const exception = new HttpException("Test error", HttpStatus.BAD_REQUEST);
@@ -32,17 +35,20 @@ describe("HttpExceptionFilter", () => {
     expect(mockResponse.json).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "Test error",
-      })
+      }),
     );
   });
 
   it("should handle object message", () => {
-    const mockResponse = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
     const host = createMockHost(mockResponse);
 
     const exception = new HttpException(
       { message: "Object error", code: "TEST" },
-      HttpStatus.NOT_FOUND
+      HttpStatus.NOT_FOUND,
     );
 
     filter.catch(exception, host);
@@ -50,7 +56,7 @@ describe("HttpExceptionFilter", () => {
     expect(mockResponse.json).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "Object error",
-      })
+      }),
     );
   });
 
@@ -59,18 +65,24 @@ describe("HttpExceptionFilter", () => {
       getType: vi.fn().mockReturnValue("graphql"),
     } as any;
 
-    const exception = new HttpException("GraphQL error", HttpStatus.BAD_REQUEST);
+    const exception = new HttpException(
+      "GraphQL error",
+      HttpStatus.BAD_REQUEST,
+    );
 
     expect(() => filter.catch(exception, host)).toThrow();
   });
 
   it("should handle array message", () => {
-    const mockResponse = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
     const host = createMockHost(mockResponse);
 
     const exception = new HttpException(
       { message: ["Error 1", "Error 2"] },
-      HttpStatus.BAD_REQUEST
+      HttpStatus.BAD_REQUEST,
     );
 
     filter.catch(exception, host);
@@ -78,7 +90,7 @@ describe("HttpExceptionFilter", () => {
     expect(mockResponse.json).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "Error 1, Error 2",
-      })
+      }),
     );
   });
 });

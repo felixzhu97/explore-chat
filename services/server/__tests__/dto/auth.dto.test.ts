@@ -1,6 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { plainToInstance } from "class-transformer";
-import { RegisterDto, LoginDto, RefreshTokenDto, UpdateProfileDto } from "@/application/dto/auth.dto";
+import {
+  RegisterDto,
+  LoginDto,
+  RefreshTokenDto,
+  UpdateProfileDto,
+} from "@/auth/application/auth.dto";
 
 describe("Auth DTOs", () => {
   describe("RegisterDto", () => {

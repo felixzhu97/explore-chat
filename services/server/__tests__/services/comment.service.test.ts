@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { CommentService } from "@/application/services/comment.service";
-import { NotificationService } from "@/application/services/notification.service";
-import { ChatGateway } from "@/presentation/websocket/chat.gateway";
+import { CommentService } from "@/comments/application/comment.service";
+import { NotificationService } from "@/notifications/application/notification.service";
+import { ChatGateway } from "@/websocket/presentation/chat.gateway";
 
 describe("CommentService", () => {
   let service: CommentService;
@@ -75,7 +75,7 @@ describe("CommentService", () => {
       mockKafka as never,
       mockNotificationService as never,
       mockChatGateway as never,
-      mockAiService as never
+      mockAiService as never,
     );
   });
 
@@ -83,7 +83,9 @@ describe("CommentService", () => {
     it("should throw BadRequestException when content violates guidelines", async () => {
       mockAiService.moderateText.mockResolvedValue({ safe: false });
 
-      await expect(service.create("post-1", "user-1", "Bad content")).rejects.toThrow();
+      await expect(
+        service.create("post-1", "user-1", "Bad content"),
+      ).rejects.toThrow();
     });
 
     it("should create comment successfully", async () => {
@@ -92,16 +94,23 @@ describe("CommentService", () => {
       expect(mockAiService.moderateText).toHaveBeenCalledWith("Great post!");
       expect(mockCommentRepo.insert).toHaveBeenCalled();
       expect(mockKafka.sendCommentCreated).toHaveBeenCalled();
-      expect(mockEngagementRepo.incrementCommentCount).toHaveBeenCalledWith("post-1");
+      expect(mockEngagementRepo.incrementCommentCount).toHaveBeenCalledWith(
+        "post-1",
+      );
       expect(result.id).toBe("comment-1");
       expect(result.content).toBe("Great post!");
     });
 
     it("should create reply with parentId", async () => {
-      const result = await service.create("post-1", "user-1", "Reply content", "parent-comment-1");
+      const result = await service.create(
+        "post-1",
+        "user-1",
+        "Reply content",
+        "parent-comment-1",
+      );
 
       expect(mockCommentRepo.insert).toHaveBeenCalledWith(
-        expect.objectContaining({ parentId: "parent-comment-1" })
+        expect.objectContaining({ parentId: "parent-comment-1" }),
       );
     });
 
@@ -157,7 +166,11 @@ describe("CommentService", () => {
 
       const result = await service.findByPostId("post-1", 1, 10);
 
-      expect(mockCommentRepo.findByPostId).toHaveBeenCalledWith("post-1", 10, 0);
+      expect(mockCommentRepo.findByPostId).toHaveBeenCalledWith(
+        "post-1",
+        10,
+        0,
+      );
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe("comment-1");
     });
@@ -165,7 +178,11 @@ describe("CommentService", () => {
     it("should calculate correct skip value", async () => {
       await service.findByPostId("post-1", 3, 10);
 
-      expect(mockCommentRepo.findByPostId).toHaveBeenCalledWith("post-1", 10, 20);
+      expect(mockCommentRepo.findByPostId).toHaveBeenCalledWith(
+        "post-1",
+        10,
+        20,
+      );
     });
   });
 
@@ -203,8 +220,12 @@ describe("CommentService", () => {
 
       const result = await service.delete("comment-1", "user-1");
 
-      expect(mockEngagementRepo.decrementCommentCount).toHaveBeenCalledWith("post-1");
-      expect(mockNotificationService.deleteByCommentId).toHaveBeenCalledWith("comment-1");
+      expect(mockEngagementRepo.decrementCommentCount).toHaveBeenCalledWith(
+        "post-1",
+      );
+      expect(mockNotificationService.deleteByCommentId).toHaveBeenCalledWith(
+        "comment-1",
+      );
       expect(result.deleted).toBe(true);
     });
   });

@@ -1,10 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NotFoundException } from "@nestjs/common";
-import { MessagesService, CreateMessageData, GetMessagesOptions } from "@/application/services/messages.service";
-import { PrismaService } from "@/infrastructure/database/prisma.service";
-import { CacheService } from "@/infrastructure/cache/cache.service";
+import {
+  MessagesService,
+  CreateMessageData,
+  GetMessagesOptions,
+} from "@/messages/application/messages.service";
+import { PrismaService } from "@/core/database/prisma.service";
+import { CacheService } from "@/core/cache/cache.service";
 
-vi.mock("@/infrastructure/cache/cache.service", () => ({
+vi.mock("@/core/cache/cache.service", () => ({
   CacheService: vi.fn().mockImplementation(() => ({
     get: vi.fn(),
     set: vi.fn(),
@@ -74,7 +78,7 @@ describe("MessagesService", () => {
 
     messagesService = new MessagesService(
       mockPrisma as PrismaService,
-      mockCache as CacheService
+      mockCache as CacheService,
     );
   });
 
@@ -89,22 +93,21 @@ describe("MessagesService", () => {
     it("should throw NotFoundException if chat does not exist", async () => {
       mockPrisma.chat!.findUnique = vi.fn().mockResolvedValue(null);
 
-      await expect(messagesService.createMessage(createMessageData)).rejects.toThrow(
-        NotFoundException
-      );
-      await expect(messagesService.createMessage(createMessageData)).rejects.toThrow(
-        "聊天不存在"
-      );
+      await expect(
+        messagesService.createMessage(createMessageData),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        messagesService.createMessage(createMessageData),
+      ).rejects.toThrow("聊天不存在");
     });
 
     it("should create message successfully", async () => {
       mockPrisma.chat!.findUnique = vi.fn().mockResolvedValue(mockChat);
       mockPrisma.message!.create = vi.fn().mockResolvedValue(mockMessage);
       mockPrisma.chat!.update = vi.fn().mockResolvedValue({});
-      mockPrisma.chatParticipant!.findMany = vi.fn().mockResolvedValue([
-        { userId: "user-1" },
-        { userId: "user-2" },
-      ]);
+      mockPrisma.chatParticipant!.findMany = vi
+        .fn()
+        .mockResolvedValue([{ userId: "user-1" }, { userId: "user-2" }]);
 
       const result = await messagesService.createMessage(createMessageData);
 
@@ -132,9 +135,9 @@ describe("MessagesService", () => {
       mockPrisma.chat!.findUnique = vi.fn().mockResolvedValue(mockChat);
       mockPrisma.message!.create = vi.fn().mockResolvedValue(mockMessage);
       mockPrisma.chat!.update = vi.fn().mockResolvedValue({});
-      mockPrisma.chatParticipant!.findMany = vi.fn().mockResolvedValue([
-        { userId: "user-1" },
-      ]);
+      mockPrisma.chatParticipant!.findMany = vi
+        .fn()
+        .mockResolvedValue([{ userId: "user-1" }]);
 
       await messagesService.createMessage(createMessageData);
 
@@ -148,14 +151,16 @@ describe("MessagesService", () => {
       mockPrisma.chat!.findUnique = vi.fn().mockResolvedValue(mockChat);
       mockPrisma.message!.create = vi.fn().mockResolvedValue(mockMessage);
       mockPrisma.chat!.update = vi.fn().mockResolvedValue({});
-      mockPrisma.chatParticipant!.findMany = vi.fn().mockResolvedValue([
-        { userId: "user-1" },
-        { userId: "user-2" },
-      ]);
+      mockPrisma.chatParticipant!.findMany = vi
+        .fn()
+        .mockResolvedValue([{ userId: "user-1" }, { userId: "user-2" }]);
 
       await messagesService.createMessage(createMessageData);
 
-      expect(mockCache.delMany).toHaveBeenCalledWith(["chats:user-1", "chats:user-2"]);
+      expect(mockCache.delMany).toHaveBeenCalledWith([
+        "chats:user-1",
+        "chats:user-2",
+      ]);
     });
 
     it("should include mediaUrl when provided", async () => {
@@ -167,12 +172,15 @@ describe("MessagesService", () => {
       mockPrisma.chat!.findUnique = vi.fn().mockResolvedValue(mockChat);
       mockPrisma.message!.create = vi.fn().mockImplementation((data: any) => {
         expect(data.data.mediaUrl).toBe("https://example.com/image.jpg");
-        return Promise.resolve({ ...mockMessage, mediaUrl: data.data.mediaUrl });
+        return Promise.resolve({
+          ...mockMessage,
+          mediaUrl: data.data.mediaUrl,
+        });
       });
       mockPrisma.chat!.update = vi.fn().mockResolvedValue({});
-      mockPrisma.chatParticipant!.findMany = vi.fn().mockResolvedValue([
-        { userId: "user-1" },
-      ]);
+      mockPrisma.chatParticipant!.findMany = vi
+        .fn()
+        .mockResolvedValue([{ userId: "user-1" }]);
 
       const result = await messagesService.createMessage(messageWithMedia);
 
@@ -194,9 +202,9 @@ describe("MessagesService", () => {
         });
       });
       mockPrisma.chat!.update = vi.fn().mockResolvedValue({});
-      mockPrisma.chatParticipant!.findMany = vi.fn().mockResolvedValue([
-        { userId: "user-1" },
-      ]);
+      mockPrisma.chatParticipant!.findMany = vi
+        .fn()
+        .mockResolvedValue([{ userId: "user-1" }]);
 
       const result = await messagesService.createMessage(messageWithReply);
 
@@ -214,7 +222,10 @@ describe("MessagesService", () => {
       const messages = [mockMessage, { ...mockMessage, id: "message-2" }];
       mockPrisma.message!.findMany = vi.fn().mockResolvedValue(messages);
 
-      const result = await messagesService.getMessages("chat-1", getMessagesOptions);
+      const result = await messagesService.getMessages(
+        "chat-1",
+        getMessagesOptions,
+      );
 
       expect(result).toEqual(messages);
       expect(mockPrisma.message!.findMany).toHaveBeenCalledWith(
@@ -223,7 +234,7 @@ describe("MessagesService", () => {
           orderBy: { createdAt: "desc" },
           skip: 0,
           take: 20,
-        })
+        }),
       );
     });
 
@@ -236,7 +247,7 @@ describe("MessagesService", () => {
         expect.objectContaining({
           skip: 20,
           take: 10,
-        })
+        }),
       );
     });
 
@@ -257,14 +268,17 @@ describe("MessagesService", () => {
               mode: "insensitive",
             },
           },
-        })
+        }),
       );
     });
 
     it("should include sender information", async () => {
       mockPrisma.message!.findMany = vi.fn().mockResolvedValue([mockMessage]);
 
-      const result = await messagesService.getMessages("chat-1", getMessagesOptions);
+      const result = await messagesService.getMessages(
+        "chat-1",
+        getMessagesOptions,
+      );
 
       expect(result[0]).toHaveProperty("sender");
       expect(result[0].sender).toEqual(mockSender);
@@ -278,7 +292,7 @@ describe("MessagesService", () => {
       expect(mockPrisma.message!.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           orderBy: { createdAt: "desc" },
-        })
+        }),
       );
     });
   });

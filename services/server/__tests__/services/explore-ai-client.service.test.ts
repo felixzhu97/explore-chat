@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   ExploreAiClientService,
   userIdToClientId,
-} from "@/application/services/explore-ai-client.service";
+} from "@/ai/application/explore-ai-client.service";
 import { ServiceUnavailableException } from "@nestjs/common";
 
 const mockConfigResult = {
@@ -14,7 +14,7 @@ const mockConfigResult = {
   },
 };
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => mockConfigResult),
   },

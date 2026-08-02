@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { FeedService } from "@/application/services/feed.service";
+import { FeedService } from "@/post/application/feed.service";
 
 describe("FeedService", () => {
   describe("constructor", () => {
@@ -17,7 +17,9 @@ describe("FeedService", () => {
         rankFeed: vi.fn().mockResolvedValue({ items: [] }),
       };
       const mockExperiments = {
-        assign: vi.fn().mockReturnValue({ experimentId: "exp-1", variantId: "var-1" }),
+        assign: vi
+          .fn()
+          .mockReturnValue({ experimentId: "exp-1", variantId: "var-1" }),
       };
       const mockAds = {
         selectAds: vi.fn().mockResolvedValue([]),
@@ -29,7 +31,7 @@ describe("FeedService", () => {
         mockEngagementRepo as never,
         mockRecommendation as never,
         mockExperiments as never,
-        mockAds as never
+        mockAds as never,
       );
 
       expect(service).toBeDefined();
@@ -45,10 +47,13 @@ describe("FeedService", () => {
         createdAt: Date,
         likeCount: number,
         commentCount: number,
-        now: Date
+        now: Date,
       ) => {
-        const ageHours = (now.getTime() - new Date(createdAt).getTime()) / (1000 * 3600);
-        const recency = Math.exp(-ageHours * Math.LN2 / RECENCY_HALFLIFE_HOURS);
+        const ageHours =
+          (now.getTime() - new Date(createdAt).getTime()) / (1000 * 3600);
+        const recency = Math.exp(
+          (-ageHours * Math.LN2) / RECENCY_HALFLIFE_HOURS,
+        );
         const engagement = Math.log(1 + likeCount + commentCount);
         return recency + ENGAGEMENT_WEIGHT * engagement;
       };
@@ -71,10 +76,13 @@ describe("FeedService", () => {
         createdAt: Date,
         likeCount: number,
         commentCount: number,
-        now: Date
+        now: Date,
       ) => {
-        const ageHours = (now.getTime() - new Date(createdAt).getTime()) / (1000 * 3600);
-        const recency = Math.exp(-ageHours * Math.LN2 / RECENCY_HALFLIFE_HOURS);
+        const ageHours =
+          (now.getTime() - new Date(createdAt).getTime()) / (1000 * 3600);
+        const recency = Math.exp(
+          (-ageHours * Math.LN2) / RECENCY_HALFLIFE_HOURS,
+        );
         const engagement = Math.log(1 + likeCount + commentCount);
         return recency + ENGAGEMENT_WEIGHT * engagement;
       };

@@ -6,7 +6,7 @@ import {
   CreateAdCampaignDto,
   CreateAdGroupDto,
   CreateAdCreativeDto,
-} from "@/application/dto/ads.dto";
+} from "@/ads/application/ads.dto";
 
 describe("CreateAdAccountDto", () => {
   it("should create dto with minimal required fields", async () => {

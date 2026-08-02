@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { GroupsService, CreateGroupData, UpdateGroupData } from "@/application/services/groups.service";
+import {
+  GroupsService,
+  CreateGroupData,
+  UpdateGroupData,
+} from "@/groups/application/groups.service";
 
 describe("GroupsService", () => {
   let service: GroupsService;
@@ -70,7 +74,15 @@ describe("GroupsService", () => {
             avatar: null,
             creator: { id: "user-1", username: "creator", avatar: null },
             participants: [
-              { user: { id: "user-1", username: "user1", avatar: null, isOnline: true }, role: "ADMIN" },
+              {
+                user: {
+                  id: "user-1",
+                  username: "user1",
+                  avatar: null,
+                  isOnline: true,
+                },
+                role: "ADMIN",
+              },
             ],
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -89,13 +101,13 @@ describe("GroupsService", () => {
   describe("createGroup", () => {
     it("should throw BadRequestException when name is empty", async () => {
       await expect(
-        service.createGroup("user-1", { name: "", participantIds: [] })
+        service.createGroup("user-1", { name: "", participantIds: [] }),
       ).rejects.toThrow();
     });
 
     it("should throw BadRequestException when name is whitespace only", async () => {
       await expect(
-        service.createGroup("user-1", { name: "   ", participantIds: [] })
+        service.createGroup("user-1", { name: "   ", participantIds: [] }),
       ).rejects.toThrow();
     });
 
@@ -103,13 +115,19 @@ describe("GroupsService", () => {
       mockPrisma.user.findMany.mockResolvedValue([{ id: "user-1" }]);
 
       await expect(
-        service.createGroup("user-1", { name: "Group", participantIds: ["user-1", "non-existent"] })
+        service.createGroup("user-1", {
+          name: "Group",
+          participantIds: ["user-1", "non-existent"],
+        }),
       ).rejects.toThrow();
     });
 
     it("should create group successfully", async () => {
       mockPrisma.user.findMany.mockResolvedValue([{ id: "user-2" }]);
-      mockPrisma.group.create.mockResolvedValue({ id: "group-1", name: "Test Group" });
+      mockPrisma.group.create.mockResolvedValue({
+        id: "group-1",
+        name: "Test Group",
+      });
 
       const result = await service.createGroup("user-1", {
         name: "Test Group",

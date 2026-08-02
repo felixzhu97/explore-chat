@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { MinioService } from "@/infrastructure/storage/minio.service";
+import { MinioService } from "@/core/storage/minio.service";
 
 describe("MinioService", () => {
   let service: MinioService;

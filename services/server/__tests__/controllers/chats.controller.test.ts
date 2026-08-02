@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ChatsController } from "@/presentation/chats/chats.controller";
+import { ChatsController } from "@/chats/presentation/chats.controller";
 import { NotFoundException, BadRequestException } from "@nestjs/common";
 
 describe("ChatsController", () => {
@@ -86,11 +86,11 @@ describe("ChatsController", () => {
 
     it("should throw NotFoundException when service fails", async () => {
       mockChatsService.getChats.mockRejectedValue(
-        new NotFoundException("User not found")
+        new NotFoundException("User not found"),
       );
 
       await expect(chatsController.getChats(mockUser)).rejects.toThrow(
-        NotFoundException
+        NotFoundException,
       );
     });
   });
@@ -113,7 +113,7 @@ describe("ChatsController", () => {
       });
       expect(mockChatsService.createChat).toHaveBeenCalledWith(
         mockUser.id,
-        createChatDto
+        createChatDto,
       );
     });
 
@@ -135,11 +135,11 @@ describe("ChatsController", () => {
 
     it("should throw BadRequestException for invalid participants", async () => {
       mockChatsService.createChat.mockRejectedValue(
-        new BadRequestException("部分参与者不存在")
+        new BadRequestException("部分参与者不存在"),
       );
 
       await expect(
-        chatsController.createChat(mockUser, createChatDto)
+        chatsController.createChat(mockUser, createChatDto),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -157,28 +157,28 @@ describe("ChatsController", () => {
       });
       expect(mockChatsService.getChatById).toHaveBeenCalledWith(
         "chat-1",
-        mockUser.id
+        mockUser.id,
       );
     });
 
     it("should throw NotFoundException when chat not found", async () => {
       mockChatsService.getChatById.mockRejectedValue(
-        new NotFoundException("聊天不存在")
+        new NotFoundException("聊天不存在"),
       );
 
       await expect(
-        chatsController.getChat(mockUser, "non-existent-chat")
+        chatsController.getChat(mockUser, "non-existent-chat"),
       ).rejects.toThrow(NotFoundException);
     });
 
     it("should throw BadRequestException when user is not a participant", async () => {
       mockChatsService.getChatById.mockRejectedValue(
-        new BadRequestException("无权访问此聊天")
+        new BadRequestException("无权访问此聊天"),
       );
 
-      await expect(
-        chatsController.getChat(mockUser, "chat-1")
-      ).rejects.toThrow(BadRequestException);
+      await expect(chatsController.getChat(mockUser, "chat-1")).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -192,7 +192,7 @@ describe("ChatsController", () => {
       const result = await chatsController.updateChat(
         mockUser,
         "chat-1",
-        updateData
+        updateData,
       );
 
       expect(result).toEqual({
@@ -203,27 +203,27 @@ describe("ChatsController", () => {
       expect(mockChatsService.updateChat).toHaveBeenCalledWith(
         "chat-1",
         mockUser.id,
-        updateData
+        updateData,
       );
     });
 
     it("should throw NotFoundException when chat not found", async () => {
       mockChatsService.updateChat.mockRejectedValue(
-        new NotFoundException("聊天不存在")
+        new NotFoundException("聊天不存在"),
       );
 
       await expect(
-        chatsController.updateChat(mockUser, "non-existent-chat", updateData)
+        chatsController.updateChat(mockUser, "non-existent-chat", updateData),
       ).rejects.toThrow(NotFoundException);
     });
 
     it("should throw BadRequestException for private chat update", async () => {
       mockChatsService.updateChat.mockRejectedValue(
-        new BadRequestException("私聊不能修改名称和头像")
+        new BadRequestException("私聊不能修改名称和头像"),
       );
 
       await expect(
-        chatsController.updateChat(mockUser, "chat-1", updateData)
+        chatsController.updateChat(mockUser, "chat-1", updateData),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -242,27 +242,27 @@ describe("ChatsController", () => {
       });
       expect(mockChatsService.deleteChat).toHaveBeenCalledWith(
         "chat-1",
-        mockUser.id
+        mockUser.id,
       );
     });
 
     it("should throw NotFoundException when chat not found", async () => {
       mockChatsService.deleteChat.mockRejectedValue(
-        new NotFoundException("聊天不存在")
+        new NotFoundException("聊天不存在"),
       );
 
       await expect(
-        chatsController.deleteChat(mockUser, "non-existent-chat")
+        chatsController.deleteChat(mockUser, "non-existent-chat"),
       ).rejects.toThrow(NotFoundException);
     });
 
     it("should throw BadRequestException when user is not a participant", async () => {
       mockChatsService.deleteChat.mockRejectedValue(
-        new BadRequestException("无权删除此聊天")
+        new BadRequestException("无权删除此聊天"),
       );
 
       await expect(
-        chatsController.deleteChat(mockUser, "chat-1")
+        chatsController.deleteChat(mockUser, "chat-1"),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -281,17 +281,17 @@ describe("ChatsController", () => {
       });
       expect(mockChatsService.archiveChat).toHaveBeenCalledWith(
         "chat-1",
-        mockUser.id
+        mockUser.id,
       );
     });
 
     it("should throw NotFoundException when chat not found", async () => {
       mockChatsService.archiveChat.mockRejectedValue(
-        new NotFoundException("聊天不存在或无权访问")
+        new NotFoundException("聊天不存在或无权访问"),
       );
 
       await expect(
-        chatsController.archiveChat(mockUser, "non-existent-chat")
+        chatsController.archiveChat(mockUser, "non-existent-chat"),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -310,17 +310,17 @@ describe("ChatsController", () => {
       });
       expect(mockChatsService.muteChat).toHaveBeenCalledWith(
         "chat-1",
-        mockUser.id
+        mockUser.id,
       );
     });
 
     it("should throw NotFoundException when chat not found", async () => {
       mockChatsService.muteChat.mockRejectedValue(
-        new NotFoundException("聊天不存在或无权访问")
+        new NotFoundException("聊天不存在或无权访问"),
       );
 
       await expect(
-        chatsController.muteChat(mockUser, "non-existent-chat")
+        chatsController.muteChat(mockUser, "non-existent-chat"),
       ).rejects.toThrow(NotFoundException);
     });
   });

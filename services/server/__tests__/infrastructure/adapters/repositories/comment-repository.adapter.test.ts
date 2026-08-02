@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { CommentRepositoryAdapter } from "@/infrastructure/adapters/repositories/comment-repository.adapter";
-import { MongoCommentRepository } from "@/infrastructure/database/mongo-comment.repository";
+import { CommentRepositoryAdapter } from "@/comments/infrastructure/comment-repository.adapter";
+import { MongoCommentRepository } from "@/core/database/mongo-comment.repository";
 
 describe("CommentRepositoryAdapter", () => {
   let adapter: CommentRepositoryAdapter;
@@ -19,7 +19,11 @@ describe("CommentRepositoryAdapter", () => {
 
   describe("insert", () => {
     it("should delegate to implementation", async () => {
-      const doc = { postId: "post-1", userId: "user-1", content: "Test comment" };
+      const doc = {
+        postId: "post-1",
+        userId: "user-1",
+        content: "Test comment",
+      };
 
       const result = await adapter.insert(doc);
 
@@ -30,7 +34,9 @@ describe("CommentRepositoryAdapter", () => {
 
   describe("findByPostId", () => {
     it("should delegate to implementation", async () => {
-      const comments = [{ _id: "comment-1", postId: "post-1", content: "Test" }];
+      const comments = [
+        { _id: "comment-1", postId: "post-1", content: "Test" },
+      ];
       mockImpl.findByPostId.mockResolvedValue(comments);
 
       const result = await adapter.findByPostId("post-1", 10, 0);

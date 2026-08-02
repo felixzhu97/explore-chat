@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { KafkaConsumerService } from "@/infrastructure/messaging/kafka-consumer.service";
-import { RedisService } from "@/infrastructure/database/redis.service";
-import { CassandraFeedRepository } from "@/infrastructure/database/cassandra-feed.repository";
-import { CacheService } from "@/infrastructure/cache/cache.service";
-import { ElasticsearchService } from "@/infrastructure/database/elasticsearch.service";
+import { KafkaConsumerService } from "@/core/messaging/kafka-consumer.service";
+import { RedisService } from "@/core/database/redis.service";
+import { CassandraFeedRepository } from "@/core/database/cassandra-feed.repository";
+import { CacheService } from "@/core/cache/cache.service";
+import { ElasticsearchService } from "@/core/database/elasticsearch.service";
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => ({
       kafka: {
@@ -70,7 +70,9 @@ describe("KafkaConsumerService", () => {
       } as never;
       const mockVisionClient = {
         predictFromUrl: vi.fn().mockResolvedValue([]),
-        moderateFromUrl: vi.fn().mockResolvedValue({ safe: true, categories: [] }),
+        moderateFromUrl: vi
+          .fn()
+          .mockResolvedValue({ safe: true, categories: [] }),
       } as never;
 
       service = new KafkaConsumerService(
@@ -80,7 +82,7 @@ describe("KafkaConsumerService", () => {
         mockCacheService,
         mockElasticsearchService,
         mockPostRepo,
-        mockVisionClient
+        mockVisionClient,
       );
 
       expect(service).toBeDefined();
@@ -117,7 +119,9 @@ describe("KafkaConsumerService", () => {
       } as never;
       const mockVisionClient = {
         predictFromUrl: vi.fn().mockResolvedValue([]),
-        moderateFromUrl: vi.fn().mockResolvedValue({ safe: true, categories: [] }),
+        moderateFromUrl: vi
+          .fn()
+          .mockResolvedValue({ safe: true, categories: [] }),
       } as never;
 
       service = new KafkaConsumerService(
@@ -127,7 +131,7 @@ describe("KafkaConsumerService", () => {
         mockCacheService,
         mockElasticsearchService,
         mockPostRepo,
-        mockVisionClient
+        mockVisionClient,
       );
 
       await service.onModuleInit();
@@ -164,7 +168,9 @@ describe("KafkaConsumerService", () => {
       } as never;
       const mockVisionClient = {
         predictFromUrl: vi.fn().mockResolvedValue([]),
-        moderateFromUrl: vi.fn().mockResolvedValue({ safe: true, categories: [] }),
+        moderateFromUrl: vi
+          .fn()
+          .mockResolvedValue({ safe: true, categories: [] }),
       } as never;
 
       service = new KafkaConsumerService(
@@ -174,7 +180,7 @@ describe("KafkaConsumerService", () => {
         mockCacheService,
         mockElasticsearchService,
         mockPostRepo,
-        mockVisionClient
+        mockVisionClient,
       );
 
       await expect(service.onModuleDestroy()).resolves.not.toThrow();

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { CassandraEngagementRepository } from "@/infrastructure/database/cassandra-engagement.repository";
+import { CassandraEngagementRepository } from "@/core/database/cassandra-engagement.repository";
 
 describe("CassandraEngagementRepository", () => {
   beforeEach(() => {
@@ -11,7 +11,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(null),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
       expect(repository).toBeDefined();
     });
   });
@@ -21,7 +23,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(null),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.like("user-1", "post-1");
 
@@ -35,7 +39,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(mockClient as never),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.like("user-1", "post-1");
 
@@ -49,7 +55,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(null),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.unlike("user-1", "post-1");
 
@@ -63,7 +71,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(mockClient as never),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.unlike("user-1", "post-1");
 
@@ -77,7 +87,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(null),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.save("user-1", "post-1");
 
@@ -91,7 +103,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(mockClient as never),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.save("user-1", "post-1");
 
@@ -105,7 +119,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(null),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.unsave("user-1", "post-1");
 
@@ -119,7 +135,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(mockClient as never),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.unsave("user-1", "post-1");
 
@@ -133,7 +151,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(null),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.isLiked("user-1", "post-1");
 
@@ -147,7 +167,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(mockClient as never),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.isLiked("user-1", "post-1");
 
@@ -161,7 +183,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(mockClient as never),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.isLiked("user-1", "post-1");
 
@@ -174,7 +198,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(null),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.isSaved("user-1", "post-1");
 
@@ -188,7 +214,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(mockClient as never),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.isSaved("user-1", "post-1");
 
@@ -201,7 +229,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(null),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.getEngagementCounts("post-1");
 
@@ -215,7 +245,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(mockClient as never),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.getEngagementCounts("non-existent");
 
@@ -231,7 +263,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(mockClient as never),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.getEngagementCounts("post-1");
 
@@ -246,9 +280,14 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(null),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
-      const result = await repository.getEngagementCountsBatch(["post-1", "post-2"]);
+      const result = await repository.getEngagementCountsBatch([
+        "post-1",
+        "post-2",
+      ]);
 
       expect(result.size).toBe(0);
     });
@@ -260,7 +299,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(mockClient as never),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.getEngagementCountsBatch([]);
 
@@ -276,7 +317,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(mockClient as never),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       await repository.incrementCommentCount("post-1");
 
@@ -292,7 +335,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(mockClient as never),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       await repository.decrementCommentCount("post-1");
 
@@ -305,9 +350,14 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(null),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
-      const result = await repository.getLikedPostIds("user-1", ["post-1", "post-2"]);
+      const result = await repository.getLikedPostIds("user-1", [
+        "post-1",
+        "post-2",
+      ]);
 
       expect(result.size).toBe(0);
     });
@@ -319,7 +369,9 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(mockClient as never),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
       const result = await repository.getLikedPostIds("user-1", []);
 
@@ -332,9 +384,14 @@ describe("CassandraEngagementRepository", () => {
       const mockCassandraService = {
         getClient: vi.fn().mockReturnValue(null),
       } as never;
-      const repository = new CassandraEngagementRepository(mockCassandraService);
+      const repository = new CassandraEngagementRepository(
+        mockCassandraService,
+      );
 
-      const result = await repository.getSavedPostIds("user-1", ["post-1", "post-2"]);
+      const result = await repository.getSavedPostIds("user-1", [
+        "post-1",
+        "post-2",
+      ]);
 
       expect(result.size).toBe(0);
     });
