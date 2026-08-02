@@ -109,7 +109,8 @@ const PopoverContainer = styled.div`
   bottom: 3rem;
   z-index: 50;
   overflow: visible;
-  max-width: min(100%, calc(100vw - 1.5rem));
+  width: max-content;
+  max-width: min(19rem, calc(100vw - 1.5rem));
 `;
 
 const PopoverContainerRight = styled.div`
@@ -118,7 +119,8 @@ const PopoverContainerRight = styled.div`
   bottom: 3rem;
   z-index: 50;
   overflow: visible;
-  max-width: min(100%, calc(100vw - 1.5rem));
+  width: max-content;
+  max-width: min(19rem, calc(100vw - 1.5rem));
 `;
 
 const MessageTextarea = styled(Textarea)`
@@ -253,7 +255,11 @@ export function MessageInput({
       <ToolbarRow>
         <RoundedBar style={{ flex: 1 }}>
           <IconButtonWrapper>
-            <BarIconBtn variant="ghost" size="icon" onClick={onToggleEmojiPicker}>
+            <BarIconBtn
+              variant="ghost"
+              size="icon"
+              onClick={onToggleEmojiPicker}
+            >
               <Smile size={22} />
             </BarIconBtn>
             {showEmojiPicker && (
@@ -284,7 +290,10 @@ export function MessageInput({
             </PrimarySendButton>
           ) : (
             <IconButtonWrapper>
-              <VoiceRecorder onSendVoice={onSendVoice} onRecordingChange={onRecordingChange} />
+              <VoiceRecorder
+                onSendVoice={onSendVoice}
+                onRecordingChange={onRecordingChange}
+              />
             </IconButtonWrapper>
           )}
 

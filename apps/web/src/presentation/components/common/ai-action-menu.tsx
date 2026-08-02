@@ -2,7 +2,13 @@
 
 import { Button } from "@/src/presentation/components/ui/button";
 import { Card } from "@/src/presentation/components/ui/card";
-import { FileText, Image as ImageIcon, MessageCircle, Video, Mic } from "lucide-react";
+import {
+  FileText,
+  Image as ImageIcon,
+  MessageCircle,
+  Video,
+  Mic,
+} from "lucide-react";
 import { styled } from "@/src/shared/utils/emotion";
 
 interface AiActionMenuProps {
@@ -15,15 +21,19 @@ interface AiActionMenuProps {
 
 const MenuCard = styled(Card)`
   padding: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
   overflow: visible;
 `;
 
 const MenuGrid = styled.div<{ count: number }>`
   display: grid;
-  grid-template-columns: repeat(${({ count }) => (count >= 4 ? (count === 5 ? 5 : 4) : 3)}, 1fr);
+  grid-template-columns: repeat(
+    ${({ count }) => Math.max(count, 1)},
+    minmax(4.5rem, auto)
+  );
   gap: 0.5rem;
-  min-width: ${({ count }) => (count >= 4 ? (count === 5 ? "24rem" : "19rem") : "12rem")};
   width: max-content;
 `;
 
@@ -78,9 +88,13 @@ export function AiActionMenu({
   onGenerateVideo,
   onGenerateVoice,
 }: AiActionMenuProps) {
-  const count = [onSmartReply, onGenerateText, onGenerateImage, onGenerateVideo, onGenerateVoice].filter(
-    (x) => x != null
-  ).length;
+  const count = [
+    onSmartReply,
+    onGenerateText,
+    onGenerateImage,
+    onGenerateVideo,
+    onGenerateVoice,
+  ].filter((x) => x != null).length;
   if (count === 0) return null;
 
   return (
