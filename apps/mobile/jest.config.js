@@ -4,6 +4,17 @@ module.exports = {
   setupFiles: ["<rootDir>/jest.setup.ts"],
   moduleNameMapper: {
     "^@/src/(.*)$": "<rootDir>/src/$1",
+    "^@/core/(.*)$": "<rootDir>/src/core/$1",
+    "^@/shared/(.*)$": "<rootDir>/src/shared/$1",
+    "^@/layout/(.*)$": "<rootDir>/src/layout/$1",
+    "^@/auth/(.*)$": "<rootDir>/src/auth/$1",
+    "^@/feed/(.*)$": "<rootDir>/src/feed/$1",
+    "^@/chat/(.*)$": "<rootDir>/src/chat/$1",
+    "^@/explore/(.*)$": "<rootDir>/src/explore/$1",
+    "^@/reels/(.*)$": "<rootDir>/src/reels/$1",
+    "^@/profile/(.*)$": "<rootDir>/src/profile/$1",
+    "^@/calls/(.*)$": "<rootDir>/src/calls/$1",
+    "^@/secondary/(.*)$": "<rootDir>/src/secondary/$1",
     "^@/(.*)$": "<rootDir>/src/$1",
     "^@whatschat/im$": "<rootDir>/src/__mocks__/@whatschat/im.ts",
   },
@@ -20,47 +31,48 @@ module.exports = {
       lines: 80,
       statements: 80,
     },
-    "./src/application/mappers/feed.mapper.ts": {
+    "./src/feed/feed.mapper.ts": {
       branches: 75,
       functions: 90,
       lines: 85,
       statements: 85,
     },
-    "./src/application/mappers/message.mapper.ts": {
+    "./src/chat/message.mapper.ts": {
       branches: 50,
       functions: 90,
       lines: 90,
       statements: 90,
     },
-    "./src/application/mappers/chat.mapper.ts": {
+    "./src/chat/chat.mapper.ts": {
       branches: 80,
       functions: 100,
       lines: 80,
       statements: 80,
     },
-    "./src/application/use-cases/chat.use-cases.ts": {
+    "./src/chat/chat.api.ts": {
       branches: 80,
       functions: 100,
       lines: 80,
       statements: 80,
     },
-    "./src/application/use-cases/message.use-cases.ts": {
+    "./src/chat/message.api.ts": {
       branches: 80,
       functions: 100,
       lines: 80,
       statements: 80,
     },
-    "./src/application/use-cases/auth.use-cases.ts": {
+    "./src/auth/auth.api.ts": {
       branches: 80,
       functions: 100,
       lines: 80,
       statements: 80,
     },
-    "./src/application/use-cases/feed.use-cases.ts": {
-      branches: 80,
-      functions: 100,
-      lines: 80,
-      statements: 80,
+    // Former FeedRepositoryAdapter body (not the thin FeedUseCases passthrough)
+    "./src/feed/feed.api.ts": {
+      branches: 75,
+      functions: 85,
+      lines: 90,
+      statements: 90,
     },
   },
   collectCoverageFrom: [
@@ -69,12 +81,20 @@ module.exports = {
     "!src/**/__tests__/**",
     "!src/**/__mocks__/**",
     "!src/app/**",
-    "!src/presentation/screens/**",
-    "!src/presentation/store/api/feedApi.ts",
-    "!src/presentation/store/slices/authSlice.ts",
-    "!src/presentation/store/slices/socketSlice.ts",
-    "!src/presentation/providers/**",
-    "!src/infrastructure/call/**",
-    "!src/infrastructure/rtc/**",
+    "!src/feed/home-feed-screen.tsx",
+    "!src/explore/explore-screen.tsx",
+    "!src/reels/reels-screen.tsx",
+    "!src/profile/profile-screen.tsx",
+    "!src/secondary/settings-menu-screen.tsx",
+    "!src/feed/feedApi.ts",
+    "!src/core/store/**",
+    "!src/core/composition-root.ts",
+    "!src/core/call/**",
+    "!src/core/rtc/**",
+    "!src/calls/**",
+    "!src/layout/**",
+    "!src/shared/components/ActiveCallOverlay.tsx",
+    "!src/shared/components/CallOverlay.tsx",
+    "!src/shared/components/IncomingCallOverlay.tsx",
   ],
 };

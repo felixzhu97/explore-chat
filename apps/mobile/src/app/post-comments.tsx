@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -11,13 +11,19 @@ import {
   TextInput,
   useWindowDimensions,
   View,
-} from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { styled } from '@/src/presentation/shared/emotion';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useTranslation } from '@/src/presentation/shared/i18n';
-import { useAuthStore } from '@/src/presentation/stores';
-import { useCreatePostCommentMutation, useGetPostCommentsQuery } from '@/src/presentation/store/api/feedApi';
+} from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { styled } from "@/shared/emotion";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useTranslation } from "@/shared/i18n";
+import { useAuthStore } from "@/core/store/hooks";
+import {
+  useCreatePostCommentMutation,
+  useGetPostCommentsQuery,
+} from "@/feed/feedApi";
 
 const Page = styled.View`
   flex: 1;
@@ -167,8 +173,10 @@ export default function PostCommentsScreen() {
   const { height: windowHeight } = useWindowDimensions();
   const me = useAuthStore((s) => s.user);
   const params = useLocalSearchParams<{ postId?: string | string[] }>();
-  const postId = Array.isArray(params.postId) ? params.postId[0] : params.postId;
-  const [input, setInput] = useState('');
+  const postId = Array.isArray(params.postId)
+    ? params.postId[0]
+    : params.postId;
+  const [input, setInput] = useState("");
   const expandedTop = Math.max(insets.top + 8, 8);
   const defaultTop = Math.max(expandedTop, Math.round(windowHeight / 3));
   const closeTop = windowHeight;
@@ -176,12 +184,13 @@ export default function PostCommentsScreen() {
   const dragStartTopRef = useRef(defaultTop);
   const [createPostComment, createResult] = useCreatePostCommentMutation();
   const { data, isFetching, isError, refetch } = useGetPostCommentsQuery(
-    { postId: postId ?? '', page: 1, limit: 50 },
+    { postId: postId ?? "", page: 1, limit: 50 },
     { skip: !postId },
   );
 
   const comments = useMemo(() => (Array.isArray(data) ? data : []), [data]);
-  const canSend = !!postId && input.trim().length > 0 && !createResult.isLoading;
+  const canSend =
+    !!postId && input.trim().length > 0 && !createResult.isLoading;
 
   React.useEffect(() => {
     sheetTop.setValue(defaultTop);
@@ -201,22 +210,30 @@ export default function PostCommentsScreen() {
     () =>
       PanResponder.create({
         onPanResponderGrant: () => {
-          dragStartTopRef.current = (sheetTop as any).__getValue?.() ?? defaultTop;
+          dragStartTopRef.current =
+            (sheetTop as any).__getValue?.() ?? defaultTop;
         },
         onMoveShouldSetPanResponder: (_evt, gestureState) =>
-          Math.abs(gestureState.dy) > 4 && Math.abs(gestureState.dy) > Math.abs(gestureState.dx),
+          Math.abs(gestureState.dy) > 4 &&
+          Math.abs(gestureState.dy) > Math.abs(gestureState.dx),
         onPanResponderMove: (_evt, gestureState) => {
-          const nextTop = Math.max(expandedTop, Math.min(closeTop, dragStartTopRef.current + gestureState.dy));
+          const nextTop = Math.max(
+            expandedTop,
+            Math.min(closeTop, dragStartTopRef.current + gestureState.dy),
+          );
           sheetTop.setValue(nextTop);
         },
         onPanResponderRelease: (_evt, gestureState) => {
           const currentTop = (sheetTop as any).__getValue?.() ?? defaultTop;
-          const shouldClose = currentTop > defaultTop + 140 || gestureState.vy > 1.1;
+          const shouldClose =
+            currentTop > defaultTop + 140 || gestureState.vy > 1.1;
           if (shouldClose) {
             closeSheet();
             return;
           }
-          const shouldExpand = gestureState.vy < -0.9 || currentTop < (expandedTop + defaultTop) / 2;
+          const shouldExpand =
+            gestureState.vy < -0.9 ||
+            currentTop < (expandedTop + defaultTop) / 2;
           Animated.spring(sheetTop, {
             toValue: shouldExpand ? expandedTop : defaultTop,
             useNativeDriver: false,
@@ -229,10 +246,10 @@ export default function PostCommentsScreen() {
 
   const formatAgo = (value: string) => {
     const ts = new Date(value).getTime();
-    if (!Number.isFinite(ts)) return '';
+    if (!Number.isFinite(ts)) return "";
     const diff = Math.max(0, Date.now() - ts);
     const min = Math.floor(diff / 60000);
-    if (min < 1) return 'now';
+    if (min < 1) return "now";
     if (min < 60) return `${min}m`;
     const h = Math.floor(min / 60);
     if (h < 24) return `${h}h`;
@@ -244,7 +261,7 @@ export default function PostCommentsScreen() {
 
   const getInitial = (value: string) => {
     const s = value.trim();
-    if (!s) return '?';
+    if (!s) return "?";
     return s.charAt(0).toUpperCase();
   };
 
@@ -253,22 +270,28 @@ export default function PostCommentsScreen() {
     if (!postId || !content) return;
     try {
       await createPostComment({ postId, content }).unwrap();
-      setInput('');
+      setInput("");
     } catch (e) {
-      const message = e instanceof Error ? e.message : t('comments.sendFailed');
-      Alert.alert(t('comments.title'), String(message || t('comments.sendFailed')));
+      const message = e instanceof Error ? e.message : t("comments.sendFailed");
+      Alert.alert(
+        t("comments.title"),
+        String(message || t("comments.sendFailed")),
+      );
       return;
     }
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={[]}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
         <Page>
           <Pressable style={{ flex: 1 }} onPress={closeSheet} />
           <Animated.View
             style={{
-              position: 'absolute',
+              position: "absolute",
               left: 0,
               right: 0,
               bottom: 0,
@@ -276,76 +299,85 @@ export default function PostCommentsScreen() {
             }}
           >
             <Sheet>
-            <HandleTouch {...panResponder.panHandlers}>
-              <Handle />
-            </HandleTouch>
-            <Header>
-              <Title>{t('comments.title')}</Title>
-            </Header>
-            <ListWrap>
-              {isFetching ? (
-                <EmptyWrap>
-                  <ActivityIndicator size="small" color="#999" />
-                </EmptyWrap>
-              ) : isError ? (
-                <EmptyWrap>
-                  <Pressable onPress={() => refetch()}>
-                    <EmptyText>{t('common.retry')}</EmptyText>
-                  </Pressable>
-                </EmptyWrap>
-              ) : comments.length === 0 ? (
-                <EmptyWrap>
-                  <EmptyText>{t('comments.empty')}</EmptyText>
-                  <EmptyHint>{t('comments.emptyHint')}</EmptyHint>
-                </EmptyWrap>
-              ) : (
-                <FlatList
-                  data={comments}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
-                    <Row>
-                      <Avatar>
-                        <AvatarText>{getInitial(item.userId)}</AvatarText>
-                      </Avatar>
-                      <Content>
-                        <NameLine>
-                          <Name numberOfLines={1}>{item.userId}</Name>
-                          <Time>{formatAgo(item.createdAt)}</Time>
-                        </NameLine>
-                        <CommentText>{item.content}</CommentText>
-                      </Content>
-                    </Row>
-                  )}
-                />
-              )}
-            </ListWrap>
-            <InputBar style={{ paddingBottom: Math.max(insets.bottom, 8) }}>
-              <Avatar>
-                <AvatarText>{getInitial(me?.username ?? me?.id ?? '')}</AvatarText>
-              </Avatar>
-              <InputWrap>
-                <TextInput
-                  value={input}
-                  onChangeText={setInput}
-                  placeholder={t('comments.placeholder')}
-                  placeholderTextColor="#8e8e93"
-                  returnKeyType="send"
-                  blurOnSubmit={false}
-                  onSubmitEditing={() => {
-                    if (canSend) void onSend();
-                  }}
-                  style={{ fontSize: 15, color: '#111' }}
-                />
-              </InputWrap>
-              <SendButton $disabled={!canSend} onPress={onSend} disabled={!canSend}>
-                <SendText>{createResult.isLoading ? t('common.loading') : t('common.send')}</SendText>
-              </SendButton>
-            </InputBar>
-          </Sheet>
+              <HandleTouch {...panResponder.panHandlers}>
+                <Handle />
+              </HandleTouch>
+              <Header>
+                <Title>{t("comments.title")}</Title>
+              </Header>
+              <ListWrap>
+                {isFetching ? (
+                  <EmptyWrap>
+                    <ActivityIndicator size="small" color="#999" />
+                  </EmptyWrap>
+                ) : isError ? (
+                  <EmptyWrap>
+                    <Pressable onPress={() => refetch()}>
+                      <EmptyText>{t("common.retry")}</EmptyText>
+                    </Pressable>
+                  </EmptyWrap>
+                ) : comments.length === 0 ? (
+                  <EmptyWrap>
+                    <EmptyText>{t("comments.empty")}</EmptyText>
+                    <EmptyHint>{t("comments.emptyHint")}</EmptyHint>
+                  </EmptyWrap>
+                ) : (
+                  <FlatList
+                    data={comments}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                      <Row>
+                        <Avatar>
+                          <AvatarText>{getInitial(item.userId)}</AvatarText>
+                        </Avatar>
+                        <Content>
+                          <NameLine>
+                            <Name numberOfLines={1}>{item.userId}</Name>
+                            <Time>{formatAgo(item.createdAt)}</Time>
+                          </NameLine>
+                          <CommentText>{item.content}</CommentText>
+                        </Content>
+                      </Row>
+                    )}
+                  />
+                )}
+              </ListWrap>
+              <InputBar style={{ paddingBottom: Math.max(insets.bottom, 8) }}>
+                <Avatar>
+                  <AvatarText>
+                    {getInitial(me?.username ?? me?.id ?? "")}
+                  </AvatarText>
+                </Avatar>
+                <InputWrap>
+                  <TextInput
+                    value={input}
+                    onChangeText={setInput}
+                    placeholder={t("comments.placeholder")}
+                    placeholderTextColor="#8e8e93"
+                    returnKeyType="send"
+                    blurOnSubmit={false}
+                    onSubmitEditing={() => {
+                      if (canSend) void onSend();
+                    }}
+                    style={{ fontSize: 15, color: "#111" }}
+                  />
+                </InputWrap>
+                <SendButton
+                  $disabled={!canSend}
+                  onPress={onSend}
+                  disabled={!canSend}
+                >
+                  <SendText>
+                    {createResult.isLoading
+                      ? t("common.loading")
+                      : t("common.send")}
+                  </SendText>
+                </SendButton>
+              </InputBar>
+            </Sheet>
           </Animated.View>
         </Page>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-

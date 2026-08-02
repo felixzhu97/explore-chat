@@ -34,12 +34,11 @@ Rel(api_client, api_server, "HTTPS")
 Rel(ws_client, api_server, "WebSocket")
 
 note right of pages
-  Web src/ 按业务域分文件夹：
+  Web 与 Mobile src/ 均按业务域分文件夹：
   core, layout, auth, feed, chat,
-  explore, reels, search, profile,
-  calls, ai, secondary, shared。
-  Mobile（Expo）与 Admin 共享 API；
-  细节见 C2 容器图。
+  explore, reels, profile, calls,
+  secondary, shared（Web 另有 search、ai）。
+  Admin 共享 API；细节见 C2 容器图。
 end note
 
 @enduml

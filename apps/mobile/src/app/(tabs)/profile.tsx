@@ -1,4 +1,4 @@
-import { ProfileScreen } from '@/src/presentation/screens';
+import { ProfileScreen } from "@/profile/profile-screen";
 
 export default function ProfileTabScreen() {
   return <ProfileScreen />;

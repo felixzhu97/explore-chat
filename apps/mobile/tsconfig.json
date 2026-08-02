@@ -1,1 +1,33 @@
-{"extends":"expo/tsconfig.base","compilerOptions":{"strict":true,"paths":{"@/*":["./src/*"],"@/src/*":["./src/*"]},"types":["react","react-native","jest","node"],"jsx":"react-native","skipLibCheck":true,"esModuleInterop":true},"include": ["**/*.ts","**/*.tsx","**/*.d.ts","./src/types/**/*.d.ts"],"exclude":["node_modules"]}
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/src/*": ["./src/*"],
+      "@/core/*": ["./src/core/*"],
+      "@/shared/*": ["./src/shared/*"],
+      "@/layout/*": ["./src/layout/*"],
+      "@/auth/*": ["./src/auth/*"],
+      "@/feed/*": ["./src/feed/*"],
+      "@/chat/*": ["./src/chat/*"],
+      "@/explore/*": ["./src/explore/*"],
+      "@/reels/*": ["./src/reels/*"],
+      "@/profile/*": ["./src/profile/*"],
+      "@/calls/*": ["./src/calls/*"],
+      "@/secondary/*": ["./src/secondary/*"]
+    },
+    "types": ["react", "react-native", "jest", "node"],
+    "jsx": "react-native",
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.d.ts",
+    "./src/types/**/*.d.ts",
+    "./src/shared/types/**/*.d.ts"
+  ],
+  "exclude": ["node_modules"]
+}
