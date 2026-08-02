@@ -1,3 +1,8 @@
+import type {
+  VoiceGenTargetLanguage,
+  VoiceTranslateTargetLanguage,
+} from "@whatschat/shared-types";
+
 export interface ITextGenerateService {
   postChatStream(
     messages: Array<{ role: string; content: string }>,
@@ -36,14 +41,14 @@ export interface IVideoGenerateService {
 export interface IVoiceGenerateService {
   generate(
     prompt: string,
-    targetLang?: string,
+    targetLang?: VoiceGenTargetLanguage,
   ): Promise<{
     success: boolean;
     data?: { audioUrl: string; text?: string };
   }>;
   translate(
     text: string,
-    targetLang: "zh" | "en",
+    targetLang: VoiceTranslateTargetLanguage,
   ): Promise<{
     success: boolean;
     data?: { translatedText: string };

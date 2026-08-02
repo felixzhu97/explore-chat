@@ -27,7 +27,11 @@ export type {
   Location,
 } from "./message";
 export { MessageTypeValues } from "./message";
-export type { Contact, GroupMember as ContactGroupMember, GroupMemberRole } from "./contact";
+export type {
+  Contact,
+  GroupMember as ContactGroupMember,
+  GroupMemberRole,
+} from "./contact";
 export type { Chat, ChatType } from "./chat";
 export type {
   Group,
@@ -37,3 +41,19 @@ export type {
   ParticipantRole,
 } from "./group";
 export type { Call, CallType, CallStatus } from "./call";
+export {
+  PrimaryDestinations,
+  type PrimaryDestination,
+} from "./primary-destination";
+export {
+  SearchScopes,
+  SearchUiScopes,
+  type SearchScope,
+  type SearchUiScope,
+} from "./search";
+export {
+  VoiceGenTargetLanguages,
+  VoiceTranslateTargetLanguages,
+  type VoiceGenTargetLanguage,
+  type VoiceTranslateTargetLanguage,
+} from "./voice-gen";

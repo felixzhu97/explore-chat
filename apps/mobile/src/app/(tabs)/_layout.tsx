@@ -1,13 +1,15 @@
-import React from 'react';
-import { Tabs, Redirect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LiquidGlassBar } from '@/src/presentation/components';
-import { useTheme } from '@/src/presentation/shared/theme';
-import { useTranslation } from '@/src/presentation/shared/i18n';
-import { useAuthStore } from '@/src/presentation/stores';
-import { styled } from '@/src/presentation/shared/emotion';
+import React from "react";
+import { Tabs, Redirect } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LiquidGlassBar } from "@/src/presentation/components";
+import { useTheme } from "@/src/presentation/shared/theme";
+import { useTranslation } from "@/src/presentation/shared/i18n";
+import { PrimaryDestinations } from "@whatschat/shared-types";
+import { useAuthStore } from "@/src/presentation/stores";
+import { styled } from "@/src/presentation/shared/emotion";
+import { MobilePrimaryDestinationTabs } from "@/src/presentation/shared/primary-destination-tabs";
 
 const TabButton = styled.TouchableOpacity`
   flex: 1;
@@ -24,7 +26,9 @@ const Pill = styled.View`
   bottom: 6px;
   border-radius: 18px;
   background-color: ${(p) =>
-    (p.theme as { isDark?: boolean })?.isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'};
+    (p.theme as { isDark?: boolean })?.isDark
+      ? "rgba(255,255,255,0.12)"
+      : "rgba(0,0,0,0.06)"};
 `;
 
 const TAB_BAR_HEIGHT = 64;
@@ -54,10 +58,10 @@ export default function TabsLayout() {
         tabBarLabelStyle: { fontSize: 12 },
         tabBarShowLabel: false,
         tabBarStyle: {
-          position: 'absolute',
+          position: "absolute",
           height: tabBarTotalHeight,
           paddingBottom: bottomInset,
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent",
           borderTopWidth: 0.5,
           borderTopColor: colors.separator,
           elevation: 0,
@@ -82,21 +86,25 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="status"
+        name={MobilePrimaryDestinationTabs[PrimaryDestinations.Feed]}
         options={{
-          title: t('tabs.status'),
+          title: t("tabs.status"),
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color} />
+            <Ionicons
+              name={focused ? "home" : "home-outline"}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
       <Tabs.Screen
-        name="reels"
+        name={MobilePrimaryDestinationTabs[PrimaryDestinations.Reels]}
         options={{
-          title: t('tabs.reels'),
+          title: t("tabs.reels"),
           tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
-              name={focused ? 'movie-open' : 'movie-open-outline'}
+              name={focused ? "movie-open" : "movie-open-outline"}
               size={size}
               color={color}
             />
@@ -104,12 +112,12 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="chats"
+        name={MobilePrimaryDestinationTabs[PrimaryDestinations.Chat]}
         options={{
-          title: t('tabs.chats'),
+          title: t("tabs.chats"),
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
-              name={focused ? 'paper-plane' : 'paper-plane-outline'}
+              name={focused ? "paper-plane" : "paper-plane-outline"}
               size={size}
               color={color}
             />
@@ -117,21 +125,25 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name={MobilePrimaryDestinationTabs[PrimaryDestinations.Explore]}
         options={{
-          title: t('tabs.explore'),
+          title: t("tabs.explore"),
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'search' : 'search-outline'} size={size} color={color} />
+            <Ionicons
+              name={focused ? "search" : "search-outline"}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name={MobilePrimaryDestinationTabs[PrimaryDestinations.User]}
         options={{
-          title: t('tabs.profile'),
+          title: t("tabs.profile"),
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
-              name={focused ? 'person-circle' : 'person-circle-outline'}
+              name={focused ? "person-circle" : "person-circle-outline"}
               size={size}
               color={color}
             />

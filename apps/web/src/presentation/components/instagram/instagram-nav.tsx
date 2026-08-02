@@ -13,7 +13,15 @@ import {
   Menu,
   Camera,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/src/presentation/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/src/presentation/components/ui/avatar";
+import {
+  PrimaryDestinations,
+  type PrimaryDestination,
+} from "@whatschat/shared-types";
 import type { User } from "@/shared/types";
 import { styled } from "@/src/shared/utils/emotion";
 import { useTranslation } from "@/src/shared/i18n";
@@ -154,7 +162,9 @@ const FlyoutRow = styled.li<{
   box-sizing: border-box;
   opacity: ${(p) => (p.$visible ? 1 : 0)};
   transform: translateX(${(p) => (p.$visible ? 0 : -12)}px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 `;
 
 const FlyoutBottom = styled.div`
@@ -177,7 +187,7 @@ const MetaLogo = styled.div`
 
 interface InstagramNavProps {
   user: User | null;
-  activeTab: "home" | "messages" | "profile" | "reels" | "explore" | "search";
+  activeTab: PrimaryDestination;
   onHomeClick: () => void;
   onMessagesClick: () => void;
   onProfileClick: () => void;
@@ -188,12 +198,13 @@ interface InstagramNavProps {
   onNotificationsClick?: () => void;
 }
 
-type TabKey = "home" | "messages" | "profile" | "reels" | "explore" | "search" | null;
+/** Platform-only: Create / Notifications are not Primary Destinations. */
+type DestinationTabKey = PrimaryDestination | null;
 
 interface NavEntry {
   id: number;
   label: string;
-  tab: TabKey;
+  tab: DestinationTabKey;
   Icon: LucideIcon;
   onClick?: () => void;
 }
@@ -215,11 +226,41 @@ export function InstagramNav({
   const [hovered, setHovered] = useState<number | null>(null);
 
   const mainItems: NavEntry[] = [
-    { id: 0, label: t("nav.home"), tab: "home", Icon: Home, onClick: onHomeClick },
-    { id: 1, label: t("nav.reels"), tab: "reels", Icon: Clapperboard, onClick: onReelsClick },
-    { id: 2, label: t("nav.messages"), tab: "messages", Icon: Send, onClick: onMessagesClick },
-    { id: 3, label: t("nav.search"), tab: "search", Icon: Search, onClick: onSearchClick },
-    { id: 4, label: t("nav.explore"), tab: "explore", Icon: Compass, onClick: onExploreClick },
+    {
+      id: 0,
+      label: t("nav.home"),
+      tab: PrimaryDestinations.Feed,
+      Icon: Home,
+      onClick: onHomeClick,
+    },
+    {
+      id: 1,
+      label: t("nav.reels"),
+      tab: PrimaryDestinations.Reels,
+      Icon: Clapperboard,
+      onClick: onReelsClick,
+    },
+    {
+      id: 2,
+      label: t("nav.messages"),
+      tab: PrimaryDestinations.Chat,
+      Icon: Send,
+      onClick: onMessagesClick,
+    },
+    {
+      id: 3,
+      label: t("nav.search"),
+      tab: PrimaryDestinations.Search,
+      Icon: Search,
+      onClick: onSearchClick,
+    },
+    {
+      id: 4,
+      label: t("nav.explore"),
+      tab: PrimaryDestinations.Explore,
+      Icon: Compass,
+      onClick: onExploreClick,
+    },
     {
       id: 5,
       label: t("nav.notifications"),
@@ -227,8 +268,20 @@ export function InstagramNav({
       Icon: Heart,
       onClick: onNotificationsClick,
     },
-    { id: 6, label: t("nav.create"), tab: null, Icon: SquarePlus, onClick: onCreateClick },
-    { id: 7, label: t("nav.profile"), tab: "profile", Icon: Heart, onClick: onProfileClick },
+    {
+      id: 6,
+      label: t("nav.create"),
+      tab: null,
+      Icon: SquarePlus,
+      onClick: onCreateClick,
+    },
+    {
+      id: 7,
+      label: t("nav.profile"),
+      tab: PrimaryDestinations.User,
+      Icon: Heart,
+      onClick: onProfileClick,
+    },
   ];
 
   const bottomItems: { id: number; label: string }[] = [
@@ -236,7 +289,7 @@ export function InstagramNav({
     { id: 9, label: t("nav.fromMeta") },
   ];
 
-  const active = (tab: TabKey) => tab !== null && activeTab === tab;
+  const active = (tab: DestinationTabKey) => tab !== null && activeTab === tab;
   const isHovered = (id: number) => hovered === id;
 
   return (
@@ -266,7 +319,9 @@ export function InstagramNav({
                 {id === 7 ? (
                   <Avatar style={{ width: 24, height: 24 }}>
                     <AvatarImage src={user?.avatar} />
-                    <AvatarFallback>{(user?.name ?? t("common.me"))[0]}</AvatarFallback>
+                    <AvatarFallback>
+                      {(user?.name ?? t("common.me"))[0]}
+                    </AvatarFallback>
                   </Avatar>
                 ) : (
                   <Icon

@@ -1,3 +1,4 @@
+import type { SearchScope } from "@whatschat/shared-types";
 import { IApiClient } from "../../../domain/interfaces/adapters/api-client.interface";
 
 export interface FeedEntryRes {
@@ -53,10 +54,11 @@ export class FeedApiAdapter {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("folder", folder);
-    const res = await this.api.upload<{ url: string; mimeType: string; size: number }>(
-      "/media/upload",
-      formData
-    );
+    const res = await this.api.upload<{
+      url: string;
+      mimeType: string;
+      size: number;
+    }>("/media/upload", formData);
     return (res as { data?: { url?: string } }).data;
   }
 
@@ -97,7 +99,15 @@ export class FeedApiAdapter {
     const variables: { limit: number; pageState?: string } = { limit };
     if (pageState) variables.pageState = pageState;
     const res = await this.api.post<unknown>("/graphql", { query, variables });
-    const body = res as { errors?: Array<{ message: string }>; data?: { feed?: { pageState?: string | null; entries?: Array<{ postId: string; post?: PostDetailRes | null }> } } };
+    const body = res as {
+      errors?: Array<{ message: string }>;
+      data?: {
+        feed?: {
+          pageState?: string | null;
+          entries?: Array<{ postId: string; post?: PostDetailRes | null }>;
+        };
+      };
+    };
     if (body.errors?.length) {
       throw new Error(body.errors[0]?.message ?? "GraphQL error");
     }
@@ -111,7 +121,10 @@ export class FeedApiAdapter {
   async getFeed(limit: number, pageState?: string) {
     const q = new URLSearchParams({ limit: String(limit) });
     if (pageState) q.set("pageState", pageState);
-    const res = await this.api.get<{ entries?: FeedEntryRes[]; pageState?: string }>(`/posts/feed?${q}`);
+    const res = await this.api.get<{
+      entries?: FeedEntryRes[];
+      pageState?: string;
+    }>(`/posts/feed?${q}`);
     return {
       entries: Array.isArray((res as any).entries) ? (res as any).entries : [],
       pageState: (res as any).pageState,
@@ -119,8 +132,14 @@ export class FeedApiAdapter {
   }
 
   async getExplore(limit: number = 20, offset: number = 0) {
-    const q = new URLSearchParams({ limit: String(limit), offset: String(offset) });
-    const res = await this.api.get<{ entries?: FeedEntryRes[]; total?: number }>(`/posts/explore?${q}`);
+    const q = new URLSearchParams({
+      limit: String(limit),
+      offset: String(offset),
+    });
+    const res = await this.api.get<{
+      entries?: FeedEntryRes[];
+      total?: number;
+    }>(`/posts/explore?${q}`);
     return {
       entries: Array.isArray((res as any).entries) ? (res as any).entries : [],
       total: (res as any).total ?? 0,
@@ -135,7 +154,9 @@ export class FeedApiAdapter {
   async getPostsByUser(userId: string, limit: number = 24, pageState?: string) {
     const q = new URLSearchParams({ limit: String(limit) });
     if (pageState) q.set("pageState", pageState);
-    const res = await this.api.get<unknown>(`/posts/user/${userId}?${q.toString()}`);
+    const res = await this.api.get<unknown>(
+      `/posts/user/${userId}?${q.toString()}`,
+    );
     const r = res as unknown as { posts?: unknown[]; pageState?: string };
     const posts = Array.isArray(r.posts) ? r.posts : [];
     return {
@@ -160,8 +181,17 @@ export class FeedApiAdapter {
     await this.api.delete(`/posts/${postId}/save`);
   }
 
-  async createPost(caption: string, type: string, mediaUrls?: string[], coverUrl?: string) {
-    const res = await this.api.post<{ postId: string; userId: string; createdAt: string }>("/posts", {
+  async createPost(
+    caption: string,
+    type: string,
+    mediaUrls?: string[],
+    coverUrl?: string,
+  ) {
+    const res = await this.api.post<{
+      postId: string;
+      userId: string;
+      createdAt: string;
+    }>("/posts", {
       caption,
       type: type || "TEXT",
       ...(mediaUrls?.length && { mediaUrls }),
@@ -172,16 +202,19 @@ export class FeedApiAdapter {
 
   async getComments(postId: string, page: number, limit: number) {
     const res = await this.api.get<CommentRes[]>(
-      `/posts/${postId}/comments?page=${page}&limit=${limit}`
+      `/posts/${postId}/comments?page=${page}&limit=${limit}`,
     );
     return Array.isArray((res as any).data) ? (res as any).data : [];
   }
 
   async addComment(postId: string, content: string, parentId?: string) {
-    const res = await this.api.post<{ id: string }>(`/posts/${postId}/comments`, {
-      content,
-      ...(parentId && { parentId }),
-    });
+    const res = await this.api.post<{ id: string }>(
+      `/posts/${postId}/comments`,
+      {
+        content,
+        ...(parentId && { parentId }),
+      },
+    );
     return res.data;
   }
 
@@ -194,7 +227,9 @@ export class FeedApiAdapter {
   }
 
   async checkFollowingUsers(userIds: string[]) {
-    const res = await this.api.post<{ data: Array<{ userId: string; isFollowing: boolean }> }>(`/users/following/check`, {
+    const res = await this.api.post<{
+      data: Array<{ userId: string; isFollowing: boolean }>;
+    }>(`/users/following/check`, {
       userIds,
     });
     return res.data?.data ?? [];
@@ -202,9 +237,9 @@ export class FeedApiAdapter {
 
   async search(
     q: string,
-    type: "users" | "posts" | "hashtags",
+    type: SearchScope,
     limit: number,
-    cursor?: string
+    cursor?: string,
   ): Promise<{ hits: unknown[]; nextCursor?: string; total?: number }> {
     const params = new URLSearchParams({
       q,
@@ -212,10 +247,14 @@ export class FeedApiAdapter {
       limit: String(limit),
     });
     if (cursor) params.set("cursor", cursor);
-    const res = await this.api.get<{ hits: unknown[]; nextCursor?: string; total?: number }>(
-      `/search?${params.toString()}`
-    );
-    const data = (res as { data?: { hits: unknown[]; nextCursor?: string; total?: number } }).data;
+    const res = await this.api.get<{
+      hits: unknown[];
+      nextCursor?: string;
+      total?: number;
+    }>(`/search?${params.toString()}`);
+    const data = (
+      res as { data?: { hits: unknown[]; nextCursor?: string; total?: number } }
+    ).data;
     return {
       hits: Array.isArray(data?.hits) ? data.hits : [],
       ...(data?.nextCursor != null && { nextCursor: data.nextCursor }),
@@ -224,34 +263,59 @@ export class FeedApiAdapter {
   }
 
   async getSuggestions(limit: number = 10) {
-    const res = await this.api.get<Array<{ id: string; username: string; avatar: string | null; description: string }>>(
-      `/users/suggestions?limit=${limit}`
-    );
-    return Array.isArray((res as { data?: unknown }).data) ? (res as { data: unknown[] }).data : [];
+    const res = await this.api.get<
+      Array<{
+        id: string;
+        username: string;
+        avatar: string | null;
+        description: string;
+      }>
+    >(`/users/suggestions?limit=${limit}`);
+    return Array.isArray((res as { data?: unknown }).data)
+      ? (res as { data: unknown[] }).data
+      : [];
   }
 
   async getFollowers(userId: string, limit: number = 20, pageState?: string) {
     const q = new URLSearchParams({ limit: String(limit) });
     if (pageState) q.set("pageState", pageState);
     const res = await this.api.get<{
-      data?: Array<{ id: string; username: string; avatar: string | null; isFollowing?: boolean }>;
+      data?: Array<{
+        id: string;
+        username: string;
+        avatar: string | null;
+        isFollowing?: boolean;
+      }>;
       total?: number;
       pageState?: string;
     }>(`/users/${userId}/followers?${q}`);
     const r = res as { data?: unknown[]; total?: number; pageState?: string };
-    return { list: Array.isArray(r.data) ? r.data : [], total: r.total ?? 0, pageState: r.pageState };
+    return {
+      list: Array.isArray(r.data) ? r.data : [],
+      total: r.total ?? 0,
+      pageState: r.pageState,
+    };
   }
 
   async getFollowing(userId: string, limit: number = 20, pageState?: string) {
     const q = new URLSearchParams({ limit: String(limit) });
     if (pageState) q.set("pageState", pageState);
     const res = await this.api.get<{
-      data?: Array<{ id: string; username: string; avatar: string | null; isFollowing?: boolean }>;
+      data?: Array<{
+        id: string;
+        username: string;
+        avatar: string | null;
+        isFollowing?: boolean;
+      }>;
       total?: number;
       pageState?: string;
     }>(`/users/${userId}/following?${q}`);
     const r = res as { data?: unknown[]; total?: number; pageState?: string };
-    return { list: Array.isArray(r.data) ? r.data : [], total: r.total ?? 0, pageState: r.pageState };
+    return {
+      list: Array.isArray(r.data) ? r.data : [],
+      total: r.total ?? 0,
+      pageState: r.pageState,
+    };
   }
 
   async getNotifications(limit: number = 20, cursor?: string) {
@@ -260,10 +324,13 @@ export class FeedApiAdapter {
     const res = await this.api.get<{
       data?: { items?: NotificationItemRes[]; nextCursor?: string };
     }>(`/notifications?${q}`);
-    const d = (res as { data?: { items?: NotificationItemRes[]; nextCursor?: string } }).data;
+    const d = (
+      res as { data?: { items?: NotificationItemRes[]; nextCursor?: string } }
+    ).data;
     return {
       items: Array.isArray(d?.items) ? d.items : [],
-      ...(d?.nextCursor != null && d.nextCursor !== "" && { nextCursor: d.nextCursor }),
+      ...(d?.nextCursor != null &&
+        d.nextCursor !== "" && { nextCursor: d.nextCursor }),
     };
   }
 
@@ -279,9 +346,16 @@ export class FeedApiAdapter {
     await this.api.post("/notifications/read-all", {});
   }
 
-  async getProfileStats(userId: string): Promise<{ followersCount: number; followingCount: number }> {
-    const res = await this.api.get<{ followersCount?: number; followingCount?: number }>(`/users/${userId}`);
-    const d = (res as { data?: { followersCount?: number; followingCount?: number } }).data;
+  async getProfileStats(
+    userId: string,
+  ): Promise<{ followersCount: number; followingCount: number }> {
+    const res = await this.api.get<{
+      followersCount?: number;
+      followingCount?: number;
+    }>(`/users/${userId}`);
+    const d = (
+      res as { data?: { followersCount?: number; followingCount?: number } }
+    ).data;
     return {
       followersCount: d?.followersCount ?? 0,
       followingCount: d?.followingCount ?? 0,

@@ -19,6 +19,10 @@ import {
   SelectValue,
 } from "@/src/presentation/components/ui/select";
 import ReactMarkdown from "react-markdown";
+import {
+  VoiceGenTargetLanguages,
+  type VoiceGenTargetLanguage,
+} from "@whatschat/shared-types";
 import type { IVoiceGenerateService } from "./dialog-services.types";
 import { Play, Pause } from "lucide-react";
 import { styled } from "@/src/shared/utils/emotion";
@@ -60,11 +64,13 @@ const PlayBtn = styled.button<{ $playing?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: ${({ $playing }) => ($playing ? "#25D366" : "rgb(229 231 235)")};
+  background-color: ${({ $playing }) =>
+    $playing ? "#25D366" : "rgb(229 231 235)"};
   color: ${({ $playing }) => ($playing ? "white" : "rgb(75 85 99)")};
   transition: background-color 0.15s ease;
   &:hover:not(:disabled) {
-    background-color: ${({ $playing }) => ($playing ? "#20BD5A" : "rgb(209 213 219)")};
+    background-color: ${({ $playing }) =>
+      $playing ? "#20BD5A" : "rgb(209 213 219)"};
   }
   &:disabled {
     cursor: not-allowed;
@@ -92,7 +98,7 @@ const ProgressFill = styled.div<{ widthPct: number }>`
   width: ${({ widthPct }) => widthPct}%;
   height: 100%;
   border-radius: 3px;
-  background-color: #25D366;
+  background-color: #25d366;
   transition: width 0.1s linear;
 `;
 
@@ -116,15 +122,41 @@ const GeneratedTextBlock = styled.div`
   max-height: 12rem;
   overflow-y: auto;
 
-  & h1, & h2, & h3 { font-weight: 600; margin: 0.75em 0 0.25em; }
-  & h1 { font-size: 1.125rem; }
-  & h2 { font-size: 1rem; }
-  & h3 { font-size: 0.9375rem; }
-  & p { margin: 0.5em 0; }
-  & ul, & ol { margin: 0.5em 0; padding-left: 1.5rem; }
-  & li { margin: 0.25em 0; }
-  & strong { font-weight: 600; }
-  & code { font-size: 0.8125rem; background: rgb(229 231 235); padding: 0.125rem 0.25rem; border-radius: 0.25rem; }
+  & h1,
+  & h2,
+  & h3 {
+    font-weight: 600;
+    margin: 0.75em 0 0.25em;
+  }
+  & h1 {
+    font-size: 1.125rem;
+  }
+  & h2 {
+    font-size: 1rem;
+  }
+  & h3 {
+    font-size: 0.9375rem;
+  }
+  & p {
+    margin: 0.5em 0;
+  }
+  & ul,
+  & ol {
+    margin: 0.5em 0;
+    padding-left: 1.5rem;
+  }
+  & li {
+    margin: 0.25em 0;
+  }
+  & strong {
+    font-weight: 600;
+  }
+  & code {
+    font-size: 0.8125rem;
+    background: rgb(229 231 235);
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+  }
 `;
 
 const TranslatedBlock = styled.div`
@@ -134,26 +166,47 @@ const TranslatedBlock = styled.div`
   background-color: rgb(243 244 246);
   font-size: 0.8125rem;
   color: rgb(75 85 99);
-  border-left: 3px solid #25D366;
+  border-left: 3px solid #25d366;
   max-height: 10rem;
   overflow-y: auto;
 
-  & h1, & h2, & h3 { font-weight: 600; margin: 0.5em 0 0.2em; font-size: inherit; }
-  & p { margin: 0.4em 0; }
-  & ul, & ol { margin: 0.4em 0; padding-left: 1.25rem; }
-  & li { margin: 0.2em 0; }
-  & strong { font-weight: 600; }
-  & code { font-size: 0.75rem; background: rgb(229 231 235); padding: 0.125rem 0.25rem; border-radius: 0.25rem; }
+  & h1,
+  & h2,
+  & h3 {
+    font-weight: 600;
+    margin: 0.5em 0 0.2em;
+    font-size: inherit;
+  }
+  & p {
+    margin: 0.4em 0;
+  }
+  & ul,
+  & ol {
+    margin: 0.4em 0;
+    padding-left: 1.25rem;
+  }
+  & li {
+    margin: 0.2em 0;
+  }
+  & strong {
+    font-weight: 600;
+  }
+  & code {
+    font-size: 0.75rem;
+    background: rgb(229 231 235);
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+  }
 `;
 
 const PrimaryButton = styled(Button)`
-  background-color: #25D366;
+  background-color: #25d366;
   color: white;
   border-radius: 24px;
   padding-left: 1.25rem;
   padding-right: 1.25rem;
   &:hover:not(:disabled) {
-    background-color: #20BD5A;
+    background-color: #20bd5a;
   }
 `;
 
@@ -171,8 +224,6 @@ interface VoiceGenerateDialogProps {
   service: IVoiceGenerateService;
 }
 
-type TargetLang = "auto" | "zh" | "en";
-
 function formatTime(s: number): string {
   const m = Math.floor(s / 60);
   const sec = Math.floor(s % 60);
@@ -187,7 +238,9 @@ export function VoiceGenerateDialog({
   service,
 }: VoiceGenerateDialogProps) {
   const [prompt, setPrompt] = useState("");
-  const [targetLang, setTargetLang] = useState<TargetLang>("auto");
+  const [targetLang, setTargetLang] = useState<VoiceGenTargetLanguage>(
+    VoiceGenTargetLanguages.Auto,
+  );
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -231,7 +284,10 @@ export function VoiceGenerateDialog({
     setStatus("生成中...");
     setIsSubmitting(true);
     try {
-      const res = await service.generate(prompt.trim(), targetLang === "auto" ? undefined : targetLang);
+      const res = await service.generate(
+        prompt.trim(),
+        targetLang === "auto" ? undefined : targetLang,
+      );
       setStatus("");
       setIsSubmitting(false);
       if (!res.success || !res.data?.audioUrl) {
@@ -305,7 +361,7 @@ export function VoiceGenerateDialog({
       setAudioUrl(null);
       setGeneratedText("");
       setTranslatedText("");
-      setTargetLang("auto");
+      setTargetLang(VoiceGenTargetLanguages.Auto);
       if (audioRef.current) {
         audioRef.current.pause();
       }
@@ -317,7 +373,10 @@ export function VoiceGenerateDialog({
   const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && handleClose()}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open: boolean) => !open && handleClose()}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>生成语音</DialogTitle>
@@ -336,7 +395,9 @@ export function VoiceGenerateDialog({
             <Label>播报语言</Label>
             <Select
               value={targetLang}
-              onValueChange={(v: string) => setTargetLang(v as TargetLang)}
+              onValueChange={(v: string) =>
+                setTargetLang(v as VoiceGenTargetLanguage)
+              }
               disabled={isSubmitting}
             >
               <SelectTrigger style={{ marginTop: "0.5rem", borderRadius: 12 }}>
@@ -351,7 +412,11 @@ export function VoiceGenerateDialog({
           </FormRow>
           {audioUrl ? (
             <>
-              <audio ref={audioRef} src={audioUrl} style={{ display: "none" }} />
+              <audio
+                ref={audioRef}
+                src={audioUrl}
+                style={{ display: "none" }}
+              />
               <AudioBarWrap>
                 <PlayBtn
                   type="button"
@@ -359,7 +424,11 @@ export function VoiceGenerateDialog({
                   onClick={togglePlay}
                   aria-label={isPlaying ? "暂停" : "播放"}
                 >
-                  {isPlaying ? <Pause size={18} /> : <Play size={18} style={{ marginLeft: 2 }} />}
+                  {isPlaying ? (
+                    <Pause size={18} />
+                  ) : (
+                    <Play size={18} style={{ marginLeft: 2 }} />
+                  )}
                 </PlayBtn>
                 <ProgressWrap>
                   <ProgressTrack onClick={handleSeek}>
@@ -377,7 +446,9 @@ export function VoiceGenerateDialog({
               <GeneratedTextBlock>
                 <ReactMarkdown>{generatedText}</ReactMarkdown>
               </GeneratedTextBlock>
-              <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem" }}>
+              <div
+                style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem" }}
+              >
                 <OutlineButton
                   variant="outline"
                   size="sm"
@@ -401,7 +472,8 @@ export function VoiceGenerateDialog({
                     {typeof translatedText === "string"
                       ? translatedText
                       : String(
-                          (translatedText as { translatedText?: string })?.translatedText ?? ""
+                          (translatedText as { translatedText?: string })
+                            ?.translatedText ?? "",
                         )}
                   </ReactMarkdown>
                 </TranslatedBlock>
@@ -412,7 +484,11 @@ export function VoiceGenerateDialog({
           {status ? <StatusText>{status}</StatusText> : null}
         </div>
         <DialogFooter>
-          <OutlineButton variant="outline" onClick={handleClose} disabled={isSubmitting}>
+          <OutlineButton
+            variant="outline"
+            onClick={handleClose}
+            disabled={isSubmitting}
+          >
             取消
           </OutlineButton>
           {audioUrl ? (
@@ -424,7 +500,9 @@ export function VoiceGenerateDialog({
               >
                 重新生成
               </OutlineButton>
-              <PrimaryButton onClick={handleSendToChat}>发送到聊天</PrimaryButton>
+              <PrimaryButton onClick={handleSendToChat}>
+                发送到聊天
+              </PrimaryButton>
             </>
           ) : (
             <PrimaryButton
