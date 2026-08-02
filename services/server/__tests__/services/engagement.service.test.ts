@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { EngagementService } from "@/application/services/engagement.service";
-import { NotificationService } from "@/application/services/notification.service";
-import { ChatGateway } from "@/presentation/websocket/chat.gateway";
+import { EngagementService } from "@/post/application/engagement.service";
+import { NotificationService } from "@/notifications/application/notification.service";
+import { ChatGateway } from "@/websocket/presentation/chat.gateway";
 
 describe("EngagementService", () => {
   let service: EngagementService;
@@ -35,7 +35,9 @@ describe("EngagementService", () => {
       unsave: vi.fn().mockResolvedValue(true),
       isLiked: vi.fn().mockResolvedValue(false),
       isSaved: vi.fn().mockResolvedValue(false),
-      getEngagementCounts: vi.fn().mockResolvedValue({ likeCount: 1, commentCount: 0, saveCount: 0 }),
+      getEngagementCounts: vi
+        .fn()
+        .mockResolvedValue({ likeCount: 1, commentCount: 0, saveCount: 0 }),
     };
 
     mockPostRepo = {
@@ -64,7 +66,7 @@ describe("EngagementService", () => {
       mockEngagementRepo as never,
       mockPostRepo as never,
       mockNotificationService as never,
-      mockChatGateway as never
+      mockChatGateway as never,
     );
   });
 
@@ -122,8 +124,14 @@ describe("EngagementService", () => {
     it("should unlike post and delete notification", async () => {
       const result = await service.unlike("user-1", "post-1");
 
-      expect(mockEngagementRepo.unlike).toHaveBeenCalledWith("user-1", "post-1");
-      expect(mockNotificationService.deleteLike).toHaveBeenCalledWith("user-1", "post-1");
+      expect(mockEngagementRepo.unlike).toHaveBeenCalledWith(
+        "user-1",
+        "post-1",
+      );
+      expect(mockNotificationService.deleteLike).toHaveBeenCalledWith(
+        "user-1",
+        "post-1",
+      );
       expect(result.isLiked).toBe(false);
     });
   });
@@ -163,7 +171,10 @@ describe("EngagementService", () => {
     it("should unsave post", async () => {
       const result = await service.unsave("user-1", "post-1");
 
-      expect(mockEngagementRepo.unsave).toHaveBeenCalledWith("user-1", "post-1");
+      expect(mockEngagementRepo.unsave).toHaveBeenCalledWith(
+        "user-1",
+        "post-1",
+      );
       expect(result.isSaved).toBe(false);
     });
   });
@@ -172,7 +183,9 @@ describe("EngagementService", () => {
     it("should return engagement counts", async () => {
       const result = await service.getEngagementCounts("post-1");
 
-      expect(mockEngagementRepo.getEngagementCounts).toHaveBeenCalledWith("post-1");
+      expect(mockEngagementRepo.getEngagementCounts).toHaveBeenCalledWith(
+        "post-1",
+      );
       expect(result).toEqual({ likeCount: 1, commentCount: 0, saveCount: 0 });
     });
   });
@@ -183,7 +196,10 @@ describe("EngagementService", () => {
 
       const result = await service.isLiked("user-1", "post-1");
 
-      expect(mockEngagementRepo.isLiked).toHaveBeenCalledWith("user-1", "post-1");
+      expect(mockEngagementRepo.isLiked).toHaveBeenCalledWith(
+        "user-1",
+        "post-1",
+      );
       expect(result).toBe(true);
     });
   });
@@ -194,7 +210,10 @@ describe("EngagementService", () => {
 
       const result = await service.isSaved("user-1", "post-1");
 
-      expect(mockEngagementRepo.isSaved).toHaveBeenCalledWith("user-1", "post-1");
+      expect(mockEngagementRepo.isSaved).toHaveBeenCalledWith(
+        "user-1",
+        "post-1",
+      );
       expect(result).toBe(true);
     });
   });

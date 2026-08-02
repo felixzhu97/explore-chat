@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { CassandraPostRepository } from "@/infrastructure/database/cassandra-post.repository";
+import { CassandraPostRepository } from "@/core/database/cassandra-post.repository";
 
 describe("CassandraPostRepository", () => {
   beforeEach(() => {

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { validate } from "class-validator";
 import { plainToInstance } from "class-transformer";
-import { GetUsersDto, UpdateUserDto } from "@/application/dto/user.dto";
+import { GetUsersDto, UpdateUserDto } from "@/users/application/user.dto";
 
 describe("GetUsersDto", () => {
   it("should pass with valid default values", async () => {
@@ -55,7 +55,9 @@ describe("UpdateUserDto", () => {
   });
 
   it("should pass with valid avatar url", async () => {
-    const dto = plainToInstance(UpdateUserDto, { avatar: "https://example.com/avatar.jpg" });
+    const dto = plainToInstance(UpdateUserDto, {
+      avatar: "https://example.com/avatar.jpg",
+    });
     const errors = await validate(dto);
     expect(errors.length).toBe(0);
   });

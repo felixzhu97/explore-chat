@@ -1,8 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NotFoundException, BadRequestException } from "@nestjs/common";
-import { UsersService, GetUsersOptions, UpdateUserData } from "@/application/services/users.service";
-import { PrismaService } from "@/infrastructure/database/prisma.service";
-import { ElasticsearchService } from "@/infrastructure/database/elasticsearch.service";
+import {
+  UsersService,
+  GetUsersOptions,
+  UpdateUserData,
+} from "@/users/application/users.service";
+import { PrismaService } from "@/core/database/prisma.service";
+import { ElasticsearchService } from "@/core/database/elasticsearch.service";
 
 describe("UsersService", () => {
   let usersService: UsersService;
@@ -47,7 +51,7 @@ describe("UsersService", () => {
 
     usersService = new UsersService(
       mockPrisma as PrismaService,
-      mockElasticsearch as ElasticsearchService
+      mockElasticsearch as ElasticsearchService,
     );
   });
 
@@ -85,7 +89,7 @@ describe("UsersService", () => {
         expect.objectContaining({
           skip: 20,
           take: 10,
-        })
+        }),
       );
     });
 
@@ -104,12 +108,14 @@ describe("UsersService", () => {
               { phone: expect.objectContaining({ contains: "test" }) },
             ]),
           }),
-        })
+        }),
       );
     });
 
     it("should return correct total pages", async () => {
-      mockPrisma.user!.findMany = vi.fn().mockResolvedValue(Array(10).fill(mockUser));
+      mockPrisma.user!.findMany = vi
+        .fn()
+        .mockResolvedValue(Array(10).fill(mockUser));
       mockPrisma.user!.count = vi.fn().mockResolvedValue(45);
 
       const result = await usersService.getUsers({ page: 1, limit: 10 });
@@ -131,10 +137,10 @@ describe("UsersService", () => {
       mockPrisma.user!.findUnique = vi.fn().mockResolvedValue(null);
 
       await expect(usersService.getUserById("non-existent")).rejects.toThrow(
-        NotFoundException
+        NotFoundException,
       );
       await expect(usersService.getUserById("non-existent")).rejects.toThrow(
-        "用户不存在"
+        "用户不存在",
       );
     });
   });
@@ -151,7 +157,10 @@ describe("UsersService", () => {
 
       expect(result).toBeInstanceOf(Map);
       expect(result.get("user-1")).toEqual({ username: "user1", avatar: null });
-      expect(result.get("user-2")).toEqual({ username: "user2", avatar: "avatar.jpg" });
+      expect(result.get("user-2")).toEqual({
+        username: "user2",
+        avatar: "avatar.jpg",
+      });
     });
 
     it("should return empty map for empty input", async () => {
@@ -170,7 +179,7 @@ describe("UsersService", () => {
       expect(mockPrisma.user!.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: { in: ["user-1"] } },
-        })
+        }),
       );
     });
   });
@@ -187,7 +196,9 @@ describe("UsersService", () => {
     it("should update user successfully", async () => {
       mockPrisma.user!.findUnique = vi.fn().mockResolvedValue(mockUser);
       mockPrisma.user!.findFirst = vi.fn().mockResolvedValue(null);
-      mockPrisma.user!.update = vi.fn().mockResolvedValue({ ...mockUser, ...updateData });
+      mockPrisma.user!.update = vi
+        .fn()
+        .mockResolvedValue({ ...mockUser, ...updateData });
       mockElasticsearch.indexUser = vi.fn().mockResolvedValue(undefined);
 
       const result = await usersService.updateUser("user-1", updateData);
@@ -199,20 +210,22 @@ describe("UsersService", () => {
     it("should throw NotFoundException when user not found", async () => {
       mockPrisma.user!.findUnique = vi.fn().mockResolvedValue(null);
 
-      await expect(usersService.updateUser("non-existent", updateData)).rejects.toThrow(
-        NotFoundException
-      );
+      await expect(
+        usersService.updateUser("non-existent", updateData),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it("should throw BadRequestException when username is taken", async () => {
       mockPrisma.user!.findUnique = vi.fn().mockResolvedValue(mockUser);
-      mockPrisma.user!.findFirst = vi.fn().mockResolvedValue({ id: "user-2", username: "taken" });
+      mockPrisma.user!.findFirst = vi
+        .fn()
+        .mockResolvedValue({ id: "user-2", username: "taken" });
 
       await expect(
-        usersService.updateUser("user-1", { username: "taken" })
+        usersService.updateUser("user-1", { username: "taken" }),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        usersService.updateUser("user-1", { username: "taken" })
+        usersService.updateUser("user-1", { username: "taken" }),
       ).rejects.toThrow("用户名、邮箱或手机号已被使用");
     });
 
@@ -229,7 +242,7 @@ describe("UsersService", () => {
           data: expect.objectContaining({
             status: "busy",
           }),
-        })
+        }),
       );
     });
   });
@@ -250,7 +263,7 @@ describe("UsersService", () => {
       mockPrisma.user!.findUnique = vi.fn().mockResolvedValue(null);
 
       await expect(usersService.deleteUser("non-existent")).rejects.toThrow(
-        NotFoundException
+        NotFoundException,
       );
     });
   });
@@ -268,22 +281,22 @@ describe("UsersService", () => {
 
     it("should throw BadRequestException when blocking self", async () => {
       await expect(usersService.blockUser("user-1", "user-1")).rejects.toThrow(
-        BadRequestException
+        BadRequestException,
       );
       await expect(usersService.blockUser("user-1", "user-1")).rejects.toThrow(
-        "不能阻止自己"
+        "不能阻止自己",
       );
     });
 
     it("should throw NotFoundException when blocked user not found", async () => {
       mockPrisma.user!.findUnique = vi.fn().mockResolvedValue(null);
 
-      await expect(usersService.blockUser("user-1", "non-existent")).rejects.toThrow(
-        NotFoundException
-      );
-      await expect(usersService.blockUser("user-1", "non-existent")).rejects.toThrow(
-        "要阻止的用户不存在"
-      );
+      await expect(
+        usersService.blockUser("user-1", "non-existent"),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        usersService.blockUser("user-1", "non-existent"),
+      ).rejects.toThrow("要阻止的用户不存在");
     });
 
     it("should throw BadRequestException when user already blocked", async () => {
@@ -291,10 +304,10 @@ describe("UsersService", () => {
       mockPrisma.blockedUser!.findUnique = vi.fn().mockResolvedValue({});
 
       await expect(usersService.blockUser("user-1", "user-2")).rejects.toThrow(
-        BadRequestException
+        BadRequestException,
       );
       await expect(usersService.blockUser("user-1", "user-2")).rejects.toThrow(
-        "该用户已被阻止"
+        "该用户已被阻止",
       );
     });
   });
@@ -312,12 +325,12 @@ describe("UsersService", () => {
     it("should throw NotFoundException when user is not blocked", async () => {
       mockPrisma.blockedUser!.findUnique = vi.fn().mockResolvedValue(null);
 
-      await expect(usersService.unblockUser("user-1", "user-2")).rejects.toThrow(
-        NotFoundException
-      );
-      await expect(usersService.unblockUser("user-1", "user-2")).rejects.toThrow(
-        "该用户未被阻止"
-      );
+      await expect(
+        usersService.unblockUser("user-1", "user-2"),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        usersService.unblockUser("user-1", "user-2"),
+      ).rejects.toThrow("该用户未被阻止");
     });
   });
 });

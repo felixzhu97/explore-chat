@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { PostRepositoryAdapter } from "@/infrastructure/adapters/repositories/post-repository.adapter";
-import { CassandraPostRepository } from "@/infrastructure/database/cassandra-post.repository";
+import { PostRepositoryAdapter } from "@/post/infrastructure/post-repository.adapter";
+import { CassandraPostRepository } from "@/core/database/cassandra-post.repository";
 
 describe("PostRepositoryAdapter", () => {
   let adapter: PostRepositoryAdapter;
@@ -70,14 +70,22 @@ describe("PostRepositoryAdapter", () => {
 
       const result = await adapter.getPostsByUserId("user-1", 10);
 
-      expect(mockImpl.getPostsByUserId).toHaveBeenCalledWith("user-1", 10, undefined);
+      expect(mockImpl.getPostsByUserId).toHaveBeenCalledWith(
+        "user-1",
+        10,
+        undefined,
+      );
       expect(result).toEqual(posts);
     });
 
     it("should pass pageState when provided", async () => {
       await adapter.getPostsByUserId("user-1", 10, "current-page");
 
-      expect(mockImpl.getPostsByUserId).toHaveBeenCalledWith("user-1", 10, "current-page");
+      expect(mockImpl.getPostsByUserId).toHaveBeenCalledWith(
+        "user-1",
+        10,
+        "current-page",
+      );
     });
   });
 

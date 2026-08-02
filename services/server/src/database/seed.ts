@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import uniqBy from "lodash/uniqBy";
 import { prisma } from "./client";
-import { ConfigService } from "../infrastructure/config/config.service";
+import { ConfigService } from "@/core/config/config.service";
 import { seedPosts } from "./seed-posts";
 import logger from "@/shared/utils/logger";
 

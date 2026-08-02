@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
-import { PostService } from "@/application/services/post.service";
-import type { IPostRepository } from "@/domain/interfaces/repositories/post.repository.interface";
-import type { IEngagementRepository } from "@/domain/interfaces/repositories/engagement.repository.interface";
-import { ElasticsearchService } from "@/infrastructure/database/elasticsearch.service";
-import { KafkaProducerService } from "@/infrastructure/messaging/kafka-producer.service";
-import { UsersService } from "@/application/services/users.service";
-import { AiService } from "@/application/services/ai.service";
-import { VisionClientService } from "@/application/services/vision-client.service";
+import { PostService } from "@/post/application/post.service";
+import type { IPostRepository } from "@/post/domain/post.repository.interface";
+import type { IEngagementRepository } from "@/post/domain/engagement.repository.interface";
+import { ElasticsearchService } from "@/core/database/elasticsearch.service";
+import { KafkaProducerService } from "@/core/messaging/kafka-producer.service";
+import { UsersService } from "@/users/application/users.service";
+import { AiService } from "@/ai/application/ai.service";
+import { VisionClientService } from "@/ai/application/vision-client.service";
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => ({
       vision: { enabled: true, moderationEnabled: true, maxImagesPerPost: 10 },
@@ -17,33 +17,33 @@ vi.mock("@/infrastructure/config/config.service", () => ({
   },
 }));
 
-vi.mock("@/infrastructure/database/elasticsearch.service", () => ({
+vi.mock("@/core/database/elasticsearch.service", () => ({
   ElasticsearchService: vi.fn().mockImplementation(() => ({
     getClient: vi.fn().mockReturnValue(null),
   })),
 }));
 
-vi.mock("@/infrastructure/messaging/kafka-producer.service", () => ({
+vi.mock("@/core/messaging/kafka-producer.service", () => ({
   KafkaProducerService: vi.fn().mockImplementation(() => ({
     sendPostCreated: vi.fn().mockResolvedValue(undefined),
     sendPostDeleted: vi.fn().mockResolvedValue(undefined),
   })),
 }));
 
-vi.mock("@/application/services/users.service", () => ({
+vi.mock("@/users/application/users.service", () => ({
   UsersService: vi.fn().mockImplementation(() => ({
     getUserById: vi.fn(),
     getUsersByIds: vi.fn(),
   })),
 }));
 
-vi.mock("@/application/services/ai.service", () => ({
+vi.mock("@/ai/application/ai.service", () => ({
   AiService: vi.fn().mockImplementation(() => ({
     moderateText: vi.fn(),
   })),
 }));
 
-vi.mock("@/application/services/vision-client.service", () => ({
+vi.mock("@/ai/application/vision-client.service", () => ({
   VisionClientService: vi.fn().mockImplementation(() => ({
     moderateFromUrl: vi.fn(),
     moderateVideoFromUrl: vi.fn(),
@@ -109,8 +109,12 @@ describe("PostService", () => {
     };
 
     mockVisionClient = {
-      moderateFromUrl: vi.fn().mockResolvedValue({ safe: true, categories: [] }),
-      moderateVideoFromUrl: vi.fn().mockResolvedValue({ safe: true, categories: [] }),
+      moderateFromUrl: vi
+        .fn()
+        .mockResolvedValue({ safe: true, categories: [] }),
+      moderateVideoFromUrl: vi
+        .fn()
+        .mockResolvedValue({ safe: true, categories: [] }),
     };
 
     postService = new PostService(
@@ -120,7 +124,7 @@ describe("PostService", () => {
       mockKafka as KafkaProducerService,
       mockUsersService as UsersService,
       mockAiService as AiService,
-      mockVisionClient as VisionClientService
+      mockVisionClient as VisionClientService,
     );
   });
 
@@ -145,21 +149,23 @@ describe("PostService", () => {
           userId: "user-1",
           caption: "Test post",
           type: "IMAGE",
-        })
+        }),
       );
     });
 
     it("should throw BadRequestException for unsafe content", async () => {
       mockAiService.moderateText = vi.fn().mockResolvedValue({ safe: false });
 
-      await expect(postService.createPost("user-1", createPostData)).rejects.toThrow(
-        BadRequestException
-      );
+      await expect(
+        postService.createPost("user-1", createPostData),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it("should moderate images before posting", async () => {
       mockPostRepo.insertPost = vi.fn().mockResolvedValue(undefined);
-      mockVisionClient.moderateFromUrl = vi.fn().mockResolvedValue({ safe: true, categories: [] });
+      mockVisionClient.moderateFromUrl = vi
+        .fn()
+        .mockResolvedValue({ safe: true, categories: [] });
 
       await postService.createPost("user-1", createPostData);
 
@@ -174,7 +180,7 @@ describe("PostService", () => {
       expect(mockPostRepo.insertPost).toHaveBeenCalledWith(
         expect.objectContaining({
           location: "New York",
-        })
+        }),
       );
     });
 
@@ -187,7 +193,7 @@ describe("PostService", () => {
         expect.objectContaining({
           userId: "user-1",
           caption: "Test post",
-        })
+        }),
       );
     });
 
@@ -222,7 +228,9 @@ describe("PostService", () => {
     it("should throw NotFoundException when post not found", async () => {
       mockPostRepo.getPostById = vi.fn().mockResolvedValue(null);
 
-      await expect(postService.getPost("nonexistent")).rejects.toThrow(NotFoundException);
+      await expect(postService.getPost("nonexistent")).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it("should include user interaction status when currentUserId provided", async () => {
@@ -238,7 +246,9 @@ describe("PostService", () => {
 
     it("should handle missing author gracefully", async () => {
       mockPostRepo.getPostById = vi.fn().mockResolvedValue(mockPostRow);
-      mockUsersService.getUserById = vi.fn().mockRejectedValue(new Error("User not found"));
+      mockUsersService.getUserById = vi
+        .fn()
+        .mockRejectedValue(new Error("User not found"));
 
       const result = await postService.getPost("post-1");
 
@@ -250,9 +260,11 @@ describe("PostService", () => {
   describe("getPostsBatch", () => {
     it("should return batch of posts with enrichment", async () => {
       mockPostRepo.getPostById = vi.fn().mockResolvedValue(mockPostRow);
-      mockUsersService.getUsersByIds = vi.fn().mockResolvedValue(
-        new Map([["user-1", { username: "testuser", avatar: null }]])
-      );
+      mockUsersService.getUsersByIds = vi
+        .fn()
+        .mockResolvedValue(
+          new Map([["user-1", { username: "testuser", avatar: null }]]),
+        );
 
       const result = await postService.getPostsBatch(["post-1"]);
 
@@ -286,7 +298,9 @@ describe("PostService", () => {
       mockUsersService.getUsersByIds = vi.fn().mockResolvedValue(new Map());
       mockElasticsearch.getClient = vi.fn().mockReturnValue({
         mget: vi.fn().mockResolvedValue({
-          docs: [{ _id: "post-1", _source: { autoTags: ["nature", "travel"] } }],
+          docs: [
+            { _id: "post-1", _source: { autoTags: ["nature", "travel"] } },
+          ],
         }),
       });
 
@@ -344,16 +358,16 @@ describe("PostService", () => {
     it("should throw NotFoundException when post not found", async () => {
       mockPostRepo.getPostById = vi.fn().mockResolvedValue(null);
 
-      await expect(postService.deletePost("nonexistent", "user-1")).rejects.toThrow(
-        NotFoundException
-      );
+      await expect(
+        postService.deletePost("nonexistent", "user-1"),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it("should throw NotFoundException when user is not owner", async () => {
       mockPostRepo.getPostById = vi.fn().mockResolvedValue(mockPostRow);
 
       await expect(postService.deletePost("post-1", "user-2")).rejects.toThrow(
-        NotFoundException
+        NotFoundException,
       );
     });
   });

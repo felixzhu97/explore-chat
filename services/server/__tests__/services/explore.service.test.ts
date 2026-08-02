@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { ExploreService } from "@/application/services/explore.service";
-import { RecommendationService } from "@/application/services/recommendation.service";
-import { ExperimentService } from "@/application/services/experiment.service";
-import { AdService } from "@/application/services/ad.service";
+import { ExploreService } from "@/post/application/explore.service";
+import { RecommendationService } from "@/post/application/recommendation.service";
+import { ExperimentService } from "@/analytics/application/experiment.service";
+import { AdService } from "@/ads/application/ad.service";
 
 describe("ExploreService", () => {
   let service: ExploreService;
@@ -45,10 +45,9 @@ describe("ExploreService", () => {
         findMany: vi.fn().mockResolvedValue([]),
       },
       user: {
-        findMany: vi.fn().mockResolvedValue([
-          { id: "user-1" },
-          { id: "user-2" },
-        ]),
+        findMany: vi
+          .fn()
+          .mockResolvedValue([{ id: "user-1" }, { id: "user-2" }]),
       },
     };
 
@@ -74,7 +73,9 @@ describe("ExploreService", () => {
     };
 
     mockExperiments = {
-      assign: vi.fn().mockReturnValue({ experimentId: "exp-1", variantId: "var-1" }),
+      assign: vi
+        .fn()
+        .mockReturnValue({ experimentId: "exp-1", variantId: "var-1" }),
     };
 
     mockAds = {
@@ -88,14 +89,18 @@ describe("ExploreService", () => {
       mockPostRepo as never,
       mockRecommendation as never,
       mockExperiments as never,
-      mockAds as never
+      mockAds as never,
     );
   });
 
   describe("getExplore", () => {
     it("should return explore feed from cache", async () => {
       const cachedEntries = [
-        { postId: "post-1", authorId: "author-1", createdAt: "2024-01-01T00:00:00Z" },
+        {
+          postId: "post-1",
+          authorId: "author-1",
+          createdAt: "2024-01-01T00:00:00Z",
+        },
       ];
       mockRedis.get.mockResolvedValue(cachedEntries);
       mockRecommendation.rankExplore.mockResolvedValue({
@@ -110,11 +115,21 @@ describe("ExploreService", () => {
 
     it("should filter out followed users' posts", async () => {
       const cachedEntries = [
-        { postId: "post-1", authorId: "user-1", createdAt: "2024-01-01T00:00:00Z" },
-        { postId: "post-2", authorId: "user-2", createdAt: "2024-01-01T00:00:00Z" },
+        {
+          postId: "post-1",
+          authorId: "user-1",
+          createdAt: "2024-01-01T00:00:00Z",
+        },
+        {
+          postId: "post-2",
+          authorId: "user-2",
+          createdAt: "2024-01-01T00:00:00Z",
+        },
       ];
       mockRedis.get.mockResolvedValue(cachedEntries);
-      mockPrisma.userFollow.findMany.mockResolvedValue([{ followingId: "user-1" }]);
+      mockPrisma.userFollow.findMany.mockResolvedValue([
+        { followingId: "user-1" },
+      ]);
       mockRecommendation.rankExplore.mockResolvedValue({
         items: [{ id: "post-2", score: 1 }],
       });

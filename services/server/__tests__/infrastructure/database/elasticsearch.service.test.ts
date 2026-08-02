@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ElasticsearchService } from "@/infrastructure/database/elasticsearch.service";
-import { ConfigService } from "@/infrastructure/config/config.service";
+import { ElasticsearchService } from "@/core/database/elasticsearch.service";
+import { ConfigService } from "@/core/config/config.service";
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => ({
       elasticsearch: {
@@ -52,7 +52,7 @@ describe("ElasticsearchService", () => {
           id: "user-1",
           username: "testuser",
           createdAt: "2024-01-01",
-        })
+        }),
       ).resolves.not.toThrow();
     });
   });

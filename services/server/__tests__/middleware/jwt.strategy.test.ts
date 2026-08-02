@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ExecutionContext, UnauthorizedException } from "@nestjs/common";
-import { JwtStrategy, JwtPayload } from "@/presentation/auth/jwt.strategy";
-import { ConfigService } from "@/infrastructure/config/config.service";
+import { JwtStrategy, JwtPayload } from "@/auth/presentation/jwt.strategy";
+import { ConfigService } from "@/core/config/config.service";
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => ({
       jwt: {
@@ -96,7 +96,7 @@ describe("JwtStrategy", () => {
       expect(mockCache.set).toHaveBeenCalledWith(
         "jwt:user:user-123",
         mockUser,
-        60
+        60,
       );
     });
 
@@ -105,7 +105,7 @@ describe("JwtStrategy", () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
 
       await expect(jwtStrategy.validate(payload)).rejects.toThrow(
-        UnauthorizedException
+        UnauthorizedException,
       );
       await expect(jwtStrategy.validate(payload)).rejects.toThrow("用户不存在");
     });

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { of } from "rxjs";
-import { TransformInterceptor } from "@/presentation/interceptors/transform.interceptor";
+import { TransformInterceptor } from "@/core/interceptors/transform.interceptor";
 
 describe("TransformInterceptor", () => {
   let interceptor: TransformInterceptor<any>;

@@ -1,6 +1,6 @@
 import { Client } from "@elastic/elasticsearch";
 import { PrismaClient } from "@prisma/client";
-import { ConfigService } from "../infrastructure/config/config.service";
+import { ConfigService } from "@/core/config/config.service";
 
 const config = ConfigService.loadConfig();
 const prisma = new PrismaClient();

@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { TransformInterceptor, Response } from "@/presentation/interceptors/transform.interceptor";
+import {
+  TransformInterceptor,
+  Response,
+} from "@/core/interceptors/transform.interceptor";
 import { ExecutionContext, CallHandler } from "@nestjs/common";
 import { of } from "rxjs";
 
@@ -61,7 +64,10 @@ describe("TransformInterceptor", () => {
 
     it("should preserve existing success structure and add timestamp", async () => {
       const context = createMockExecutionContext();
-      const next = createMockCallHandler({ success: true, message: "Custom message" });
+      const next = createMockCallHandler({
+        success: true,
+        message: "Custom message",
+      });
 
       const result = interceptor.intercept(context, next);
       const value = await subscribeToObservable<Response<any>>(result);

@@ -5,6 +5,8 @@ LAYOUT_WITH_LEGEND()
 
 title 组件图 (C3) - API 服务（NestJS）
 
+' Nest packages by business domain (auth/, users/, post/, …) with Clean Architecture layers inside each domain.
+
 Container_Boundary(api_server, "API 服务") {
   Component(controllers, "REST 控制器", "NestJS", "auth、users、posts（含 explore）、search、media、ai/explore、admin、ads、analytics、health 等")
   Component(graphql_api, "GraphQL", "Apollo", "feed / reels；JWT；路径 /api/v1/graphql")

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { VoiceService } from "@/application/services/voice.service";
+import { VoiceService } from "@/ai/application/voice.service";
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => ({
       voice: {
@@ -29,9 +29,7 @@ describe("VoiceService", () => {
 
   describe("generate", () => {
     it("should throw BadRequestException when voice generation not configured", async () => {
-      await expect(
-        service.generate({ prompt: "say hello" })
-      ).rejects.toThrow();
+      await expect(service.generate({ prompt: "say hello" })).rejects.toThrow();
     });
   });
 
@@ -39,7 +37,10 @@ describe("VoiceService", () => {
     it("should translate text to Chinese", async () => {
       mockAiService.chat.mockResolvedValue({ content: "你好世界" });
 
-      const result = await service.translate({ text: "Hello world", targetLang: "zh" });
+      const result = await service.translate({
+        text: "Hello world",
+        targetLang: "zh",
+      });
 
       expect(result.translatedText).toBe("你好世界");
     });
@@ -47,7 +48,10 @@ describe("VoiceService", () => {
     it("should translate text to English", async () => {
       mockAiService.chat.mockResolvedValue({ content: "Hello world" });
 
-      const result = await service.translate({ text: "你好世界", targetLang: "en" });
+      const result = await service.translate({
+        text: "你好世界",
+        targetLang: "en",
+      });
 
       expect(result.translatedText).toBe("Hello world");
     });

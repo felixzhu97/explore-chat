@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { FeedCacheService } from "@/infrastructure/cache/feed-cache.service";
-import { CacheService } from "@/infrastructure/cache/cache.service";
-import { CassandraFeedRepository } from "@/infrastructure/database/cassandra-feed.repository";
+import { FeedCacheService } from "@/core/cache/feed-cache.service";
+import { CacheService } from "@/core/cache/cache.service";
+import { CassandraFeedRepository } from "@/core/database/cassandra-feed.repository";
 
 describe("FeedCacheService", () => {
   beforeEach(() => {
@@ -54,7 +54,11 @@ describe("FeedCacheService", () => {
       const mockFeedRepo = {
         getFeedPage: vi.fn().mockResolvedValue({
           entries: [
-            { post_id: "post-1", author_id: "author-1", created_at: new Date() },
+            {
+              post_id: "post-1",
+              author_id: "author-1",
+              created_at: new Date(),
+            },
           ],
         }),
       } as never;
@@ -63,7 +67,11 @@ describe("FeedCacheService", () => {
       const result = await service.getFeedPage("user-1", 10);
 
       expect(result.entries).toHaveLength(1);
-      expect(mockFeedRepo.getFeedPage).toHaveBeenCalledWith("user-1", 10, undefined);
+      expect(mockFeedRepo.getFeedPage).toHaveBeenCalledWith(
+        "user-1",
+        10,
+        undefined,
+      );
       expect(mockCacheService.set).toHaveBeenCalled();
     });
 
@@ -105,7 +113,11 @@ describe("FeedCacheService", () => {
       const mockFeedRepo = {
         getFeedPage: vi.fn().mockResolvedValue({
           entries: [
-            { post_id: "post-1", author_id: "author-1", created_at: new Date() },
+            {
+              post_id: "post-1",
+              author_id: "author-1",
+              created_at: new Date(),
+            },
           ],
           pageState: "next-page",
         }),

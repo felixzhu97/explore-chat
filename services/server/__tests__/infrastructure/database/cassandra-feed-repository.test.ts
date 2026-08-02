@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { CassandraFeedRepository } from "@/infrastructure/database/cassandra-feed.repository";
+import { CassandraFeedRepository } from "@/core/database/cassandra-feed.repository";
 
 describe("CassandraFeedRepository", () => {
   beforeEach(() => {
@@ -26,12 +26,22 @@ describe("CassandraFeedRepository", () => {
       } as never;
       const repository = new CassandraFeedRepository(mockCassandraService);
 
-      await repository.insertFeedEntry("follower-1", "author-1", "post-1", new Date());
+      await repository.insertFeedEntry(
+        "follower-1",
+        "author-1",
+        "post-1",
+        new Date(),
+      );
 
       expect(mockClient.execute).toHaveBeenCalledWith(
         expect.stringContaining("INSERT INTO feed_by_user"),
-        expect.arrayContaining(["follower-1", expect.any(Date), "post-1", "author-1"]),
-        expect.objectContaining({ prepare: true })
+        expect.arrayContaining([
+          "follower-1",
+          expect.any(Date),
+          "post-1",
+          "author-1",
+        ]),
+        expect.objectContaining({ prepare: true }),
       );
     });
 
@@ -41,7 +51,12 @@ describe("CassandraFeedRepository", () => {
       } as never;
       const repository = new CassandraFeedRepository(mockCassandraService);
 
-      await repository.insertFeedEntry("follower-1", "author-1", "post-1", new Date());
+      await repository.insertFeedEntry(
+        "follower-1",
+        "author-1",
+        "post-1",
+        new Date(),
+      );
 
       expect(mockCassandraService.getClient).toHaveBeenCalled();
     });
@@ -63,8 +78,18 @@ describe("CassandraFeedRepository", () => {
       const mockClient = {
         execute: vi.fn().mockResolvedValue({
           rows: [
-            { user_id: "user-1", created_at: new Date(), post_id: "post-1", author_id: "author-1" },
-            { user_id: "user-1", created_at: new Date(), post_id: "post-2", author_id: "author-2" },
+            {
+              user_id: "user-1",
+              created_at: new Date(),
+              post_id: "post-1",
+              author_id: "author-1",
+            },
+            {
+              user_id: "user-1",
+              created_at: new Date(),
+              post_id: "post-2",
+              author_id: "author-2",
+            },
           ],
         }),
       };
@@ -79,14 +104,21 @@ describe("CassandraFeedRepository", () => {
       expect(mockClient.execute).toHaveBeenCalledWith(
         expect.stringContaining("SELECT"),
         expect.arrayContaining(["user-1"]),
-        expect.objectContaining({ prepare: true, fetchSize: 10 })
+        expect.objectContaining({ prepare: true, fetchSize: 10 }),
       );
     });
 
     it("should handle pagination with pageState", async () => {
       const mockClient = {
         execute: vi.fn().mockResolvedValue({
-          rows: [{ user_id: "user-1", created_at: new Date(), post_id: "post-1", author_id: "author-1" }],
+          rows: [
+            {
+              user_id: "user-1",
+              created_at: new Date(),
+              post_id: "post-1",
+              author_id: "author-1",
+            },
+          ],
           pageState: "next-page-state",
         }),
       };
@@ -95,7 +127,11 @@ describe("CassandraFeedRepository", () => {
       } as never;
       const repository = new CassandraFeedRepository(mockCassandraService);
 
-      const result = await repository.getFeedPage("user-1", 10, "current-page-state");
+      const result = await repository.getFeedPage(
+        "user-1",
+        10,
+        "current-page-state",
+      );
 
       expect(result.entries).toHaveLength(1);
       expect(result.pageState).toBe("next-page-state");
@@ -105,7 +141,14 @@ describe("CassandraFeedRepository", () => {
       const createdAt = new Date("2024-01-01");
       const mockClient = {
         execute: vi.fn().mockResolvedValue({
-          rows: [{ user_id: "user-1", created_at: createdAt, post_id: "post-1", author_id: "author-1" }],
+          rows: [
+            {
+              user_id: "user-1",
+              created_at: createdAt,
+              post_id: "post-1",
+              author_id: "author-1",
+            },
+          ],
         }),
       };
       const mockCassandraService = {
@@ -140,7 +183,14 @@ describe("CassandraFeedRepository", () => {
     it("should not include pageState when result has no pageState", async () => {
       const mockClient = {
         execute: vi.fn().mockResolvedValue({
-          rows: [{ user_id: "user-1", created_at: new Date(), post_id: "post-1", author_id: "author-1" }],
+          rows: [
+            {
+              user_id: "user-1",
+              created_at: new Date(),
+              post_id: "post-1",
+              author_id: "author-1",
+            },
+          ],
           pageState: undefined,
         }),
       };
@@ -157,7 +207,14 @@ describe("CassandraFeedRepository", () => {
     it("should handle pageState as null", async () => {
       const mockClient = {
         execute: vi.fn().mockResolvedValue({
-          rows: [{ user_id: "user-1", created_at: new Date(), post_id: "post-1", author_id: "author-1" }],
+          rows: [
+            {
+              user_id: "user-1",
+              created_at: new Date(),
+              post_id: "post-1",
+              author_id: "author-1",
+            },
+          ],
           pageState: null,
         }),
       };

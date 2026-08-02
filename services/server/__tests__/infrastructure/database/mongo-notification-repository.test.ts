@@ -1,11 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { MongoNotificationRepository } from "@/infrastructure/database/mongo-notification.repository";
+import { MongoNotificationRepository } from "@/core/database/mongo-notification.repository";
 
 const createMockCollection = () => ({
   updateOne: vi.fn().mockResolvedValue({ modifiedCount: 1, matchedCount: 1 }),
   findOne: vi.fn().mockResolvedValue(null),
   deleteOne: vi.fn().mockResolvedValue({ deletedCount: 1 }),
-  insertOne: vi.fn().mockResolvedValue({ insertedId: { toString: () => "notification-1" } }),
+  insertOne: vi
+    .fn()
+    .mockResolvedValue({ insertedId: { toString: () => "notification-1" } }),
   updateMany: vi.fn().mockResolvedValue({ modifiedCount: 5 }),
   find: vi.fn().mockReturnValue({
     sort: vi.fn().mockReturnValue({
@@ -40,7 +42,11 @@ describe("MongoNotificationRepository", () => {
       } as never;
       const repository = new MongoNotificationRepository(mockMongoService);
 
-      const result = await repository.upsertLike("recipient-1", "actor-1", "post-1");
+      const result = await repository.upsertLike(
+        "recipient-1",
+        "actor-1",
+        "post-1",
+      );
 
       expect(result).toBeNull();
     });
@@ -62,7 +68,11 @@ describe("MongoNotificationRepository", () => {
       } as never;
       const repository = new MongoNotificationRepository(mockMongoService);
 
-      const result = await repository.upsertLike("recipient-1", "actor-1", "post-1");
+      const result = await repository.upsertLike(
+        "recipient-1",
+        "actor-1",
+        "post-1",
+      );
 
       expect(mockCollection.updateOne).toHaveBeenCalled();
       expect(result).not.toBeNull();
@@ -104,7 +114,13 @@ describe("MongoNotificationRepository", () => {
       } as never;
       const repository = new MongoNotificationRepository(mockMongoService);
 
-      const result = await repository.insertComment("recipient-1", "actor-1", "post-1", "comment-1", "Great post!");
+      const result = await repository.insertComment(
+        "recipient-1",
+        "actor-1",
+        "post-1",
+        "comment-1",
+        "Great post!",
+      );
 
       expect(result).toBeNull();
     });
@@ -128,7 +144,13 @@ describe("MongoNotificationRepository", () => {
       } as never;
       const repository = new MongoNotificationRepository(mockMongoService);
 
-      const result = await repository.insertComment("recipient-1", "actor-1", "post-1", "comment-1", "Great post!");
+      const result = await repository.insertComment(
+        "recipient-1",
+        "actor-1",
+        "post-1",
+        "comment-1",
+        "Great post!",
+      );
 
       expect(mockCollection.insertOne).toHaveBeenCalled();
       expect(result).not.toBeNull();
@@ -189,7 +211,9 @@ describe("MongoNotificationRepository", () => {
       const result = await repository.findByRecipient("recipient-1", 10);
 
       expect(result.items).toHaveLength(1);
-      expect(mockCollection.find).toHaveBeenCalledWith({ recipientId: "recipient-1" });
+      expect(mockCollection.find).toHaveBeenCalledWith({
+        recipientId: "recipient-1",
+      });
     });
   });
 
@@ -227,7 +251,10 @@ describe("MongoNotificationRepository", () => {
       } as never;
       const repository = new MongoNotificationRepository(mockMongoService);
 
-      const result = await repository.markReadMany("recipient-1", ["id-1", "id-2"]);
+      const result = await repository.markReadMany("recipient-1", [
+        "id-1",
+        "id-2",
+      ]);
 
       expect(result).toBe(0);
     });
@@ -254,7 +281,10 @@ describe("MongoNotificationRepository", () => {
       } as never;
       const repository = new MongoNotificationRepository(mockMongoService);
 
-      const result = await repository.markReadMany("recipient-1", ["invalid", "also-invalid"]);
+      const result = await repository.markReadMany("recipient-1", [
+        "invalid",
+        "also-invalid",
+      ]);
 
       expect(result).toBe(0);
     });

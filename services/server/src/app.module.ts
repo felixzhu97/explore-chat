@@ -1,33 +1,33 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { DatabaseModule } from './infrastructure/database/database.module';
-import { KafkaModule } from './infrastructure/messaging/kafka.module';
-import { ConfigService } from './infrastructure/config/config.service';
-import { AuthModule } from './presentation/auth/auth.module';
-import { HealthModule } from './presentation/health/health.module';
-import { WebSocketModule } from './presentation/websocket/websocket.module';
-import { UsersModule } from './presentation/users/users.module';
-import { MessagesModule } from './presentation/messages/messages.module';
-import { ChatsModule } from './presentation/chats/chats.module';
-import { GroupsModule } from './presentation/groups/groups.module';
-import { CallsModule } from './presentation/calls/calls.module';
-import { StatusModule } from './presentation/status/status.module';
-import { AdminModule } from './presentation/admin/admin.module';
-import { AnalyticsModule } from './presentation/analytics/analytics.module';
-import { AiModule } from './presentation/ai/ai.module';
-import { VideoModule } from './presentation/video/video.module';
-import { ImageModule } from './presentation/image/image.module';
-import { VisionModule } from './presentation/vision/vision.module';
-import { VoiceModule } from './presentation/voice/voice.module';
-import { PostModule } from './presentation/post/post.module';
-import { MediaModule } from './presentation/media/media.module';
-import { CommentsModule } from './presentation/comments/comments.module';
-import { SearchModule } from './presentation/search/search.module';
-import { FollowModule } from './presentation/follow/follow.module';
-import { GraphqlModule } from './presentation/graphql/graphql.module';
-import { NotificationsModule } from './presentation/notifications/notifications.module';
-import { AdsModule } from './presentation/ads/ads.module';
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { ThrottlerModule } from "@nestjs/throttler";
+import { DatabaseModule } from "@/core/database/database.module";
+import { KafkaModule } from "@/core/messaging/kafka.module";
+import { ConfigService } from "@/core/config/config.service";
+import { AuthModule } from "@/auth/presentation/auth.module";
+import { HealthModule } from "@/health/presentation/health.module";
+import { WebSocketModule } from "@/websocket/presentation/websocket.module";
+import { UsersModule } from "@/users/presentation/users.module";
+import { MessagesModule } from "@/messages/presentation/messages.module";
+import { ChatsModule } from "@/chats/presentation/chats.module";
+import { GroupsModule } from "@/groups/presentation/groups.module";
+import { CallsModule } from "@/calls/presentation/calls.module";
+import { StatusModule } from "@/status/presentation/status.module";
+import { AdminModule } from "@/admin/presentation/admin.module";
+import { AnalyticsModule } from "@/analytics/presentation/analytics.module";
+import { AiModule } from "@/ai/presentation/ai.module";
+import { VideoModule } from "@/ai/presentation/video.module";
+import { ImageModule } from "@/ai/presentation/image.module";
+import { VisionModule } from "@/ai/presentation/vision.module";
+import { VoiceModule } from "@/ai/presentation/voice.module";
+import { PostModule } from "@/post/presentation/post.module";
+import { MediaModule } from "@/media/presentation/media.module";
+import { CommentsModule } from "@/comments/presentation/comments.module";
+import { SearchModule } from "@/search/presentation/search.module";
+import { FollowModule } from "@/follow/presentation/follow.module";
+import { GraphqlModule } from "@/graphql/graphql.module";
+import { NotificationsModule } from "@/notifications/presentation/notifications.module";
+import { AdsModule } from "@/ads/presentation/ads.module";
 
 @Module({
   imports: [
@@ -75,4 +75,3 @@ import { AdsModule } from './presentation/ads/ads.module';
   ],
 })
 export class AppModule {}
-

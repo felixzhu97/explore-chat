@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MongoService } from "@/infrastructure/database/mongo.service";
-import { ConfigService } from "@/infrastructure/config/config.service";
+import { MongoService } from "@/core/database/mongo.service";
+import { ConfigService } from "@/core/config/config.service";
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => ({
       mongodb: {

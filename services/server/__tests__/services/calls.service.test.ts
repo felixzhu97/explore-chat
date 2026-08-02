@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { CallsService, CreateCallData } from "@/application/services/calls.service";
+import {
+  CallsService,
+  CreateCallData,
+} from "@/calls/application/calls.service";
 
 describe("CallsService", () => {
   let service: CallsService;
@@ -67,7 +70,7 @@ describe("CallsService", () => {
   describe("createCall", () => {
     it("should throw error when no target provided", async () => {
       await expect(
-        service.createCall("user-1", { type: "VIDEO" })
+        service.createCall("user-1", { type: "VIDEO" }),
       ).rejects.toThrow();
     });
 
@@ -75,7 +78,7 @@ describe("CallsService", () => {
       mockPrisma.chat.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.createCall("user-1", { type: "VIDEO", chatId: "chat-1" })
+        service.createCall("user-1", { type: "VIDEO", chatId: "chat-1" }),
       ).rejects.toThrow();
     });
 
@@ -83,14 +86,23 @@ describe("CallsService", () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.createCall("user-1", { type: "VIDEO", targetUserId: "non-existent" })
+        service.createCall("user-1", {
+          type: "VIDEO",
+          targetUserId: "non-existent",
+        }),
       ).rejects.toThrow();
     });
 
     it("should create call with targetUserId", async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({ id: "user-2", username: "user2" });
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: "user-2",
+        username: "user2",
+      });
 
-      const result = await service.createCall("user-1", { type: "VIDEO", targetUserId: "user-2" });
+      const result = await service.createCall("user-1", {
+        type: "VIDEO",
+        targetUserId: "user-2",
+      });
 
       expect(mockPrisma.call.create).toHaveBeenCalled();
     });
@@ -100,9 +112,15 @@ describe("CallsService", () => {
         id: "chat-1",
         participants: [{ userId: "user-1" }, { userId: "user-2" }],
       });
-      mockPrisma.user.findUnique.mockResolvedValue({ id: "user-2", username: "user2" });
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: "user-2",
+        username: "user2",
+      });
 
-      const result = await service.createCall("user-1", { type: "AUDIO", chatId: "chat-1" });
+      const result = await service.createCall("user-1", {
+        type: "AUDIO",
+        chatId: "chat-1",
+      });
 
       expect(mockPrisma.call.create).toHaveBeenCalled();
     });

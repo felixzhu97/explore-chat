@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { FollowService } from "@/application/services/follow.service";
+import { FollowService } from "@/follow/application/follow.service";
 
 describe("FollowService", () => {
   let service: FollowService;
@@ -77,7 +77,10 @@ describe("FollowService", () => {
         { followingId: "user-3" },
       ]);
 
-      const result = await service.checkFollowing("user-1", ["user-2", "user-3"]);
+      const result = await service.checkFollowing("user-1", [
+        "user-2",
+        "user-3",
+      ]);
 
       expect(result.has("user-2")).toBe(true);
       expect(result.has("user-3")).toBe(true);
@@ -117,7 +120,9 @@ describe("FollowService", () => {
 
     it("should return paginated followers", async () => {
       mockPrisma.userFollow.count.mockResolvedValue(1);
-      mockPrisma.userFollow.findMany.mockResolvedValue([{ followerId: "user-2" }]);
+      mockPrisma.userFollow.findMany.mockResolvedValue([
+        { followerId: "user-2" },
+      ]);
       mockPrisma.user.findMany.mockResolvedValue([
         { id: "user-2", username: "user2", avatar: null },
       ]);

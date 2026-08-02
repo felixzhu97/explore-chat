@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { AuthController } from "@/presentation/auth/auth.controller";
+import { AuthController } from "@/auth/presentation/auth.controller";
 import { ConflictException, UnauthorizedException } from "@nestjs/common";
-import { User } from "@/domain/entities/user.entity";
+import { User } from "@/users/domain/user.entity";
 
 describe("AuthController", () => {
   let authController: AuthController;
@@ -35,10 +35,7 @@ describe("AuthController", () => {
       updateUser: vi.fn(),
     };
 
-    authController = new AuthController(
-      mockAuthService,
-      mockUsersService
-    );
+    authController = new AuthController(mockAuthService, mockUsersService);
   });
 
   describe("register", () => {
@@ -78,11 +75,11 @@ describe("AuthController", () => {
 
     it("should throw ConflictException if user already exists", async () => {
       mockAuthService.register.mockRejectedValue(
-        new ConflictException("User already exists")
+        new ConflictException("User already exists"),
       );
 
       await expect(authController.register(registerDto)).rejects.toThrow(
-        ConflictException
+        ConflictException,
       );
     });
   });
@@ -122,11 +119,11 @@ describe("AuthController", () => {
 
     it("should throw UnauthorizedException for invalid credentials", async () => {
       mockAuthService.login.mockRejectedValue(
-        new UnauthorizedException("Invalid email or password")
+        new UnauthorizedException("Invalid email or password"),
       );
 
       await expect(authController.login(loginDto)).rejects.toThrow(
-        UnauthorizedException
+        UnauthorizedException,
       );
     });
   });
@@ -154,17 +151,17 @@ describe("AuthController", () => {
         },
       });
       expect(mockAuthService.refreshToken).toHaveBeenCalledWith(
-        refreshTokenDto.refreshToken
+        refreshTokenDto.refreshToken,
       );
     });
 
     it("should throw UnauthorizedException for invalid refresh token", async () => {
       mockAuthService.refreshToken.mockRejectedValue(
-        new UnauthorizedException("Invalid refresh token")
+        new UnauthorizedException("Invalid refresh token"),
       );
 
       await expect(
-        authController.refreshToken(refreshTokenDto)
+        authController.refreshToken(refreshTokenDto),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
@@ -220,7 +217,7 @@ describe("AuthController", () => {
 
       const result = await authController.updateProfile(
         currentUser,
-        updateProfileDto
+        updateProfileDto,
       );
 
       expect(result.success).toBe(true);
@@ -255,7 +252,7 @@ describe("AuthController", () => {
         {
           currentPassword: "oldpassword",
           newPassword: "newpassword123",
-        }
+        },
       );
 
       expect(result).toEqual({

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { LoggingInterceptor } from "@/presentation/interceptors/logging.interceptor";
+import { LoggingInterceptor } from "@/core/interceptors/logging.interceptor";
 import { ExecutionContext, CallHandler } from "@nestjs/common";
 import { of } from "rxjs";
 
@@ -10,7 +10,9 @@ describe("LoggingInterceptor", () => {
     interceptor = new LoggingInterceptor();
   });
 
-  const createMockExecutionContext = (overrides: Partial<ExecutionContext & { request: any; response: any }> = {}): ExecutionContext => {
+  const createMockExecutionContext = (
+    overrides: Partial<ExecutionContext & { request: any; response: any }> = {},
+  ): ExecutionContext => {
     const mockRequest = {
       method: "GET",
       url: "/api/users",

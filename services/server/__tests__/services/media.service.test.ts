@@ -1,12 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { MediaService } from "@/application/services/media.service";
+import { MediaService } from "@/media/application/media.service";
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => ({
       storage: {
         local: {
-          allowedMimeTypes: ["image/jpeg", "image/png", "image/heic", "video/mp4", "video/quicktime", "video/webm"],
+          allowedMimeTypes: [
+            "image/jpeg",
+            "image/png",
+            "image/heic",
+            "video/mp4",
+            "video/quicktime",
+            "video/webm",
+          ],
           maxFileSize: 10 * 1024 * 1024,
         },
       },
@@ -53,7 +60,9 @@ describe("MediaService", () => {
         size: 100 * 1024 * 1024,
       } as Express.Multer.File;
 
-      await expect(service.uploadMedia(file)).rejects.toThrow("File size exceeds limit");
+      await expect(service.uploadMedia(file)).rejects.toThrow(
+        "File size exceeds limit",
+      );
     });
 
     it("should upload media successfully", async () => {

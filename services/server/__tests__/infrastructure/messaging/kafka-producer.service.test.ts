@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { KafkaProducerService } from "@/infrastructure/messaging/kafka-producer.service";
-import { ConfigService } from "@/infrastructure/config/config.service";
+import { KafkaProducerService } from "@/core/messaging/kafka-producer.service";
+import { ConfigService } from "@/core/config/config.service";
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => ({
       kafka: {
@@ -42,7 +42,9 @@ describe("KafkaProducerService", () => {
 
   describe("sendOfflineMessage", () => {
     it("should exist and be callable", async () => {
-      await expect(service.sendOfflineMessage("user123", "payload")).resolves.toBeUndefined();
+      await expect(
+        service.sendOfflineMessage("user123", "payload"),
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -78,7 +80,9 @@ describe("KafkaProducerService", () => {
         createdAt: "2024-01-01T00:00:00Z",
       };
 
-      await expect(service.sendCommentCreated(payload)).resolves.toBeUndefined();
+      await expect(
+        service.sendCommentCreated(payload),
+      ).resolves.toBeUndefined();
     });
   });
 });

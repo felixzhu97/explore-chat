@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { AllExceptionsFilter } from "@/presentation/filters/all-exceptions.filter";
+import { AllExceptionsFilter } from "@/core/filters/all-exceptions.filter";
 import { HttpStatus, HttpException } from "@nestjs/common";
 
 describe("AllExceptionsFilter", () => {
@@ -35,7 +35,10 @@ describe("AllExceptionsFilter", () => {
   });
 
   it("should handle HttpException", () => {
-    const mockResponse = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
     const host = createMockHost(mockResponse);
 
     filter.catch(new HttpException("Test error", HttpStatus.BAD_REQUEST), host);
@@ -44,59 +47,85 @@ describe("AllExceptionsFilter", () => {
   });
 
   it("should handle generic Error", () => {
-    const mockResponse = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
     const host = createMockHost(mockResponse);
 
     filter.catch(new Error("generic error"), host);
 
-    expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(mockResponse.status).toHaveBeenCalledWith(
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
     expect(mockResponse.json).toHaveBeenCalled();
   });
 
   it("should handle PrismaClientKnownRequestError P2002", () => {
-    const mockResponse = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
     const host = createMockHost(mockResponse);
 
-    const prismaError = { name: "PrismaClientKnownRequestError", code: "P2002" };
+    const prismaError = {
+      name: "PrismaClientKnownRequestError",
+      code: "P2002",
+    };
     filter.catch(prismaError as any, host);
 
     expect(mockResponse.json).toHaveBeenCalledWith(
       expect.objectContaining({
         code: "DUPLICATE_ENTRY",
-      })
+      }),
     );
   });
 
   it("should handle PrismaClientKnownRequestError P2025", () => {
-    const mockResponse = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
     const host = createMockHost(mockResponse);
 
-    const prismaError = { name: "PrismaClientKnownRequestError", code: "P2025" };
+    const prismaError = {
+      name: "PrismaClientKnownRequestError",
+      code: "P2025",
+    };
     filter.catch(prismaError as any, host);
 
     expect(mockResponse.json).toHaveBeenCalledWith(
       expect.objectContaining({
         code: "RECORD_NOT_FOUND",
-      })
+      }),
     );
   });
 
   it("should handle PrismaClientKnownRequestError P2003", () => {
-    const mockResponse = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
     const host = createMockHost(mockResponse);
 
-    const prismaError = { name: "PrismaClientKnownRequestError", code: "P2003" };
+    const prismaError = {
+      name: "PrismaClientKnownRequestError",
+      code: "P2003",
+    };
     filter.catch(prismaError as any, host);
 
     expect(mockResponse.json).toHaveBeenCalledWith(
       expect.objectContaining({
         code: "FOREIGN_KEY_CONSTRAINT",
-      })
+      }),
     );
   });
 
   it("should handle JsonWebTokenError", () => {
-    const mockResponse = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
     const host = createMockHost(mockResponse);
 
     const jwtError = { name: "JsonWebTokenError", message: "invalid token" };
@@ -105,12 +134,15 @@ describe("AllExceptionsFilter", () => {
     expect(mockResponse.json).toHaveBeenCalledWith(
       expect.objectContaining({
         code: "INVALID_TOKEN",
-      })
+      }),
     );
   });
 
   it("should handle TokenExpiredError", () => {
-    const mockResponse = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
     const host = createMockHost(mockResponse);
 
     const expiredError = { name: "TokenExpiredError", message: "jwt expired" };
@@ -119,7 +151,7 @@ describe("AllExceptionsFilter", () => {
     expect(mockResponse.json).toHaveBeenCalledWith(
       expect.objectContaining({
         code: "TOKEN_EXPIRED",
-      })
+      }),
     );
   });
 });

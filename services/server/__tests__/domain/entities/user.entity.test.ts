@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { User } from "@/domain/entities/user.entity";
+import { User } from "@/users/domain/user.entity";
 
 describe("User Entity", () => {
   describe("constructor", () => {
@@ -14,7 +14,7 @@ describe("User Entity", () => {
         true,
         new Date("2024-01-01"),
         new Date("2024-01-01"),
-        new Date("2024-01-01")
+        new Date("2024-01-01"),
       );
 
       expect(user.id).toBe("user-1");
@@ -43,7 +43,7 @@ describe("User Entity", () => {
         undefined,
         undefined,
         undefined,
-        false
+        false,
       );
 
       expect(user.phone).toBeUndefined();
@@ -119,7 +119,7 @@ describe("User Entity", () => {
         true,
         originalDate,
         originalDate,
-        originalDate
+        originalDate,
       );
 
       const updatedUser = user.updateStatus("online");
@@ -144,7 +144,7 @@ describe("User Entity", () => {
         true,
         originalDate,
         originalDate,
-        originalDate
+        originalDate,
       );
 
       const updatedUser = user.updateStatus("online");
@@ -167,14 +167,14 @@ describe("User Entity", () => {
         true,
         originalDate,
         originalDate,
-        originalDate
+        originalDate,
       );
 
       const beforeUpdate = new Date();
       const updatedUser = user.updateStatus("online");
 
       expect(updatedUser.updatedAt.getTime()).toBeGreaterThanOrEqual(
-        beforeUpdate.getTime() - 1000
+        beforeUpdate.getTime() - 1000,
       );
     });
   });
@@ -192,7 +192,7 @@ describe("User Entity", () => {
         false,
         originalDate,
         originalDate,
-        originalDate
+        originalDate,
       );
 
       const updatedUser = user.setOnline(true);
@@ -216,7 +216,7 @@ describe("User Entity", () => {
         true,
         new Date(),
         new Date(),
-        new Date()
+        new Date(),
       );
 
       const updatedUser = user.setOnline(false);
@@ -236,7 +236,7 @@ describe("User Entity", () => {
         true,
         new Date(),
         new Date(),
-        new Date()
+        new Date(),
       );
 
       const updatedUser = user.setOnline(false);
@@ -257,17 +257,17 @@ describe("User Entity", () => {
         false,
         originalDate,
         new Date("2024-01-01"),
-        new Date("2024-01-01")
+        new Date("2024-01-01"),
       );
 
       const beforeUpdate = new Date();
       const updatedUser = user.setOnline(true);
 
       expect(updatedUser.lastSeen.getTime()).toBeGreaterThanOrEqual(
-        beforeUpdate.getTime() - 1000
+        beforeUpdate.getTime() - 1000,
       );
       expect(updatedUser.updatedAt.getTime()).toBeGreaterThanOrEqual(
-        beforeUpdate.getTime() - 1000
+        beforeUpdate.getTime() - 1000,
       );
     });
 
@@ -283,7 +283,7 @@ describe("User Entity", () => {
         false,
         new Date(),
         createdAt,
-        new Date("2024-01-01")
+        new Date("2024-01-01"),
       );
 
       const updatedUser = user.setOnline(true);

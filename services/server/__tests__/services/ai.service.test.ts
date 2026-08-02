@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { AiService } from "@/application/services/ai.service";
+import { AiService } from "@/ai/application/ai.service";
 
 vi.mock("@/lib/llm", () => ({
   createClient: vi.fn(() => ({
@@ -8,7 +8,7 @@ vi.mock("@/lib/llm", () => ({
   })),
 }));
 
-vi.mock("@/infrastructure/config/config.service", () => ({
+vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
     loadConfig: vi.fn(() => ({
       ai: {
@@ -44,7 +44,9 @@ describe("AiService", () => {
     });
 
     it("should return safe when ollama is not configured", async () => {
-      const { ConfigService } = vi.mocked(await import("@/infrastructure/config/config.service"));
+      const { ConfigService } = vi.mocked(
+        await import("@/core/config/config.service"),
+      );
       ConfigService.loadConfig.mockReturnValueOnce({
         ai: { ollamaBaseUrl: null, defaultModel: "llama2" },
       } as any);
@@ -79,7 +81,11 @@ describe("AiService", () => {
     it("should filter out invalid categories", async () => {
       const { createClient } = await import("@/lib/llm");
       const mockClient = {
-        chat: vi.fn().mockResolvedValue({ content: "UNSAFE:violence,invalid,hate,unknown" }),
+        chat: vi
+          .fn()
+          .mockResolvedValue({
+            content: "UNSAFE:violence,invalid,hate,unknown",
+          }),
       };
       (createClient as any).mockReturnValue(mockClient);
 
@@ -115,7 +121,14 @@ describe("AiService", () => {
     it("should return safe on timeout", async () => {
       const { createClient } = await import("@/lib/llm");
       const mockClient = {
-        chat: vi.fn().mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve({ content: "SAFE" }), 3000))),
+        chat: vi
+          .fn()
+          .mockImplementation(
+            () =>
+              new Promise((resolve) =>
+                setTimeout(() => resolve({ content: "SAFE" }), 3000),
+              ),
+          ),
       };
       (createClient as any).mockReturnValue(mockClient);
 
@@ -175,7 +188,7 @@ describe("AiService", () => {
 
       expect(mockClient.chat).toHaveBeenCalledWith(
         [{ role: "user", content: "Hi" }],
-        { model: "custom-model" }
+        { model: "custom-model" },
       );
     });
 
@@ -192,7 +205,7 @@ describe("AiService", () => {
 
       expect(mockClient.chat).toHaveBeenCalledWith(
         [{ role: "user", content: "Hi" }],
-        { model: "llama2" }
+        { model: "llama2" },
       );
     });
   });
@@ -202,7 +215,8 @@ describe("AiService", () => {
       const { createClient } = await import("@/lib/llm");
       const mockStream = {
         [Symbol.asyncIterator]: vi.fn().mockReturnValue({
-          next: vi.fn()
+          next: vi
+            .fn()
             .mockResolvedValueOnce({ value: "Hello", done: false })
             .mockResolvedValueOnce({ value: " World", done: false })
             .mockResolvedValueOnce({ done: true }),
