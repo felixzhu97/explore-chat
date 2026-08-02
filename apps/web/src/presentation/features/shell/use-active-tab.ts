@@ -1,25 +1,18 @@
 import { useMemo } from "react";
 import { usePathname } from "next/navigation";
+import {
+  PrimaryDestinations,
+  type PrimaryDestination,
+} from "@whatschat/shared-types";
+import { primaryDestinationFromPathname } from "./primary-destination-routes";
 
-export type NavTab =
-  | "home"
-  | "messages"
-  | "reels"
-  | "explore"
-  | "profile"
-  | "search";
+export type { PrimaryDestination };
 
-export function useActiveTab(searchDrawerOpen: boolean): NavTab {
+export function useActiveTab(searchDrawerOpen: boolean): PrimaryDestination {
   const pathname = usePathname();
 
   return useMemo(() => {
-    if (pathname === "/profile" || pathname.startsWith("/profile/")) {
-      return "profile";
-    }
-    if (pathname === "/reels") return "reels";
-    if (pathname === "/explore") return "explore";
-    if (searchDrawerOpen || pathname === "/search") return "search";
-    if (pathname === "/messages") return "messages";
-    return "home";
+    if (searchDrawerOpen) return PrimaryDestinations.Search;
+    return primaryDestinationFromPathname(pathname);
   }, [pathname, searchDrawerOpen]);
 }

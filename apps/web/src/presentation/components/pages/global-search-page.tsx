@@ -2,7 +2,11 @@
 
 import { useRef, useEffect } from "react";
 import { Search, Hash, User, Image as ImageIcon } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/src/presentation/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/src/presentation/components/ui/avatar";
 import { Button } from "@/src/presentation/components/ui/button";
 import { Input } from "@/src/presentation/components/ui/input";
 import { ScrollArea } from "@/src/presentation/components/ui/scroll-area";
@@ -11,7 +15,8 @@ import {
   InstagramSpinnerWrap,
   InstagramSpinnerText,
 } from "@/src/presentation/components/ui/instagram-spinner";
-import { useGlobalSearch, type SearchType } from "@/src/presentation/hooks/use-global-search";
+import { SearchUiScopes, type SearchUiScope } from "@whatschat/shared-types";
+import { useGlobalSearch } from "@/src/presentation/hooks/use-global-search";
 import { useTranslation } from "@/src/shared/i18n";
 import { styled } from "@/src/shared/utils/emotion";
 
@@ -112,7 +117,8 @@ const Tab = styled.button<{ $active?: boolean }>`
   color: ${(p) => (p.$active ? TEXT_PRIMARY : TEXT_SECONDARY)};
   background: none;
   border: none;
-  border-bottom: ${(p) => (p.$active ? "2px solid rgb(38 38 38)" : "2px solid transparent")};
+  border-bottom: ${(p) =>
+    p.$active ? "2px solid rgb(38 38 38)" : "2px solid transparent"};
   cursor: pointer;
   margin-bottom: -1px;
 `;
@@ -304,7 +310,12 @@ export function GlobalSearchPage({
   }, []);
 
   const renderUser = (h: unknown) => {
-    const row = h as { id?: string; username?: string; avatar?: string; highlight?: Record<string, string[]> };
+    const row = h as {
+      id?: string;
+      username?: string;
+      avatar?: string;
+      highlight?: Record<string, string[]>;
+    };
     const id = row.id ?? "";
     const username = row.username ?? "";
     return (
@@ -318,7 +329,9 @@ export function GlobalSearchPage({
       >
         <Avatar style={{ width: 44, height: 44 }}>
           <AvatarImage src={row.avatar ?? undefined} />
-          <AvatarFallback>{(username || id).slice(0, 1).toUpperCase()}</AvatarFallback>
+          <AvatarFallback>
+            {(username || id).slice(0, 1).toUpperCase()}
+          </AvatarFallback>
         </Avatar>
         <UserName>
           <HighlightFragment text={username} highlight={row.highlight} />
@@ -366,14 +379,21 @@ export function GlobalSearchPage({
       >
         <PostThumb>
           {row.mediaUrls?.[0] ? (
-            <img src={row.mediaUrls[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img
+              src={row.mediaUrls[0]}
+              alt=""
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
           ) : (
             <ImageIcon size={24} />
           )}
         </PostThumb>
         <PostBody>
           <PostCaption>
-            <HighlightFragment text={row.caption ?? ""} highlight={row.highlight} />
+            <HighlightFragment
+              text={row.caption ?? ""}
+              highlight={row.highlight}
+            />
           </PostCaption>
         </PostBody>
       </PostRow>
@@ -396,8 +416,9 @@ export function GlobalSearchPage({
       return <Empty>{t("search.placeholder")}</Empty>;
     }
 
-    if (searchType === "all") {
-      const hasAny = userHits.length > 0 || postHits.length > 0 || hashtagHits.length > 0;
+    if (searchType === SearchUiScopes.All) {
+      const hasAny =
+        userHits.length > 0 || postHits.length > 0 || hashtagHits.length > 0;
       if (!hasAny) return <Empty>{t("search.noResults")}</Empty>;
       return (
         <Section>
@@ -410,7 +431,9 @@ export function GlobalSearchPage({
           {hashtagHits.length > 0 && (
             <>
               <SectionTitle>{t("search.tabTopics")}</SectionTitle>
-              <div style={{ padding: "8px 0" }}>{hashtagHits.map(renderHashtag)}</div>
+              <div style={{ padding: "8px 0" }}>
+                {hashtagHits.map(renderHashtag)}
+              </div>
             </>
           )}
           {postHits.length > 0 && (
@@ -423,13 +446,17 @@ export function GlobalSearchPage({
       );
     }
 
-    if (searchType === "users") {
+    if (searchType === SearchUiScopes.Users) {
       if (userHits.length === 0) return <Empty>{t("search.noResults")}</Empty>;
       return (
         <Section>
           {userHits.map(renderUser)}
           {nextCursor && (
-            <LoadMoreBtn variant="outline" onClick={loadMore} disabled={loadingMore}>
+            <LoadMoreBtn
+              variant="outline"
+              onClick={loadMore}
+              disabled={loadingMore}
+            >
               {loadingMore ? t("common.loading") : t("search.loadMore")}
             </LoadMoreBtn>
           )}
@@ -437,13 +464,20 @@ export function GlobalSearchPage({
       );
     }
 
-    if (searchType === "hashtags") {
-      if (hashtagHits.length === 0) return <Empty>{t("search.noResults")}</Empty>;
+    if (searchType === SearchUiScopes.Hashtags) {
+      if (hashtagHits.length === 0)
+        return <Empty>{t("search.noResults")}</Empty>;
       return (
         <Section>
-          <div style={{ padding: "8px 0" }}>{hashtagHits.map(renderHashtag)}</div>
+          <div style={{ padding: "8px 0" }}>
+            {hashtagHits.map(renderHashtag)}
+          </div>
           {nextCursor && (
-            <LoadMoreBtn variant="outline" onClick={loadMore} disabled={loadingMore}>
+            <LoadMoreBtn
+              variant="outline"
+              onClick={loadMore}
+              disabled={loadingMore}
+            >
               {loadingMore ? t("common.loading") : t("search.loadMore")}
             </LoadMoreBtn>
           )}
@@ -461,7 +495,11 @@ export function GlobalSearchPage({
         )}
         {postHits.map(renderPost)}
         {nextCursor && (
-          <LoadMoreBtn variant="outline" onClick={loadMore} disabled={loadingMore}>
+          <LoadMoreBtn
+            variant="outline"
+            onClick={loadMore}
+            disabled={loadingMore}
+          >
             {loadingMore ? t("common.loading") : t("search.loadMore")}
           </LoadMoreBtn>
         )}
@@ -469,11 +507,11 @@ export function GlobalSearchPage({
     );
   };
 
-  const tabs: { key: SearchType; label: string }[] = [
-    { key: "all", label: t("search.tabAll") },
-    { key: "posts", label: t("search.tabPosts") },
-    { key: "users", label: t("search.tabUsers") },
-    { key: "hashtags", label: t("search.tabTopics") },
+  const tabs: { key: SearchUiScope; label: string }[] = [
+    { key: SearchUiScopes.All, label: t("search.tabAll") },
+    { key: SearchUiScopes.Posts, label: t("search.tabPosts") },
+    { key: SearchUiScopes.Users, label: t("search.tabUsers") },
+    { key: SearchUiScopes.Hashtags, label: t("search.tabTopics") },
   ];
 
   return (
@@ -499,8 +537,7 @@ export function GlobalSearchPage({
                     type="button"
                     onClick={() => setQuery(`#${tag}`)}
                   >
-                    <Hash size={16} />
-                    #{tag}
+                    <Hash size={16} />#{tag}
                   </SuggestionItem>
                 );
               })}

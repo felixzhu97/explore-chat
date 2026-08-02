@@ -1,13 +1,17 @@
-import type { IHttpClient } from '@/src/domain/ports/http-client.port';
-import type { IFeedRepository } from '@/src/domain/ports/feed.repository.port';
-import type { FeedPost } from '@/src/domain/entities/feed-post';
-import type { StoryUser } from '@/src/domain/entities/story-user';
-import type { UserProfile } from '@/src/domain/entities/user-profile';
-import compact from 'lodash/compact';
-import keyBy from 'lodash/keyBy';
-import uniq from 'lodash/uniq';
-import uniqBy from 'lodash/uniqBy';
-import { mapFeedPostResToFeedPost, type FeedPostRes } from '@/src/application/mappers/feed.mapper';
+import { SearchScopes } from "@whatschat/shared-types";
+import type { IHttpClient } from "@/src/domain/ports/http-client.port";
+import type { IFeedRepository } from "@/src/domain/ports/feed.repository.port";
+import type { FeedPost } from "@/src/domain/entities/feed-post";
+import type { StoryUser } from "@/src/domain/entities/story-user";
+import type { UserProfile } from "@/src/domain/entities/user-profile";
+import compact from "lodash/compact";
+import keyBy from "lodash/keyBy";
+import uniq from "lodash/uniq";
+import uniqBy from "lodash/uniqBy";
+import {
+  mapFeedPostResToFeedPost,
+  type FeedPostRes,
+} from "@/src/application/mappers/feed.mapper";
 
 interface FeedGraphqlBody {
   errors?: Array<{ message?: string }>;
@@ -26,7 +30,10 @@ interface FeedGraphqlBody {
 export class FeedRepositoryAdapter implements IFeedRepository {
   constructor(private readonly http: IHttpClient) {}
 
-  async getFeed(limit: number, pageState?: string): Promise<{
+  async getFeed(
+    limit: number,
+    pageState?: string,
+  ): Promise<{
     posts: FeedPost[];
     nextPageState?: string;
   }> {
@@ -58,10 +65,13 @@ export class FeedRepositoryAdapter implements IFeedRepository {
     }`;
     const variables: { limit: number; pageState?: string } = { limit };
     if (pageState) variables.pageState = pageState;
-    const feedGraphRes = await this.http.post<FeedGraphqlBody>('/graphql', { query, variables });
+    const feedGraphRes = await this.http.post<FeedGraphqlBody>("/graphql", {
+      query,
+      variables,
+    });
     const body = feedGraphRes.data;
     if (body.errors?.length) {
-      throw new Error(body.errors[0]?.message ?? 'GraphQL error');
+      throw new Error(body.errors[0]?.message ?? "GraphQL error");
     }
     const feed = body.data?.feed;
     const entries = Array.isArray(feed?.entries) ? feed?.entries : [];
@@ -72,11 +82,14 @@ export class FeedRepositoryAdapter implements IFeedRepository {
     const next = feed?.pageState ?? undefined;
     return {
       posts,
-      nextPageState: next && next !== '' ? next : undefined,
+      nextPageState: next && next !== "" ? next : undefined,
     };
   }
 
-  async getReels(limit: number, pageState?: string): Promise<{
+  async getReels(
+    limit: number,
+    pageState?: string,
+  ): Promise<{
     posts: FeedPost[];
     nextPageState?: string;
   }> {
@@ -108,10 +121,13 @@ export class FeedRepositoryAdapter implements IFeedRepository {
     }`;
     const variables: { limit: number; pageState?: string } = { limit };
     if (pageState) variables.pageState = pageState;
-    const reelsGraphRes = await this.http.post<FeedGraphqlBody>('/graphql', { query, variables });
+    const reelsGraphRes = await this.http.post<FeedGraphqlBody>("/graphql", {
+      query,
+      variables,
+    });
     const body = reelsGraphRes.data;
     if (body.errors?.length) {
-      throw new Error(body.errors[0]?.message ?? 'GraphQL error');
+      throw new Error(body.errors[0]?.message ?? "GraphQL error");
     }
     const reels = body.data?.reels;
     const entries = Array.isArray(reels?.entries) ? reels?.entries : [];
@@ -122,33 +138,45 @@ export class FeedRepositoryAdapter implements IFeedRepository {
     const next = reels?.pageState ?? undefined;
     return {
       posts,
-      nextPageState: next && next !== '' ? next : undefined,
+      nextPageState: next && next !== "" ? next : undefined,
     };
   }
 
   async getSuggestions(limit: number): Promise<StoryUser[]> {
     const suggestionsRes = await this.http.get<{
-      data?: Array<{ id: string; username: string; avatar: string | null; description: string }>;
+      data?: Array<{
+        id: string;
+        username: string;
+        avatar: string | null;
+        description: string;
+      }>;
     }>(`/users/suggestions?limit=${limit}`);
-    const list = Array.isArray(suggestionsRes.data?.data) ? suggestionsRes.data?.data ?? [] : [];
-    return uniqBy(list.filter((u) => Boolean(u.id)), 'id').map<StoryUser>((u) => ({
+    const list = Array.isArray(suggestionsRes.data?.data)
+      ? (suggestionsRes.data?.data ?? [])
+      : [];
+    return uniqBy(
+      list.filter((u) => Boolean(u.id)),
+      "id",
+    ).map<StoryUser>((u) => ({
       id: u.id,
       username: u.username,
-      avatar: u.avatar ?? '',
+      avatar: u.avatar ?? "",
     }));
   }
 
   async getPostById(postId: string): Promise<FeedPost | null> {
     try {
-      const postRes = await this.http.get<{ data?: FeedPostRes }>(`/posts/${postId}`);
+      const postRes = await this.http.get<{ data?: FeedPostRes }>(
+        `/posts/${postId}`,
+      );
       const raw = postRes.data?.data;
       if (!raw?.postId) return null;
       const createdAt =
-        typeof raw.createdAt === 'string'
+        typeof raw.createdAt === "string"
           ? raw.createdAt
           : raw.createdAt != null
             ? String(raw.createdAt)
-            : '';
+            : "";
       return mapFeedPostResToFeedPost({ ...(raw as FeedPostRes), createdAt });
     } catch {
       return null;
@@ -162,12 +190,18 @@ export class FeedRepositoryAdapter implements IFeedRepository {
     const exploreRes = await this.http.get<{
       entries?: Array<{ postId: string; isSponsored?: boolean }>;
       total?: number;
-      data?: { entries?: Array<{ postId: string; isSponsored?: boolean }>; total?: number };
+      data?: {
+        entries?: Array<{ postId: string; isSponsored?: boolean }>;
+        total?: number;
+      };
     }>(`/posts/explore?limit=${limit}&offset=${offset}`);
     const top = exploreRes.data as {
       entries?: Array<{ postId: string; isSponsored?: boolean }>;
       total?: number;
-      data?: { entries?: Array<{ postId: string; isSponsored?: boolean }>; total?: number };
+      data?: {
+        entries?: Array<{ postId: string; isSponsored?: boolean }>;
+        total?: number;
+      };
     };
     const rawEntries = Array.isArray(top.entries)
       ? top.entries
@@ -177,13 +211,15 @@ export class FeedRepositoryAdapter implements IFeedRepository {
     const filtered = rawEntries.filter((e) => !e.isSponsored);
     const entries = filtered.length > 0 ? filtered : rawEntries;
     const total =
-      typeof top.total === 'number'
+      typeof top.total === "number"
         ? top.total
-        : typeof top.data?.total === 'number'
+        : typeof top.data?.total === "number"
           ? top.data.total
           : 0;
     const postIds = entries.map((e) => e.postId).filter(Boolean);
-    const details = await Promise.all(postIds.map((id) => this.getPostById(id)));
+    const details = await Promise.all(
+      postIds.map((id) => this.getPostById(id)),
+    );
     const posts = details.filter((p): p is FeedPost => p != null);
     return { posts, total, fetchedEntryCount: rawEntries.length };
   }
@@ -197,10 +233,10 @@ export class FeedRepositoryAdapter implements IFeedRepository {
     if (!trimmed) return { posts: [] };
     const params = new URLSearchParams({
       q: trimmed,
-      type: 'posts',
+      type: SearchScopes.Posts,
       limit: String(limit),
     });
-    if (cursor) params.set('cursor', cursor);
+    if (cursor) params.set("cursor", cursor);
     const searchRes = await this.http.get<{
       data?: { hits: unknown[]; nextCursor?: string; total?: number };
     }>(`/search?${params.toString()}`);
@@ -211,21 +247,23 @@ export class FeedRepositoryAdapter implements IFeedRepository {
     const orderedIds = hits
       .map((h) => {
         const o = h as Record<string, unknown>;
-        return String(o.postId ?? o.id ?? '');
+        return String(o.postId ?? o.id ?? "");
       })
       .filter(Boolean);
     const unique = uniq(orderedIds);
     const loaded = await Promise.all(unique.map((id) => this.getPostById(id)));
-    const byId = keyBy(compact(loaded), 'id');
+    const byId = keyBy(compact(loaded), "id");
     const posts = compact(orderedIds.map((id) => byId[id]));
     return { posts, nextCursor, total };
   }
 
   async getUserProfile(userId: string): Promise<UserProfile | null> {
     try {
-      const profileRes = await this.http.get<{ data?: UserProfile }>(`/users/${userId}`);
+      const profileRes = await this.http.get<{ data?: UserProfile }>(
+        `/users/${userId}`,
+      );
       const u = profileRes.data?.data;
-      if (!u || typeof u !== 'object') return null;
+      if (!u || typeof u !== "object") return null;
       return u as UserProfile;
     } catch {
       return null;
@@ -238,7 +276,7 @@ export class FeedRepositoryAdapter implements IFeedRepository {
     pageState?: string,
   ): Promise<{ posts: FeedPost[]; nextPageState?: string }> {
     const params = new URLSearchParams({ limit: String(limit) });
-    if (pageState) params.set('pageState', pageState);
+    if (pageState) params.set("pageState", pageState);
     const userPostsRes = await this.http.get<{
       posts?: FeedPostRes[];
       pageState?: string | null;
@@ -257,13 +295,16 @@ export class FeedRepositoryAdapter implements IFeedRepository {
     const next = body.pageState ?? body.data?.pageState;
     const posts = rawPosts.map((r) => {
       const createdAt =
-        typeof r.createdAt === 'string'
+        typeof r.createdAt === "string"
           ? r.createdAt
           : r.createdAt != null
             ? String(r.createdAt)
-            : '';
+            : "";
       return mapFeedPostResToFeedPost({ ...(r as FeedPostRes), createdAt });
     });
-    return { posts, nextPageState: next && next !== '' ? String(next) : undefined };
+    return {
+      posts,
+      nextPageState: next && next !== "" ? String(next) : undefined,
+    };
   }
 }

@@ -2,6 +2,11 @@
 
 import { useState, useCallback, useEffect, useMemo } from "react";
 import debounce from "lodash/debounce";
+import {
+  SearchScopes,
+  SearchUiScopes,
+  type SearchUiScope,
+} from "@whatschat/shared-types";
 import { FeedApiAdapter } from "@/infrastructure/adapters/api/feed-api.adapter";
 import { getApiClient } from "@/infrastructure/adapters/api/api-client.adapter";
 
@@ -9,7 +14,8 @@ const api = new FeedApiAdapter(getApiClient());
 const LIMIT = 20;
 const DEBOUNCE_MS = 350;
 
-export type SearchType = "all" | "posts" | "users" | "hashtags";
+/** @deprecated Prefer SearchUiScope from @whatschat/shared-types */
+export type SearchType = SearchUiScope;
 
 export interface SearchHit {
   type: "user" | "post" | "hashtag";
@@ -19,32 +25,41 @@ export interface SearchHit {
 
 export function useGlobalSearch() {
   const [query, setQuery] = useState("");
-  const [searchType, setSearchType] = useState<SearchType>("all");
+  const [searchType, setSearchType] = useState<SearchUiScope>(
+    SearchUiScopes.All,
+  );
   const [userHits, setUserHits] = useState<unknown[]>([]);
   const [postHits, setPostHits] = useState<unknown[]>([]);
   const [hashtagHits, setHashtagHits] = useState<unknown[]>([]);
   const [userNextCursor, setUserNextCursor] = useState<string | undefined>();
   const [postNextCursor, setPostNextCursor] = useState<string | undefined>();
-  const [hashtagNextCursor, setHashtagNextCursor] = useState<string | undefined>();
+  const [hashtagNextCursor, setHashtagNextCursor] = useState<
+    string | undefined
+  >();
   const [postTotal, setPostTotal] = useState<number | undefined>();
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hashtagSuggestions, setHashtagSuggestions] = useState<unknown[]>([]);
   const runSearch = useCallback(
-    async (q: string, type: SearchType, cursor?: string, append?: boolean) => {
+    async (
+      q: string,
+      type: SearchUiScope,
+      cursor?: string,
+      append?: boolean,
+    ) => {
       const trimmed = q.trim();
-      if (!trimmed && type !== "all") return;
+      if (!trimmed && type !== SearchUiScopes.All) return;
       const isLoadMore = !!cursor;
-      if (type === "all") {
+      if (type === SearchUiScopes.All) {
         if (isLoadMore) return;
         setLoading(true);
         setError(null);
         try {
           const [u, p, h] = await Promise.all([
-            api.search(trimmed, "users", 10),
-            api.search(trimmed, "posts", LIMIT),
-            api.search(trimmed, "hashtags", 10),
+            api.search(trimmed, SearchScopes.Users, 10),
+            api.search(trimmed, SearchScopes.Posts, LIMIT),
+            api.search(trimmed, SearchScopes.Hashtags, 10),
           ]);
           setUserHits(u.hits);
           setUserNextCursor(u.nextCursor);
@@ -67,19 +82,27 @@ export function useGlobalSearch() {
         setError(null);
       }
       try {
-        const typeKey = type === "users" ? "users" : type === "posts" ? "posts" : "hashtags";
+        const typeKey =
+          type === SearchScopes.Users
+            ? SearchScopes.Users
+            : type === SearchScopes.Posts
+              ? SearchScopes.Posts
+              : SearchScopes.Hashtags;
         const res = await api.search(trimmed, typeKey, LIMIT, cursor);
-        if (type === "users") {
-          if (append) setUserHits((prev) => [...prev, ...(res.hits as unknown[])]);
+        if (type === SearchScopes.Users) {
+          if (append)
+            setUserHits((prev) => [...prev, ...(res.hits as unknown[])]);
           else setUserHits(res.hits as unknown[]);
           setUserNextCursor(res.nextCursor);
-        } else if (type === "posts") {
-          if (append) setPostHits((prev) => [...prev, ...(res.hits as unknown[])]);
+        } else if (type === SearchScopes.Posts) {
+          if (append)
+            setPostHits((prev) => [...prev, ...(res.hits as unknown[])]);
           else setPostHits(res.hits as unknown[]);
           setPostNextCursor(res.nextCursor);
           setPostTotal(res.total);
         } else {
-          if (append) setHashtagHits((prev) => [...prev, ...(res.hits as unknown[])]);
+          if (append)
+            setHashtagHits((prev) => [...prev, ...(res.hits as unknown[])]);
           else setHashtagHits(res.hits as unknown[]);
           setHashtagNextCursor(res.nextCursor);
           setHashtagSuggestions((res.hits as unknown[]).slice(0, 5));
@@ -91,32 +114,29 @@ export function useGlobalSearch() {
         setLoadingMore(false);
       }
     },
-    []
+    [],
   );
 
-  const loadHashtagSuggestions = useCallback(
-    async (q: string) => {
-      const t = q.replace(/^#/, "").trim().toLowerCase();
-      if (!t) {
-        setHashtagSuggestions([]);
-        return;
-      }
-      try {
-        const res = await api.search(t, "hashtags", 5);
-        setHashtagSuggestions(res.hits);
-      } catch {
-        setHashtagSuggestions([]);
-      }
-    },
-    []
-  );
+  const loadHashtagSuggestions = useCallback(async (q: string) => {
+    const t = q.replace(/^#/, "").trim().toLowerCase();
+    if (!t) {
+      setHashtagSuggestions([]);
+      return;
+    }
+    try {
+      const res = await api.search(t, SearchScopes.Hashtags, 5);
+      setHashtagSuggestions(res.hits);
+    } catch {
+      setHashtagSuggestions([]);
+    }
+  }, []);
 
   const debouncedSearch = useMemo(
     () =>
-      debounce((nextQuery: string, nextType: SearchType) => {
+      debounce((nextQuery: string, nextType: SearchUiScope) => {
         void runSearch(nextQuery, nextType);
       }, DEBOUNCE_MS),
-    [runSearch]
+    [runSearch],
   );
 
   const debouncedSuggestions = useMemo(
@@ -124,7 +144,7 @@ export function useGlobalSearch() {
       debounce((nextQuery: string) => {
         void loadHashtagSuggestions(nextQuery);
       }, 200),
-    [loadHashtagSuggestions]
+    [loadHashtagSuggestions],
   );
 
   useEffect(() => {
@@ -145,7 +165,10 @@ export function useGlobalSearch() {
   }, [query, searchType, debouncedSearch]);
 
   useEffect(() => {
-    if (searchType === "all" || searchType === "hashtags") {
+    if (
+      searchType === SearchUiScopes.All ||
+      searchType === SearchScopes.Hashtags
+    ) {
       debouncedSuggestions.cancel();
       return;
     }
@@ -155,22 +178,29 @@ export function useGlobalSearch() {
 
   const loadMore = useCallback(() => {
     const trimmed = query.trim();
-    if (!trimmed || searchType === "all") return;
-    if (searchType === "users" && userNextCursor) {
-      runSearch(trimmed, "users", userNextCursor, true);
-    } else if (searchType === "posts" && postNextCursor) {
-      runSearch(trimmed, "posts", postNextCursor, true);
-    } else if (searchType === "hashtags" && hashtagNextCursor) {
-      runSearch(trimmed, "hashtags", hashtagNextCursor, true);
+    if (!trimmed || searchType === SearchUiScopes.All) return;
+    if (searchType === SearchScopes.Users && userNextCursor) {
+      runSearch(trimmed, SearchScopes.Users, userNextCursor, true);
+    } else if (searchType === SearchScopes.Posts && postNextCursor) {
+      runSearch(trimmed, SearchScopes.Posts, postNextCursor, true);
+    } else if (searchType === SearchScopes.Hashtags && hashtagNextCursor) {
+      runSearch(trimmed, SearchScopes.Hashtags, hashtagNextCursor, true);
     }
-  }, [query, searchType, userNextCursor, postNextCursor, hashtagNextCursor, runSearch]);
+  }, [
+    query,
+    searchType,
+    userNextCursor,
+    postNextCursor,
+    hashtagNextCursor,
+    runSearch,
+  ]);
 
   const nextCursor =
-    searchType === "users"
+    searchType === SearchScopes.Users
       ? userNextCursor
-      : searchType === "posts"
+      : searchType === SearchScopes.Posts
         ? postNextCursor
-        : searchType === "hashtags"
+        : searchType === SearchScopes.Hashtags
           ? hashtagNextCursor
           : undefined;
 

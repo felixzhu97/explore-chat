@@ -69,14 +69,18 @@ flowchart TB
 
 ## 3. Preferred Terms | 术语表
 
-| Preferred Term  | 中文           | Definition                                               |
-| --------------- | -------------- | -------------------------------------------------------- |
-| WhatsFeed       | WhatsFeed      | 社交 + 即时通讯产品；npm scope `@whatschat/*` 为历史包名 |
-| Cover URL       | 封面 URL       | 视频帖封面图地址；与 mediaUrls 分离                      |
-| Feed Entry      | 信息流条目     | Feed 中的一条 Post 引用                                  |
-| Engagement      | 互动           | 点赞、收藏及计数                                         |
-| Explore AI BFF  | Explore AI BFF | Nest 服务间代理；`X-Service-Key` + `X-Client-Id`         |
-| Client Identity | 客户端身份     | 映射到 Explore AI 的稳定客户端 ID（UUID）                |
+| Preferred Term                  | 中文             | Definition                                                                                       |
+| ------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------ |
+| WhatsFeed                       | WhatsFeed        | 社交 + 即时通讯产品；npm scope `@whatschat/*` 为历史包名                                         |
+| Cover URL                       | 封面 URL         | 视频帖封面图地址；与 mediaUrls 分离                                                              |
+| Feed Entry                      | 信息流条目       | Feed 中的一条 Post 引用                                                                          |
+| Engagement                      | 互动             | 点赞、收藏及计数                                                                                 |
+| Explore AI BFF                  | Explore AI BFF   | Nest 服务间代理；`X-Service-Key` + `X-Client-Id`                                                 |
+| Client Identity                 | 客户端身份       | 映射到 Explore AI 的稳定客户端 ID（UUID）                                                        |
+| Primary Destination             | 主目的地         | 跨端规范导航身份：`feed` / `chat` / `reels` / `explore` / `user` / `search`；path/tab 由各端映射 |
+| Search Scope                    | 搜索范围         | Nest `type`：`posts` / `users` / `hashtags`；UI `all` 仅客户端聚合，勿作为 API type              |
+| Voice Gen Target Language       | 语音合成目标语言 | Voice Gen：`auto` / `zh` / `en`                                                                  |
+| Voice Translate Target Language | 语音翻译目标语言 | Voice translate：`zh` / `en`（无 `auto`）                                                        |
 
 ---
 
