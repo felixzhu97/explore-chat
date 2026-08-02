@@ -4,6 +4,8 @@
 
 产品交付状态见 [User Story Map](../../product-owner/User-Story-Map.md)。本目录聚焦 **C4 软件架构**。
 
+> **注意**：以 `.puml` 为准；改图后应重渲 `png/`。
+
 ## 文件
 
 | 文件                            | 层级 | 说明                                                      |
