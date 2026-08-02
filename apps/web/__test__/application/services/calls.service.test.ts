@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { CallsService } from "@/src/application/services/calls.service";
-import { store } from "@/src/infrastructure/adapters/state/store";
+import { CallsService } from "@/calls/calls.service";
+import { store } from "@/core/store/store";
 
-vi.mock("@/src/infrastructure/adapters/state/store", () => ({
+vi.mock("@/core/store/store", () => ({
   store: {
     getState: vi.fn(() => ({
       calls: {
@@ -44,7 +44,7 @@ describe("CallsService", () => {
   describe("endCall", () => {
     it("should end a call with duration", async () => {
       const call = await callsService.startCall("contact-1", "voice");
-      
+
       callsService.endCall(call.id, 120);
 
       expect(store.dispatch).toHaveBeenCalled();
@@ -54,7 +54,7 @@ describe("CallsService", () => {
   describe("answerCall", () => {
     it("should answer an incoming call", async () => {
       const call = await callsService.startCall("contact-1", "voice");
-      
+
       callsService.answerCall(call.id);
 
       expect(store.dispatch).toHaveBeenCalled();
@@ -64,7 +64,7 @@ describe("CallsService", () => {
   describe("declineCall", () => {
     it("should decline an incoming call", async () => {
       const call = await callsService.startCall("contact-1", "voice");
-      
+
       callsService.declineCall(call.id);
 
       expect(store.dispatch).toHaveBeenCalled();
@@ -119,7 +119,9 @@ describe("CallsService", () => {
       const stats = callsService.getCallStats();
 
       if (stats.answered > 0) {
-        expect(stats.averageDuration).toBe(stats.totalDuration / stats.answered);
+        expect(stats.averageDuration).toBe(
+          stats.totalDuration / stats.answered,
+        );
       } else {
         expect(stats.averageDuration).toBe(0);
       }

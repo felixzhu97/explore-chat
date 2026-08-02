@@ -15,7 +15,7 @@ const mockUseAuth: any = {
   error: null as string | null,
 };
 
-vi.mock("../../../src/presentation/hooks/use-auth", () => ({
+vi.mock("@/auth/use-auth", () => ({
   useAuth: () => mockUseAuth,
 }));
 
@@ -39,7 +39,8 @@ vi.mock("@/src/shared/i18n", () => ({
         "login.logInWithFacebook": "Log in with Facebook",
         "login.createNewAccount": "Create new account",
         "login.meta": "Meta",
-        "login.footerLinks": "Meta About Blog Jobs Help API Privacy Terms Locations Instagram Lite Meta AI Threads Contact Uploading & Non-Users Meta Verified",
+        "login.footerLinks":
+          "Meta About Blog Jobs Help API Privacy Terms Locations Instagram Lite Meta AI Threads Contact Uploading & Non-Users Meta Verified",
         "login.language": "English",
         "login.copyright": "© 2026 Instagram from Meta",
         "login.settings": "Settings",
@@ -52,7 +53,7 @@ vi.mock("@/src/shared/i18n", () => ({
   }),
 }));
 
-vi.mock("@/components/ui/input", () => ({
+vi.mock("@/shared/ui/input", () => ({
   Input: ({ onChange, ...props }: any) => (
     <input onChange={onChange} {...props} />
   ),
@@ -74,29 +75,39 @@ describe("LoginPage", () => {
   describe("Basic Rendering", () => {
     it("should render login form title", () => {
       render(<LoginPage />);
-      expect(screen.getByRole("heading", { name: /log into instagram/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: /log into instagram/i }),
+      ).toBeInTheDocument();
     });
 
     it("should render form inputs", () => {
       render(<LoginPage />);
-      expect(screen.getByPlaceholderText(/mobile number, username or email/i)).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText(/mobile number, username or email/i),
+      ).toBeInTheDocument();
       expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
     });
 
     it("should render submit button", () => {
       render(<LoginPage />);
       const buttons = screen.getAllByRole("button", { name: /log in/i });
-      expect(buttons.some((b) => b.getAttribute("type") === "submit")).toBe(true);
+      expect(buttons.some((b) => b.getAttribute("type") === "submit")).toBe(
+        true,
+      );
     });
 
     it("should render create new account button", () => {
       render(<LoginPage />);
-      expect(screen.getByRole("button", { name: /create new account/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /create new account/i }),
+      ).toBeInTheDocument();
     });
 
     it("should render forgot password link", () => {
       render(<LoginPage />);
-      expect(screen.getByRole("link", { name: /forgot password/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /forgot password/i }),
+      ).toBeInTheDocument();
     });
   });
 
@@ -104,7 +115,9 @@ describe("LoginPage", () => {
     it("should update username field", async () => {
       const user = userEvent.setup();
       render(<LoginPage />);
-      const input = screen.getByPlaceholderText(/mobile number, username or email/i);
+      const input = screen.getByPlaceholderText(
+        /mobile number, username or email/i,
+      );
       await user.clear(input);
       await user.type(input, "test@example.com");
       expect(input).toHaveValue("test@example.com");
@@ -122,7 +135,9 @@ describe("LoginPage", () => {
     it("should navigate to register on create new account click", async () => {
       const user = userEvent.setup();
       render(<LoginPage />);
-      await user.click(screen.getByRole("button", { name: /create new account/i }));
+      await user.click(
+        screen.getByRole("button", { name: /create new account/i }),
+      );
       expect(mockPush).toHaveBeenCalledWith("/register");
     });
   });
@@ -130,13 +145,18 @@ describe("LoginPage", () => {
   describe("Form Validation", () => {
     it("should have required fields", () => {
       render(<LoginPage />);
-      expect(screen.getByPlaceholderText(/mobile number, username or email/i)).toBeRequired();
+      expect(
+        screen.getByPlaceholderText(/mobile number, username or email/i),
+      ).toBeRequired();
       expect(screen.getByPlaceholderText(/password/i)).toBeRequired();
     });
 
     it("should have password input type", () => {
       render(<LoginPage />);
-      expect(screen.getByPlaceholderText(/password/i)).toHaveAttribute("type", "password");
+      expect(screen.getByPlaceholderText(/password/i)).toHaveAttribute(
+        "type",
+        "password",
+      );
     });
   });
 

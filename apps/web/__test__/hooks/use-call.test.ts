@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useCall } from "@/src/presentation/hooks/use-call";
+import { useCall } from "@/calls/use-call";
 
 describe("useCall Hook", () => {
   beforeEach(() => {
@@ -166,7 +166,12 @@ describe("useCall Hook", () => {
       const { result } = renderHook(() => useCall());
 
       act(() => {
-        result.current.simulateIncomingCall("contact-1", "John Doe", "", "voice");
+        result.current.simulateIncomingCall(
+          "contact-1",
+          "John Doe",
+          "",
+          "voice",
+        );
       });
 
       expect(result.current.callState.isActive).toBe(true);
@@ -179,7 +184,12 @@ describe("useCall Hook", () => {
       const { result } = renderHook(() => useCall());
 
       act(() => {
-        result.current.simulateIncomingCall("contact-1", "John Doe", "", "voice");
+        result.current.simulateIncomingCall(
+          "contact-1",
+          "John Doe",
+          "",
+          "voice",
+        );
       });
 
       act(() => {

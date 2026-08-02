@@ -52,15 +52,30 @@ services/server/src/
 
 Global API prefix: `/api/v1`.
 
-### Web / Admin
+### Web (`apps/web`)
+
+Business-domain folders (Redux retained; no Clean Architecture layers):
 
 ```
 apps/web/src/
-├── domain/
-├── application/
-├── infrastructure/   # ApiClient, *ApiAdapter
-└── presentation/     # components, screens
+├── core/       # api-client, storage, websocket, rtc, Redux store, config, mock-data
+├── shared/     # emotion, i18n, utils, shared UI (ui/)
+├── layout/     # authenticated-shell, nav, providers, routing helpers
+├── auth/       # auth.api, auth-session, use-auth, user.model
+├── feed/       # feed.api, use-feed, feed-page, feed components
+├── chat/       # chat.api, messages-page, chat components, slices hooks
+├── explore/    # explore-page
+├── reels/      # reels-page
+├── search/     # search containers, global search hooks
+├── profile/    # profile-page, user.api, use-user-profile*
+├── calls/      # call UI, calls slice hooks, WebRTC usage
+├── ai/         # ai/voice/image/video/vision/file apis, AI dialogs
+└── secondary/  # settings, status, starred
 ```
+
+Import aliases: `@/core/*`, `@/auth/*`, `@/feed/*`, … (see `apps/web/tsconfig.json`).
+
+### Admin
 
 ### Mobile
 

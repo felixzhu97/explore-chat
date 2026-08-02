@@ -6,7 +6,7 @@ import {
   mapUnknownToMessageCreate,
   type ApiChatRow,
   type ApiMessageRow,
-} from "@/src/application/mappers/chats.mapper";
+} from "@/chat/chats.mapper";
 
 // =============================================================================
 // TEST DOMAIN CONSTANTS
@@ -36,7 +36,9 @@ const createApiChatRow = (overrides: Partial<ApiChatRow> = {}): ApiChatRow => {
   };
 };
 
-const createApiMessageRow = (overrides: Partial<ApiMessageRow> = {}): ApiMessageRow => {
+const createApiMessageRow = (
+  overrides: Partial<ApiMessageRow> = {},
+): ApiMessageRow => {
   messageCounter++;
   return {
     id: `msg-${messageCounter}`,
@@ -50,25 +52,46 @@ const createApiMessageRow = (overrides: Partial<ApiMessageRow> = {}): ApiMessage
 };
 
 // Specialized factories
-const createPrivateChatRow = (overrides: Partial<ApiChatRow> = {}): ApiChatRow =>
-  createApiChatRow({ type: "PRIVATE", participants: [{ isOnline: true }], ...overrides });
+const createPrivateChatRow = (
+  overrides: Partial<ApiChatRow> = {},
+): ApiChatRow =>
+  createApiChatRow({
+    type: "PRIVATE",
+    participants: [{ isOnline: true }],
+    ...overrides,
+  });
 
 const createGroupChatRow = (overrides: Partial<ApiChatRow> = {}): ApiChatRow =>
-  createApiChatRow({ type: "GROUP", participants: [{ isOnline: false }], ...overrides });
+  createApiChatRow({
+    type: "GROUP",
+    participants: [{ isOnline: false }],
+    ...overrides,
+  });
 
 const createOnlineChatRow = (overrides: Partial<ApiChatRow> = {}): ApiChatRow =>
-  createApiChatRow({ participants: [{ isOnline: true }, { isOnline: false }], ...overrides });
+  createApiChatRow({
+    participants: [{ isOnline: true }, { isOnline: false }],
+    ...overrides,
+  });
 
-const createOfflineChatRow = (overrides: Partial<ApiChatRow> = {}): ApiChatRow =>
+const createOfflineChatRow = (
+  overrides: Partial<ApiChatRow> = {},
+): ApiChatRow =>
   createApiChatRow({ participants: [{ isOnline: false }], ...overrides });
 
-const createEmptyParticipantsChatRow = (overrides: Partial<ApiChatRow> = {}): ApiChatRow =>
-  createApiChatRow({ participants: [], ...overrides });
+const createEmptyParticipantsChatRow = (
+  overrides: Partial<ApiChatRow> = {},
+): ApiChatRow => createApiChatRow({ participants: [], ...overrides });
 
-const createMediaMessageRow = (mediaUrl: string = "https://example.com/image.jpg", overrides: Partial<ApiMessageRow> = {}): ApiMessageRow =>
-  createApiMessageRow({ mediaUrl, ...overrides });
+const createMediaMessageRow = (
+  mediaUrl: string = "https://example.com/image.jpg",
+  overrides: Partial<ApiMessageRow> = {},
+): ApiMessageRow => createApiMessageRow({ mediaUrl, ...overrides });
 
-const createTextMessageRow = (content: string = "Test message", overrides: Partial<ApiMessageRow> = {}): ApiMessageRow =>
+const createTextMessageRow = (
+  content: string = "Test message",
+  overrides: Partial<ApiMessageRow> = {},
+): ApiMessageRow =>
   createApiMessageRow({ content, type: "text", ...overrides });
 
 // =============================================================================
@@ -201,7 +224,7 @@ describe("chats.mapper", () => {
           const chat = createApiChatRow({ type });
           const contact = mapApiChatRowToContact(chat);
           expect(contact.isGroup).toBe(false);
-        }
+        },
       );
     });
 
@@ -233,7 +256,9 @@ describe("chats.mapper", () => {
 
     describe("lastMessage content handling", () => {
       it("should extract content from lastMessage object", () => {
-        const chat = createApiChatRow({ lastMessage: { content: "Extracted message" } });
+        const chat = createApiChatRow({
+          lastMessage: { content: "Extracted message" },
+        });
         const contact = mapApiChatRowToContact(chat);
         expect(contact.lastMessage).toBe("Extracted message");
       });
@@ -346,7 +371,9 @@ describe("chats.mapper", () => {
 
         expect(message.timestamp).toBeDefined();
         expect(typeof message.timestamp).toBe("string");
-        expect(message.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+        expect(message.timestamp).toMatch(
+          /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
+        );
       });
 
       it("should use empty string timestamp when provided", () => {
@@ -389,7 +416,7 @@ describe("chats.mapper", () => {
           const msg = createApiMessageRow({ type: input });
           const message = mapApiMessageRowToMessage(msg);
           expect(message.type).toBe(expected);
-        }
+        },
       );
 
       it("should default to text type when type is missing", () => {
@@ -615,7 +642,9 @@ describe("chats.mapper", () => {
 
     describe("long content", () => {
       it("should handle long message content", () => {
-        const msg = createApiMessageRow({ content: BOUNDARY_VALUES.LONG_CONTENT });
+        const msg = createApiMessageRow({
+          content: BOUNDARY_VALUES.LONG_CONTENT,
+        });
         const message = mapApiMessageRowToMessage(msg);
         expect(message.content).toBe(BOUNDARY_VALUES.LONG_CONTENT);
       });
@@ -686,8 +715,16 @@ describe("chats.mapper", () => {
     it("should map multiple messages from API response", () => {
       const apiMessages: ApiMessageRow[] = [
         createApiMessageRow({ id: "msg-1", content: "First message" }),
-        createApiMessageRow({ id: "msg-2", content: "Second message", type: "IMAGE" }),
-        createApiMessageRow({ id: "msg-3", content: "Third message", type: "VIDEO" }),
+        createApiMessageRow({
+          id: "msg-2",
+          content: "Second message",
+          type: "IMAGE",
+        }),
+        createApiMessageRow({
+          id: "msg-3",
+          content: "Third message",
+          type: "VIDEO",
+        }),
       ];
 
       const messages = apiMessages.map(mapApiMessageRowToMessage);

@@ -1,0 +1,30 @@
+import type { ApiClient } from "@/core/api-client";
+import type { ApiResponse } from "@/core/api-response.model";
+
+export interface VideoGenerateResponse {
+  jobId: string;
+}
+
+export interface VideoResultResponse {
+  status: "pending" | "succeeded" | "failed";
+  videoUrl?: string;
+  error?: string;
+}
+
+export class VideoApi {
+  constructor(private apiClient: ApiClient) {}
+
+  async generate(
+    prompt: string,
+    imageUrl?: string,
+  ): Promise<ApiResponse<VideoGenerateResponse>> {
+    return this.apiClient.post<VideoGenerateResponse>("/video/generate", {
+      prompt,
+      ...(imageUrl != null && { imageUrl }),
+    });
+  }
+
+  async getResult(jobId: string): Promise<ApiResponse<VideoResultResponse>> {
+    return this.apiClient.get<VideoResultResponse>(`/video/generate/${jobId}`);
+  }
+}

@@ -4,9 +4,9 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock the actual Dialog components with simple implementations
-vi.mock("@/src/presentation/components/ui/dialog", () => {
+vi.mock("@/shared/ui/dialog", () => {
   const React = require("react");
-  
+
   const MockDialog = ({ children }: { children: React.ReactNode }) => (
     <div data-testid="dialog-root">{children}</div>
   );
@@ -112,20 +112,73 @@ vi.mock("@/src/shared/utils/emotion", () => ({
 
 // Mock Radix Dialog
 vi.mock("@radix-ui/react-dialog", () => ({
-  Root: ({ children }: { children: React.ReactNode }) => 
-    React.createElement("div", { "data-testid": "radix-dialog-root" }, children),
-  Trigger: ({ children, ...props }: { children: React.ReactNode; [key: string]: any }) => 
-    React.createElement("button", { "data-testid": "dialog-trigger", ...props }, children),
+  Root: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(
+      "div",
+      { "data-testid": "radix-dialog-root" },
+      children,
+    ),
+  Trigger: ({
+    children,
+    ...props
+  }: {
+    children: React.ReactNode;
+    [key: string]: any;
+  }) =>
+    React.createElement(
+      "button",
+      { "data-testid": "dialog-trigger", ...props },
+      children,
+    ),
   Portal: ({ children }: { children: React.ReactNode }) => children,
-  Overlay: ({ children, ...props }: { children: React.ReactNode; [key: string]: any }) => 
-    React.createElement("div", { "data-testid": "dialog-overlay", ...props }, children),
-  Content: ({ children, title, ...props }: { children: React.ReactNode; title?: string; [key: string]: any }) => 
-    React.createElement("div", { "data-testid": "dialog-content", role: "dialog", "aria-label": title, ...props }, children),
-  Close: ({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) => 
-    asChild ? children : React.createElement("button", { "data-testid": "dialog-close" }, children),
-  Title: ({ children }: { children: React.ReactNode }) => 
+  Overlay: ({
+    children,
+    ...props
+  }: {
+    children: React.ReactNode;
+    [key: string]: any;
+  }) =>
+    React.createElement(
+      "div",
+      { "data-testid": "dialog-overlay", ...props },
+      children,
+    ),
+  Content: ({
+    children,
+    title,
+    ...props
+  }: {
+    children: React.ReactNode;
+    title?: string;
+    [key: string]: any;
+  }) =>
+    React.createElement(
+      "div",
+      {
+        "data-testid": "dialog-content",
+        role: "dialog",
+        "aria-label": title,
+        ...props,
+      },
+      children,
+    ),
+  Close: ({
+    children,
+    asChild,
+  }: {
+    children: React.ReactNode;
+    asChild?: boolean;
+  }) =>
+    asChild
+      ? children
+      : React.createElement(
+          "button",
+          { "data-testid": "dialog-close" },
+          children,
+        ),
+  Title: ({ children }: { children: React.ReactNode }) =>
     React.createElement("h2", {}, children),
-  Description: ({ children }: { children: React.ReactNode }) => 
+  Description: ({ children }: { children: React.ReactNode }) =>
     React.createElement("p", {}, children),
 }));
 
@@ -146,7 +199,7 @@ import {
   DialogClose,
   DialogOverlay,
   DialogPortal,
-} from "@/src/presentation/components/ui/dialog";
+} from "@/shared/ui/dialog";
 
 describe("Dialog Component", () => {
   beforeEach(() => {
@@ -163,7 +216,7 @@ describe("Dialog Component", () => {
       render(
         <Dialog>
           <span>Child Element</span>
-        </Dialog>
+        </Dialog>,
       );
       expect(screen.getByText("Child Element")).toBeInTheDocument();
     });
@@ -177,28 +230,26 @@ describe("Dialog Component", () => {
 
     it("should display trigger text content", () => {
       render(<DialogTrigger>Open Dialog</DialogTrigger>);
-      expect(screen.getByTestId("dialog-trigger")).toHaveTextContent("Open Dialog");
+      expect(screen.getByTestId("dialog-trigger")).toHaveTextContent(
+        "Open Dialog",
+      );
     });
 
     it("should handle click events on trigger", async () => {
       const user = userEvent.setup();
       const handleClick = vi.fn();
       render(
-        <DialogTrigger onClick={handleClick}>
-          Click Trigger
-        </DialogTrigger>
+        <DialogTrigger onClick={handleClick}>Click Trigger</DialogTrigger>,
       );
       await user.click(screen.getByTestId("dialog-trigger"));
       expect(handleClick).toHaveBeenCalled();
     });
 
     it("should support aria-label", () => {
-      render(
-        <DialogTrigger aria-label="Open settings">
-          Open
-        </DialogTrigger>
-      );
-      expect(screen.getByRole("button", { name: /open settings/i })).toBeInTheDocument();
+      render(<DialogTrigger aria-label="Open settings">Open</DialogTrigger>);
+      expect(
+        screen.getByRole("button", { name: /open settings/i }),
+      ).toBeInTheDocument();
     });
   });
 
@@ -210,17 +261,25 @@ describe("Dialog Component", () => {
 
     it("should have role dialog", () => {
       render(<DialogContent title="Test Dialog">Content</DialogContent>);
-      expect(screen.getByTestId("dialog-content")).toHaveAttribute("role", "dialog");
+      expect(screen.getByTestId("dialog-content")).toHaveAttribute(
+        "role",
+        "dialog",
+      );
     });
 
     it("should have accessible title via aria-label", () => {
       render(<DialogContent title="Accessible Title">Content</DialogContent>);
-      expect(screen.getByTestId("dialog-content")).toHaveAttribute("aria-label", "Accessible Title");
+      expect(screen.getByTestId("dialog-content")).toHaveAttribute(
+        "aria-label",
+        "Accessible Title",
+      );
     });
 
     it("should render children content", () => {
       render(<DialogContent>Child Content</DialogContent>);
-      expect(screen.getByTestId("dialog-content")).toHaveTextContent("Child Content");
+      expect(screen.getByTestId("dialog-content")).toHaveTextContent(
+        "Child Content",
+      );
     });
 
     it("should render multiple children", () => {
@@ -228,7 +287,7 @@ describe("Dialog Component", () => {
         <DialogContent>
           <span>First</span>
           <span>Second</span>
-        </DialogContent>
+        </DialogContent>,
       );
       expect(screen.getByText("First")).toBeInTheDocument();
       expect(screen.getByText("Second")).toBeInTheDocument();
@@ -236,11 +295,13 @@ describe("Dialog Component", () => {
 
     it("should handle hideClose prop", () => {
       const { rerender } = render(
-        <DialogContent hideClose={true}>Without Close</DialogContent>
+        <DialogContent hideClose={true}>Without Close</DialogContent>,
       );
       expect(screen.getByTestId("dialog-content")).toBeInTheDocument();
-      expect(screen.queryByTestId("dialog-close-button")).not.toBeInTheDocument();
-      
+      expect(
+        screen.queryByTestId("dialog-close-button"),
+      ).not.toBeInTheDocument();
+
       rerender(<DialogContent hideClose={false}>With Close</DialogContent>);
       expect(screen.getByTestId("dialog-content")).toBeInTheDocument();
     });
@@ -259,9 +320,12 @@ describe("Dialog Component", () => {
       render(
         <DialogContent aria-describedby="desc-id" title="Title">
           Content
-        </DialogContent>
+        </DialogContent>,
       );
-      expect(screen.getByTestId("dialog-content")).toHaveAttribute("aria-describedby", "desc-id");
+      expect(screen.getByTestId("dialog-content")).toHaveAttribute(
+        "aria-describedby",
+        "desc-id",
+      );
     });
   });
 
@@ -272,11 +336,7 @@ describe("Dialog Component", () => {
     });
 
     it("should handle className", () => {
-      render(
-        <DialogOverlay className="custom-overlay">
-          Overlay
-        </DialogOverlay>
-      );
+      render(<DialogOverlay className="custom-overlay">Overlay</DialogOverlay>);
       expect(screen.getByTestId("dialog-overlay")).toBeInTheDocument();
     });
   });
@@ -299,7 +359,7 @@ describe("Dialog Component", () => {
         <DialogHeader>
           <h2>Title</h2>
           <p>Description</p>
-        </DialogHeader>
+        </DialogHeader>,
       );
       expect(screen.getByText("Title")).toBeInTheDocument();
       expect(screen.getByText("Description")).toBeInTheDocument();
@@ -307,9 +367,7 @@ describe("Dialog Component", () => {
 
     it("should handle className", () => {
       render(
-        <DialogHeader className="header-class">
-          Styled Header
-        </DialogHeader>
+        <DialogHeader className="header-class">Styled Header</DialogHeader>,
       );
       expect(screen.getByTestId("dialog-header")).toBeInTheDocument();
     });
@@ -326,17 +384,19 @@ describe("Dialog Component", () => {
         <DialogFooter>
           <button>Cancel</button>
           <button>Confirm</button>
-        </DialogFooter>
+        </DialogFooter>,
       );
-      expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /confirm/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /cancel/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /confirm/i }),
+      ).toBeInTheDocument();
     });
 
     it("should handle className", () => {
       render(
-        <DialogFooter className="footer-class">
-          Styled Footer
-        </DialogFooter>
+        <DialogFooter className="footer-class">Styled Footer</DialogFooter>,
       );
       expect(screen.getByTestId("dialog-footer")).toBeInTheDocument();
     });
@@ -355,11 +415,7 @@ describe("Dialog Component", () => {
     });
 
     it("should handle className", () => {
-      render(
-        <DialogTitle className="title-class">
-          Styled Title
-        </DialogTitle>
-      );
+      render(<DialogTitle className="title-class">Styled Title</DialogTitle>);
       expect(screen.getByTestId("dialog-title")).toBeInTheDocument();
     });
   });
@@ -374,7 +430,7 @@ describe("Dialog Component", () => {
       render(
         <DialogDescription className="desc-class">
           Styled Description
-        </DialogDescription>
+        </DialogDescription>,
       );
       expect(screen.getByTestId("dialog-description")).toBeInTheDocument();
     });
@@ -388,7 +444,9 @@ describe("Dialog Component", () => {
 
     it("should render children content", () => {
       render(<DialogClose>Close Dialog</DialogClose>);
-      expect(screen.getByTestId("dialog-close")).toHaveTextContent("Close Dialog");
+      expect(screen.getByTestId("dialog-close")).toHaveTextContent(
+        "Close Dialog",
+      );
     });
 
     it("should handle click events", async () => {
@@ -400,12 +458,10 @@ describe("Dialog Component", () => {
     });
 
     it("should support aria-label", () => {
-      render(
-        <DialogClose aria-label="Close dialog">
-          X
-        </DialogClose>
-      );
-      expect(screen.getByRole("button", { name: /close dialog/i })).toBeInTheDocument();
+      render(<DialogClose aria-label="Close dialog">X</DialogClose>);
+      expect(
+        screen.getByRole("button", { name: /close dialog/i }),
+      ).toBeInTheDocument();
     });
   });
 
@@ -425,7 +481,7 @@ describe("Dialog Component", () => {
               <button>Confirm</button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog>,
       );
 
       expect(screen.getByTestId("dialog-root")).toBeInTheDocument();
@@ -453,7 +509,7 @@ describe("Dialog Component", () => {
               <button type="submit">Submit</button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog>,
       );
 
       expect(screen.getByPlaceholderText("Name")).toBeInTheDocument();
@@ -469,7 +525,9 @@ describe("Dialog Component", () => {
 
     it("should have accessible title", () => {
       render(<DialogContent title="Important Dialog">Content</DialogContent>);
-      expect(screen.getByRole("dialog", { name: /important dialog/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("dialog", { name: /important dialog/i }),
+      ).toBeInTheDocument();
     });
 
     it("should support aria-describedby for descriptions", () => {
@@ -477,9 +535,12 @@ describe("Dialog Component", () => {
         <DialogContent aria-describedby="desc-id" title="Test">
           <span id="desc-id">This is a description</span>
           Content
-        </DialogContent>
+        </DialogContent>,
       );
-      expect(screen.getByRole("dialog")).toHaveAttribute("aria-describedby", "desc-id");
+      expect(screen.getByRole("dialog")).toHaveAttribute(
+        "aria-describedby",
+        "desc-id",
+      );
     });
   });
 

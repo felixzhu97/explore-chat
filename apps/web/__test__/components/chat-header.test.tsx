@@ -1,26 +1,50 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ChatHeader } from "@/src/presentation/components/chat/chat-header";
+import { ChatHeader } from "@/chat/components/chat-header";
 import type { Contact } from "@/shared/types";
 
 // Mock lucide-react icons
 vi.mock("lucide-react", () => ({
-  Info: vi.fn(() => React.createElement("span", { "data-testid": "info-icon" }, "Info")),
-  Users: vi.fn(() => React.createElement("span", { "data-testid": "users-icon" }, "Users")),
-  BellOff: vi.fn(() => React.createElement("span", { "data-testid": "bell-off-icon" }, "BellOff")),
+  Info: vi.fn(() =>
+    React.createElement("span", { "data-testid": "info-icon" }, "Info"),
+  ),
+  Users: vi.fn(() =>
+    React.createElement("span", { "data-testid": "users-icon" }, "Users"),
+  ),
+  BellOff: vi.fn(() =>
+    React.createElement("span", { "data-testid": "bell-off-icon" }, "BellOff"),
+  ),
 }));
 
 // Mock UI components
-vi.mock("@/src/presentation/components/ui/avatar", () => ({
-  Avatar: vi.fn(({ children }) => React.createElement("div", { "data-testid": "avatar" }, children)),
-  AvatarImage: vi.fn(({ src, ...props }) => React.createElement("img", { "data-testid": "avatar-image", src, ...props })),
-  AvatarFallback: vi.fn(({ children, ...props }) => React.createElement("span", { "data-testid": "avatar-fallback", ...props }, children)),
+vi.mock("@/shared/ui/avatar", () => ({
+  Avatar: vi.fn(({ children }) =>
+    React.createElement("div", { "data-testid": "avatar" }, children),
+  ),
+  AvatarImage: vi.fn(({ src, ...props }) =>
+    React.createElement("img", {
+      "data-testid": "avatar-image",
+      src,
+      ...props,
+    }),
+  ),
+  AvatarFallback: vi.fn(({ children, ...props }) =>
+    React.createElement(
+      "span",
+      { "data-testid": "avatar-fallback", ...props },
+      children,
+    ),
+  ),
 }));
 
-vi.mock("@/src/presentation/components/ui/button", () => ({
-  Button: vi.fn(({ children, ...props }) => 
-    React.createElement("button", { "data-testid": "button", ...props }, children)
+vi.mock("@/shared/ui/button", () => ({
+  Button: vi.fn(({ children, ...props }) =>
+    React.createElement(
+      "button",
+      { "data-testid": "button", ...props },
+      children,
+    ),
   ),
 }));
 
@@ -53,7 +77,10 @@ vi.mock("@/src/shared/utils/emotion", () => {
   // Create styled function with both element shortcuts and callable pattern
   const styled: any = (component: any) => {
     // If called as styled(Component), use component pattern
-    if (typeof component === 'function' || (typeof component === 'object' && component !== null)) {
+    if (
+      typeof component === "function" ||
+      (typeof component === "object" && component !== null)
+    ) {
       return createStyledComponent(component);
     }
     // If called as styled('div'), styled('span'), etc
@@ -61,25 +88,25 @@ vi.mock("@/src/shared/utils/emotion", () => {
   };
 
   // Add HTML element shortcuts
-  styled.div = styledElement('div');
-  styled.span = styledElement('span');
-  styled.button = styledElement('button');
-  styled.p = styledElement('p');
-  styled.img = styledElement('img');
-  styled.input = styledElement('input');
-  styled.ul = styledElement('ul');
-  styled.li = styledElement('li');
-  styled.form = styledElement('form');
-  styled.label = styledElement('label');
-  styled.nav = styledElement('nav');
-  styled.section = styledElement('section');
-  styled.article = styledElement('article');
-  styled.aside = styledElement('aside');
-  styled.header = styledElement('header');
-  styled.footer = styledElement('footer');
-  styled.main = styledElement('main');
-  styled.a = styledElement('a');
-  styled.svg = styledElement('svg');
+  styled.div = styledElement("div");
+  styled.span = styledElement("span");
+  styled.button = styledElement("button");
+  styled.p = styledElement("p");
+  styled.img = styledElement("img");
+  styled.input = styledElement("input");
+  styled.ul = styledElement("ul");
+  styled.li = styledElement("li");
+  styled.form = styledElement("form");
+  styled.label = styledElement("label");
+  styled.nav = styledElement("nav");
+  styled.section = styledElement("section");
+  styled.article = styledElement("article");
+  styled.aside = styledElement("aside");
+  styled.header = styledElement("header");
+  styled.footer = styledElement("footer");
+  styled.main = styledElement("main");
+  styled.a = styledElement("a");
+  styled.svg = styledElement("svg");
 
   return {
     styled,
@@ -144,7 +171,9 @@ describe("ChatHeader Component", () => {
         isGroup: true,
         name: "Test Group",
       };
-      render(<ChatHeader {...defaultProps} contact={groupContact} isGroup={true} />);
+      render(
+        <ChatHeader {...defaultProps} contact={groupContact} isGroup={true} />,
+      );
       expect(screen.getByText("Test Group")).toBeInTheDocument();
     });
 
@@ -153,7 +182,9 @@ describe("ChatHeader Component", () => {
         ...mockContact,
         isGroup: true,
       };
-      render(<ChatHeader {...defaultProps} contact={groupContact} isGroup={true} />);
+      render(
+        <ChatHeader {...defaultProps} contact={groupContact} isGroup={true} />,
+      );
       expect(screen.getByTestId("users-icon")).toBeInTheDocument();
     });
 
@@ -186,16 +217,16 @@ describe("ChatHeader Component", () => {
   describe("info button", () => {
     it("should call onShowInfo when info button is clicked", () => {
       render(<ChatHeader {...defaultProps} />);
-      
+
       const infoButton = screen.getByTestId("button");
       infoButton.click();
-      
+
       expect(defaultProps.onShowInfo).toHaveBeenCalledTimes(1);
     });
 
     it("should have aria-label for accessibility", () => {
       render(<ChatHeader {...defaultProps} />);
-      
+
       const infoButton = screen.getByTestId("button");
       expect(infoButton).toHaveAttribute("aria-label", "Info");
     });

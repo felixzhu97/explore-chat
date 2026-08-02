@@ -1,6 +1,6 @@
 import { renderHook, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { useDialogs } from "@/src/presentation/hooks/use-dialogs";
+import { useDialogs } from "@/layout/use-dialogs";
 
 describe("useDialogs Hook", () => {
   beforeEach(() => {
@@ -323,9 +323,21 @@ describe("useDialogs Hook", () => {
       const { result } = renderHook(() => useDialogs());
 
       const actions = [
-        { open: "handleCreateGroupClick", close: "closeCreateGroupDialog", state: "showCreateGroupDialog" },
-        { open: "handleAddFriendClick", close: "closeAddFriendDialog", state: "showAddFriendDialog" },
-        { open: "handleAdvancedSearchClick", close: "closeAdvancedSearchDialog", state: "showAdvancedSearchDialog" },
+        {
+          open: "handleCreateGroupClick",
+          close: "closeCreateGroupDialog",
+          state: "showCreateGroupDialog",
+        },
+        {
+          open: "handleAddFriendClick",
+          close: "closeAddFriendDialog",
+          state: "showAddFriendDialog",
+        },
+        {
+          open: "handleAdvancedSearchClick",
+          close: "closeAdvancedSearchDialog",
+          state: "showAdvancedSearchDialog",
+        },
       ];
 
       actions.forEach((action) => {
@@ -413,7 +425,9 @@ describe("useDialogs Hook", () => {
 
       expect(result.current.closeCreateGroupDialog).toBe(firstCloseCreateGroup);
       expect(result.current.closeAddFriendDialog).toBe(firstCloseAddFriend);
-      expect(result.current.closeAdvancedSearchDialog).toBe(firstCloseAdvancedSearch);
+      expect(result.current.closeAdvancedSearchDialog).toBe(
+        firstCloseAdvancedSearch,
+      );
     });
   });
 

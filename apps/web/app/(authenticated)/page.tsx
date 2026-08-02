@@ -1,4 +1,4 @@
-import { FeedPage } from "@/src/presentation/features/feed/feed-page";
+import { FeedPage } from "@/feed/feed-page";
 
 export default function HomePage() {
   return <FeedPage />;

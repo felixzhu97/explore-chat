@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import { ChatArea } from "@/src/presentation/components/chat/chat-area";
+import { ChatArea } from "@/chat/components/chat-area";
 
 // Mock i18n and locales FIRST
 vi.mock("@/shared/locales/en", () => ({}));
@@ -49,11 +49,13 @@ vi.mock("@/components/ui/separator", () => ({
 // Mock Lucide React icons
 vi.mock("lucide-react", () => {
   const createMockIcon = (name: string) => {
-    const MockIcon = () => <div data-testid={`${name.toLowerCase()}-icon`} data-icon-name={name} />;
+    const MockIcon = () => (
+      <div data-testid={`${name.toLowerCase()}-icon`} data-icon-name={name} />
+    );
     MockIcon.displayName = name;
     return MockIcon;
   };
-  
+
   return {
     __esModule: true,
     Send: createMockIcon("Send"),
@@ -166,7 +168,7 @@ vi.mock("@/components/emoji-picker", () => ({
 }));
 
 // Mock MessageInput component
-vi.mock("@/presentation/components/chat/message-input", () => ({
+vi.mock("@/chat/components/message-input", () => ({
   MessageInput: (props: any) => (
     <div data-testid="message-input">
       <input placeholder="输入消息..." />
@@ -179,7 +181,7 @@ vi.mock("@/presentation/components/chat/message-input", () => ({
 }));
 
 // Mock ChatHeader component
-vi.mock("@/presentation/components/chat/chat-header", () => ({
+vi.mock("@/chat/components/chat-header", () => ({
   ChatHeader: ({ contact, isTyping }: any) => (
     <div data-testid="chat-header">
       <h2>{contact.name}</h2>
@@ -191,7 +193,7 @@ vi.mock("@/presentation/components/chat/chat-header", () => ({
 }));
 
 // Mock MessageArea component
-vi.mock("@/presentation/components/chat/message-area", () => ({
+vi.mock("@/chat/components/message-area", () => ({
   MessageArea: ({ messages }: any) => (
     <div data-testid="message-area">
       {messages.map((message: any) => (

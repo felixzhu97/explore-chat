@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/src/presentation/hooks/use-auth";
-import { AuthenticatedShell } from "@/src/presentation/features/shell/authenticated-shell";
-import { RealCallProvider } from "@/src/presentation/features/shell/real-call-context";
+import { useAuth } from "@/auth/use-auth";
+import { AuthenticatedShell } from "@/layout/authenticated-shell";
+import { RealCallProvider } from "@/layout/real-call-context";
 import {
   InstagramLoadingSplash,
   FromMetaBadge,
-} from "@/src/presentation/components/ui/instagram-loading-splash";
+} from "@/shared/ui/instagram-loading-splash";
 import { styled } from "@/src/shared/utils/emotion";
 
 const LoadingScreen = styled.div`

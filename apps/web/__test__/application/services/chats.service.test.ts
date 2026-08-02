@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ChatsService } from "@/src/application/services/chats.service";
+import { ChatsService } from "@/chat/services/chats.service";
 
-vi.mock("@/src/application/mappers/chats.mapper", () => ({
+vi.mock("@/chat/chats.mapper", () => ({
   mapApiChatRowToContact: vi.fn((chat: any) => ({
     id: chat.id,
     name: chat.name || "Chat",
@@ -155,7 +155,7 @@ describe("ChatsService", () => {
         chatsService.createChat({
           participantIds: ["user-1"],
           type: "private",
-        })
+        }),
       ).rejects.toThrow("创建聊天失败");
     });
   });
@@ -233,7 +233,7 @@ describe("ChatsService", () => {
       });
 
       await expect(
-        chatsService.sendMessage("chat-1", { content: "Hello" })
+        chatsService.sendMessage("chat-1", { content: "Hello" }),
       ).rejects.toThrow("发送消息失败");
     });
   });
@@ -244,14 +244,17 @@ describe("ChatsService", () => {
 
       await chatsService.markMessageAsRead("chat-1", "msg-1");
 
-      expect(mockChatApi.markMessageAsRead).toHaveBeenCalledWith("chat-1", "msg-1");
+      expect(mockChatApi.markMessageAsRead).toHaveBeenCalledWith(
+        "chat-1",
+        "msg-1",
+      );
     });
 
     it("should throw error on failure", async () => {
       mockChatApi.markMessageAsRead.mockRejectedValue(new Error("Failed"));
 
       await expect(
-        chatsService.markMessageAsRead("chat-1", "msg-1")
+        chatsService.markMessageAsRead("chat-1", "msg-1"),
       ).rejects.toThrow();
     });
   });

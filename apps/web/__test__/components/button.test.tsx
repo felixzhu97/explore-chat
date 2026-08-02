@@ -4,9 +4,9 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock the actual Button component with a simple implementation
-vi.mock("@/src/presentation/components/ui/button", () => {
+vi.mock("@/shared/ui/button", () => {
   const React = require("react");
-  
+
   const MockButton = React.forwardRef<HTMLButtonElement, any>(
     ({ asChild = false, children, ...props }, ref) => {
       if (asChild) {
@@ -17,10 +17,10 @@ vi.mock("@/src/presentation/components/ui/button", () => {
           {children}
         </button>
       );
-    }
+    },
   );
   MockButton.displayName = "Button";
-  
+
   return { Button: MockButton };
 });
 
@@ -35,7 +35,7 @@ vi.mock("@radix-ui/react-slot", () => ({
 }));
 
 // Import mocked component
-import { Button } from "@/src/presentation/components/ui/button";
+import { Button } from "@/shared/ui/button";
 
 describe("Button Component", () => {
   beforeEach(() => {
@@ -45,7 +45,9 @@ describe("Button Component", () => {
   describe("Rendering", () => {
     it("should render button with children content", () => {
       render(<Button>Click me</Button>);
-      expect(screen.getByRole("button", { name: /click me/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /click me/i }),
+      ).toBeInTheDocument();
     });
 
     it("should render as button element by default", () => {
@@ -55,7 +57,9 @@ describe("Button Component", () => {
 
     it("should render button with text content", () => {
       render(<Button>Submit Form</Button>);
-      expect(screen.getByRole("button", { name: /submit form/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /submit form/i }),
+      ).toBeInTheDocument();
     });
 
     it("should render button with multiple children", () => {
@@ -63,7 +67,7 @@ describe("Button Component", () => {
         <Button>
           <span>Icon</span>
           <span>Text</span>
-        </Button>
+        </Button>,
       );
       expect(screen.getByRole("button")).toBeInTheDocument();
       expect(screen.getByText("Icon")).toBeInTheDocument();
@@ -74,7 +78,9 @@ describe("Button Component", () => {
   describe("Disabled State", () => {
     it("should render disabled button", () => {
       render(<Button disabled>Disabled Button</Button>);
-      expect(screen.getByRole("button", { name: /disabled button/i })).toBeDisabled();
+      expect(
+        screen.getByRole("button", { name: /disabled button/i }),
+      ).toBeDisabled();
     });
 
     it("should have disabled attribute set", () => {
@@ -89,7 +95,7 @@ describe("Button Component", () => {
       render(
         <Button onClick={handleClick} disabled>
           Disabled
-        </Button>
+        </Button>,
       );
 
       await user.click(screen.getByRole("button"));
@@ -102,7 +108,7 @@ describe("Button Component", () => {
       render(
         <Button onClick={handleClick} disabled>
           Disabled
-        </Button>
+        </Button>,
       );
 
       const button = screen.getByRole("button");
@@ -127,10 +133,12 @@ describe("Button Component", () => {
       render(<Button onClick={handleClick}>Click</Button>);
 
       await user.click(screen.getByRole("button"));
-      expect(handleClick).toHaveBeenCalledWith(expect.objectContaining({
-        type: "click",
-        target: expect.any(Element),
-      }));
+      expect(handleClick).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "click",
+          target: expect.any(Element),
+        }),
+      );
     });
 
     it("should handle multiple rapid clicks", async () => {
@@ -186,7 +194,9 @@ describe("Button Component", () => {
       ["link", "Link"],
     ])("should render with %s variant", (variant, name) => {
       render(<Button variant={variant as any}>{name}</Button>);
-      expect(screen.getByRole("button", { name: new RegExp(name, "i") })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: new RegExp(name, "i") }),
+      ).toBeInTheDocument();
     });
   });
 
@@ -198,7 +208,9 @@ describe("Button Component", () => {
       ["icon", "Icon"],
     ])("should render with %s size", (size, name) => {
       render(<Button size={size as any}>{name}</Button>);
-      expect(screen.getByRole("button", { name: new RegExp(name, "i") })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: new RegExp(name, "i") }),
+      ).toBeInTheDocument();
     });
   });
 
@@ -224,16 +236,18 @@ describe("Button Component", () => {
       render(
         <Button asChild>
           <a href="/test">Link Button</a>
-        </Button>
+        </Button>,
       );
-      expect(screen.getByRole("link", { name: /link button/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /link button/i }),
+      ).toBeInTheDocument();
     });
 
     it("should render anchor with href", () => {
       render(
         <Button asChild>
           <a href="https://example.com">External Link</a>
-        </Button>
+        </Button>,
       );
       const link = screen.getByRole("link", { name: /external link/i });
       expect(link).toHaveAttribute("href", "https://example.com");
@@ -260,9 +274,11 @@ describe("Button Component", () => {
       render(
         <Button aria-label="Close dialog">
           <span aria-hidden>X</span>
-        </Button>
+        </Button>,
       );
-      expect(screen.getByRole("button", { name: /close dialog/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /close dialog/i }),
+      ).toBeInTheDocument();
     });
 
     it("should support aria-disabled", () => {
@@ -274,9 +290,11 @@ describe("Button Component", () => {
     it("should support aria-describedby", () => {
       render(
         <>
-          <Button aria-describedby="button-description">With Description</Button>
+          <Button aria-describedby="button-description">
+            With Description
+          </Button>
           <span id="button-description">This is a helpful description</span>
-        </>
+        </>,
       );
       const button = screen.getByRole("button", { name: /with description/i });
       expect(button).toHaveAttribute("aria-describedby", "button-description");
@@ -311,14 +329,13 @@ describe("Button Component", () => {
 
     it("should handle undefined props gracefully", () => {
       render(
-        <Button 
-          onClick={undefined} 
-          className={undefined}
-        >
+        <Button onClick={undefined} className={undefined}>
           Undefined Props
-        </Button>
+        </Button>,
       );
-      expect(screen.getByRole("button", { name: /undefined props/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /undefined props/i }),
+      ).toBeInTheDocument();
     });
 
     it("should handle very long text", () => {
@@ -336,7 +353,7 @@ describe("Button Component", () => {
       const { rerender } = render(
         <Button onClick={handleClick} disabled={true}>
           Loading
-        </Button>
+        </Button>,
       );
 
       await user.click(screen.getByRole("button"));
@@ -345,7 +362,7 @@ describe("Button Component", () => {
       rerender(
         <Button onClick={handleClick} disabled={false}>
           Loading
-        </Button>
+        </Button>,
       );
 
       await user.click(screen.getByRole("button"));

@@ -1,4 +1,4 @@
-import { SettingsPageContainer } from "@/src/presentation/features/secondary/secondary-pages";
+import { SettingsPageContainer } from "@/secondary/secondary-pages";
 
 export default function SettingsRoutePage() {
   return <SettingsPageContainer />;

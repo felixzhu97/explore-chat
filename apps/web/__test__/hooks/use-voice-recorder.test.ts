@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useVoiceRecorder } from "@/src/presentation/hooks/use-voice-recorder";
+import { useVoiceRecorder } from "@/shared/use-voice-recorder";
 
-vi.mock("@/src/presentation/hooks/use-voice-recorder", () => ({
+vi.mock("@/shared/use-voice-recorder", () => ({
   useVoiceRecorder: vi.fn(() => ({
     isRecording: false,
     duration: 0,

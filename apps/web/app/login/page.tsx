@@ -5,8 +5,8 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Settings } from "lucide-react";
-import { Input } from "@/src/presentation/components/ui/input";
-import { useAuth } from "../../src/presentation/hooks/use-auth";
+import { Input } from "@/shared/ui/input";
+import { useAuth } from "@/auth/use-auth";
 import { useTranslation } from "@/src/shared/i18n";
 import { styled } from "@/src/shared/utils/emotion";
 
@@ -15,7 +15,9 @@ const PageShell = styled.div`
   display: flex;
   flex-direction: column;
   background-color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
 `;
 
 const Main = styled.main`
@@ -50,9 +52,18 @@ const InstagramLogo = styled.div`
   width: 220px;
   height: 80px;
   margin-bottom: 1.5rem;
-  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 174 60'%3E%3Cpath fill='black' d='M115 30c0-8.3 6.7-15 15-15s15 6.7 15 15-6.7 15-15 15-15-6.7-15-15zm-58 0c0-8.3 6.7-15 15-15s15 6.7 15 15-6.7 15-15 15-15-6.7-15-15zm29 0c0-16.6 13.4-30 30-30s30 13.4 30 30-13.4 30-30 30-30-13.4-30-30z'/%3E%3C/svg%3E") center/contain no-repeat;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 174 60'%3E%3Cpath fill='black' d='M115 30c0-8.3 6.7-15 15-15s15 6.7 15 15-6.7 15-15 15-15-6.7-15-15zm-58 0c0-8.3 6.7-15 15-15s15 6.7 15 15-6.7 15-15 15-15-6.7-15-15zm29 0c0-16.6 13.4-30 30-30s30 13.4 30 30-13.4 30-30 30-30-13.4-30-30z'/%3E%3C/svg%3E") center/contain no-repeat;
+  background: linear-gradient(
+    45deg,
+    #f09433,
+    #e6683c,
+    #dc2743,
+    #cc2366,
+    #bc1888
+  );
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 174 60'%3E%3Cpath fill='black' d='M115 30c0-8.3 6.7-15 15-15s15 6.7 15 15-6.7 15-15 15-15-6.7-15-15zm-58 0c0-8.3 6.7-15 15-15s15 6.7 15 15-6.7 15-15 15-15-6.7-15-15zm29 0c0-16.6 13.4-30 30-30s30 13.4 30 30-13.4 30-30 30-30-13.4-30-30z'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 174 60'%3E%3Cpath fill='black' d='M115 30c0-8.3 6.7-15 15-15s15 6.7 15 15-6.7 15-15 15-15-6.7-15-15zm-58 0c0-8.3 6.7-15 15-15s15 6.7 15 15-6.7 15-15 15-15-6.7-15-15zm29 0c0-16.6 13.4-30 30-30s30 13.4 30 30-13.4 30-30 30-30-13.4-30-30z'/%3E%3C/svg%3E")
+    center/contain no-repeat;
 `;
 
 const Tagline = styled.p`
@@ -75,7 +86,9 @@ const PhoneGraphic = styled.div`
   background: linear-gradient(180deg, #fae0e8 0%, #e8d5f0 50%, #d5e8f0 100%);
   border-radius: 40px;
   position: relative;
-  box-shadow: 0 0 0 8px #262626, 0 0 0 10px #eee;
+  box-shadow:
+    0 0 0 8px #262626,
+    0 0 0 10px #eee;
   &::before {
     content: "";
     position: absolute;
@@ -387,7 +400,8 @@ export default function LoginPage() {
         <LeftColumn>
           <InstagramLogo aria-hidden />
           <Tagline>
-            {t("login.taglinePart1")} <TaglineHighlight>{t("login.taglinePart2")}</TaglineHighlight>
+            {t("login.taglinePart1")}{" "}
+            <TaglineHighlight>{t("login.taglinePart2")}</TaglineHighlight>
           </Tagline>
           <PhoneGraphic aria-hidden />
         </LeftColumn>
@@ -395,7 +409,11 @@ export default function LoginPage() {
         <RightColumn>
           <FormCard>
             <FormHeader>
-              <BackButton type="button" onClick={() => router.back()} aria-label={t("common.cancel")}>
+              <BackButton
+                type="button"
+                onClick={() => router.back()}
+                aria-label={t("common.cancel")}
+              >
                 <ChevronLeft size={24} strokeWidth={2} />
               </BackButton>
               <FormTitle>{t("login.logIntoInstagram")}</FormTitle>
@@ -421,7 +439,11 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 aria-label={t("login.passwordPlaceholder")}
               />
-              <LogInButton type="submit" disabled={isLoading} $disabled={isLoading}>
+              <LogInButton
+                type="submit"
+                disabled={isLoading}
+                $disabled={isLoading}
+              >
                 {isLoading ? t("login.loggingIn") : t("login.logIn")}
               </LogInButton>
               <ForgotLink href="#">{t("login.forgotPassword")}</ForgotLink>
@@ -434,7 +456,10 @@ export default function LoginPage() {
                 <FacebookIcon />
                 {t("login.logInWithFacebook")}
               </SecondaryButton>
-              <SecondaryButton type="button" onClick={() => router.push("/register")}>
+              <SecondaryButton
+                type="button"
+                onClick={() => router.push("/register")}
+              >
                 {t("login.createNewAccount")}
               </SecondaryButton>
               <MetaLink href="#">
@@ -447,15 +472,15 @@ export default function LoginPage() {
       </Main>
 
       <Footer>
-        {t("login.footerLinks").split(" ").map((word, index) => (
-          <FooterLink key={`${word}-${index}`} href="#">
-            {word}
-          </FooterLink>
-        ))}
+        {t("login.footerLinks")
+          .split(" ")
+          .map((word, index) => (
+            <FooterLink key={`${word}-${index}`} href="#">
+              {word}
+            </FooterLink>
+          ))}
         <LanguageRow>
-          <LanguageSelect type="button">
-            {t("login.language")} ▼
-          </LanguageSelect>
+          <LanguageSelect type="button">{t("login.language")} ▼</LanguageSelect>
           <span>{t("login.copyright")}</span>
         </LanguageRow>
       </Footer>

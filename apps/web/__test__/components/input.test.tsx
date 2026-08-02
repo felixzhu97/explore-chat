@@ -4,16 +4,16 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock the actual Input component with a simple implementation
-vi.mock("@/src/presentation/components/ui/input", () => {
+vi.mock("@/shared/ui/input", () => {
   const React = require("react");
-  
+
   const MockInput = React.forwardRef<HTMLInputElement, any>(
     ({ type = "text", ...props }, ref) => {
       return <input ref={ref} type={type} {...props} />;
-    }
+    },
   );
   MockInput.displayName = "Input";
-  
+
   return { Input: MockInput };
 });
 
@@ -23,7 +23,7 @@ vi.mock("@/src/shared/utils/emotion", () => ({
 }));
 
 // Import mocked component
-import { Input } from "@/src/presentation/components/ui/input";
+import { Input } from "@/shared/ui/input";
 
 describe("Input Component", () => {
   beforeEach(() => {
@@ -43,7 +43,9 @@ describe("Input Component", () => {
 
     it("should render with placeholder", () => {
       render(<Input placeholder="Enter text here" />);
-      expect(screen.getByPlaceholderText("Enter text here")).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText("Enter text here"),
+      ).toBeInTheDocument();
     });
 
     it("should display initial value", () => {
@@ -201,7 +203,9 @@ describe("Input Component", () => {
   describe("Placeholder", () => {
     it("should display placeholder text", () => {
       render(<Input placeholder="Enter your name" />);
-      expect(screen.getByPlaceholderText("Enter your name")).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText("Enter your name"),
+      ).toBeInTheDocument();
     });
 
     it("should handle empty placeholder", () => {
@@ -234,7 +238,10 @@ describe("Input Component", () => {
   describe("Accessibility", () => {
     it("should support aria-label", () => {
       render(<Input aria-label="Search input" />);
-      expect(screen.getByRole("textbox")).toHaveAttribute("aria-label", "Search input");
+      expect(screen.getByRole("textbox")).toHaveAttribute(
+        "aria-label",
+        "Search input",
+      );
     });
 
     it("should support aria-describedby", () => {
@@ -242,19 +249,28 @@ describe("Input Component", () => {
         <>
           <Input aria-describedby="description-id" />
           <span id="description-id">Enter your search query</span>
-        </>
+        </>,
       );
-      expect(screen.getByRole("textbox")).toHaveAttribute("aria-describedby", "description-id");
+      expect(screen.getByRole("textbox")).toHaveAttribute(
+        "aria-describedby",
+        "description-id",
+      );
     });
 
     it("should support aria-invalid", () => {
       render(<Input aria-invalid="true" />);
-      expect(screen.getByRole("textbox")).toHaveAttribute("aria-invalid", "true");
+      expect(screen.getByRole("textbox")).toHaveAttribute(
+        "aria-invalid",
+        "true",
+      );
     });
 
     it("should support aria-required", () => {
       render(<Input aria-required="true" />);
-      expect(screen.getByRole("textbox")).toHaveAttribute("aria-required", "true");
+      expect(screen.getByRole("textbox")).toHaveAttribute(
+        "aria-required",
+        "true",
+      );
     });
 
     it("should be focusable via tab", async () => {
@@ -307,7 +323,7 @@ describe("Input Component", () => {
           onChange={undefined}
           className={undefined}
           placeholder={undefined}
-        />
+        />,
       );
       expect(screen.getByRole("textbox")).toBeInTheDocument();
     });
@@ -319,7 +335,7 @@ describe("Input Component", () => {
 
     it("should handle newlines in value", () => {
       render(<Input value="line1\nline2" onChange={() => {}} />);
-      const input = document.querySelector('input');
+      const input = document.querySelector("input");
       // Input values don't preserve newlines in the same way as strings
       expect(input?.value).toBeDefined();
     });
@@ -362,12 +378,18 @@ describe("Input Component", () => {
   describe("Additional Attributes", () => {
     it("should support autoComplete", () => {
       render(<Input autoComplete="email" />);
-      expect(screen.getByRole("textbox")).toHaveAttribute("autocomplete", "email");
+      expect(screen.getByRole("textbox")).toHaveAttribute(
+        "autocomplete",
+        "email",
+      );
     });
 
     it("should support autoCapitalize", () => {
       render(<Input autoCapitalize="none" />);
-      expect(screen.getByRole("textbox")).toHaveAttribute("autocapitalize", "none");
+      expect(screen.getByRole("textbox")).toHaveAttribute(
+        "autocapitalize",
+        "none",
+      );
     });
 
     it("should support maxLength", () => {
@@ -382,7 +404,10 @@ describe("Input Component", () => {
 
     it("should support pattern", () => {
       render(<Input pattern="[A-Za-z]+" />);
-      expect(screen.getByRole("textbox")).toHaveAttribute("pattern", "[A-Za-z]+");
+      expect(screen.getByRole("textbox")).toHaveAttribute(
+        "pattern",
+        "[A-Za-z]+",
+      );
     });
 
     it("should support min for number input", () => {

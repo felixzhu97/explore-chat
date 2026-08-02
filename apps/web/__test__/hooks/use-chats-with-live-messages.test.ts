@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { useChatsWithLiveMessages } from "@/src/presentation/hooks/use-chats-with-live-messages";
+import { useChatsWithLiveMessages } from "@/chat/hooks/use-chats-with-live-messages";
 
 vi.mock("@whatschat/im", () => ({
   useChatsWithLiveMessages: vi.fn(() => ({
@@ -11,14 +11,14 @@ vi.mock("@whatschat/im", () => ({
   })),
 }));
 
-vi.mock("@/src/application/services/chats.service", () => ({
+vi.mock("@/chat/services/chats.service", () => ({
   getChatsService: vi.fn(() => ({
     getChats: vi.fn().mockResolvedValue([]),
     getChatById: vi.fn().mockResolvedValue(null),
   })),
 }));
 
-vi.mock("@/src/infrastructure/adapters/websocket", () => ({
+vi.mock("@/core/websocket", () => ({
   getWebSocketAdapter: vi.fn(() => ({
     connect: vi.fn(),
     disconnect: vi.fn(),
@@ -35,7 +35,7 @@ describe("useChatsWithLiveMessages Hook", () => {
   describe("initial state", () => {
     it("should return chats array", () => {
       const { result } = renderHook(() =>
-        useChatsWithLiveMessages(null, undefined)
+        useChatsWithLiveMessages(null, undefined),
       );
 
       expect(result.current).toHaveProperty("chats");
@@ -44,7 +44,7 @@ describe("useChatsWithLiveMessages Hook", () => {
 
     it("should have loading state", () => {
       const { result } = renderHook(() =>
-        useChatsWithLiveMessages(null, undefined)
+        useChatsWithLiveMessages(null, undefined),
       );
 
       expect(result.current).toHaveProperty("loading");
@@ -53,7 +53,7 @@ describe("useChatsWithLiveMessages Hook", () => {
 
     it("should have error state", () => {
       const { result } = renderHook(() =>
-        useChatsWithLiveMessages(null, undefined)
+        useChatsWithLiveMessages(null, undefined),
       );
 
       expect(result.current).toHaveProperty("error");

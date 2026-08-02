@@ -1,4 +1,4 @@
-import { StatusPageContainer } from "@/src/presentation/features/secondary/secondary-pages";
+import { StatusPageContainer } from "@/secondary/secondary-pages";
 
 export default function StatusRoutePage() {
   return <StatusPageContainer />;

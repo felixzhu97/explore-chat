@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render } from "@testing-library/react";
 import StarredPage from "@/app/(authenticated)/starred/page";
 
-vi.mock("@/src/presentation/components/pages/starred-messages-page", () => ({
+vi.mock("@/secondary/pages/starred-messages-page", () => ({
   StarredMessagesPage: () => <div data-testid="starred-messages-page" />,
 }));
 
