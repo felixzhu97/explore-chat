@@ -1,11 +1,13 @@
 import bcrypt from "bcryptjs";
+import uniqBy from "lodash/uniqBy";
 import { prisma } from "./client";
 import { ConfigService } from "../infrastructure/config/config.service";
+import { seedPosts } from "./seed-posts";
 import logger from "@/shared/utils/logger";
 
 if (!process.env["DATABASE_URL"]) {
   process.env["DATABASE_URL"] =
-      "postgresql://whatschat:whatschat123@localhost:5433/whatschat?schema=public";
+    "postgresql://whatschat:whatschat123@localhost:5433/whatschat?schema=public";
 }
 
 const config = ConfigService.loadConfig();
@@ -151,7 +153,8 @@ export async function main() {
   try {
     const existingUserCount = await prisma.user.count();
     if (existingUserCount > 0) {
-      logger.info("数据库已有数据，跳过种子写入以保留现有数据。");
+      logger.info("数据库已有数据，跳过 Postgres 种子；尝试补齐帖子种子…");
+      await seedPosts();
       return;
     }
 
@@ -221,8 +224,12 @@ export async function main() {
       },
     });
 
-    const ladyGagaUser = users.find((_, i) => PERSON_DATA[i]?.username === "ladygaga");
-    const cristianoUser = users.find((_, i) => PERSON_DATA[i]?.username === "cristiano");
+    const ladyGagaUser = users.find(
+      (_, i) => PERSON_DATA[i]?.username === "ladygaga",
+    );
+    const cristianoUser = users.find(
+      (_, i) => PERSON_DATA[i]?.username === "cristiano",
+    );
     if (ladyGagaUser && cristianoUser) {
       const pc = await prisma.chat.create({
         data: {
@@ -246,7 +253,9 @@ export async function main() {
     }
     const ladyGagaIdx = PERSON_DATA.findIndex((p) => p.username === "ladygaga");
     if (ladyGagaIdx >= 0) {
-      const others = [0, 1, 16, 17, 22, 24].filter((i) => i !== ladyGagaIdx && i < users.length);
+      const others = [0, 1, 16, 17, 22, 24].filter(
+        (i) => i !== ladyGagaIdx && i < users.length,
+      );
       for (const otherIdx of others) {
         if (otherIdx === ladyGagaIdx) continue;
         const pc = await prisma.chat.create({
@@ -332,10 +341,17 @@ export async function main() {
     }
     logger.info(`创建了 ${4 + groupMessages.length} 条消息`);
 
-    const contactPairs = [
-      [0, 1], [1, 0], [0, 2], [2, 0], [4, 5], [5, 4],
+    const contactPairs: [number, number][] = [
+      [0, 1],
+      [1, 0],
+      [0, 2],
+      [2, 0],
+      [4, 5],
+      [5, 4],
     ];
-    const cristianoIdx = PERSON_DATA.findIndex((p) => p.username === "cristiano");
+    const cristianoIdx = PERSON_DATA.findIndex(
+      (p) => p.username === "cristiano",
+    );
     if (ladyGagaIdx >= 0) {
       for (const otherIdx of [0, 1, 2, 16, 17, 22, 24, 25]) {
         if (otherIdx >= users.length || otherIdx === ladyGagaIdx) continue;
@@ -343,7 +359,10 @@ export async function main() {
       }
     }
     if (cristianoIdx >= 0 && ladyGagaIdx >= 0) {
-      contactPairs.push([cristianoIdx, ladyGagaIdx], [ladyGagaIdx, cristianoIdx]);
+      contactPairs.push(
+        [cristianoIdx, ladyGagaIdx],
+        [ladyGagaIdx, cristianoIdx],
+      );
     }
     for (let i = 0; i < Math.min(20, users.length - 1); i += 2) {
       const a = i;
@@ -352,22 +371,27 @@ export async function main() {
         contactPairs.push([a, b], [b, a]);
       }
     }
-    for (const pair of contactPairs) {
-      const ownerIdx = pair[0]!;
-      const targetIdx = pair[1]!;
-      if (ownerIdx >= users.length || targetIdx >= users.length) continue;
-      const owner = users[ownerIdx]!;
-      const target = users[targetIdx]!;
-      await prisma.contact.create({
-        data: {
-          ownerId: owner.id,
-          name: PERSON_DATA[targetIdx]!.name,
-          phone: target.phone,
-          email: target.email,
-          avatar: target.avatar,
-        },
-      });
-    }
+    const uniqueContactPairs = uniqBy(
+      contactPairs,
+      ([ownerIdx, targetIdx]) => `${ownerIdx}:${targetIdx}`,
+    );
+    await prisma.contact.createMany({
+      data: uniqueContactPairs.flatMap(([ownerIdx, targetIdx]) => {
+        if (ownerIdx >= users.length || targetIdx >= users.length) return [];
+        const owner = users[ownerIdx]!;
+        const target = users[targetIdx]!;
+        return [
+          {
+            ownerId: owner.id,
+            name: PERSON_DATA[targetIdx]!.name,
+            phone: target.phone,
+            email: target.email,
+            avatar: target.avatar,
+          },
+        ];
+      }),
+      skipDuplicates: true,
+    });
     logger.info("创建了联系人关系");
 
     const statusExpiresAt = new Date();
@@ -384,9 +408,13 @@ export async function main() {
     }
     logger.info("创建了状态更新");
 
+    await seedPosts();
+
     logger.info("数据库种子完成！");
     logger.info(`共 ${users.length} 个测试账户，密码均为: 123456`);
-    logger.info("示例: cristiano@whatschat.com (Web默认), ladygaga@whatschat.com (Mobile默认) ...");
+    logger.info(
+      "示例: cristiano@whatschat.com (Web默认), ladygaga@whatschat.com (Mobile默认) ...",
+    );
   } catch (error) {
     logger.error("数据库种子失败:", error);
     throw error;
@@ -394,10 +422,10 @@ export async function main() {
 }
 
 main()
-    .catch((e) => {
-      console.error(e);
-      process.exit(1);
-    })
-    .finally(async () => {
-      await prisma.$disconnect();
-    });
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
