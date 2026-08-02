@@ -1,9 +1,13 @@
-import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
-import StarredPage from '@/app/starred/page';
+import { describe, it, expect, vi } from "vitest";
+import { render } from "@testing-library/react";
+import StarredPage from "@/app/(authenticated)/starred/page";
 
-describe('StarredPage', () => {
-  it('should render starred page', () => {
+vi.mock("@/src/presentation/components/pages/starred-messages-page", () => ({
+  StarredMessagesPage: () => <div data-testid="starred-messages-page" />,
+}));
+
+describe("StarredPage", () => {
+  it("should_render_starred_page_when_mounted", () => {
     expect(() => render(<StarredPage />)).not.toThrow();
   });
 });

@@ -2,7 +2,9 @@ import { useCallback, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 function mapPathToPage(pathname: string): string {
-  if (pathname === "/profile") return "profile";
+  if (pathname === "/profile" || pathname.startsWith("/profile/"))
+    return "profile";
+  if (pathname === "/messages") return "messages";
   if (pathname === "/status") return "status";
   if (pathname === "/calls") return "calls";
   if (pathname === "/starred") return "starred";
@@ -18,17 +20,20 @@ export function useNavigation() {
   const pathname = usePathname();
   const currentPage = useMemo(() => mapPathToPage(pathname), [pathname]);
 
-  const navigateToPage = useCallback((page: string) => {
-    if (page === "profile") router.push("/profile");
-    else if (page === "status") router.push("/status");
-    else if (page === "calls") router.push("/calls");
-    else if (page === "starred") router.push("/starred");
-    else if (page === "settings") router.push("/settings");
-    else if (page === "search") router.push("/search");
-    else if (page === "reels") router.push("/reels");
-    else if (page === "explore") router.push("/explore");
-    else router.push("/");
-  }, [router]);
+  const navigateToPage = useCallback(
+    (page: string) => {
+      if (page === "profile") router.push("/profile");
+      else if (page === "status") router.push("/status");
+      else if (page === "calls") router.push("/calls");
+      else if (page === "starred") router.push("/starred");
+      else if (page === "settings") router.push("/settings");
+      else if (page === "search") router.push("/search");
+      else if (page === "reels") router.push("/reels");
+      else if (page === "explore") router.push("/explore");
+      else router.push("/");
+    },
+    [router],
+  );
 
   const handleProfileClick = useCallback(() => {
     router.push("/profile");
