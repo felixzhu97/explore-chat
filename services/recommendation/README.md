@@ -1,5 +1,8 @@
 # Recommendation Service (Python)
 
+Layout (same as other Python helpers): `main.py` / `config.py` / `api.py` / `service.py` / `domain/` / `tests/`.
+Start: `uvicorn main:app --host 0.0.0.0 --port 8000`.
+
 Offline and online recommendation stack for WhatsChat:
 
 - Batch jobs for follow suggestions, explore hot list, and vector embeddings (LightFM + implicit + PyTorch towers)

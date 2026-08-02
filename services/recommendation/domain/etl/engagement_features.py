@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 
-from etl.cassandra_engagement import get_cassandra_session, load_post_likes
+from domain.etl.cassandra_engagement import get_cassandra_session, load_post_likes
 
 
 def load_user_post_engagement(

@@ -7,7 +7,7 @@ import os
 import torch
 from torch import nn
 
-from etl.cassandra_engagement import get_cassandra_session
+from domain.etl.cassandra_engagement import get_cassandra_session
 
 
 class FeedRanker(nn.Module):
@@ -80,7 +80,7 @@ class FeedRankingService:
         if key in self.models:
             return self.models[key]
         suffix = key.replace(":", "_").replace("/", "_")
-        candidate = f"models/feed_ranker_{suffix}.pt"
+        candidate = f"domain/models/feed_ranker_{suffix}.pt"
         if os.path.exists(candidate):
             self._load_model(key, candidate)
             return self.models[key]

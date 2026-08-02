@@ -1,5 +1,7 @@
 # Media Gen (Image + Video + Voice)
 
+Layout (same as other Python helpers): `main.py` / `config.py` / `api.py` / `service.py` / `domain/` / `tests/`.
+
 Single service for image generation (Stable Diffusion), video generation (CogVideoX), and voice synthesis (edge-tts). Port: 3456.
 
 ## Setup

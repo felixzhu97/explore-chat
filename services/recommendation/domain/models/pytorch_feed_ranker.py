@@ -9,7 +9,7 @@ import torch
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
 
-from etl.cassandra_engagement import get_cassandra_session, load_post_likes, load_engagement_and_posts
+from domain.etl.cassandra_engagement import get_cassandra_session, load_post_likes, load_engagement_and_posts
 
 
 def parse_iso_to_datetime(value: str) -> datetime:

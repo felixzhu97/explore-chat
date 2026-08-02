@@ -1,22 +1,20 @@
 """Document management API routes."""
 import logging
 import time
-from typing import Annotated, Optional
+from typing import Annotated
 
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Query
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 
-from deps import get_processor, get_embeddings, get_qdrant
-from core.document_processor import DocumentProcessor
-from core.embedding import EmbeddingService
-from core.qdrant_client import QdrantService
-from schemas.document import (
-    DocumentUploadResponse,
+import service as rag_service
+from domain.core.document_processor import DocumentProcessor
+from domain.core.embedding import EmbeddingService
+from domain.core.qdrant_client import QdrantService
+from domain.schemas.document import (
+    DocumentDeleteResponse,
     DocumentInfo,
     DocumentListResponse,
-    DocumentDeleteResponse,
+    DocumentUploadResponse,
 )
-from schemas.common import PaginationParams
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +24,9 @@ router = APIRouter(prefix="/documents", tags=["Documents"])
 @router.post("/upload", response_model=DocumentUploadResponse)
 async def upload_document(
     file: Annotated[UploadFile, File(description="Document to upload")],
-    processor: DocumentProcessor = Depends(get_processor),
-    embeddings: EmbeddingService = Depends(get_embeddings),
-    qdrant: QdrantService = Depends(get_qdrant),
+    processor: DocumentProcessor = Depends(rag_service.get_processor),
+    embeddings: EmbeddingService = Depends(rag_service.get_embeddings),
+    qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
     """
     Upload and process a document.
@@ -37,7 +35,6 @@ async def upload_document(
     """
     start_time = time.time()
 
-    # Validate file
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
 
@@ -46,32 +43,28 @@ async def upload_document(
     if f".{ext}" not in allowed_extensions:
         raise HTTPException(
             status_code=400,
-            detail=f"Unsupported file type. Allowed: {', '.join(allowed_extensions)}"
+            detail=f"Unsupported file type. Allowed: {', '.join(allowed_extensions)}",
         )
 
-    # Read file content
     content = await file.read()
     if len(content) == 0:
         raise HTTPException(status_code=400, detail="Empty file")
 
-    max_size = 50 * 1024 * 1024  # 50MB
+    max_size = 50 * 1024 * 1024
     if len(content) > max_size:
         raise HTTPException(status_code=400, detail="File too large (max 50MB)")
 
     try:
-        # Process the document
         result = await processor.process_uploaded_file(
             content,
             file.filename,
             file.content_type or "application/octet-stream",
         )
 
-        # Generate embeddings and store in Qdrant
-        from core.chunker import get_chunker
-        chunker = get_chunker()
+        from domain.core.chunker import get_chunker
+        from domain.utils.pdf_parser import parse_file
 
-        # Re-parse to get chunks
-        from utils.pdf_parser import parse_file
+        chunker = get_chunker()
         parsed = parse_file(content, file.filename)
 
         if parsed["type"] == "pdf":
@@ -93,7 +86,6 @@ async def upload_document(
 
         chunks = chunker.chunk_documents(text_parts, metadata, result["id"])
 
-        # Generate embeddings in batches
         batch_size = 10
         points = []
 
@@ -116,15 +108,16 @@ async def upload_document(
                     },
                 })
 
-        # Store in Qdrant
         if points:
             await qdrant.upsert("documents", points)
 
         elapsed = (time.time() - start_time) * 1000
 
         logger.info(
-            f"Document '{file.filename}' processed in {elapsed:.2f}ms: "
-            f"{len(chunks)} chunks"
+            "Document '%s' processed in %.2fms: %s chunks",
+            file.filename,
+            elapsed,
+            len(chunks),
         )
 
         return DocumentUploadResponse(
@@ -137,7 +130,7 @@ async def upload_document(
         )
 
     except Exception as e:
-        logger.error(f"Failed to process document: {e}")
+        logger.error("Failed to process document: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -145,20 +138,16 @@ async def upload_document(
 async def list_documents(
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
-    qdrant: QdrantService = Depends(get_qdrant),
+    qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
-    """
-    List all uploaded documents.
-    """
+    """List all uploaded documents."""
     try:
-        # Search for all documents to get unique doc_ids
         results = await qdrant.search(
             collection="documents",
-            query_vector=[0] * 768,  # Dummy vector, we just want payload
+            query_vector=[0] * 768,
             top_k=1000,
         )
 
-        # Group by doc_id to count chunks
         doc_info: dict[str, dict] = {}
         for result in results:
             payload = result.get("payload", {})
@@ -173,7 +162,6 @@ async def list_documents(
                     }
                 doc_info[doc_id]["chunk_count"] += 1
 
-        # Convert to list format
         documents = []
         for doc_id, info in doc_info.items():
             documents.append(DocumentInfo(
@@ -187,7 +175,6 @@ async def list_documents(
                 updated_at=None,
             ))
 
-        # Apply pagination
         total = len(documents)
         documents = documents[skip:skip + limit]
 
@@ -198,27 +185,23 @@ async def list_documents(
             limit=limit,
         )
     except Exception as e:
-        logger.error(f"Failed to list documents: {e}")
+        logger.error("Failed to list documents: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{doc_id}", response_model=DocumentInfo)
 async def get_document(
     doc_id: str,
-    qdrant: QdrantService = Depends(get_qdrant),
+    qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
-    """
-    Get document details by ID.
-    """
+    """Get document details by ID."""
     try:
-        # Search for chunks with this doc_id
         results = await qdrant.search(
             collection="documents",
-            query_vector=[0] * 768,  # Dummy vector, we just want payload
+            query_vector=[0] * 768,
             top_k=1000,
         )
 
-        # Find chunks belonging to this document
         doc_chunks = [r for r in results if r["payload"].get("doc_id") == doc_id]
 
         if not doc_chunks:
@@ -240,37 +223,32 @@ async def get_document(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get document: {e}")
+        logger.error("Failed to get document: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/{doc_id}", response_model=DocumentDeleteResponse)
 async def delete_document(
     doc_id: str,
-    qdrant: QdrantService = Depends(get_qdrant),
+    qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
-    """
-    Delete a document and all its chunks.
-    """
+    """Delete a document and all its chunks."""
     try:
-        # Search for all chunks with this doc_id
         results = await qdrant.search(
             collection="documents",
-            query_vector=[0] * 768,  # Dummy vector
+            query_vector=[0] * 768,
             top_k=1000,
         )
 
-        # Find chunks belonging to this document
         doc_chunks = [r for r in results if r["payload"].get("doc_id") == doc_id]
 
         if not doc_chunks:
             raise HTTPException(status_code=404, detail="Document not found")
 
-        # Delete the chunks
         point_ids = [chunk["id"] for chunk in doc_chunks]
         await qdrant.delete_points("documents", point_ids)
 
-        logger.info(f"Deleted document '{doc_id}' with {len(point_ids)} chunks")
+        logger.info("Deleted document '%s' with %s chunks", doc_id, len(point_ids))
 
         return DocumentDeleteResponse(
             id=doc_id,
@@ -281,5 +259,5 @@ async def delete_document(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to delete document: {e}")
+        logger.error("Failed to delete document: %s", e)
         raise HTTPException(status_code=500, detail=str(e))

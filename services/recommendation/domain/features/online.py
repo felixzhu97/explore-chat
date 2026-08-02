@@ -1,7 +1,7 @@
 from typing import Dict, Tuple
 
-from etl.engagement_features import build_user_recent_engagement_features
-from features.registry import FeatureDefinition, registry
+from domain.etl.engagement_features import build_user_recent_engagement_features
+from domain.features.registry import FeatureDefinition, registry
 
 
 def register_online_features() -> None:

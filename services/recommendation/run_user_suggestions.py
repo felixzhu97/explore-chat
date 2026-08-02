@@ -2,11 +2,11 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import config as cfg
-from etl.follows import load_follows, load_user_ids
-from etl.user_features import load_user_features
-from models.user_suggestions import fof_candidates, implicit_als_with_annoy
-from models.lightfm_suggestions import build_lightfm_suggestions
-from export.redis_export import write_user_suggestions
+from domain.etl.follows import load_follows, load_user_ids
+from domain.etl.user_features import load_user_features
+from domain.models.user_suggestions import fof_candidates, implicit_als_with_annoy
+from domain.models.lightfm_suggestions import build_lightfm_suggestions
+from domain.export.redis_export import write_user_suggestions
 
 
 def main() -> int:

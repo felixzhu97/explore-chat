@@ -1,22 +1,18 @@
 """Database sync API routes."""
 import logging
 import time
-import httpx
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Depends
+import httpx
+from fastapi import APIRouter, Depends, HTTPException
 
-from deps import get_processor, get_embeddings, get_qdrant
-from core.document_processor import DocumentProcessor
-from core.embedding import EmbeddingService
-from core.qdrant_client import QdrantService
-from schemas.query import (
-    SyncPostsRequest,
-    SyncCommentsRequest,
-    SyncResult,
-)
+import service as rag_service
 from config import get_settings
+from domain.core.document_processor import DocumentProcessor
+from domain.core.embedding import EmbeddingService
+from domain.core.qdrant_client import QdrantService
+from domain.schemas.query import SyncCommentsRequest, SyncPostsRequest, SyncResult
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +22,11 @@ router = APIRouter(prefix="/sync", tags=["Sync"])
 @router.post("/posts", response_model=SyncResult)
 async def sync_posts(
     request: Optional[SyncPostsRequest] = None,
-    processor: DocumentProcessor = Depends(get_processor),
-    embeddings: EmbeddingService = Depends(get_embeddings),
-    qdrant: QdrantService = Depends(get_qdrant),
+    processor: DocumentProcessor = Depends(rag_service.get_processor),
+    embeddings: EmbeddingService = Depends(rag_service.get_embeddings),
+    qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
-    """
-    Sync posts from the database to the vector store.
-    """
+    """Sync posts from the database to the vector store."""
     start_time = time.time()
     request = request or SyncPostsRequest()
     settings = get_settings()
@@ -43,7 +37,6 @@ async def sync_posts(
     errors = []
 
     try:
-        # Build query parameters
         params = {"limit": request.limit}
         if request.post_ids:
             params["ids"] = ",".join(request.post_ids)
@@ -51,7 +44,6 @@ async def sync_posts(
             since = datetime.utcnow() - timedelta(hours=request.since_hours)
             params["since"] = since.isoformat()
 
-        # Fetch posts from the database service
         async with httpx.AsyncClient(timeout=60) as client:
             response = await client.get(
                 f"{settings.database_url}/posts",
@@ -62,7 +54,6 @@ async def sync_posts(
 
         total = len(posts)
 
-        # Process posts in batches
         batch_size = 10
         for i in range(0, len(posts), batch_size):
             batch = posts[i:i + batch_size]
@@ -87,11 +78,9 @@ async def sync_posts(
                     if not chunks:
                         continue
 
-                    # Generate embeddings
                     texts = [chunk.text for chunk in chunks]
                     vectors = await embeddings.embed(texts)
 
-                    # Prepare points for Qdrant
                     points = [
                         {
                             "id": chunk.id,
@@ -108,20 +97,17 @@ async def sync_posts(
                         for chunk, vector in zip(chunks, vectors)
                     ]
 
-                    # Store in Qdrant
                     await qdrant.upsert("posts", points)
                     successful += 1
 
                 except Exception as e:
                     failed += 1
                     errors.append(f"Post {post.get('id')}: {str(e)}")
-                    logger.error(f"Failed to sync post {post.get('id')}: {e}")
+                    logger.error("Failed to sync post %s: %s", post.get("id"), e)
 
         elapsed = int((time.time() - start_time) * 1000)
 
-        logger.info(
-            f"Synced posts: {successful}/{total} successful in {elapsed}ms"
-        )
+        logger.info("Synced posts: %s/%s successful in %sms", successful, total, elapsed)
 
         return SyncResult(
             total=total,
@@ -132,26 +118,24 @@ async def sync_posts(
         )
 
     except httpx.HTTPStatusError as e:
-        logger.error(f"Failed to fetch posts: {e}")
+        logger.error("Failed to fetch posts: %s", e)
         raise HTTPException(
             status_code=e.response.status_code,
             detail=f"Failed to fetch posts from database: {e}",
         )
     except Exception as e:
-        logger.error(f"Failed to sync posts: {e}")
+        logger.error("Failed to sync posts: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/comments", response_model=SyncResult)
 async def sync_comments(
     request: Optional[SyncCommentsRequest] = None,
-    processor: DocumentProcessor = Depends(get_processor),
-    embeddings: EmbeddingService = Depends(get_embeddings),
-    qdrant: QdrantService = Depends(get_qdrant),
+    processor: DocumentProcessor = Depends(rag_service.get_processor),
+    embeddings: EmbeddingService = Depends(rag_service.get_embeddings),
+    qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
-    """
-    Sync comments from the database to the vector store.
-    """
+    """Sync comments from the database to the vector store."""
     start_time = time.time()
     request = request or SyncCommentsRequest()
     settings = get_settings()
@@ -163,14 +147,12 @@ async def sync_comments(
     errors = []
 
     try:
-        # Build query parameters
         params = {"limit": request.limit}
         if request.comment_ids:
             params["ids"] = ",".join(request.comment_ids)
         if request.post_ids:
             params["post_ids"] = ",".join(request.post_ids)
 
-        # Fetch comments from the database service
         async with httpx.AsyncClient(timeout=60) as client:
             response = await client.get(
                 f"{settings.database_url}/comments",
@@ -181,7 +163,6 @@ async def sync_comments(
 
         total = len(comments)
 
-        # Process comments in batches
         batch_size = 10
         for i in range(0, len(comments), batch_size):
             batch = comments[i:i + batch_size]
@@ -209,11 +190,9 @@ async def sync_comments(
                         skipped += 1
                         continue
 
-                    # Generate embeddings
                     texts = [chunk.text for chunk in chunks]
                     vectors = await embeddings.embed(texts)
 
-                    # Prepare points for Qdrant
                     points = [
                         {
                             "id": chunk.id,
@@ -231,19 +210,21 @@ async def sync_comments(
                         for chunk, vector in zip(chunks, vectors)
                     ]
 
-                    # Store in Qdrant
                     await qdrant.upsert("comments", points)
                     successful += 1
 
                 except Exception as e:
                     failed += 1
                     errors.append(f"Comment {comment.get('id')}: {str(e)}")
-                    logger.error(f"Failed to sync comment {comment.get('id')}: {e}")
+                    logger.error("Failed to sync comment %s: %s", comment.get("id"), e)
 
         elapsed = int((time.time() - start_time) * 1000)
 
         logger.info(
-            f"Synced comments: {successful}/{total} successful, {skipped} skipped"
+            "Synced comments: %s/%s successful, %s skipped",
+            successful,
+            total,
+            skipped,
         )
 
         return SyncResult(
@@ -256,31 +237,23 @@ async def sync_comments(
         )
 
     except httpx.HTTPStatusError as e:
-        logger.error(f"Failed to fetch comments: {e}")
+        logger.error("Failed to fetch comments: %s", e)
         raise HTTPException(
             status_code=e.response.status_code,
             detail=f"Failed to fetch comments from database: {e}",
         )
     except Exception as e:
-        logger.error(f"Failed to sync comments: {e}")
+        logger.error("Failed to sync comments: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/all", response_model=dict)
 async def sync_all(
-    processor: DocumentProcessor = Depends(get_processor),
-    embeddings: EmbeddingService = Depends(get_embeddings),
-    qdrant: QdrantService = Depends(get_qdrant),
+    processor: DocumentProcessor = Depends(rag_service.get_processor),
+    embeddings: EmbeddingService = Depends(rag_service.get_embeddings),
+    qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
-    """
-    Sync all content types (posts, comments, documents).
-    """
-    # Import routers to access the endpoint functions
-    from routes.crawler import router as crawler_router
-
-    # For now, we'll just sync posts and comments
-    # In a full implementation, you'd call the other sync endpoints
-
+    """Sync all content types (posts, comments, documents)."""
     posts_result = await sync_posts(
         SyncPostsRequest(limit=1000),
         processor,

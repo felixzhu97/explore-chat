@@ -1,29 +1,33 @@
-# Python ML helpers — simple layout
+# Python ML helpers — identical minimal layout
 
 WhatsFeed keeps four optional Python HTTP helpers. Clients call **Nest only**; Nest calls these over loopback.
 
-## Shared layout (every service)
+Every helper uses the **same top-level directory** and the same two layers: `api` → `service` → `domain`.
+
+## Forced layout
 
 ```
 services/<name>/
-├── main.py       # FastAPI app + uvicorn entry
-├── config.py     # env / default port
-├── api.py        # HTTP routes (thin)
-├── service.py    # orchestration / ML calls
-├── requirements.txt
 ├── README.md
-└── .env.example
+├── .env.example
+├── requirements.txt      # sole dependency list
+├── main.py               # FastAPI assemble + uvicorn
+├── config.py             # dotenv + os.getenv (ports)
+├── api.py                # all HTTP (flat api_*.py allowed; no routes/ dir)
+├── service.py            # orchestration only
+├── domain/               # ML / ETL / schemas / utils
+│   └── __init__.py
+├── tests/                # at least test_health.py or existing suite
+└── (recommendation only) celery_app.py, tasks.py, run_*.py
 ```
 
-Optional extras (recommendation): `etl/`, `models/`, `features/`, `celery_app.py`, `tasks.py`.
+Optional: `Dockerfile`, runtime dirs (`output/`, `uploads/` — gitignored).
 
-## Start command
-
-From the service directory:
+## Start
 
 ```bash
+cd services/<name>
 uvicorn main:app --host 0.0.0.0 --port $PORT
-# or: python main.py
 ```
 
 | Service        | Default port | Nest env                   |
@@ -33,11 +37,13 @@ uvicorn main:app --host 0.0.0.0 --port $PORT
 | rag            | 8002         | `RAG_SERVICE_URL` (docs)   |
 | media-gen      | 3456         | `MEDIA_GENERATION_API_URL` |
 
-## Layering rule
+## Layering
 
-- **api.py** — parse request, call `service`, return response. No model loading.
-- **service.py** — business / ML / I/O.
-- Do not add deeper `app/api/routes/...` trees unless a service truly needs them; prefer this flat split.
+- **api.py** — request/response only; call `service`
+- **service.py** — orchestration; call `domain` / external I/O
+- **domain/** — models, ETL, embeddings, parsers (never HTTP routers)
+
+**Forbidden:** `routes/`, `src/`, `app/`, root-level `etl/` / `core/` / `schemas/` (those live under `domain/`), dual `pyproject.toml` + `requirements.txt`.
 
 ## References
 

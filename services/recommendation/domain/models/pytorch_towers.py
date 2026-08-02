@@ -5,8 +5,8 @@ import torch
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
 
-from etl.cassandra_engagement import get_cassandra_session, load_post_likes
-from vector_store import RedisVectorStore
+from domain.etl.cassandra_engagement import get_cassandra_session, load_post_likes
+from domain.vector_store import RedisVectorStore
 import config as cfg
 import redis
 

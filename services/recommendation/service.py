@@ -8,8 +8,8 @@ from typing import List, Optional, Tuple
 import redis
 
 import config as cfg
-from feed_ranker import FeedRankingService
-from vector_store import FaissVectorStore, RedisVectorStore
+from domain.feed_ranker import FeedRankingService
+from domain.vector_store import FaissVectorStore, RedisVectorStore
 
 
 class VectorStoreFactory:
@@ -45,7 +45,7 @@ class RankerFactory:
     @staticmethod
     def create_ranker() -> Optional[FeedRankingService]:
         root = os.path.dirname(os.path.abspath(__file__))
-        model_path = os.path.join(root, "models", "feed_ranker.pt")
+        model_path = os.path.join(root, "domain", "models", "feed_ranker.pt")
         if not os.path.isfile(model_path):
             return None
         return FeedRankingService(model_path=model_path)

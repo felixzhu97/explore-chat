@@ -3,12 +3,12 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import config as cfg
-from etl.cassandra_engagement import (
+from domain.etl.cassandra_engagement import (
     get_cassandra_session,
     load_engagement_and_posts,
     hot_score,
 )
-from export.explore_export import write_explore_hot
+from domain.export.explore_export import write_explore_hot
 
 
 def main() -> int:

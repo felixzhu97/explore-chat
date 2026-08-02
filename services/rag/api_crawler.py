@@ -1,25 +1,18 @@
 """Web crawler API routes."""
+import asyncio
 import logging
 import time
-import asyncio
-from typing import Optional
 
 import httpx
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
-from deps import get_processor, get_embeddings, get_qdrant
-from core.document_processor import DocumentProcessor
-from core.embedding import EmbeddingService
-from core.qdrant_client import QdrantService
-from core.chunker import get_chunker
-from schemas.document import (
-    ScrapeRequest,
-    ScrapeResponse,
-    CrawlRequest,
-    CrawlResponse,
-)
-from schemas.common import BaseResponse
+import service as rag_service
 from config import get_settings
+from domain.core.chunker import get_chunker
+from domain.core.document_processor import DocumentProcessor
+from domain.core.embedding import EmbeddingService
+from domain.core.qdrant_client import QdrantService
+from domain.schemas.document import CrawlRequest, CrawlResponse, ScrapeRequest, ScrapeResponse
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +21,6 @@ router = APIRouter(prefix="/crawler", tags=["Crawler"])
 
 async def fetch_url(url: str, timeout: int = 30) -> dict:
     """Fetch and parse a URL."""
-    settings = get_settings()
-
     async with httpx.AsyncClient(timeout=timeout) as client:
         response = await client.get(
             url,
@@ -55,31 +46,26 @@ async def fetch_url(url: str, timeout: int = 30) -> dict:
 @router.post("/scrape", response_model=ScrapeResponse)
 async def scrape_url(
     request: ScrapeRequest,
-    processor: DocumentProcessor = Depends(get_processor),
-    embeddings: EmbeddingService = Depends(get_embeddings),
-    qdrant: QdrantService = Depends(get_qdrant),
+    processor: DocumentProcessor = Depends(rag_service.get_processor),
+    embeddings: EmbeddingService = Depends(rag_service.get_embeddings),
+    qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
-    """
-    Scrape a single URL and index its content.
-    """
+    """Scrape a single URL and index its content."""
     start_time = time.time()
     settings = get_settings()
 
     try:
-        # Fetch the URL
         fetch_result = await fetch_url(
             request.url,
             timeout=settings.crawler_timeout,
         )
 
-        # Process the webpage
         result = await processor.process_webpage(
             url=fetch_result["url"],
             content=fetch_result["content"],
             title=fetch_result["title"],
         )
 
-        # Generate embeddings and store
         chunker = get_chunker()
         metadata = {
             "source_url": fetch_result["url"],
@@ -89,19 +75,22 @@ async def scrape_url(
             "created_at": "",
         }
 
-        from utils.pdf_parser import HTMLParser
+        from domain.utils.pdf_parser import HTMLParser
+
         parsed = HTMLParser.parse(fetch_result["content"])
 
-        # Limit text length to avoid context overflow
-        max_text_length = 100000  # ~100k chars should be safe for most models
+        max_text_length = 100000
         text = parsed["text"]
         if len(text) > max_text_length:
-            logger.warning(f"Text too long ({len(text)} chars), truncating to {max_text_length}")
+            logger.warning(
+                "Text too long (%s chars), truncating to %s",
+                len(text),
+                max_text_length,
+            )
             text = text[:max_text_length]
 
         chunks = chunker.chunk_text(text, metadata, result["id"])
 
-        # Generate embeddings in batches
         batch_size = 10
         points = []
 
@@ -123,15 +112,16 @@ async def scrape_url(
                     },
                 })
 
-        # Store in Qdrant
         if points:
             await qdrant.upsert("webpages", points)
 
         elapsed = (time.time() - start_time) * 1000
 
         logger.info(
-            f"Scraped '{fetch_result['url']}' in {elapsed:.2f}ms: "
-            f"{len(chunks)} chunks"
+            "Scraped '%s' in %.2fms: %s chunks",
+            fetch_result["url"],
+            elapsed,
+            len(chunks),
         )
 
         return ScrapeResponse(
@@ -144,28 +134,25 @@ async def scrape_url(
         )
 
     except httpx.HTTPStatusError as e:
-        logger.error(f"HTTP error scraping {request.url}: {e}")
+        logger.error("HTTP error scraping %s: %s", request.url, e)
         raise HTTPException(
             status_code=e.response.status_code,
             detail=f"Failed to fetch URL: {e}",
         )
     except Exception as e:
-        logger.error(f"Failed to scrape {request.url}: {e}")
+        logger.error("Failed to scrape %s: %s", request.url, e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/crawl", response_model=CrawlResponse)
 async def crawl_urls(
     request: CrawlRequest,
-    processor: DocumentProcessor = Depends(get_processor),
-    embeddings: EmbeddingService = Depends(get_embeddings),
-    qdrant: QdrantService = Depends(get_qdrant),
+    processor: DocumentProcessor = Depends(rag_service.get_processor),
+    embeddings: EmbeddingService = Depends(rag_service.get_embeddings),
+    qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
-    """
-    Crawl multiple URLs in parallel.
-    """
+    """Crawl multiple URLs in parallel."""
     start_time = time.time()
-    results = []
     successful = 0
     failed = 0
     settings = get_settings()
@@ -180,16 +167,19 @@ async def crawl_urls(
                 title=fetch_result["title"],
             )
 
-            # Generate embeddings and store
             chunker = get_chunker()
-            from utils.pdf_parser import HTMLParser
+            from domain.utils.pdf_parser import HTMLParser
+
             parsed = HTMLParser.parse(fetch_result["content"])
 
-            # Limit text length to avoid context overflow
             max_text_length = 100000
             text = parsed["text"]
             if len(text) > max_text_length:
-                logger.warning(f"Text too long ({len(text)} chars), truncating to {max_text_length}")
+                logger.warning(
+                    "Text too long (%s chars), truncating to %s",
+                    len(text),
+                    max_text_length,
+                )
                 text = text[:max_text_length]
 
             metadata = {
@@ -234,7 +224,7 @@ async def crawl_urls(
             )
 
         except Exception as e:
-            logger.error(f"Failed to crawl {url}: {e}")
+            logger.error("Failed to crawl %s: %s", url, e)
             return ScrapeResponse(
                 id="",
                 url=url,
@@ -244,7 +234,6 @@ async def crawl_urls(
                 status=f"error: {str(e)}",
             )
 
-    # Process URLs with limited concurrency
     semaphore = asyncio.Semaphore(5)
 
     async def process_with_semaphore(url: str) -> ScrapeResponse:
@@ -276,8 +265,11 @@ async def crawl_urls(
     elapsed = (time.time() - start_time) * 1000
 
     logger.info(
-        f"Crawled {len(request.urls)} URLs in {elapsed:.2f}ms: "
-        f"{successful} successful, {failed} failed"
+        "Crawled %s URLs in %.2fms: %s successful, %s failed",
+        len(request.urls),
+        elapsed,
+        successful,
+        failed,
     )
 
     return CrawlResponse(

@@ -1,19 +1,22 @@
 """HTTP routes for RAG (health + domain routers)."""
 
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from starlette.responses import Response
 
 import service as rag_service
-from routes import crawler, documents, query, sync
-from schemas.common import HealthStatus
+from api_crawler import router as crawler_router
+from api_documents import router as documents_router
+from api_query import router as query_router
+from api_sync import router as sync_router
+from domain.schemas.common import HealthStatus
 
 router = APIRouter()
-router.include_router(documents.router, prefix="/api/v1")
-router.include_router(crawler.router, prefix="/api/v1")
-router.include_router(sync.router, prefix="/api/v1")
-router.include_router(query.router, prefix="/api/v1")
+router.include_router(documents_router, prefix="/api/v1")
+router.include_router(crawler_router, prefix="/api/v1")
+router.include_router(sync_router, prefix="/api/v1")
+router.include_router(query_router, prefix="/api/v1")
 
 
 @router.get("/health", response_model=HealthStatus, tags=["Health"])

@@ -1,23 +1,18 @@
 """RAG query API routes."""
 import logging
 import time
-from typing import Optional, AsyncGenerator
+from typing import AsyncGenerator, Optional
 
 import ollama
-from openai import AsyncOpenAI
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
+from openai import AsyncOpenAI
 
-from deps import get_embeddings, get_qdrant
-from core.embedding import EmbeddingService
-from core.qdrant_client import QdrantService
-from schemas.query import (
-    QueryRequest,
-    QueryResponse,
-    SourceDocument,
-)
-from schemas.common import BaseResponse
+import service as rag_service
 from config import get_settings
+from domain.core.embedding import EmbeddingService
+from domain.core.qdrant_client import QdrantService
+from domain.schemas.query import QueryRequest, QueryResponse, SourceDocument
 
 logger = logging.getLogger(__name__)
 
@@ -73,10 +68,9 @@ async def generate_answer(
             )
             return response["message"]["content"]
         except Exception as e:
-            logger.error(f"Ollama chat failed: {e}")
+            logger.error("Ollama chat failed: %s", e)
             raise HTTPException(status_code=503, detail="LLM service unavailable")
     else:
-        # OpenAI
         try:
             response = await openai_client.chat.completions.create(
                 model=model,
@@ -88,7 +82,7 @@ async def generate_answer(
             )
             return response.choices[0].message.content
         except Exception as e:
-            logger.error(f"OpenAI chat failed: {e}")
+            logger.error("OpenAI chat failed: %s", e)
             raise HTTPException(status_code=503, detail="LLM service unavailable")
 
 
@@ -119,11 +113,10 @@ async def generate_answer_stream(
                 if chunk.get("message") and chunk["message"].get("content"):
                     yield f"data: {chunk['message']['content']}\n\n"
         except Exception as e:
-            logger.error(f"Ollama streaming failed: {e}")
-            yield f"data: Error: LLM service unavailable\n\n"
+            logger.error("Ollama streaming failed: %s", e)
+            yield "data: Error: LLM service unavailable\n\n"
 
     else:
-        # OpenAI streaming
         try:
             stream = await openai_client.chat.completions.create(
                 model=model,
@@ -138,8 +131,8 @@ async def generate_answer_stream(
                 if chunk.choices and chunk.choices[0].delta.content:
                     yield f"data: {chunk.choices[0].delta.content}\n\n"
         except Exception as e:
-            logger.error(f"OpenAI streaming failed: {e}")
-            yield f"data: Error: LLM service unavailable\n\n"
+            logger.error("OpenAI streaming failed: %s", e)
+            yield "data: Error: LLM service unavailable\n\n"
 
 
 async def search_collections(
@@ -162,7 +155,7 @@ async def search_collections(
             )
             all_results.extend(results)
         except Exception as e:
-            logger.warning(f"Failed to search collection {coll}: {e}")
+            logger.warning("Failed to search collection %s: %s", coll, e)
 
     all_results.sort(key=lambda x: x["score"], reverse=True)
     return all_results
@@ -171,14 +164,10 @@ async def search_collections(
 @router.post("", response_model=QueryResponse)
 async def query(
     request: QueryRequest,
-    embeddings: EmbeddingService = Depends(get_embeddings),
-    qdrant: QdrantService = Depends(get_qdrant),
+    embeddings: EmbeddingService = Depends(rag_service.get_embeddings),
+    qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
-    """
-    Query the RAG system with a question.
-
-    Returns an answer generated from the retrieved context.
-    """
+    """Query the RAG system with a question."""
     start_time = time.time()
     settings = get_settings()
 
@@ -220,8 +209,9 @@ async def query(
         generation_time = int((time.time() - start_time) * 1000)
 
         logger.info(
-            f"Query processed in {generation_time}ms: "
-            f"{len(top_results)} sources retrieved"
+            "Query processed in %sms: %s sources retrieved",
+            generation_time,
+            len(top_results),
         )
 
         return QueryResponse(
@@ -236,21 +226,17 @@ async def query(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Query failed: {e}")
+        logger.error("Query failed: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/stream")
 async def query_stream(
     request: QueryRequest,
-    embeddings: EmbeddingService = Depends(get_embeddings),
-    qdrant: QdrantService = Depends(get_qdrant),
+    embeddings: EmbeddingService = Depends(rag_service.get_embeddings),
+    qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
-    """
-    Query the RAG system with streaming response.
-
-    Returns a Server-Sent Events stream of the generated answer.
-    """
+    """Query the RAG system with streaming response."""
     start_time = time.time()
     settings = get_settings()
 
@@ -299,13 +285,13 @@ async def query_stream(
         )
 
     except Exception as e:
-        logger.error(f"Streaming query failed: {e}")
+        logger.error("Streaming query failed: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/collections")
 async def list_collections(
-    qdrant: QdrantService = Depends(get_qdrant),
+    qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
     """List all available collections."""
     try:
@@ -321,5 +307,5 @@ async def list_collections(
         }
 
     except Exception as e:
-        logger.error(f"Failed to list collections: {e}")
+        logger.error("Failed to list collections: %s", e)
         raise HTTPException(status_code=500, detail=str(e))

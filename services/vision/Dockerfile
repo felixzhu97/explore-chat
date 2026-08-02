@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py config.py api.py service.py imagenet_labels.json ./
+COPY main.py config.py api.py service.py ./
+COPY domain ./domain
 
 ENV PYTHONUNBUFFERED=1
 EXPOSE 8001

@@ -3,7 +3,7 @@ from pathlib import Path
 
 HOST = os.environ.get("VISION_HOST", "0.0.0.0")
 PORT = int(os.environ.get("VISION_PORT", "8001"))
-LABELS_PATH = Path(__file__).resolve().parent / "imagenet_labels.json"
+LABELS_PATH = Path(__file__).resolve().parent / "domain" / "imagenet_labels.json"
 TOP_K = int(os.environ.get("VISION_TOP_K", "10"))
 REQUEST_TIMEOUT = float(os.environ.get("VISION_REQUEST_TIMEOUT", "15.0"))
 MAX_IMAGE_SIZE = int(os.environ.get("VISION_MAX_IMAGE_SIZE", "800"))

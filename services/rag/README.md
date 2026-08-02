@@ -1,5 +1,8 @@
 # RAG Service
 
+Layout (same as other Python helpers): `main.py` / `config.py` / `api.py` / `service.py` / `domain/` / `tests/`.
+Start: `uvicorn main:app --host 0.0.0.0 --port 8002`.
+
 Retrieval Augmented Generation (RAG) service for WhatsChat, providing semantic search and AI-powered question answering capabilities.
 
 ## Features
