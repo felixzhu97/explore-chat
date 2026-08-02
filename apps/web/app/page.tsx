@@ -1,5 +1,0 @@
-import { AuthenticatedInstagramApp } from "@/src/presentation/components/containers/authenticated-instagram-app";
-
-export default function HomePage() {
-  return <AuthenticatedInstagramApp routePage="home" />;
-}
