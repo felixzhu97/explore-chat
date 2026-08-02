@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render } from "@testing-library/react";
 import MessagesPage from "@/app/(authenticated)/messages/page";
 
-vi.mock("@/src/presentation/features/shell/real-call-context", () => ({
+vi.mock("@/layout/real-call-context", () => ({
   useSharedRealCall: () => ({
     startCall: vi.fn(),
   }),

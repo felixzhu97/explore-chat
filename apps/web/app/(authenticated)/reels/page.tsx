@@ -1,4 +1,4 @@
-import { ReelsPage } from "@/src/presentation/features/reels/reels-page";
+import { ReelsPage } from "@/reels/reels-page";
 
 export default function ReelsRoutePage() {
   return <ReelsPage />;

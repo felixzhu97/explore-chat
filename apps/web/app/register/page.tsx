@@ -5,15 +5,15 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, HelpCircle } from "lucide-react";
-import { Input } from "@/src/presentation/components/ui/input";
+import { Input } from "@/shared/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/src/presentation/components/ui/select";
-import { useAuth } from "../../src/presentation/hooks/use-auth";
+} from "@/shared/ui/select";
+import { useAuth } from "@/auth/use-auth";
 import { useTranslation } from "@/src/shared/i18n";
 import { styled } from "@/src/shared/utils/emotion";
 
@@ -22,7 +22,9 @@ const PageShell = styled.div`
   display: flex;
   flex-direction: column;
   background-color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
 `;
 
 const Header = styled.header`
@@ -222,8 +224,18 @@ const ErrorMessage = styled.div`
 `;
 
 const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 function getDaysInMonth(month: number, year: number): number {
@@ -257,12 +269,16 @@ export default function RegisterPage() {
   }, [mounted, isAuthenticated, router]);
 
   const monthNum = birthMonth ? MONTHS.indexOf(birthMonth) + 1 : 0;
-  const yearNum = birthYear ? parseInt(birthYear, 10) : new Date().getFullYear();
-  const daysInMonth = monthNum && yearNum ? getDaysInMonth(monthNum, yearNum) : 31;
-  const dayOptions = Array.from({ length: daysInMonth }, (_, i) => String(i + 1));
-  const yearOptions = Array.from(
-    { length: 100 },
-    (_, i) => String(new Date().getFullYear() - 18 - i)
+  const yearNum = birthYear
+    ? parseInt(birthYear, 10)
+    : new Date().getFullYear();
+  const daysInMonth =
+    monthNum && yearNum ? getDaysInMonth(monthNum, yearNum) : 31;
+  const dayOptions = Array.from({ length: daysInMonth }, (_, i) =>
+    String(i + 1),
+  );
+  const yearOptions = Array.from({ length: 100 }, (_, i) =>
+    String(new Date().getFullYear() - 18 - i),
   );
 
   const validateAndSubmit = async (e: React.FormEvent) => {
@@ -300,7 +316,11 @@ export default function RegisterPage() {
   return (
     <PageShell>
       <Header>
-        <BackButton type="button" onClick={() => router.back()} aria-label={t("common.cancel")}>
+        <BackButton
+          type="button"
+          onClick={() => router.back()}
+          aria-label={t("common.cancel")}
+        >
           <ChevronLeft size={24} strokeWidth={2} />
         </BackButton>
         <MetaLogo href="#">
@@ -437,9 +457,7 @@ export default function RegisterPage() {
             {t("register.agreeTermsSuffix")}
           </LegalBlock>
 
-          <LegalBlock>
-            {t("register.privacyNote")}
-          </LegalBlock>
+          <LegalBlock>{t("register.privacyNote")}</LegalBlock>
 
           <SubmitButton
             type="submit"

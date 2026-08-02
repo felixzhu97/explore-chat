@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { EmotionRegistry } from "./emotion-registry";
-import { I18nProvider } from "@/presentation/providers/i18n-provider";
-import { GrowthBookProviderWrapper } from "@/presentation/providers/growthbook-provider";
-import { AnalyticsProvider } from "@/presentation/providers/analytics-provider";
-import { StoreProvider } from "@/presentation/providers/StoreProvider";
-import { Toaster } from "@/src/presentation/components/ui/toaster";
+import { I18nProvider } from "@/layout/providers/i18n-provider";
+import { GrowthBookProviderWrapper } from "@/layout/providers/growthbook-provider";
+import { AnalyticsProvider } from "@/layout/providers/analytics-provider";
+import { StoreProvider } from "@/layout/providers/StoreProvider";
+import { Toaster } from "@/shared/ui/toaster";
 
 export const metadata: Metadata = {
   title: "whats chat",

@@ -1,4 +1,4 @@
-import { MessagesPage } from "@/src/presentation/features/messaging/messages-page";
+import { MessagesPage } from "@/chat/messages-page";
 
 export default function MessagesRoutePage() {
   return <MessagesPage />;

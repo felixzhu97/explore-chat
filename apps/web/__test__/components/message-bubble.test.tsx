@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 
 // Mock MessageBubble with a simple implementation
-vi.mock("@/src/presentation/components/chat/message-bubble", () => ({
+vi.mock("@/chat/components/message-bubble", () => ({
   MessageBubble: ({
     message,
     isGroup = false,
@@ -13,7 +13,10 @@ vi.mock("@/src/presentation/components/chat/message-bubble", () => ({
     isGroup?: boolean;
     isOwn?: boolean;
   }) => {
-    const isSent = isOwn !== undefined ? isOwn : message.senderId === "current-user" || message.senderId === "me";
+    const isSent =
+      isOwn !== undefined
+        ? isOwn
+        : message.senderId === "current-user" || message.senderId === "me";
 
     const formatTime = (timestamp: string | Date | undefined) => {
       if (timestamp == null) return "";
@@ -112,7 +115,7 @@ vi.mock("@/components/ui/tooltip", () => ({
 }));
 
 // Import the mocked component
-import { MessageBubble } from "@/src/presentation/components/chat/message-bubble";
+import { MessageBubble } from "@/chat/components/message-bubble";
 
 describe("MessageBubble", () => {
   const mockMessage = {
@@ -153,7 +156,7 @@ describe("MessageBubble", () => {
           {...mockProps}
           message={otherUserMessage}
           isGroup={true}
-        />
+        />,
       );
       expect(screen.getByText("John Doe")).toBeInTheDocument();
     });

@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { VoiceApiAdapter } from '@/infrastructure/adapters/api/voice-api.adapter';
-import type { IApiClient } from '@/domain/interfaces/adapters/api-client.interface';
-import type { ApiResponse } from '@/domain/dto/api-response.dto';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { VoiceApi } from "@/ai/apis/voice.api";
+import type { ApiClient } from "@/core/api-client";
+import type { ApiResponse } from "@/core/api-response.model";
 
-describe('VoiceApiAdapter', () => {
-  let adapter: VoiceApiAdapter;
-  let mockApiClient: IApiClient;
+describe("VoiceApi", () => {
+  let adapter: VoiceApi;
+  let mockApiClient: ApiClient;
 
   beforeEach(() => {
     mockApiClient = {
@@ -18,98 +18,133 @@ describe('VoiceApiAdapter', () => {
       postStream: vi.fn(),
       setToken: vi.fn(),
       getToken: vi.fn(),
-    } as unknown as IApiClient;
-    adapter = new VoiceApiAdapter(mockApiClient);
+    } as unknown as ApiClient;
+    adapter = new VoiceApi(mockApiClient);
   });
 
-  describe('generate', () => {
-    it('should generate voice with prompt only', async () => {
-      const mockResponse: ApiResponse = { success: true, data: { audioUrl: 'http://example.com/audio.mp3' } };
-      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse);
+  describe("generate", () => {
+    it("should generate voice with prompt only", async () => {
+      const mockResponse: ApiResponse = {
+        success: true,
+        data: { audioUrl: "http://example.com/audio.mp3" },
+      };
+      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+        mockResponse,
+      );
 
-      const result = await adapter.generate('Hello, how are you?');
+      const result = await adapter.generate("Hello, how are you?");
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/voice/generate', {
-        prompt: 'Hello, how are you?',
+      expect(mockApiClient.post).toHaveBeenCalledWith("/voice/generate", {
+        prompt: "Hello, how are you?",
       });
       expect(result).toEqual(mockResponse);
     });
 
-    it('should generate voice with target language', async () => {
-      const mockResponse: ApiResponse = { success: true, data: { audioUrl: 'http://example.com/audio.mp3' } };
-      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse);
+    it("should generate voice with target language", async () => {
+      const mockResponse: ApiResponse = {
+        success: true,
+        data: { audioUrl: "http://example.com/audio.mp3" },
+      };
+      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+        mockResponse,
+      );
 
-      const result = await adapter.generate('Hello', 'zh');
+      const result = await adapter.generate("Hello", "zh");
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/voice/generate', {
-        prompt: 'Hello',
-        targetLang: 'zh',
+      expect(mockApiClient.post).toHaveBeenCalledWith("/voice/generate", {
+        prompt: "Hello",
+        targetLang: "zh",
       });
       expect(result).toEqual(mockResponse);
     });
 
-    it('should generate voice with auto target language', async () => {
-      const mockResponse: ApiResponse = { success: true, data: { audioUrl: 'http://example.com/audio.mp3' } };
-      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse);
+    it("should generate voice with auto target language", async () => {
+      const mockResponse: ApiResponse = {
+        success: true,
+        data: { audioUrl: "http://example.com/audio.mp3" },
+      };
+      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+        mockResponse,
+      );
 
-      const result = await adapter.generate('Bonjour', 'auto');
+      const result = await adapter.generate("Bonjour", "auto");
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/voice/generate', {
-        prompt: 'Bonjour',
-        targetLang: 'auto',
+      expect(mockApiClient.post).toHaveBeenCalledWith("/voice/generate", {
+        prompt: "Bonjour",
+        targetLang: "auto",
       });
       expect(result).toEqual(mockResponse);
     });
 
-    it('should not include targetLang when undefined', async () => {
-      const mockResponse: ApiResponse = { success: true, data: { audioUrl: 'http://example.com/audio.mp3' } };
-      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse);
+    it("should not include targetLang when undefined", async () => {
+      const mockResponse: ApiResponse = {
+        success: true,
+        data: { audioUrl: "http://example.com/audio.mp3" },
+      };
+      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+        mockResponse,
+      );
 
-      await adapter.generate('Hello');
+      await adapter.generate("Hello");
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/voice/generate', {
-        prompt: 'Hello',
+      expect(mockApiClient.post).toHaveBeenCalledWith("/voice/generate", {
+        prompt: "Hello",
       });
     });
   });
 
-  describe('translate', () => {
-    it('should translate text to Chinese', async () => {
-      const mockResponse: ApiResponse = { success: true, data: { translatedText: '你好' } };
-      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse);
+  describe("translate", () => {
+    it("should translate text to Chinese", async () => {
+      const mockResponse: ApiResponse = {
+        success: true,
+        data: { translatedText: "你好" },
+      };
+      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+        mockResponse,
+      );
 
-      const result = await adapter.translate('Hello', 'zh');
+      const result = await adapter.translate("Hello", "zh");
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/voice/translate', {
-        text: 'Hello',
-        targetLang: 'zh',
+      expect(mockApiClient.post).toHaveBeenCalledWith("/voice/translate", {
+        text: "Hello",
+        targetLang: "zh",
       });
       expect(result).toEqual(mockResponse);
     });
 
-    it('should translate text to English', async () => {
-      const mockResponse: ApiResponse = { success: true, data: { translatedText: 'Good morning' } };
-      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse);
+    it("should translate text to English", async () => {
+      const mockResponse: ApiResponse = {
+        success: true,
+        data: { translatedText: "Good morning" },
+      };
+      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+        mockResponse,
+      );
 
-      const result = await adapter.translate('早上好', 'en');
+      const result = await adapter.translate("早上好", "en");
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/voice/translate', {
-        text: '早上好',
-        targetLang: 'en',
+      expect(mockApiClient.post).toHaveBeenCalledWith("/voice/translate", {
+        text: "早上好",
+        targetLang: "en",
       });
       expect(result).toEqual(mockResponse);
     });
 
-    it('should handle long text translation', async () => {
-      const mockResponse: ApiResponse = { success: true, data: { translatedText: 'translated' } };
-      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse);
+    it("should handle long text translation", async () => {
+      const mockResponse: ApiResponse = {
+        success: true,
+        data: { translatedText: "translated" },
+      };
+      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+        mockResponse,
+      );
 
-      const longText = 'A'.repeat(1000);
-      await adapter.translate(longText, 'zh');
+      const longText = "A".repeat(1000);
+      await adapter.translate(longText, "zh");
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/voice/translate', {
+      expect(mockApiClient.post).toHaveBeenCalledWith("/voice/translate", {
         text: longText,
-        targetLang: 'zh',
+        targetLang: "zh",
       });
     });
   });

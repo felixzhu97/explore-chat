@@ -23,10 +23,18 @@
       "@/*": ["./*"],
       "@/src/*": ["./src/*"],
       "@/shared/*": ["./src/shared/*"],
-      "@/domain/*": ["./src/domain/*"],
-      "@/infrastructure/*": ["./src/infrastructure/*"],
-      "@/application/*": ["./src/application/*"],
-      "@/presentation/*": ["./src/presentation/*"]
+      "@/core/*": ["./src/core/*"],
+      "@/layout/*": ["./src/layout/*"],
+      "@/auth/*": ["./src/auth/*"],
+      "@/feed/*": ["./src/feed/*"],
+      "@/chat/*": ["./src/chat/*"],
+      "@/explore/*": ["./src/explore/*"],
+      "@/reels/*": ["./src/reels/*"],
+      "@/search/*": ["./src/search/*"],
+      "@/profile/*": ["./src/profile/*"],
+      "@/calls/*": ["./src/calls/*"],
+      "@/ai/*": ["./src/ai/*"],
+      "@/secondary/*": ["./src/secondary/*"]
     }
   },
   "include": [

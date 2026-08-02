@@ -1,7 +1,7 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import type { Message } from "@whatschat/shared-types";
-import { useRealChat } from "@/src/presentation/hooks/use-real-chat";
+import { useRealChat } from "@/chat/hooks/use-real-chat";
 
 // Mock WebSocket manager
 const mockWebSocketManager = {
@@ -15,7 +15,7 @@ const mockWebSocketManager = {
   isConnected: vi.fn(() => true),
 };
 
-vi.mock("@/src/infrastructure/adapters/websocket", () => ({
+vi.mock("@/core/websocket", () => ({
   getWebSocketAdapter: () => mockWebSocketManager,
   getWebSocketManager: () => mockWebSocketManager,
 }));
@@ -82,7 +82,7 @@ describe("useRealChat Hook", () => {
       const { result } = renderHook(() => useRealChat(mockContactId));
 
       expect(localStorageMock.getItem).toHaveBeenCalledWith(
-        `chat_${mockContactId}`
+        `chat_${mockContactId}`,
       );
       expect(result.current.messages).toEqual(mockMessages);
     });
@@ -94,11 +94,9 @@ describe("useRealChat Hook", () => {
 
       // 当 localStorage 为空时，hook 会设置欢迎消息
       expect(result.current.messages).toHaveLength(2);
-      expect(result.current.messages[0].content).toBe(
-        "欢迎使用 Instagram！"
-      );
+      expect(result.current.messages[0].content).toBe("欢迎使用 Instagram！");
       expect(result.current.messages[1].content).toBe(
-        "这是一个功能完整的聊天应用演示"
+        "这是一个功能完整的聊天应用演示",
       );
     });
   });
@@ -109,23 +107,23 @@ describe("useRealChat Hook", () => {
 
       expect(mockWebSocketManager.on).toHaveBeenCalledWith(
         "message",
-        expect.any(Function)
+        expect.any(Function),
       );
       expect(mockWebSocketManager.on).toHaveBeenCalledWith(
         "message_status",
-        expect.any(Function)
+        expect.any(Function),
       );
       expect(mockWebSocketManager.on).toHaveBeenCalledWith(
         "typing",
-        expect.any(Function)
+        expect.any(Function),
       );
       expect(mockWebSocketManager.on).toHaveBeenCalledWith(
         "connected",
-        expect.any(Function)
+        expect.any(Function),
       );
       expect(mockWebSocketManager.on).toHaveBeenCalledWith(
         "disconnected",
-        expect.any(Function)
+        expect.any(Function),
       );
     });
   });
@@ -199,7 +197,7 @@ describe("useRealChat Hook", () => {
         expect.objectContaining({
           content: "Hello!",
           type: "text",
-        })
+        }),
       );
     });
   });
@@ -253,7 +251,7 @@ describe("useRealChat Hook", () => {
 
       // Get the message handler that was registered
       const messageHandler = mockWebSocketManager.on.mock.calls.find(
-        (call) => call[0] === "message"
+        (call) => call[0] === "message",
       )?.[1];
 
       act(() => {
@@ -269,7 +267,7 @@ describe("useRealChat Hook", () => {
           content: "New message",
           senderId: mockContactId,
           senderName: "对方",
-        })
+        }),
       );
     });
 
@@ -278,7 +276,7 @@ describe("useRealChat Hook", () => {
 
       // Get the message status handler
       const statusHandler = mockWebSocketManager.on.mock.calls.find(
-        (call) => call[0] === "message_status"
+        (call) => call[0] === "message_status",
       )?.[1];
 
       act(() => {
@@ -289,7 +287,7 @@ describe("useRealChat Hook", () => {
       });
 
       const updatedMessage = result.current.messages.find(
-        (msg: Message) => msg.id === "msg-1"
+        (msg: Message) => msg.id === "msg-1",
       );
       expect(updatedMessage?.status).toBe("read");
     });
@@ -299,7 +297,7 @@ describe("useRealChat Hook", () => {
 
       // Get the typing handler
       const typingHandler = mockWebSocketManager.on.mock.calls.find(
-        (call) => call[0] === "typing"
+        (call) => call[0] === "typing",
       )?.[1];
 
       act(() => {
@@ -319,7 +317,7 @@ describe("useRealChat Hook", () => {
 
       // Get the typing handler
       const typingHandler = mockWebSocketManager.on.mock.calls.find(
-        (call) => call[0] === "typing"
+        (call) => call[0] === "typing",
       )?.[1];
 
       act(() => {
@@ -347,7 +345,7 @@ describe("useRealChat Hook", () => {
 
       // Get the connected handler
       const connectedHandler = mockWebSocketManager.on.mock.calls.find(
-        (call) => call[0] === "connected"
+        (call) => call[0] === "connected",
       )?.[1];
 
       act(() => {
@@ -362,7 +360,7 @@ describe("useRealChat Hook", () => {
 
       // Get the disconnected handler
       const disconnectedHandler = mockWebSocketManager.on.mock.calls.find(
-        (call) => call[0] === "disconnected"
+        (call) => call[0] === "disconnected",
       )?.[1];
 
       act(() => {
@@ -392,7 +390,7 @@ describe("useRealChat Hook", () => {
 
       // Get the message handler
       const messageHandler = mockWebSocketManager.on.mock.calls.find(
-        (call) => call[0] === "message"
+        (call) => call[0] === "message",
       )?.[1];
 
       act(() => {
@@ -408,7 +406,7 @@ describe("useRealChat Hook", () => {
 
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
         `chat_${mockContactId}`,
-        expect.any(String)
+        expect.any(String),
       );
     });
 
@@ -420,7 +418,7 @@ describe("useRealChat Hook", () => {
       });
 
       const updatedMessage = result.current.messages.find(
-        (msg: Message) => msg.id === "msg-1"
+        (msg: Message) => msg.id === "msg-1",
       );
       expect(updatedMessage?.content).toBe("Updated message");
       expect(updatedMessage?.isEdited).toBe(true);
@@ -434,7 +432,7 @@ describe("useRealChat Hook", () => {
       });
 
       const deletedMessage = result.current.messages.find(
-        (msg: Message) => msg.id === "msg-1"
+        (msg: Message) => msg.id === "msg-1",
       );
       expect(deletedMessage).toBeUndefined();
     });
@@ -444,7 +442,7 @@ describe("useRealChat Hook", () => {
     it("should reload chat history when contact changes", () => {
       const { rerender } = renderHook(
         ({ contactId }) => useRealChat(contactId),
-        { initialProps: { contactId: "contact-1" } }
+        { initialProps: { contactId: "contact-1" } },
       );
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify([]));
@@ -489,11 +487,9 @@ describe("useRealChat Hook", () => {
 
       // 当 contactId 为空时，hook 仍然会设置欢迎消息
       expect(result.current.messages).toHaveLength(2);
-      expect(result.current.messages[0].content).toBe(
-        "欢迎使用 Instagram！"
-      );
+      expect(result.current.messages[0].content).toBe("欢迎使用 Instagram！");
       expect(result.current.messages[1].content).toBe(
-        "这是一个功能完整的聊天应用演示"
+        "这是一个功能完整的聊天应用演示",
       );
     });
   });

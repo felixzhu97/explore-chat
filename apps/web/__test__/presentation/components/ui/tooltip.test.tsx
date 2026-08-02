@@ -1,21 +1,26 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/presentation/components/ui/tooltip';
+import { describe, it, expect } from "vitest";
+import { render, screen } from "@testing-library/react";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/shared/ui/tooltip";
 
-describe('Tooltip', () => {
-  describe('TooltipProvider', () => {
-    it('should render provider with children', () => {
+describe("Tooltip", () => {
+  describe("TooltipProvider", () => {
+    it("should render provider with children", () => {
       render(
         <TooltipProvider>
           <div data-testid="provider-content">Provider Content</div>
-        </TooltipProvider>
+        </TooltipProvider>,
       );
-      expect(screen.getByTestId('provider-content')).toBeInTheDocument();
+      expect(screen.getByTestId("provider-content")).toBeInTheDocument();
     });
   });
 
-  describe('TooltipTrigger', () => {
-    it('should render trigger button', () => {
+  describe("TooltipTrigger", () => {
+    it("should render trigger button", () => {
       render(
         <TooltipProvider>
           <Tooltip>
@@ -24,14 +29,14 @@ describe('Tooltip', () => {
             </TooltipTrigger>
             <TooltipContent>Content</TooltipContent>
           </Tooltip>
-        </TooltipProvider>
+        </TooltipProvider>,
       );
-      expect(screen.getByTestId('trigger')).toBeInTheDocument();
+      expect(screen.getByTestId("trigger")).toBeInTheDocument();
     });
   });
 
-  describe('TooltipContent', () => {
-    it('should render tooltip content when open', () => {
+  describe("TooltipContent", () => {
+    it("should render tooltip content when open", () => {
       render(
         <TooltipProvider>
           <Tooltip open>
@@ -40,9 +45,9 @@ describe('Tooltip', () => {
             </TooltipTrigger>
             <TooltipContent data-testid="content">Helpful tip</TooltipContent>
           </Tooltip>
-        </TooltipProvider>
+        </TooltipProvider>,
       );
-      expect(screen.getByTestId('content')).toBeInTheDocument();
+      expect(screen.getByTestId("content")).toBeInTheDocument();
     });
   });
 });

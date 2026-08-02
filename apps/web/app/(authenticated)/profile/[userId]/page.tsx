@@ -1,4 +1,4 @@
-import { ProfilePageContainer } from "@/src/presentation/features/profile/profile-page-container";
+import { ProfilePageContainer } from "@/profile/profile-page-container";
 
 export default function ProfileUserRoutePage({
   params,

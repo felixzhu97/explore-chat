@@ -14,7 +14,7 @@ const mockUseAuth: any = {
   error: null as string | null,
 };
 
-vi.mock("../../../src/presentation/hooks/use-auth", () => ({
+vi.mock("@/auth/use-auth", () => ({
   useAuth: () => mockUseAuth,
 }));
 
@@ -30,11 +30,14 @@ vi.mock("@/src/shared/i18n", () => ({
     t: (key: string) => {
       const map: Record<string, string> = {
         "register.title": "Get started on Instagram",
-        "register.subtitle": "Sign up to see photos and videos from your friends.",
+        "register.subtitle":
+          "Sign up to see photos and videos from your friends.",
         "register.mobileOrEmail": "Mobile number or email",
         "register.mobileOrEmailPlaceholder": "Mobile number or email",
-        "register.contactInfoNotePrefix": "You may receive notifications from us. ",
-        "register.learnWhyContact": "Learn why we ask for your contact information.",
+        "register.contactInfoNotePrefix":
+          "You may receive notifications from us. ",
+        "register.learnWhyContact":
+          "Learn why we ask for your contact information.",
         "register.password": "Password",
         "register.passwordPlaceholder": "Password",
         "register.birthday": "Birthday",
@@ -45,9 +48,11 @@ vi.mock("@/src/shared/i18n", () => ({
         "register.fullNamePlaceholder": "Full name",
         "register.username": "Username",
         "register.usernamePlaceholder": "Username",
-        "register.contactUploadPrefix": "People who use our service may have uploaded your contact information to Instagram. ",
+        "register.contactUploadPrefix":
+          "People who use our service may have uploaded your contact information to Instagram. ",
         "register.learnMore": "Learn more.",
-        "register.agreeTermsPrefix": "By tapping Submit, you agree to create an account and to Instagram's ",
+        "register.agreeTermsPrefix":
+          "By tapping Submit, you agree to create an account and to Instagram's ",
         "register.terms": "Terms",
         "register.privacyPolicy": "Privacy Policy",
         "register.cookiesPolicy": "Cookies Policy",
@@ -64,21 +69,29 @@ vi.mock("@/src/shared/i18n", () => ({
   }),
 }));
 
-vi.mock("@/components/ui/input", () => ({
+vi.mock("@/shared/ui/input", () => ({
   Input: ({ onChange, ...props }: any) => (
     <input onChange={onChange} {...props} />
   ),
 }));
 
-vi.mock("@/src/presentation/components/ui/select", () => ({
+vi.mock("@/shared/ui/select", () => ({
   Select: ({ children, value, onValueChange }: any) => (
-    <div data-testid="select" data-value={value} onClick={() => onValueChange?.("January")}>
+    <div
+      data-testid="select"
+      data-value={value}
+      onClick={() => onValueChange?.("January")}
+    >
       {children}
     </div>
   ),
   SelectContent: ({ children }: any) => <div>{children}</div>,
-  SelectItem: ({ children, value }: any) => <div data-value={value}>{children}</div>,
-  SelectTrigger: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+  SelectItem: ({ children, value }: any) => (
+    <div data-value={value}>{children}</div>
+  ),
+  SelectTrigger: ({ children, ...props }: any) => (
+    <button {...props}>{children}</button>
+  ),
   SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
 }));
 
@@ -86,8 +99,10 @@ vi.mock("lucide-react", async (importOriginal) => {
   const actual = await importOriginal<typeof import("lucide-react")>();
   return {
     ...actual,
-    ChevronLeft: () => React.createElement("span", { "data-testid": "chevron-left" }),
-    HelpCircle: () => React.createElement("span", { "data-testid": "help-circle" }),
+    ChevronLeft: () =>
+      React.createElement("span", { "data-testid": "chevron-left" }),
+    HelpCircle: () =>
+      React.createElement("span", { "data-testid": "help-circle" }),
   };
 });
 
@@ -102,13 +117,19 @@ describe("RegisterPage", () => {
   describe("Basic Rendering", () => {
     it("should render title and subtitle", () => {
       render(<RegisterPage />);
-      expect(screen.getByRole("heading", { name: /get started on instagram/i })).toBeInTheDocument();
-      expect(screen.getByText(/Sign up to see photos and videos from your friends/)).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: /get started on instagram/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Sign up to see photos and videos from your friends/),
+      ).toBeInTheDocument();
     });
 
     it("should render form inputs", () => {
       render(<RegisterPage />);
-      expect(screen.getByPlaceholderText("Mobile number or email")).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText("Mobile number or email"),
+      ).toBeInTheDocument();
       expect(screen.getByPlaceholderText("Password")).toBeInTheDocument();
       expect(screen.getByPlaceholderText("Full name")).toBeInTheDocument();
       expect(screen.getByPlaceholderText("Username")).toBeInTheDocument();
@@ -116,17 +137,23 @@ describe("RegisterPage", () => {
 
     it("should render submit button", () => {
       render(<RegisterPage />);
-      expect(screen.getByRole("button", { name: "Submit" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Submit" }),
+      ).toBeInTheDocument();
     });
 
     it("should render already have account button", () => {
       render(<RegisterPage />);
-      expect(screen.getByRole("button", { name: "I already have an account" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "I already have an account" }),
+      ).toBeInTheDocument();
     });
 
     it("should render header with back and Meta", () => {
       render(<RegisterPage />);
-      expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Cancel" }),
+      ).toBeInTheDocument();
       expect(screen.getByText("Meta")).toBeInTheDocument();
     });
   });
@@ -159,7 +186,9 @@ describe("RegisterPage", () => {
     it("should navigate to login on I already have an account", async () => {
       const user = userEvent.setup();
       render(<RegisterPage />);
-      await user.click(screen.getByRole("button", { name: "I already have an account" }));
+      await user.click(
+        screen.getByRole("button", { name: "I already have an account" }),
+      );
       expect(mockPush).toHaveBeenCalledWith("/login");
     });
   });
@@ -168,7 +197,10 @@ describe("RegisterPage", () => {
     it("should submit with valid email, password and username", async () => {
       const user = userEvent.setup();
       render(<RegisterPage />);
-      await user.type(screen.getByPlaceholderText("Mobile number or email"), "test@example.com");
+      await user.type(
+        screen.getByPlaceholderText("Mobile number or email"),
+        "test@example.com",
+      );
       await user.type(screen.getByPlaceholderText("Password"), "password123");
       await user.type(screen.getByPlaceholderText("Username"), "testuser");
       await user.click(screen.getByRole("button", { name: "Submit" }));
@@ -182,19 +214,27 @@ describe("RegisterPage", () => {
     it("should not submit with invalid email", async () => {
       const user = userEvent.setup();
       render(<RegisterPage />);
-      await user.type(screen.getByPlaceholderText("Mobile number or email"), "notanemail");
+      await user.type(
+        screen.getByPlaceholderText("Mobile number or email"),
+        "notanemail",
+      );
       await user.type(screen.getByPlaceholderText("Password"), "password123");
       await user.type(screen.getByPlaceholderText("Username"), "testuser");
       await user.click(screen.getByRole("button", { name: "Submit" }));
       expect(mockRegister).not.toHaveBeenCalled();
-      expect(screen.getByText(/Please enter a valid email/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Please enter a valid email/),
+      ).toBeInTheDocument();
     });
 
     it("should navigate to home on success", async () => {
       mockRegister.mockResolvedValueOnce({ success: true });
       const user = userEvent.setup();
       render(<RegisterPage />);
-      await user.type(screen.getByPlaceholderText("Mobile number or email"), "test@example.com");
+      await user.type(
+        screen.getByPlaceholderText("Mobile number or email"),
+        "test@example.com",
+      );
       await user.type(screen.getByPlaceholderText("Password"), "password123");
       await user.type(screen.getByPlaceholderText("Username"), "testuser");
       await user.click(screen.getByRole("button", { name: "Submit" }));
@@ -208,7 +248,9 @@ describe("RegisterPage", () => {
     it("should show loading state", () => {
       mockUseAuth.isLoading = true;
       render(<RegisterPage />);
-      expect(screen.getByRole("button", { name: "Submitting..." })).toBeDisabled();
+      expect(
+        screen.getByRole("button", { name: "Submitting..." }),
+      ).toBeDisabled();
     });
 
     it("should display error message", () => {

@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ApiClientAdapter } from '@/infrastructure/adapters/api/api-client.adapter';
-import type { IApiClient } from '@/domain/interfaces/adapters/api-client.interface';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { ApiClient } from "@/core/api-client";
+import type { ApiClient } from "@/core/api-client";
 
-describe('ApiClientAdapter', () => {
-  let adapter: ApiClientAdapter;
+describe("ApiClient", () => {
+  let adapter: ApiClient;
   let mockFetch: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
@@ -16,332 +16,345 @@ describe('ApiClientAdapter', () => {
     vi.restoreAllMocks();
   });
 
-  describe('constructor', () => {
-    it('should create adapter with default baseURL', () => {
-      const adapter = new ApiClientAdapter();
+  describe("constructor", () => {
+    it("should create adapter with default baseURL", () => {
+      const adapter = new ApiClient();
       expect(adapter).toBeDefined();
     });
 
-    it('should create adapter with custom baseURL', () => {
-      const customURL = 'https://custom-api.example.com';
-      const adapter = new ApiClientAdapter(customURL);
+    it("should create adapter with custom baseURL", () => {
+      const customURL = "https://custom-api.example.com";
+      const adapter = new ApiClient(customURL);
       expect(adapter).toBeDefined();
     });
   });
 
-  describe('setToken', () => {
-    it('should set token in memory', () => {
-      const adapter = new ApiClientAdapter();
-      adapter.setToken('test-token');
-      expect(adapter.getToken()).toBe('test-token');
+  describe("setToken", () => {
+    it("should set token in memory", () => {
+      const adapter = new ApiClient();
+      adapter.setToken("test-token");
+      expect(adapter.getToken()).toBe("test-token");
     });
 
-    it('should set token to null', () => {
-      const adapter = new ApiClientAdapter();
-      adapter.setToken('test-token');
+    it("should set token to null", () => {
+      const adapter = new ApiClient();
+      adapter.setToken("test-token");
       adapter.setToken(null);
       expect(adapter.getToken()).toBeNull();
     });
   });
 
-  describe('getToken', () => {
-    it('should return null when no token is set', () => {
-      const adapter = new ApiClientAdapter();
+  describe("getToken", () => {
+    it("should return null when no token is set", () => {
+      const adapter = new ApiClient();
       expect(adapter.getToken()).toBeNull();
     });
 
-    it('should return the set token', () => {
-      const adapter = new ApiClientAdapter();
-      adapter.setToken('my-token');
-      expect(adapter.getToken()).toBe('my-token');
+    it("should return the set token", () => {
+      const adapter = new ApiClient();
+      adapter.setToken("my-token");
+      expect(adapter.getToken()).toBe("my-token");
     });
   });
 
-  describe('get', () => {
-    it('should make GET request successfully', async () => {
-      const mockResponse = { data: { id: '1' }, success: true };
+  describe("get", () => {
+    it("should make GET request successfully", async () => {
+      const mockResponse = { data: { id: "1" }, success: true };
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockResponse),
       });
 
-      const adapter = new ApiClientAdapter('http://test.com');
-      const result = await adapter.get('/test');
+      const adapter = new ApiClient("http://test.com");
+      const result = await adapter.get("/test");
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://test.com/test',
-        expect.objectContaining({ method: 'GET' })
+        "http://test.com/test",
+        expect.objectContaining({ method: "GET" }),
       );
       expect(result).toEqual(mockResponse);
     });
 
-    it('should include Authorization header when token is set', async () => {
+    it("should include Authorization header when token is set", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ data: {} }),
       });
 
-      const adapter = new ApiClientAdapter('http://test.com');
-      adapter.setToken('Bearer-token');
+      const adapter = new ApiClient("http://test.com");
+      adapter.setToken("Bearer-token");
 
-      await adapter.get('/protected');
+      await adapter.get("/protected");
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://test.com/protected',
+        "http://test.com/protected",
         expect.objectContaining({
-          method: 'GET',
+          method: "GET",
           headers: expect.objectContaining({
-            Authorization: 'Bearer Bearer-token',
+            Authorization: "Bearer Bearer-token",
           }),
-        })
+        }),
       );
     });
 
-    it('should throw error on HTTP error response', async () => {
+    it("should throw error on HTTP error response", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 404,
-        json: () => Promise.resolve({ message: 'Not found' }),
+        json: () => Promise.resolve({ message: "Not found" }),
       });
 
-      const adapter = new ApiClientAdapter('http://test.com');
+      const adapter = new ApiClient("http://test.com");
 
-      await expect(adapter.get('/not-found')).rejects.toThrow('Not found');
+      await expect(adapter.get("/not-found")).rejects.toThrow("Not found");
     });
 
-    it('should throw error with default message for HTTP error', async () => {
+    it("should throw error with default message for HTTP error", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 500,
         json: () => Promise.resolve({}),
       });
 
-      const adapter = new ApiClientAdapter('http://test.com');
+      const adapter = new ApiClient("http://test.com");
 
-      await expect(adapter.get('/error')).rejects.toThrow('HTTP error! status: 500');
+      await expect(adapter.get("/error")).rejects.toThrow(
+        "HTTP error! status: 500",
+      );
     });
   });
 
-  describe('post', () => {
-    it('should make POST request with data', async () => {
-      const mockResponse = { data: { id: '1' }, success: true };
+  describe("post", () => {
+    it("should make POST request with data", async () => {
+      const mockResponse = { data: { id: "1" }, success: true };
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockResponse),
       });
 
-      const adapter = new ApiClientAdapter('http://test.com');
-      const postData = { name: 'test' };
+      const adapter = new ApiClient("http://test.com");
+      const postData = { name: "test" };
 
-      const result = await adapter.post('/create', postData);
+      const result = await adapter.post("/create", postData);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://test.com/create',
+        "http://test.com/create",
         expect.objectContaining({
-          method: 'POST',
+          method: "POST",
           body: JSON.stringify(postData),
-        })
+        }),
       );
       expect(result).toEqual(mockResponse);
     });
 
-    it('should make POST request without data', async () => {
+    it("should make POST request without data", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ success: true }),
       });
 
-      const adapter = new ApiClientAdapter('http://test.com');
-      await adapter.post('/action');
+      const adapter = new ApiClient("http://test.com");
+      await adapter.post("/action");
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://test.com/action',
+        "http://test.com/action",
         expect.objectContaining({
-          method: 'POST',
+          method: "POST",
           body: undefined,
-        })
+        }),
       );
     });
   });
 
-  describe('put', () => {
-    it('should make PUT request with data', async () => {
+  describe("put", () => {
+    it("should make PUT request with data", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ success: true }),
       });
 
-      const adapter = new ApiClientAdapter('http://test.com');
-      const putData = { name: 'updated' };
+      const adapter = new ApiClient("http://test.com");
+      const putData = { name: "updated" };
 
-      await adapter.put('/update/1', putData);
+      await adapter.put("/update/1", putData);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://test.com/update/1',
+        "http://test.com/update/1",
         expect.objectContaining({
-          method: 'PUT',
+          method: "PUT",
           body: JSON.stringify(putData),
-        })
+        }),
       );
     });
   });
 
-  describe('patch', () => {
-    it('should make PATCH request with data', async () => {
+  describe("patch", () => {
+    it("should make PATCH request with data", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ success: true }),
       });
 
-      const adapter = new ApiClientAdapter('http://test.com');
-      const patchData = { status: 'active' };
+      const adapter = new ApiClient("http://test.com");
+      const patchData = { status: "active" };
 
-      await adapter.patch('/patch/1', patchData);
+      await adapter.patch("/patch/1", patchData);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://test.com/patch/1',
+        "http://test.com/patch/1",
         expect.objectContaining({
-          method: 'PATCH',
+          method: "PATCH",
           body: JSON.stringify(patchData),
-        })
+        }),
       );
     });
   });
 
-  describe('delete', () => {
-    it('should make DELETE request', async () => {
+  describe("delete", () => {
+    it("should make DELETE request", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ success: true }),
       });
 
-      const adapter = new ApiClientAdapter('http://test.com');
-      await adapter.delete('/delete/1');
+      const adapter = new ApiClient("http://test.com");
+      await adapter.delete("/delete/1");
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://test.com/delete/1',
-        expect.objectContaining({ method: 'DELETE' })
+        "http://test.com/delete/1",
+        expect.objectContaining({ method: "DELETE" }),
       );
     });
   });
 
-  describe('postStream', () => {
-    it('should make POST request and return raw response', async () => {
-      const mockResponse = new Response('stream data');
+  describe("postStream", () => {
+    it("should make POST request and return raw response", async () => {
+      const mockResponse = new Response("stream data");
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      const adapter = new ApiClientAdapter('http://test.com');
-      const result = await adapter.postStream('/stream', { data: 'test' });
+      const adapter = new ApiClient("http://test.com");
+      const result = await adapter.postStream("/stream", { data: "test" });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://test.com/stream',
+        "http://test.com/stream",
         expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify({ data: 'test' }),
-        })
+          method: "POST",
+          body: JSON.stringify({ data: "test" }),
+        }),
       );
       expect(result).toBe(mockResponse);
     });
 
-    it('should include Authorization header for stream request', async () => {
-      mockFetch.mockResolvedValueOnce(new Response('data'));
+    it("should include Authorization header for stream request", async () => {
+      mockFetch.mockResolvedValueOnce(new Response("data"));
 
-      const adapter = new ApiClientAdapter('http://test.com');
-      adapter.setToken('stream-token');
+      const adapter = new ApiClient("http://test.com");
+      adapter.setToken("stream-token");
 
-      await adapter.postStream('/stream');
+      await adapter.postStream("/stream");
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://test.com/stream',
+        "http://test.com/stream",
         expect.objectContaining({
           headers: expect.objectContaining({
-            Authorization: 'Bearer stream-token',
+            Authorization: "Bearer stream-token",
           }),
-        })
+        }),
       );
     });
   });
 
-  describe('upload', () => {
-    it('should upload file with FormData', async () => {
-      const mockResponse = { data: { url: 'http://example.com/file.jpg' }, success: true };
+  describe("upload", () => {
+    it("should upload file with FormData", async () => {
+      const mockResponse = {
+        data: { url: "http://example.com/file.jpg" },
+        success: true,
+      };
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockResponse),
       });
 
-      const adapter = new ApiClientAdapter('http://test.com');
-      const mockFile = new File(['content'], 'test.jpg', { type: 'image/jpeg' });
+      const adapter = new ApiClient("http://test.com");
+      const mockFile = new File(["content"], "test.jpg", {
+        type: "image/jpeg",
+      });
       const formData = new FormData();
-      formData.append('file', mockFile);
+      formData.append("file", mockFile);
 
-      const result = await adapter.upload('/upload', formData);
+      const result = await adapter.upload("/upload", formData);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://test.com/upload',
+        "http://test.com/upload",
         expect.objectContaining({
-          method: 'POST',
+          method: "POST",
           body: formData,
-        })
+        }),
       );
       expect(result).toEqual(mockResponse);
     });
 
-    it('should include Authorization header for upload', async () => {
+    it("should include Authorization header for upload", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ success: true }),
       });
 
-      const adapter = new ApiClientAdapter('http://test.com');
-      adapter.setToken('upload-token');
-      const mockFile = new File(['content'], 'test.jpg', { type: 'image/jpeg' });
+      const adapter = new ApiClient("http://test.com");
+      adapter.setToken("upload-token");
+      const mockFile = new File(["content"], "test.jpg", {
+        type: "image/jpeg",
+      });
       const formData = new FormData();
-      formData.append('file', mockFile);
+      formData.append("file", mockFile);
 
-      await adapter.upload('/upload', formData);
+      await adapter.upload("/upload", formData);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://test.com/upload',
+        "http://test.com/upload",
         expect.objectContaining({
           headers: expect.objectContaining({
-            Authorization: 'Bearer upload-token',
+            Authorization: "Bearer upload-token",
           }),
-        })
+        }),
       );
     });
 
-    it('should throw error on upload failure', async () => {
+    it("should throw error on upload failure", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 413,
-        json: () => Promise.resolve({ message: 'File too large' }),
+        json: () => Promise.resolve({ message: "File too large" }),
       });
 
-      const adapter = new ApiClientAdapter('http://test.com');
-      const mockFile = new File(['content'], 'large.jpg', { type: 'image/jpeg' });
+      const adapter = new ApiClient("http://test.com");
+      const mockFile = new File(["content"], "large.jpg", {
+        type: "image/jpeg",
+      });
       const formData = new FormData();
-      formData.append('file', mockFile);
+      formData.append("file", mockFile);
 
-      await expect(adapter.upload('/upload', formData)).rejects.toThrow('File too large');
+      await expect(adapter.upload("/upload", formData)).rejects.toThrow(
+        "File too large",
+      );
     });
   });
 });
 
-describe('getApiClient (singleton behavior)', () => {
-  it('should create new instance when no singleton exists', () => {
-    const adapter = new ApiClientAdapter();
-    expect(adapter).toBeInstanceOf(ApiClientAdapter);
+describe("getApiClient (singleton behavior)", () => {
+  it("should create new instance when no singleton exists", () => {
+    const adapter = new ApiClient();
+    expect(adapter).toBeInstanceOf(ApiClient);
   });
 
-  it('should manage tokens independently', () => {
-    const adapter1 = new ApiClientAdapter();
-    const adapter2 = new ApiClientAdapter();
+  it("should manage tokens independently", () => {
+    const adapter1 = new ApiClient();
+    const adapter2 = new ApiClient();
 
-    adapter1.setToken('token1');
-    adapter2.setToken('token2');
+    adapter1.setToken("token1");
+    adapter2.setToken("token2");
 
-    expect(adapter1.getToken()).toBe('token1');
-    expect(adapter2.getToken()).toBe('token2');
+    expect(adapter1.getToken()).toBe("token1");
+    expect(adapter2.getToken()).toBe("token2");
   });
 });
