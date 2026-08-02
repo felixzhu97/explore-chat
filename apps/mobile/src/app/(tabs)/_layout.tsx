@@ -3,13 +3,13 @@ import { Tabs, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LiquidGlassBar } from "@/src/presentation/components";
-import { useTheme } from "@/src/presentation/shared/theme";
-import { useTranslation } from "@/src/presentation/shared/i18n";
+import { LiquidGlassBar } from "@/shared/components";
+import { useTheme } from "@/shared/theme";
+import { useTranslation } from "@/shared/i18n";
 import { PrimaryDestinations } from "@whatschat/shared-types";
-import { useAuthStore } from "@/src/presentation/stores";
-import { styled } from "@/src/presentation/shared/emotion";
-import { MobilePrimaryDestinationTabs } from "@/src/presentation/shared/primary-destination-tabs";
+import { useAuthStore } from "@/core/store/hooks";
+import { styled } from "@/shared/emotion";
+import { MobilePrimaryDestinationTabs } from "@/layout/primary-destination-tabs";
 
 const TabButton = styled.TouchableOpacity`
   flex: 1;

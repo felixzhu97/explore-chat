@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
-import { Redirect } from 'expo-router';
-import { styled } from '@/src/presentation/shared/emotion';
-import { useTheme } from '@/src/presentation/shared/theme';
-import { useAuthStore, useAppDispatch, hydrateAuth } from '@/src/presentation/stores';
+import { useEffect } from "react";
+import { View, ActivityIndicator } from "react-native";
+import { Redirect } from "expo-router";
+import { styled } from "@/shared/emotion";
+import { useTheme } from "@/shared/theme";
+import { useAuthStore, useAppDispatch, hydrateAuth } from "@/core/store/hooks";
 
 const Centered = styled.View`
   flex: 1;

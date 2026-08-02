@@ -1,4 +1,4 @@
-import { ExploreScreen } from '@/src/presentation/screens';
+import { ExploreScreen } from "@/explore/explore-screen";
 
 export default function ExploreTabScreen() {
   return <ExploreScreen />;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   FlatList,
   ActivityIndicator,
@@ -8,21 +8,24 @@ import {
   View,
   Pressable,
   Text,
-} from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter, useFocusEffect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Chat } from '@/src/domain/entities';
-import { ChatListItem, ChatAvatar } from '@/src/presentation/components';
-import type { AuthUser } from '@/src/domain/entities';
-import { styled } from '@/src/presentation/shared/emotion';
-import { useTheme } from '@/src/presentation/shared/theme';
-import { useTranslation } from '@/src/presentation/shared/i18n';
-import { getChatUseCases } from '@/src/infrastructure/composition-root';
-import { useAuthStore } from '@/src/presentation/stores';
+} from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { useRouter, useFocusEffect } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { Chat } from "@/chat/chat.model";
+import { ChatListItem, ChatAvatar } from "@/shared/components";
+import type { AuthUser } from "@/auth/auth.model";
+import { styled } from "@/shared/emotion";
+import { useTheme } from "@/shared/theme";
+import { useTranslation } from "@/shared/i18n";
+import { getChatApi } from "@/core/composition-root";
+import { useAuthStore } from "@/core/store/hooks";
 
-const PAGE_BG = '#FFFFFF';
-const SEARCH_BG = '#F2F2F2';
+const PAGE_BG = "#FFFFFF";
+const SEARCH_BG = "#F2F2F2";
 
 const Page = styled.View`
   flex: 1;
@@ -279,17 +282,17 @@ const PushBannerText = styled.Text`
 `;
 
 const SUGGESTIONS = [
-  { username: 'sundarpichai', verified: true },
-  { username: 'zuck', verified: true },
-  { username: 'louisvuitton', verified: true },
-  { username: 'evejobs', verified: false },
-  { username: 'oliviarodrigo', verified: true },
+  { username: "sundarpichai", verified: true },
+  { username: "zuck", verified: true },
+  { username: "louisvuitton", verified: true },
+  { username: "evejobs", verified: false },
+  { username: "oliviarodrigo", verified: true },
 ];
 
 function ChatsListHeader({ user }: { user: AuthUser | null }) {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const username = user?.username ?? '…';
+  const username = user?.username ?? "…";
 
   return (
     <>
@@ -297,11 +300,20 @@ function ChatsListHeader({ user }: { user: AuthUser | null }) {
         <HeaderSide />
         <HeaderCenter>
           <HeaderUsername numberOfLines={1}>{username}</HeaderUsername>
-          <Ionicons name="chevron-down" size={18} color={colors.primaryText} style={{ marginLeft: 4 }} />
+          <Ionicons
+            name="chevron-down"
+            size={18}
+            color={colors.primaryText}
+            style={{ marginLeft: 4 }}
+          />
         </HeaderCenter>
-        <HeaderSide style={{ alignItems: 'flex-end' }}>
+        <HeaderSide style={{ alignItems: "flex-end" }}>
           <ComposeButton onPress={() => {}}>
-            <Ionicons name="create-outline" size={26} color={colors.primaryText} />
+            <Ionicons
+              name="create-outline"
+              size={26}
+              color={colors.primaryText}
+            />
           </ComposeButton>
         </HeaderSide>
       </HeaderRow>
@@ -309,7 +321,7 @@ function ChatsListHeader({ user }: { user: AuthUser | null }) {
         <SearchBox>
           <Ionicons name="search-outline" size={18} color="#8E8E93" />
           <SearchInput
-            placeholder={t('chats.searchPlaceholder')}
+            placeholder={t("chats.searchPlaceholder")}
             placeholderTextColor="#8E8E93"
             returnKeyType="search"
           />
@@ -318,9 +330,9 @@ function ChatsListHeader({ user }: { user: AuthUser | null }) {
       <NotesScroll horizontal showsHorizontalScrollIndicator={false}>
         <NotesInner>
           <NoteColumn>
-            <View style={{ position: 'relative' }}>
+            <View style={{ position: "relative" }}>
               <NoteBubble>
-                <NoteBubbleText>{t('chats.notePreview')}</NoteBubbleText>
+                <NoteBubbleText>{t("chats.notePreview")}</NoteBubbleText>
               </NoteBubble>
               <NoteAvatarWrap>
                 <ChatAvatar
@@ -331,27 +343,35 @@ function ChatsListHeader({ user }: { user: AuthUser | null }) {
                 />
               </NoteAvatarWrap>
             </View>
-            <NoteTitle>{t('chats.yourNote')}</NoteTitle>
+            <NoteTitle>{t("chats.yourNote")}</NoteTitle>
             <NoteMeta>
-              <Ionicons name="location-outline" size={12} color={colors.secondaryText} />
-              <NoteMetaText>{t('chats.locationOff')}</NoteMetaText>
+              <Ionicons
+                name="location-outline"
+                size={12}
+                color={colors.secondaryText}
+              />
+              <NoteMetaText>{t("chats.locationOff")}</NoteMetaText>
             </NoteMeta>
           </NoteColumn>
           <NoteColumn>
             <MapCircle>
               <Ionicons name="map-outline" size={28} color="#6BA3C4" />
             </MapCircle>
-            <MapLabel>{t('chats.map')}</MapLabel>
+            <MapLabel>{t("chats.map")}</MapLabel>
           </NoteColumn>
         </NotesInner>
       </NotesScroll>
       <SectionHeaderRow>
         <SectionTitleWrap>
-          <SectionTitle>{t('chats.messages')}</SectionTitle>
-          <Ionicons name="notifications-off-outline" size={20} color={colors.primaryText} />
+          <SectionTitle>{t("chats.messages")}</SectionTitle>
+          <Ionicons
+            name="notifications-off-outline"
+            size={20}
+            color={colors.primaryText}
+          />
         </SectionTitleWrap>
         <Pressable onPress={() => {}}>
-          <RequestsLink>{t('chats.requests')}</RequestsLink>
+          <RequestsLink>{t("chats.requests")}</RequestsLink>
         </Pressable>
       </SectionHeaderRow>
     </>
@@ -364,7 +384,7 @@ function ChatsSuggestionsFooter() {
 
   return (
     <SuggestionsBlock>
-      <SuggestionTitle>{t('chats.suggestions')}</SuggestionTitle>
+      <SuggestionTitle>{t("chats.suggestions")}</SuggestionTitle>
       {SUGGESTIONS.map((s) => (
         <SuggestionRow key={s.username} onPress={() => {}}>
           <ChatAvatar name={s.username} size={56} showBorder={false} />
@@ -372,12 +392,20 @@ function ChatsSuggestionsFooter() {
             <SuggestionNameRow>
               <SuggestionName numberOfLines={1}>{s.username}</SuggestionName>
               {s.verified && (
-                <Ionicons name="checkmark-circle" size={16} color={colors.accentBlue} />
+                <Ionicons
+                  name="checkmark-circle"
+                  size={16}
+                  color={colors.accentBlue}
+                />
               )}
             </SuggestionNameRow>
-            <SuggestionHint>{t('chats.tapToChat')}</SuggestionHint>
+            <SuggestionHint>{t("chats.tapToChat")}</SuggestionHint>
           </SuggestionBody>
-          <Ionicons name="camera-outline" size={26} color={colors.primaryText} />
+          <Ionicons
+            name="camera-outline"
+            size={26}
+            color={colors.primaryText}
+          />
         </SuggestionRow>
       ))}
     </SuggestionsBlock>
@@ -397,7 +425,7 @@ export default function ChatsScreen() {
 
   const loadChats = React.useCallback(async () => {
     try {
-      const list = await getChatUseCases().getChats();
+      const list = await getChatApi().getChats();
       setChats(list);
     } catch {
       setChats([]);
@@ -411,7 +439,7 @@ export default function ChatsScreen() {
     React.useCallback(() => {
       setLoading(true);
       loadChats();
-    }, [loadChats])
+    }, [loadChats]),
   );
 
   const onRefresh = React.useCallback(() => {
@@ -419,21 +447,24 @@ export default function ChatsScreen() {
     loadChats();
   }, [loadChats]);
 
-  const listHeader = React.useMemo(() => <ChatsListHeader user={user} />, [user]);
+  const listHeader = React.useMemo(
+    () => <ChatsListHeader user={user} />,
+    [user],
+  );
 
   const listFooter = React.useMemo(() => <ChatsSuggestionsFooter />, []);
 
   const bannerBottom = insets.bottom - 20;
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: PAGE_BG }}>
+    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: PAGE_BG }}>
       <Page>
         {loading ? (
           <>
             <ChatsListHeader user={user} />
             <LoadingWrap>
               <ActivityIndicator size="large" color={colors.primaryText} />
-              <EmptyText>{t('common.loading')}</EmptyText>
+              <EmptyText>{t("common.loading")}</EmptyText>
             </LoadingWrap>
           </>
         ) : (
@@ -444,7 +475,7 @@ export default function ChatsScreen() {
             contentContainerStyle={{ paddingBottom: 120 }}
             renderItem={({ item }) => {
               const otherUserId =
-                item.type === 'individual'
+                item.type === "individual"
                   ? item.participantIds?.find((id) => id !== user?.id)
                   : undefined;
 
@@ -453,7 +484,9 @@ export default function ChatsScreen() {
                   chat={item}
                   onPress={() => router.push(`/chat-detail?chatId=${item.id}`)}
                   onAvatarPress={
-                    otherUserId ? () => router.push(`/user-profile/${otherUserId}`) : undefined
+                    otherUserId
+                      ? () => router.push(`/user-profile/${otherUserId}`)
+                      : undefined
                   }
                 />
               );
@@ -468,8 +501,12 @@ export default function ChatsScreen() {
             }
             ListEmptyComponent={
               <EmptyContainer>
-                <Ionicons name="paper-plane-outline" size={72} color={colors.secondaryText} />
-                <EmptyText>{t('chats.noChats')}</EmptyText>
+                <Ionicons
+                  name="paper-plane-outline"
+                  size={72}
+                  color={colors.secondaryText}
+                />
+                <EmptyText>{t("chats.noChats")}</EmptyText>
               </EmptyContainer>
             }
           />
@@ -477,14 +514,27 @@ export default function ChatsScreen() {
         {pushBannerVisible && (
           <PushBannerWrap style={{ bottom: bannerBottom }}>
             <PushBanner>
-              <Ionicons name="notifications-off-outline" size={20} color={colors.primaryText} />
-              <PushBannerText>{t('chats.pushBanner')}</PushBannerText>
+              <Ionicons
+                name="notifications-off-outline"
+                size={20}
+                color={colors.primaryText}
+              />
+              <PushBannerText>{t("chats.pushBanner")}</PushBannerText>
               <Pressable onPress={() => {}}>
-                <Text style={{ fontSize: 13, fontWeight: '600', color: colors.primaryGreen }}>
-                  {t('chats.turnOn')}
+                <Text
+                  style={{
+                    fontSize: 13,
+                    fontWeight: "600",
+                    color: colors.primaryGreen,
+                  }}
+                >
+                  {t("chats.turnOn")}
                 </Text>
               </Pressable>
-              <Pressable onPress={() => setPushBannerVisible(false)} hitSlop={12}>
+              <Pressable
+                onPress={() => setPushBannerVisible(false)}
+                hitSlop={12}
+              >
                 <Ionicons name="close" size={22} color={colors.secondaryText} />
               </Pressable>
             </PushBanner>

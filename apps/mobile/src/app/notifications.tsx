@@ -1,14 +1,15 @@
-import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { styled } from '@/src/presentation/shared/emotion';
-import { useTheme } from '@/src/presentation/shared/theme';
-import { useRouter } from 'expo-router';
-import { useTranslation } from '@/src/presentation/shared/i18n';
+import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { styled } from "@/shared/emotion";
+import { useTheme } from "@/shared/theme";
+import { useRouter } from "expo-router";
+import { useTranslation } from "@/shared/i18n";
 
 const Page = styled.View`
   flex: 1;
-  background-color: (p: { theme: { colors: { background: string } } }) => p.theme.colors.background;
+  background-color: (p: {theme: {colors: {background: string}}}) =>
+    p.theme.colors.background;
 `;
 
 const Header = styled.View`
@@ -21,7 +22,8 @@ const Header = styled.View`
 const Title = styled.Text`
   font-size: 17px;
   font-weight: 600;
-  color: (p: { theme: { colors: { primaryText: string } } }) => p.theme.colors.primaryText;
+  color: (p: {theme: {colors: {primaryText: string}}}) =>
+    p.theme.colors.primaryText;
 `;
 
 const IconButton = styled.TouchableOpacity`
@@ -35,7 +37,8 @@ const Body = styled.View`
 
 const Hint = styled.Text`
   font-size: 14px;
-  color: (p: { theme: { colors: { secondaryText: string } } }) => p.theme.colors.secondaryText;
+  color: (p: {theme: {colors: {secondaryText: string}}}) =>
+    p.theme.colors.secondaryText;
 `;
 
 export default function NotificationsScreen() {
@@ -44,20 +47,23 @@ export default function NotificationsScreen() {
   const { t } = useTranslation();
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
       <Page>
         <Header>
           <IconButton onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={22} color={colors.primaryText} />
+            <Ionicons
+              name="chevron-back"
+              size={22}
+              color={colors.primaryText}
+            />
           </IconButton>
-          <Title>{t('notifications.title')}</Title>
+          <Title>{t("notifications.title")}</Title>
           <IconButton />
         </Header>
         <Body>
-          <Hint>{t('notifications.comingSoon')}</Hint>
+          <Hint>{t("notifications.comingSoon")}</Hint>
         </Body>
       </Page>
     </SafeAreaView>
   );
 }
-

@@ -1,13 +1,17 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Dimensions, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { styled } from '@/src/presentation/shared/emotion';
-import { useTheme } from '@/src/presentation/shared/theme';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useGetStatusesQuery, useTrackEventsMutation, useViewStatusMutation } from '@/src/presentation/store/api/feedApi';
-import { VideoView, useVideoPlayer } from 'expo-video';
-import { WebView } from 'react-native-webview';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Dimensions, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { styled } from "@/shared/emotion";
+import { useTheme } from "@/shared/theme";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  useGetStatusesQuery,
+  useTrackEventsMutation,
+  useViewStatusMutation,
+} from "@/feed/feedApi";
+import { VideoView, useVideoPlayer } from "expo-video";
+import { WebView } from "react-native-webview";
 
 const Page = styled.View`
   flex: 1;
@@ -36,7 +40,7 @@ const ProgressTrack = styled.View`
 `;
 
 const ProgressFill = styled.View<{ active: boolean }>`
-  width: ${(p) => (p.active ? '100%' : '0%')};
+  width: ${(p) => (p.active ? "100%" : "0%")};
   height: 2px;
   background-color: rgba(255, 255, 255, 0.9);
 `;
@@ -88,15 +92,21 @@ const StoryText = styled.Text`
 
 function isVideo(url?: string) {
   if (!url) return false;
-  return /\.(mp4|webm|mov|m4v)(\?|$)/i.test(url) || url.startsWith('data:video/');
+  return (
+    /\.(mp4|webm|mov|m4v)(\?|$)/i.test(url) || url.startsWith("data:video/")
+  );
 }
 
-const StoryVideo: React.FC<{ uri: string; width: number; height: number }> = ({ uri, width, height }) => {
-  if (uri.startsWith('data:video/')) {
+const StoryVideo: React.FC<{ uri: string; width: number; height: number }> = ({
+  uri,
+  width,
+  height,
+}) => {
+  if (uri.startsWith("data:video/")) {
     const webRef = useRef<WebView>(null);
     const [muted, setMuted] = useState(false);
     const setWebMuted = (m: boolean) => {
-      const js = `(() => { const v = document.querySelector('video'); if (!v) return true; v.muted = ${m ? 'true' : 'false'}; if (!${m ? 'true' : 'false'}) { v.volume = 1; } return true; })();`;
+      const js = `(() => { const v = document.querySelector('video'); if (!v) return true; v.muted = ${m ? "true" : "false"}; if (!${m ? "true" : "false"}) { v.volume = 1; } return true; })();`;
       webRef.current?.injectJavaScript(js);
     };
     return (
@@ -119,7 +129,7 @@ const StoryVideo: React.FC<{ uri: string; width: number; height: number }> = ({ 
               </html>
             `,
           }}
-          style={{ width, height, backgroundColor: 'black' }}
+          style={{ width, height, backgroundColor: "black" }}
           javaScriptEnabled
           scrollEnabled={false}
           allowsInlineMediaPlayback
@@ -134,9 +144,13 @@ const StoryVideo: React.FC<{ uri: string; width: number; height: number }> = ({ 
             setWebMuted(next);
           }}
           hitSlop={10}
-          style={{ position: 'absolute', top: 12, right: 12, padding: 8 }}
+          style={{ position: "absolute", top: 12, right: 12, padding: 8 }}
         >
-          <Ionicons name={muted ? 'volume-mute' : 'volume-high'} size={22} color="#fff" />
+          <Ionicons
+            name={muted ? "volume-mute" : "volume-high"}
+            size={22}
+            color="#fff"
+          />
         </Pressable>
       </>
     );
@@ -182,22 +196,32 @@ export default function StoryViewerScreen() {
   }, [statuses, userId]);
 
   const item = list[index];
-  const screen = Dimensions.get('window');
-  const videoUri = item?.mediaUrl && isVideo(item.mediaUrl) ? item.mediaUrl : undefined;
+  const screen = Dimensions.get("window");
+  const videoUri =
+    item?.mediaUrl && isVideo(item.mediaUrl) ? item.mediaUrl : undefined;
 
   useEffect(() => {
     if (!item?.id) return;
     viewStatus({ statusId: item.id });
     const key = `status_view:${item.id}:${Math.floor(Date.now() / 60000)}`;
     trackEvents({
-      events: [{ eventName: 'status_view', idempotencyKey: key, properties: { statusId: item.id } }],
+      events: [
+        {
+          eventName: "status_view",
+          idempotencyKey: key,
+          properties: { statusId: item.id },
+        },
+      ],
     });
   }, [item?.id, trackEvents, viewStatus]);
 
   useEffect(() => {
     if (!item) return;
     if (timerRef.current) clearTimeout(timerRef.current);
-    const durationMs = Math.max(2500, Math.min(8000, (item.duration ?? 5) * 1000));
+    const durationMs = Math.max(
+      2500,
+      Math.min(8000, (item.duration ?? 5) * 1000),
+    );
     timerRef.current = setTimeout(() => {
       if (index + 1 < list.length) setIndex((v) => v + 1);
       else router.back();
@@ -209,7 +233,7 @@ export default function StoryViewerScreen() {
 
   if (!item) {
     return (
-      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <Page>
           <TopBar>
             <IconButton onPress={() => router.back()}>
@@ -232,7 +256,7 @@ export default function StoryViewerScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
       <Page>
         <ProgressRow>
           {list.map((_, i) => (
@@ -247,7 +271,7 @@ export default function StoryViewerScreen() {
               <Ionicons name="chevron-back" size={22} color="#fff" />
             </IconButton>
             <Avatar source={{ uri: item.user?.avatar || undefined }} />
-            <Username numberOfLines={1}>{item.user?.username ?? ''}</Username>
+            <Username numberOfLines={1}>{item.user?.username ?? ""}</Username>
           </Left>
           <IconButton onPress={() => router.back()}>
             <Ionicons name="close" size={22} color="#fff" />
@@ -262,14 +286,21 @@ export default function StoryViewerScreen() {
           style={{ flex: 1 }}
         >
           <Media>
-            {item.type === 'TEXT' ? (
+            {item.type === "TEXT" ? (
               <TextWrap>
-                <StoryText>{item.content ?? ''}</StoryText>
+                <StoryText>{item.content ?? ""}</StoryText>
               </TextWrap>
             ) : videoUri ? (
-              <StoryVideo uri={videoUri} width={screen.width} height={screen.height} />
+              <StoryVideo
+                uri={videoUri}
+                width={screen.width}
+                height={screen.height}
+              />
             ) : (
-              <StoryImage source={{ uri: item.mediaUrl || undefined }} resizeMode="cover" />
+              <StoryImage
+                source={{ uri: item.mediaUrl || undefined }}
+                resizeMode="cover"
+              />
             )}
           </Media>
         </Pressable>
@@ -277,4 +308,3 @@ export default function StoryViewerScreen() {
     </SafeAreaView>
   );
 }
-

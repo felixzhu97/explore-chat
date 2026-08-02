@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, Link } from 'expo-router';
-import { styled } from '@/src/presentation/shared/emotion';
-import { useTheme } from '@/src/presentation/shared/theme';
-import { useTranslation } from '@/src/presentation/shared/i18n';
-import { useAuthStore, useAppDispatch, setAuth } from '@/src/presentation/stores';
-import { getAuthUseCases } from '@/src/infrastructure/composition-root';
+import React, { useState } from "react";
+import {
+  View,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter, Link } from "expo-router";
+import { styled } from "@/shared/emotion";
+import { useTheme } from "@/shared/theme";
+import { useTranslation } from "@/shared/i18n";
+import { useAuthStore, useAppDispatch, setAuth } from "@/core/store/hooks";
+import { getAuthApi } from "@/core/composition-root";
 
-const DEFAULT_DEV_USER = { email: 'ladygaga@whatschat.com', password: '123456' };
+const DEFAULT_DEV_USER = {
+  email: "ladygaga@whatschat.com",
+  password: "123456",
+};
 
 const Page = styled.View`
   flex: 1;
-  background-color: (p: { theme: { colors: { secondaryBackground: string } } }) =>
+  background-color: (p: {theme: {colors: {secondaryBackground: string}}}) =>
     p.theme.colors.secondaryBackground;
 `;
 
@@ -153,31 +163,38 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     const trimmedEmail = email.trim();
     if (!trimmedEmail || !password) {
-      Alert.alert(t('login.alertTitle'), t('login.fillEmailPassword'));
+      Alert.alert(t("login.alertTitle"), t("login.fillEmailPassword"));
       return;
     }
     setLoading(true);
     try {
-      const data = await getAuthUseCases().login(trimmedEmail, password);
-      await dispatch(setAuth({ token: data.token, refreshToken: data.refreshToken, user: data.user })).unwrap();
-      router.replace('/(tabs)/status');
+      const data = await getAuthApi().login(trimmedEmail, password);
+      await dispatch(
+        setAuth({
+          token: data.token,
+          refreshToken: data.refreshToken,
+          user: data.user,
+        }),
+      ).unwrap();
+      router.replace("/(tabs)/status");
     } catch (err: unknown) {
       const message =
-        err && typeof err === 'object' && 'response' in err
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
           : err instanceof Error
             ? err.message
-            : t('login.fail');
-      Alert.alert(t('login.fail'), String(message));
+            : t("login.fail");
+      Alert.alert(t("login.fail"), String(message));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
       <Page>
-        <Keyboard behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <Keyboard behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <Content>
             <View>
               <LogoContainer>
@@ -190,7 +207,7 @@ export default function LoginScreen() {
               </LogoContainer>
               <FormCard>
                 <Input
-                  placeholder={t('login.subtitle')}
+                  placeholder={t("login.subtitle")}
                   placeholderTextColor={colors.tertiaryText}
                   value={email}
                   onChangeText={setEmail}
@@ -200,7 +217,7 @@ export default function LoginScreen() {
                   editable={!loading}
                 />
                 <Input
-                  placeholder={t('login.passwordPlaceholder')}
+                  placeholder={t("login.passwordPlaceholder")}
                   placeholderTextColor={colors.tertiaryText}
                   value={password}
                   onChangeText={setPassword}
@@ -211,17 +228,17 @@ export default function LoginScreen() {
                   {loading ? (
                     <ActivityIndicator color="#FFFFFF" />
                   ) : (
-                    <PrimaryButtonText>{t('login.submit')}</PrimaryButtonText>
+                    <PrimaryButtonText>{t("login.submit")}</PrimaryButtonText>
                   )}
                 </PrimaryButton>
                 <InlineLink disabled={loading}>
-                  <InlineLinkText>{t('login.forgotPassword')}</InlineLinkText>
+                  <InlineLinkText>{t("login.forgotPassword")}</InlineLinkText>
                 </InlineLink>
               </FormCard>
             </View>
             <BottomContainer>
               <BottomButton disabled={loading}>
-                <BottomButtonText>{t('login.createAccount')}</BottomButtonText>
+                <BottomButtonText>{t("login.createAccount")}</BottomButtonText>
               </BottomButton>
               <MetaText>Meta</MetaText>
             </BottomContainer>

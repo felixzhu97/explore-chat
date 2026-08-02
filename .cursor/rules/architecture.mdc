@@ -77,9 +77,27 @@ Import aliases: `@/core/*`, `@/auth/*`, `@/feed/*`, … (see `apps/web/tsconfig.
 
 ### Admin
 
-### Mobile
+### Mobile (`apps/mobile`)
 
-Same Clean Architecture + repository adapters; Expo public env `EXPO_PUBLIC_API_URL`.
+Business-domain folders (aligned with web; Redux Toolkit retained; no Clean Architecture layers). Expo Router stays under `src/app/` as thin route shells. Expo public env `EXPO_PUBLIC_API_URL`.
+
+```
+apps/mobile/src/
+├── app/        # Expo Router — thin re-exports / route shells (keep under src)
+├── core/       # api-client, config, store, composition-root, storage, call, rtc
+├── shared/     # emotion, i18n, theme, Glass/Tab UI, assets, types
+├── layout/     # providers, primary-destination-tabs
+├── auth/       # auth.api, auth/user models
+├── feed/       # HomeFeedScreen, feed.api, feedApi RTK, mappers, hooks
+├── chat/       # chat/message apis, models, mappers
+├── explore/    # ExploreScreen
+├── reels/      # ReelsScreen
+├── profile/    # ProfileScreen, user-profile.model
+├── calls/      # call hooks / overlays wiring
+└── secondary/  # SettingsMenuScreen, inbox placeholders
+```
+
+Import aliases: `@/core/*`, `@/auth/*`, `@/feed/*`, … (see `apps/mobile/tsconfig.json`). No empty `search/` or `ai/` folders.
 
 ## Forbidden in New Code
 

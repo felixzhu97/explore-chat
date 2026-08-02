@@ -1,14 +1,15 @@
-import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { styled } from '@/src/presentation/shared/emotion';
-import { useTheme } from '@/src/presentation/shared/theme';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useTranslation } from '@/src/presentation/shared/i18n';
+import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { styled } from "@/shared/emotion";
+import { useTheme } from "@/shared/theme";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useTranslation } from "@/shared/i18n";
 
 const Page = styled.View`
   flex: 1;
-  background-color: (p: { theme: { colors: { background: string } } }) => p.theme.colors.background;
+  background-color: (p: {theme: {colors: {background: string}}}) =>
+    p.theme.colors.background;
 `;
 
 const Header = styled.View`
@@ -22,7 +23,8 @@ const Title = styled.Text`
   text-align: center;
   font-size: 17px;
   font-weight: 600;
-  color: (p: { theme: { colors: { primaryText: string } } }) => p.theme.colors.primaryText;
+  color: (p: {theme: {colors: {primaryText: string}}}) =>
+    p.theme.colors.primaryText;
 `;
 
 const IconButton = styled.TouchableOpacity`
@@ -36,7 +38,8 @@ const Body = styled.View`
 
 const Hint = styled.Text`
   font-size: 14px;
-  color: (p: { theme: { colors: { secondaryText: string } } }) => p.theme.colors.secondaryText;
+  color: (p: {theme: {colors: {secondaryText: string}}}) =>
+    p.theme.colors.secondaryText;
 `;
 
 export default function ShareScreen() {
@@ -46,20 +49,23 @@ export default function ShareScreen() {
   const { postId } = useLocalSearchParams<{ postId?: string }>();
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
       <Page>
         <Header>
           <IconButton onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={22} color={colors.primaryText} />
+            <Ionicons
+              name="chevron-back"
+              size={22}
+              color={colors.primaryText}
+            />
           </IconButton>
-          <Title>{t('share.title')}</Title>
+          <Title>{t("share.title")}</Title>
           <IconButton />
         </Header>
         <Body>
-          <Hint>{t('share.comingSoon', { postId: postId ?? '' })}</Hint>
+          <Hint>{t("share.comingSoon", { postId: postId ?? "" })}</Hint>
         </Body>
       </Page>
     </SafeAreaView>
   );
 }
-

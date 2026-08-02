@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
-import { TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, Link } from 'expo-router';
-import { styled } from '@/src/presentation/shared/emotion';
-import { useTheme } from '@/src/presentation/shared/theme';
-import { useTranslation } from '@/src/presentation/shared/i18n';
-import { useAppDispatch, setAuth } from '@/src/presentation/stores';
-import { getAuthUseCases } from '@/src/infrastructure/composition-root';
+import React, { useState } from "react";
+import {
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter, Link } from "expo-router";
+import { styled } from "@/shared/emotion";
+import { useTheme } from "@/shared/theme";
+import { useTranslation } from "@/shared/i18n";
+import { useAppDispatch, setAuth } from "@/core/store/hooks";
+import { getAuthApi } from "@/core/composition-root";
 
 const Page = styled.View`
   flex: 1;
@@ -103,72 +111,80 @@ export default function RegisterScreen() {
   const { colors } = useTheme();
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
     const trimmedUsername = username.trim();
     const trimmedEmail = email.trim();
     if (!trimmedUsername || !trimmedEmail || !password) {
-      Alert.alert(t('register.alertTitle'), t('register.fillAll'));
+      Alert.alert(t("register.alertTitle"), t("register.fillAll"));
       return;
     }
     if (trimmedUsername.length < 2) {
-      Alert.alert(t('register.alertTitle'), t('register.usernameMin'));
+      Alert.alert(t("register.alertTitle"), t("register.usernameMin"));
       return;
     }
     if (password.length < 6) {
-      Alert.alert(t('register.alertTitle'), t('register.passwordMin'));
+      Alert.alert(t("register.alertTitle"), t("register.passwordMin"));
       return;
     }
     setLoading(true);
     try {
-      const data = await getAuthUseCases().register({
+      const data = await getAuthApi().register({
         username: trimmedUsername,
         email: trimmedEmail,
         password,
       });
       await dispatch(
-        setAuth({ token: data.token, refreshToken: data.refreshToken, user: data.user }),
+        setAuth({
+          token: data.token,
+          refreshToken: data.refreshToken,
+          user: data.user,
+        }),
       ).unwrap();
-      router.replace('/(tabs)/status');
+      router.replace("/(tabs)/status");
     } catch (err: unknown) {
       const message =
-        err && typeof err === 'object' && 'response' in err
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
           : err instanceof Error
             ? err.message
-            : t('register.fail');
-      Alert.alert(t('register.fail'), String(message));
+            : t("register.fail");
+      Alert.alert(t("register.fail"), String(message));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
       <Page>
-        <Keyboard behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <Keyboard behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <Header>
             <HeaderTitle>WhatsChat</HeaderTitle>
-            <HeaderSubtitle>{t('register.subtitle')}</HeaderSubtitle>
+            <HeaderSubtitle>{t("register.subtitle")}</HeaderSubtitle>
           </Header>
-          <FormScroll contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+          <FormScroll
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
             <FormContent>
-              <Label>{t('register.username')}</Label>
+              <Label>{t("register.username")}</Label>
               <Input
-                placeholder={t('register.usernamePlaceholder')}
+                placeholder={t("register.usernamePlaceholder")}
                 placeholderTextColor={colors.tertiaryText}
                 value={username}
                 onChangeText={setUsername}
                 autoCapitalize="none"
                 editable={!loading}
               />
-              <Label>{t('register.email')}</Label>
+              <Label>{t("register.email")}</Label>
               <Input
-                placeholder={t('register.emailPlaceholder')}
+                placeholder={t("register.emailPlaceholder")}
                 placeholderTextColor={colors.tertiaryText}
                 value={email}
                 onChangeText={setEmail}
@@ -177,9 +193,9 @@ export default function RegisterScreen() {
                 autoCorrect={false}
                 editable={!loading}
               />
-              <Label>{t('register.password')}</Label>
+              <Label>{t("register.password")}</Label>
               <Input
-                placeholder={t('register.passwordPlaceholder')}
+                placeholder={t("register.passwordPlaceholder")}
                 placeholderTextColor={colors.tertiaryText}
                 value={password}
                 onChangeText={setPassword}
@@ -190,14 +206,14 @@ export default function RegisterScreen() {
                 {loading ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <PrimaryButtonText>{t('register.submit')}</PrimaryButtonText>
+                  <PrimaryButtonText>{t("register.submit")}</PrimaryButtonText>
                 )}
               </PrimaryButton>
               <Footer>
-                <FooterText>{t('register.hasAccount')}</FooterText>
+                <FooterText>{t("register.hasAccount")}</FooterText>
                 <Link href="/login" asChild>
                   <TouchableOpacity disabled={loading}>
-                    <LinkText>{t('register.login')}</LinkText>
+                    <LinkText>{t("register.login")}</LinkText>
                   </TouchableOpacity>
                 </Link>
               </Footer>
