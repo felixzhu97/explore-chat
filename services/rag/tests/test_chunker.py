@@ -1,7 +1,7 @@
 """Tests for text chunking service."""
 import pytest
 
-from src.core.chunker import TextChunker, Chunk
+from core.chunker import TextChunker, Chunk
 
 
 class TestTextChunker:

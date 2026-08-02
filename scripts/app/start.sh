@@ -42,11 +42,12 @@ lsof -ti:3456 2>/dev/null | xargs kill -9 2>/dev/null || true
 lsof -ti:8000 2>/dev/null | xargs kill -9 2>/dev/null || true
 lsof -ti:8001 2>/dev/null | xargs kill -9 2>/dev/null || true
 pkill -f "whatschat-server.*dev" 2>/dev/null || true
-pkill -f "services/media-gen/app.py" 2>/dev/null || true
+pkill -f "services/media-gen/main.py" 2>/dev/null || true
 pkill -f "services/video-gen/app.py" 2>/dev/null || true
 pkill -f "services/image-gen/app.py" 2>/dev/null || true
 pkill -f "services/voice-gen/app.py" 2>/dev/null || true
 pkill -f "celery.*celery_app" 2>/dev/null || true
+pkill -f "uvicorn main:app" 2>/dev/null || true
 pkill -f "services/recommendation/run_service.py" 2>/dev/null || true
 sleep 1
 
@@ -83,11 +84,11 @@ echo "[4/6] Sync users to Elasticsearch..."
 (cd "$SERVER_DIR" && pnpm run search:sync-users 2>/dev/null) || true
 
 echo "[5/6] Starting server..."
-if [ -f "$MEDIA_GEN_DIR/app.py" ] && command -v python3 >/dev/null 2>&1; then
+if [ -f "$MEDIA_GEN_DIR/main.py" ] && command -v python3 >/dev/null 2>&1; then
   if [ -f "$MEDIA_GEN_DIR/requirements.txt" ]; then
     (cd "$MEDIA_GEN_DIR" && python3 -m pip install -r requirements.txt -q 2>/dev/null) || true
   fi
-  (cd "$MEDIA_GEN_DIR" && ( [ -d ".venv" ] && . .venv/bin/activate; python3 app.py )) &
+  (cd "$MEDIA_GEN_DIR" && ( [ -d ".venv" ] && . .venv/bin/activate; python3 main.py )) &
   MEDIA_GEN_PID=$!
   sleep 2
 fi
@@ -95,7 +96,7 @@ if [ -d "$VISION_DIR" ] && [ -f "$VISION_DIR/requirements.txt" ] && command -v p
   (cd "$VISION_DIR" && {
     [ ! -d ".venv" ] && python3 -m venv .venv
     .venv/bin/pip install -r requirements.txt -q 2>/dev/null || true
-    exec .venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8001
+    exec .venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8001
   }) &
   VISION_PID=$!
   sleep 2
@@ -110,7 +111,7 @@ if [ -d "$RAG_DIR" ] && [ -f "$RAG_DIR/requirements.txt" ] && command -v python3
     fi
     .venv/bin/pip install -r requirements.txt -q 2>/dev/null || true
   }) &
-  (cd "$RAG_DIR" && PYTHONPATH="$ROOT_DIR" .venv/bin/python -m uvicorn src.main:app --host 0.0.0.0 --port 8002) &
+  (cd "$RAG_DIR" && .venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8002) &
   RAG_PID=$!
   sleep 2
   kill -0 $RAG_PID 2>/dev/null && echo -e "${GREEN}RAG service started on http://localhost:8002${NC}" || RAG_PID=""
@@ -149,11 +150,11 @@ if [ -d "$RECOMMENDATION_DIR" ] && command -v python3 >/dev/null 2>&1; then
     sleep 1
     kill -0 $RECOMMENDATION_PID 2>/dev/null && echo -e "${GREEN}Recommendation worker+beat started${NC}" || RECOMMENDATION_PID=""
   fi
-  if [ -f "$RECOMMENDATION_DIR/run_service.py" ]; then
+  if [ -f "$RECOMMENDATION_DIR/main.py" ]; then
     if [ -d "$RECOMMENDATION_DIR/.venv" ]; then
-      (cd "$RECOMMENDATION_DIR" && . .venv/bin/activate && python3 run_service.py) &
+      (cd "$RECOMMENDATION_DIR" && . .venv/bin/activate && python3 -m uvicorn main:app --host 0.0.0.0 --port 8000) &
     else
-      (cd "$RECOMMENDATION_DIR" && python3 run_service.py) &
+      (cd "$RECOMMENDATION_DIR" && python3 -m uvicorn main:app --host 0.0.0.0 --port 8000) &
     fi
     RECOMMENDATION_API_PID=$!
     sleep 1

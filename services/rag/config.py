@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     workers: int = 4
 
     # Paths
-    uploads_dir: Path = Path(__file__).parent.parent / "uploads"
+    uploads_dir: Path = Path(__file__).parent / "uploads"
 
     # Qdrant settings
     qdrant_url: str = "http://localhost:6333"

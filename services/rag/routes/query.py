@@ -8,16 +8,16 @@ from openai import AsyncOpenAI
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 
-from src.api.deps import get_embeddings, get_qdrant
-from src.core.embedding import EmbeddingService
-from src.core.qdrant_client import QdrantService
-from src.schemas.query import (
+from deps import get_embeddings, get_qdrant
+from core.embedding import EmbeddingService
+from core.qdrant_client import QdrantService
+from schemas.query import (
     QueryRequest,
     QueryResponse,
     SourceDocument,
 )
-from src.schemas.common import BaseResponse
-from src.config import get_settings
+from schemas.common import BaseResponse
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

@@ -7,16 +7,16 @@ from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Depends
 
-from src.api.deps import get_processor, get_embeddings, get_qdrant
-from src.core.document_processor import DocumentProcessor
-from src.core.embedding import EmbeddingService
-from src.core.qdrant_client import QdrantService
-from src.schemas.query import (
+from deps import get_processor, get_embeddings, get_qdrant
+from core.document_processor import DocumentProcessor
+from core.embedding import EmbeddingService
+from core.qdrant_client import QdrantService
+from schemas.query import (
     SyncPostsRequest,
     SyncCommentsRequest,
     SyncResult,
 )
-from src.config import get_settings
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -276,7 +276,7 @@ async def sync_all(
     Sync all content types (posts, comments, documents).
     """
     # Import routers to access the endpoint functions
-    from src.api.routes.crawler import router as crawler_router
+    from routes.crawler import router as crawler_router
 
     # For now, we'll just sync posts and comments
     # In a full implementation, you'd call the other sync endpoints

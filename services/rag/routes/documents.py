@@ -6,17 +6,17 @@ from typing import Annotated, Optional
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Query
 from fastapi.responses import JSONResponse
 
-from src.api.deps import get_processor, get_embeddings, get_qdrant
-from src.core.document_processor import DocumentProcessor
-from src.core.embedding import EmbeddingService
-from src.core.qdrant_client import QdrantService
-from src.schemas.document import (
+from deps import get_processor, get_embeddings, get_qdrant
+from core.document_processor import DocumentProcessor
+from core.embedding import EmbeddingService
+from core.qdrant_client import QdrantService
+from schemas.document import (
     DocumentUploadResponse,
     DocumentInfo,
     DocumentListResponse,
     DocumentDeleteResponse,
 )
-from src.schemas.common import PaginationParams
+from schemas.common import PaginationParams
 
 logger = logging.getLogger(__name__)
 
@@ -67,11 +67,11 @@ async def upload_document(
         )
 
         # Generate embeddings and store in Qdrant
-        from src.core.chunker import get_chunker
+        from core.chunker import get_chunker
         chunker = get_chunker()
 
         # Re-parse to get chunks
-        from src.utils.pdf_parser import parse_file
+        from utils.pdf_parser import parse_file
         parsed = parse_file(content, file.filename)
 
         if parsed["type"] == "pdf":

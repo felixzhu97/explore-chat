@@ -5,7 +5,7 @@ from typing import Optional
 import ollama
 from openai import AsyncOpenAI
 
-from src.config import get_settings
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

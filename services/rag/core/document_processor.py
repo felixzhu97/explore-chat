@@ -8,9 +8,9 @@ from pathlib import Path
 
 import aiofiles
 
-from src.config import get_settings
-from src.utils.pdf_parser import parse_file
-from src.core.chunker import get_chunker, Chunk
+from config import get_settings
+from utils.pdf_parser import parse_file
+from core.chunker import get_chunker, Chunk
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ class DocumentProcessor:
         doc_id = self._generate_doc_id(url, content.encode())
 
         # Parse HTML
-        from src.utils.pdf_parser import HTMLParser
+        from utils.pdf_parser import HTMLParser
         parsed = HTMLParser.parse(content)
 
         # Chunk the text

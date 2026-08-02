@@ -7,19 +7,19 @@ from typing import Optional
 import httpx
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 
-from src.api.deps import get_processor, get_embeddings, get_qdrant
-from src.core.document_processor import DocumentProcessor
-from src.core.embedding import EmbeddingService
-from src.core.qdrant_client import QdrantService
-from src.core.chunker import get_chunker
-from src.schemas.document import (
+from deps import get_processor, get_embeddings, get_qdrant
+from core.document_processor import DocumentProcessor
+from core.embedding import EmbeddingService
+from core.qdrant_client import QdrantService
+from core.chunker import get_chunker
+from schemas.document import (
     ScrapeRequest,
     ScrapeResponse,
     CrawlRequest,
     CrawlResponse,
 )
-from src.schemas.common import BaseResponse
-from src.config import get_settings
+from schemas.common import BaseResponse
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +89,7 @@ async def scrape_url(
             "created_at": "",
         }
 
-        from src.utils.pdf_parser import HTMLParser
+        from utils.pdf_parser import HTMLParser
         parsed = HTMLParser.parse(fetch_result["content"])
 
         # Limit text length to avoid context overflow
@@ -182,7 +182,7 @@ async def crawl_urls(
 
             # Generate embeddings and store
             chunker = get_chunker()
-            from src.utils.pdf_parser import HTMLParser
+            from utils.pdf_parser import HTMLParser
             parsed = HTMLParser.parse(fetch_result["content"])
 
             # Limit text length to avoid context overflow

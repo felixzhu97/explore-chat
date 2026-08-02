@@ -5,7 +5,7 @@ import uuid
 from typing import Optional
 from dataclasses import dataclass
 
-from src.config import get_settings
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

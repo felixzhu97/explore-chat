@@ -2,10 +2,10 @@
 import logging
 from typing import AsyncGenerator
 
-from src.core.qdrant_client import QdrantService, get_qdrant_service
-from src.core.embedding import EmbeddingService, get_embedding_service
-from src.core.document_processor import DocumentProcessor, get_document_processor
-from src.core.chunker import TextChunker, get_chunker
+from core.qdrant_client import QdrantService, get_qdrant_service
+from core.embedding import EmbeddingService, get_embedding_service
+from core.document_processor import DocumentProcessor, get_document_processor
+from core.chunker import TextChunker, get_chunker
 
 logger = logging.getLogger(__name__)
 

@@ -1,11 +1,12 @@
 import uvicorn
 
+import config as cfg
+
 
 def main() -> int:
-  uvicorn.run("service.api:app", host="0.0.0.0", port=8000, reload=False)
-  return 0
+    uvicorn.run("main:app", host=cfg.HOST, port=cfg.PORT, reload=False)
+    return 0
 
 
 if __name__ == "__main__":
-  raise SystemExit(main())
-
+    raise SystemExit(main())
