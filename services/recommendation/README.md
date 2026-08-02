@@ -51,7 +51,8 @@ python -m models.pytorch_towers
 Run the FastAPI service (used by NestJS `RecommendationService`):
 
 ```bash
-python run_service.py
+uvicorn main:app --host 0.0.0.0 --port 8000
+# or: python main.py
 ```
 
 By default it listens on `http://localhost:8000` and exposes:
@@ -99,4 +100,3 @@ run_explore.delay()
 ```
 
 Set `CELERY_BROKER_URL` in `.env` (defaults to `REDIS_URL`).
-

@@ -9,7 +9,8 @@ cd services/media-gen
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python main.py
+uvicorn main:app --host 0.0.0.0 --port 3456
+# or: python main.py
 ```
 
 ## Env (optional)

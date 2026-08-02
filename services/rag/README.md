@@ -13,7 +13,7 @@ Retrieval Augmented Generation (RAG) service for WhatsChat, providing semantic s
 
 ## Tech Stack
 
-- **Framework**: FastAPI (Python 3.9+)
+- **Framework**: FastAPI (Python 3.11+ recommended)
 - **Vector Database**: Qdrant
 - **Embedding Models**: Ollama (local) or OpenAI (cloud)
 - **LLM**: Ollama (qwen3-coder:30b, deepseek-r1:70b, etc.) or OpenAI for answer generation
