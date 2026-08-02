@@ -11,8 +11,8 @@ Container_Boundary(web_app, "Web 应用") {
   Component(feed_ui, "信息流 / Reels / 探索", "React、Emotion", "帖子、互动、封面 coverUrl、评论弹窗")
   Component(chat_ui, "聊天与通话", "React、@whatschat/im", "私信气泡、WebRTC 通话 UI")
   Component(profile_ui, "个人页与发帖", "React、Emotion", "网格、关注列表、媒体上传 + createPost")
-  Component(state, "状态层", "Redux Toolkit", "认证、消息、通知切片")
-  Component(api_client, "API 客户端", "Fetch", "REST：auth、feed、posts、search、media")
+  Component(state, "状态层", "Redux Toolkit", "消息、通知、通话等切片；认证经 AuthService / 会话")
+  Component(api_client, "API 客户端", "Fetch", "REST：auth、posts、search、media、ai/explore")
   Component(ws_client, "WebSocket 客户端", "Socket.IO", "实时消息与通知")
 }
 

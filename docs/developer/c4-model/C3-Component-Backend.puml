@@ -6,10 +6,10 @@ LAYOUT_WITH_LEGEND()
 title 组件图 (C3) - API 服务（NestJS）
 
 Container_Boundary(api_server, "API 服务") {
-  Component(controllers, "REST 控制器", "NestJS", "auth、users、posts、feed、search、media、ai/explore、health 等")
+  Component(controllers, "REST 控制器", "NestJS", "auth、users、posts（含 explore）、search、media、ai/explore、admin、ads、analytics、health 等")
   Component(graphql_api, "GraphQL", "Apollo", "feed / reels；JWT；路径 /api/v1/graphql")
   Component(websocket, "WebSocket 网关", "Socket.IO", "消息、在线状态、通话信令、notification:new")
-  Component(app_services, "应用服务", "NestJS", "Auth、User、Post、Feed、Explore、Comment、Follow、Search、Notification、Call、AI BFF")
+  Component(app_services, "应用服务", "NestJS", "Auth、User、Post、Feed、Explore、Comment、Follow、Search、Notification、Call、Explore AI BFF")
   Component(domain_ports, "领域仓储端口", "TypeScript", "IPostRepository、IEngagementRepository、ICommentRepository 等")
   Component(infra_adapters, "基础设施适配器", "NestJS", "Prisma / Cassandra / Mongo 仓储适配器")
   ComponentDb(prisma_repo, "Prisma 仓储", "PostgreSQL", "用户、聊天、消息、关注")

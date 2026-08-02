@@ -7,7 +7,7 @@ title 部署图 (C4) - 本地开发
 
 Deployment_Node(dev_machine, "开发机", "macOS / Linux") {
   Deployment_Node(browser, "浏览器", "Chrome / Safari") {
-    Container(web, "Web 应用", "Next.js", "pnpm start:web，通常 :3000")
+    Container(web, "Web 应用", "Next.js", "pnpm start:web，:4000")
   }
   Deployment_Node(node_api, "Node 进程", "NestJS") {
     Container(api, "API 服务", "NestJS", "HOST=0.0.0.0 PORT=3001")

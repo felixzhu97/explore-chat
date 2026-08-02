@@ -13,7 +13,7 @@ System_Boundary(whatsfeed, "WhatsFeed") {
   Container(web_app, "Web 应用", "Next.js、React、TypeScript、Emotion", "信息流、Reels、探索、聊天、通知；Redux Toolkit")
   Container(admin_app, "管理端", "Next.js、React、TypeScript", "用户、内容安全、运营与分析")
   Container(mobile_app, "移动端", "React Native、Expo、TypeScript", "信息流、Reels、聊天、探索、个人主页")
-  Container(api_server, "API 服务", "NestJS、TypeScript", "REST / GraphQL / Socket.IO；Explore AI BFF；Cleaner Architecture")
+  Container(api_server, "API 服务", "NestJS、TypeScript", "REST / GraphQL / Socket.IO；Explore AI BFF；Admin/Ads/Analytics；Clean Architecture")
   Container(media_gen, "媒体生成", "Python、FastAPI", "图片 / 视频 / TTS，:3456")
   Container(recommendation_svc, "推荐服务", "Python、Celery、FastAPI", "Feed/Explore/Reels 排序与召回，:8000")
   Container(vision_svc, "视觉服务", "Python、FastAPI", "标签与 NSFW 审核，:8001")
@@ -52,6 +52,5 @@ Rel(recommendation_svc, redis, "缓存 / broker")
 Rel(recommendation_svc, postgres, "ETL")
 Rel(rag_svc, qdrant, "向量", "HTTP")
 Rel(rag_svc, ollama, "嵌入 / LLM")
-Rel(web_app, rag_svc, "RAG", "可选 REST")
 
 @enduml
