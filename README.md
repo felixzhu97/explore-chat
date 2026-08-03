@@ -1,192 +1,272 @@
 # WhatsFeed
 
-WhatsFeed – 集即时聊天、社交动态、AI 助手与内容创作为一体的社交平台。
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22-brightgreen.svg)](https://nodejs.org/)
+[![pnpm](https://img.shields.io/badge/pnpm-%3E%3D10-orange.svg)](https://pnpm.io/)
 
-## 功能特性
+WhatsFeed is a social and messaging platform: Instagram-style feed and Reels, real-time chat and calls, search and explore, optional AI features (via the Nest API), and an admin console. Clients talk only to the NestJS API (`/api/v1`); they never call Python microservices directly.
 
-- 💬 **实时聊天** – 基于 Socket.IO 的即时消息
-- 📞 **音视频通话** – 基于 WebRTC 的语音与视频通话
-- 📎 **文件分享** – 发送图片、文档与媒体文件
-- 👥 **联系人管理** – 添加、搜索与管理联系人
-- 🔍 **消息搜索** – 基于 Elasticsearch 的全文检索
-- 🔐 **身份认证** – 基于 JWT + bcrypt 的认证体系
-- 🤖 **AI 助手** – 通过 Ollama 提供流式对话
-- 🖼️ **内容生成** – 图片（Stable Diffusion）、视频（CogVideoX）、语音（edge-tts）
-- 📷 **动态与帖子** – 支持多图/视频发帖、评论、点赞、收藏
-- 🧲 **广告系统** – 广告投放、曝光/点击/转化追踪
-- 🛡️ **内容审核** – NSFW 检测、标签推荐、复审管理
-- 🔎 **全局搜索** – 搜索帖子、用户、话题
-- 🎯 **推荐系统** – 关注推荐、Feed 排序、探索流推荐
-- 🔮 **RAG 问答** – 文档上传、语义搜索、LLM 生成答案
-- 👤 **社交能力** – 关注、粉丝、个人主页
-- 🌐 **Web 应用** – Next.js SPA，Instagram 风格 UI
-- 📱 **移动端** – React Native + Expo，iOS/Android 双平台
-- 📊 **行为分析** – 事件上报、漏斗分析、数据看板
-- ⚙️ **管理后台** – 用户管理、内容审核、数据分析、系统配置
+> Historical npm package scope remains `@whatschat/*`.
 
-## 技术栈
+## Table of contents
 
-### 前端
+- [Features](#features)
+- [Architecture](#architecture)
+- [Repository structure](#repository-structure)
+- [Screenshots](#screenshots)
+- [Prerequisites](#prerequisites)
+- [Quick start](#quick-start)
+- [Configuration](#configuration)
+- [Development](#development)
+- [Documentation](#documentation)
+- [C4 model](#c4-model)
+- [Contributing](#contributing)
+- [License](#license)
 
-- Next.js · React · TypeScript · Emotion · Redux Toolkit
-- Tailwind CSS（Web）· Bootstrap · react-bootstrap（Admin）
-- lodash（Admin）· React Native · Expo · AG Grid · Recharts · i18next
+## Features
 
-### 后端
+- Real-time messaging (Socket.IO) and WebRTC voice/video calls
+- Social feed, Reels, stories, comments, likes, and saves
+- Explore grid and global search (Elasticsearch optional)
+- Media upload and post creation
+- JWT authentication
+- AI text/image/video/voice flows proxied through Nest (including Explore AI BFF)
+- Content moderation and vision side services (via Nest)
+- Recommendation and RAG side services (via Nest)
+- Ads, analytics, and admin tools
+- Web (Next.js), mobile (Expo), and admin apps
 
-- NestJS · Prisma · PostgreSQL · Redis · Socket.IO · Kafka · Cassandra · MongoDB · Elasticsearch · GraphQL
+## Architecture
 
-### AI / 媒体
+pnpm + Turbo monorepo.
 
-- Ollama（文本流式）· FastAPI · Stable Diffusion · CogVideoX · edge-tts · Qdrant
+| Layer                            | Layout                                                                                                                                                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Web / Mobile**                 | Business-domain folders (`auth/`, `feed/`, `chat/`, …) with colocated API and UI. Redux Toolkit on clients. No Clean Architecture layer trees.                                                                |
+| **Nest API** (`services/server`) | Business-domain vertical slices (`auth/`, `post/`, `chats/`, …). Each domain keeps Clean Architecture layers: `presentation` → `application` → `domain` ← `infrastructure`. Shared infra lives under `core/`. |
+| **Python services**              | Media generation, vision, recommendation, RAG — reached only through Nest.                                                                                                                                    |
 
-### 视觉 / 推荐
+Canonical terms and package paths: [docs/Glossary.md](docs/Glossary.md).  
+Rules summary: [.cursor/rules/architecture.mdc](.cursor/rules/architecture.mdc).
 
-- Python 服务（Vision/Recommendation/RAG）· NudeNet · ResNet50 · LightFM · implicit · Annoy · Celery
-
-## 项目结构
-
-```bash
-apps/
-  web            # Next.js Web 应用 (:4000)
-  admin          # 管理后台 (:4001)
-  mobile         # Expo 移动端
-services/
-  server         # NestJS API (:3001)
-  media-gen      # 媒体生成服务 (:3456)
-  recommendation # 推荐服务 + Celery
-  vision         # 内容审核服务 (:8001)
-  rag            # RAG 问答服务 (:8002)
-packages/
-  shared-types   # 共享类型
-  im             # IM 与 RTC 模块
-  analytics      # 分析 SDK
+```text
+Browser / Mobile ──HTTPS / WS──► NestJS (:3001, /api/v1)
+                                      │
+                    ┌─────────────────┼─────────────────┐
+                    ▼                 ▼                 ▼
+              media-gen          vision / RAG      recommendation
 ```
 
-## 截图
+## Repository structure
 
-### 移动端
+```text
+apps/
+  web              # Next.js web app (:4000)
+  admin            # Admin console (:4001)
+  mobile           # Expo / React Native
+services/
+  server           # NestJS API (:3001)
+  media-gen        # Media generation (:3456)
+  recommendation   # Recommendation + Celery
+  vision           # Moderation / vision (:8001)
+  rag              # RAG Q&A (:8002)
+packages/
+  shared-types     # Shared TypeScript types and consts
+  im               # IM / RTC client module
+  analytics        # Analytics SDK
+docs/
+  developer/       # Quick start, API, C4, CI notes
+  product-owner/   # User story map
+```
 
-<p align="center">
-  <img src="./screenshots/mobile-feed-new-01.png" width="220" alt="移动端截图 1">
-  <img src="./screenshots/mobile-feed-new-02.png" width="220" alt="移动端截图 2">
-  <img src="./screenshots/mobile-feed-new-03.png" width="220" alt="移动端截图 3">
-</p>
-<p align="center">
-  <img src="./screenshots/mobile-feed-new-04.png" width="220" alt="移动端截图 4">
-  <img src="./screenshots/mobile-feed-new-05.png" width="220" alt="移动端截图 5">
-</p>
+## Screenshots
 
-### Web 端
-
-<p align="center">
-  <img src="./screenshots/web-screen-1.png" width="340" alt="Web 页面 1">
-  <img src="./screenshots/web-screen-2.png" width="340" alt="Web 页面 2">
-</p>
-<p align="center">
-  <img src="./screenshots/web-screen-3.png" width="340" alt="Web 页面 3">
-  <img src="./screenshots/web-screen-4.png" width="340" alt="Web 页面 4">
-</p>
-<p align="center">
-  <img src="./screenshots/web-screen-5.png" width="340" alt="Web 页面 5">
-  <img src="./screenshots/web-screen-6.png" width="340" alt="Web 页面 6">
-</p>
-<p align="center">
-  <img src="./screenshots/web-screen-7.png" width="340" alt="Web 页面 7">
-  <img src="./screenshots/web-screen-8.png" width="340" alt="Web 页面 8">
-</p>
-<p align="center">
-  <img src="./screenshots/web-screen-9.png" width="340" alt="Web 页面 9">
-</p>
-
-### 管理端
+### Mobile
 
 <p align="center">
-  <img src="./screenshots/admin-dashboard.png" width="340" alt="管理端仪表盘">
-  <img src="./screenshots/admin-users.png" width="340" alt="管理端用户页">
+  <img src="./screenshots/mobile-feed-new-01.png" width="220" alt="Mobile feed screenshot 1">
+  <img src="./screenshots/mobile-feed-new-02.png" width="220" alt="Mobile feed screenshot 2">
+  <img src="./screenshots/mobile-feed-new-03.png" width="220" alt="Mobile feed screenshot 3">
+</p>
+<p align="center">
+  <img src="./screenshots/mobile-feed-new-04.png" width="220" alt="Mobile feed screenshot 4">
+  <img src="./screenshots/mobile-feed-new-05.png" width="220" alt="Mobile feed screenshot 5">
 </p>
 
-## 快速开始
+### Web
 
-### 前置要求
+<p align="center">
+  <img src="./screenshots/web-screen-1.png" width="340" alt="Web screenshot 1">
+  <img src="./screenshots/web-screen-2.png" width="340" alt="Web screenshot 2">
+</p>
+<p align="center">
+  <img src="./screenshots/web-screen-3.png" width="340" alt="Web screenshot 3">
+  <img src="./screenshots/web-screen-4.png" width="340" alt="Web screenshot 4">
+</p>
+<p align="center">
+  <img src="./screenshots/web-screen-5.png" width="340" alt="Web screenshot 5">
+  <img src="./screenshots/web-screen-6.png" width="340" alt="Web screenshot 6">
+</p>
+<p align="center">
+  <img src="./screenshots/web-screen-7.png" width="340" alt="Web screenshot 7">
+  <img src="./screenshots/web-screen-8.png" width="340" alt="Web screenshot 8">
+</p>
+<p align="center">
+  <img src="./screenshots/web-screen-9.png" width="340" alt="Web screenshot 9">
+</p>
 
-- Node.js 18+
-- pnpm 10+
-- Docker 与 Docker Compose
+### Admin
 
-### 安装
+<p align="center">
+  <img src="./screenshots/admin-dashboard.png" width="340" alt="Admin dashboard">
+  <img src="./screenshots/admin-users.png" width="340" alt="Admin users">
+</p>
+
+## Prerequisites
+
+| Tool                    | Version                                               |
+| ----------------------- | ----------------------------------------------------- |
+| Node.js                 | >= 22 (aligned with CI)                               |
+| pnpm                    | >= 10                                                 |
+| Docker + Docker Compose | Recent stable (Postgres, Redis, and other local deps) |
+| Git                     | Any recent version                                    |
+
+Optional for AI / media flows: Ollama, and the Python services under `services/`.
+
+## Quick start
 
 ```bash
+git clone https://github.com/felixzhu97/whatsfeed.git
+cd whatsfeed
 pnpm install
 pnpm setup
 ```
 
-### 运行
+Start local data stores (from `services/server`, at least Postgres and Redis):
 
 ```bash
-pnpm start              # 全量启动
-pnpm start:server       # 仅服务端
-pnpm start:web          # Web 应用
-pnpm start:admin        # 管理端
-pnpm start:mobile:ios   # 移动端
+cd services/server
+docker compose up -d postgres redis
+cd ../..
+cp services/server/.env.example services/server/.env
+# Set DATABASE_URL, REDIS_URL, JWT_SECRET (production secrets must be strong)
 ```
 
-### 环境变量
+Migrate and generate Prisma client:
 
 ```bash
-# services/server/.env
+cd services/server
+pnpm db:generate
+pnpm migrate          # or: pnpm exec prisma migrate deploy
+pnpm db:seed          # optional demo data
+cd ../..
+```
+
+Run apps (from repo root):
+
+```bash
+pnpm start:server          # Nest API — http://localhost:3001
+pnpm start:web             # Web — http://localhost:4000
+pnpm start:admin           # Admin — http://localhost:4001
+pnpm start:mobile:ios      # Expo iOS (or start:mobile / start:mobile:android)
+
+# Web + API together
+pnpm dev
+```
+
+| Service                  | Default URL                         |
+| ------------------------ | ----------------------------------- |
+| Web                      | http://localhost:4000               |
+| Admin                    | http://localhost:4001               |
+| API                      | http://localhost:3001               |
+| Health                   | http://localhost:3001/api/v1/health |
+| Swagger (non-production) | http://localhost:3001/api/docs      |
+
+Stop helpers: `pnpm stop` (dev) / `pnpm stop:prod`.
+
+More detail: [docs/developer/QUICKSTART.md](docs/developer/QUICKSTART.md).
+
+## Configuration
+
+Copy examples and adjust for your machine:
+
+| App / service | Example file                                                                         |
+| ------------- | ------------------------------------------------------------------------------------ |
+| Nest API      | [`services/server/.env.example`](services/server/.env.example)                       |
+| Mobile        | [`apps/mobile/.env.example`](apps/mobile/.env.example)                               |
+| Web           | `apps/web/.env.local` — typically `NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1` |
+| Admin         | `apps/admin/.env.local` — API URL + `ADMIN_EMAILS`                                   |
+
+Common server variables:
+
+```bash
+# services/server/.env (illustrative)
+DATABASE_URL=postgresql://whatschat:whatschat123@localhost:5433/whatschat?schema=public
+REDIS_URL=redis://localhost:6379
+JWT_SECRET=whatschat-dev-jwt-secret
 OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_DEFAULT_MODEL=llama3
 MEDIA_GENERATION_API_URL=http://localhost:3456
 VISION_SERVICE_URL=http://localhost:8001
 RAG_SERVICE_URL=http://localhost:8002
-
-# apps/web/.env.local
-NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
-
-# apps/admin/.env.local
-NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
-ADMIN_EMAILS=admin@whatschat.com
 ```
 
-## C4 模型架构图
+Mobile physical devices should set `EXPO_PUBLIC_API_URL` to your LAN host (see `apps/mobile/.env.example`).
 
-WhatsFeed 采用 C4 模型进行架构可视化，详见 [docs/developer/c4-model/](./docs/developer/c4-model/)。
+## Development
 
-### C1 系统上下文图
+```bash
+pnpm check-types    # TypeScript across packages
+pnpm lint
+pnpm test
+pnpm test:watch
+pnpm format
+pnpm build
+```
 
-![C1 系统上下文](./docs/developer/c4-model/png/C1-Context.png)
+Pre-commit hooks run via Husky (`lint-staged` + typecheck).
 
-### C2 容器图
+## Documentation
 
-![C2 容器](./docs/developer/c4-model/png/C2-Container.png)
+| Doc             | Path                                                                         |
+| --------------- | ---------------------------------------------------------------------------- |
+| Quick start     | [docs/developer/QUICKSTART.md](docs/developer/QUICKSTART.md)                 |
+| API             | [docs/developer/api.md](docs/developer/api.md)                               |
+| Python services | [docs/developer/python-services.md](docs/developer/python-services.md)       |
+| C4 model        | [docs/developer/c4-model/](docs/developer/c4-model/)                         |
+| Glossary        | [docs/Glossary.md](docs/Glossary.md)                                         |
+| User story map  | [docs/product-owner/User-Story-Map.md](docs/product-owner/User-Story-Map.md) |
+| CI / coverage   | [docs/developer/cicd/](docs/developer/cicd/)                                 |
 
-### C3 组件图
+## C4 model
 
-#### API Server
+Architecture diagrams live under [docs/developer/c4-model/](docs/developer/c4-model/).
 
-![C3 API Server](./docs/developer/c4-model/png/C3-Component-Backend.png)
+### C1 — System context
 
-#### Web App
+![C1 system context](./docs/developer/c4-model/png/C1-Context.png)
 
-![C3 Web App](./docs/developer/c4-model/png/C3-Component-Frontend.png)
+### C2 — Containers
 
-## 文档
+![C2 containers](./docs/developer/c4-model/png/C2-Container.png)
 
-- [Quick Start](docs/developer/QUICKSTART.md)
-- [API](docs/developer/api.md)
-- [C4 模型](docs/developer/c4-model/README.md)
-- [Glossary](docs/Glossary.md)
-- [User Story Map](docs/product-owner/User-Story-Map.md)
+### C3 — Components
 
-## Clean Architecture（2026-04）
+#### API server
 
-服务端已采用端口-适配器模式：
+![C3 API server](./docs/developer/c4-model/png/C3-Component-Backend.png)
 
-- **端口接口**：`IPostRepository`、`IEngagementRepository`、`ICommentRepository`、`INotificationRepository`
-- **适配器实现**：`PostRepositoryAdapter`、`EngagementRepositoryAdapter`、`CommentRepositoryAdapter`、`NotificationRepositoryAdapter`
-- **依赖注入**：通过 `@Inject("I...Repository")` 解耦，数据存储可替换（Cassandra/MongoDB）
+#### Web app
 
-## 许可证
+![C3 web app](./docs/developer/c4-model/png/C3-Component-Frontend.png)
 
-MIT
+## Contributing
+
+1. Use branch names `<type>/<slug>` (for example `feat/…`, `fix/…`, `docs/…`, `refactor/…`).
+2. Prefer small PRs with a clear why, References, and linked Jira when applicable.
+3. Keep Glossary Preferred Terms and architecture docs in sync when package layout or APIs change.
+
+See [.cursor/skills/developer/SKILL.md](.cursor/skills/developer/SKILL.md) for project commit and PR conventions.
+
+## License
+
+MIT (see `license` in the root [`package.json`](package.json)).
