@@ -4,9 +4,9 @@
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22-brightgreen.svg)](https://nodejs.org/)
 [![pnpm](https://img.shields.io/badge/pnpm-%3E%3D10-orange.svg)](https://pnpm.io/)
 
-WhatsFeed is a social and messaging platform: Instagram-style feed and Reels, real-time chat and calls, search and explore, optional AI features (via the Nest API), and an admin console. Clients talk only to the NestJS API (`/api/v1`); they never call Python microservices directly.
+WhatsFeed brings social connection into everyday life. Our mission is to help people share, message, and discover — simply and beautifully.
 
-> Historical npm package scope remains `@whatschat/*`.
+**Live:** [https://whatschat-web.vercel.app](https://whatschat-web.vercel.app)
 
 ## Table of contents
 
