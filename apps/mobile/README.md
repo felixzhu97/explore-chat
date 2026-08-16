@@ -1,4 +1,4 @@
-# WhatsFeed Mobile (`apps/mobile`)
+# ExploreChat Mobile (`apps/mobile`)
 
 React Native + Expo（SDK 55+）客户端，与 `services/server` API 对接；UI 对齐 Instagram（信息流、Reels、私信、探索/搜索、个人主页与「Settings and activity」设置栈）。
 

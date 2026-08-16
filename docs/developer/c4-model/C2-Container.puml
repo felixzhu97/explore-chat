@@ -3,13 +3,13 @@
 
 LAYOUT_WITH_LEGEND()
 
-title 容器图 (C2) - WhatsFeed
+title 容器图 (C2) - ExploreChat
 
 Person(user_web, "Web 用户", "浏览器客户端")
 Person(user_mobile, "移动端用户", "移动客户端")
 Person(admin_user, "管理员", "运营后台")
 
-System_Boundary(whatsfeed, "WhatsFeed") {
+System_Boundary(whatsfeed, "ExploreChat") {
   Container(web_app, "Web 应用", "Next.js、React、TypeScript、Emotion", "信息流、Reels、探索、聊天、通知；Redux Toolkit")
   Container(admin_app, "管理端", "Next.js、React、TypeScript", "用户、内容安全、运营与分析")
   Container(mobile_app, "移动端", "React Native、Expo、TypeScript", "信息流、Reels、聊天、探索、个人主页")

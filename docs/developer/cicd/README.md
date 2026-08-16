@@ -1,6 +1,6 @@
 # CI/CD
 
-WhatsFeed 使用 GitHub Actions。
+ExploreChat 使用 GitHub Actions。
 
 ## 现状
 

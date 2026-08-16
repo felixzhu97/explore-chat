@@ -1,6 +1,6 @@
-# WhatsFeed Quick Start Guide
+# ExploreChat Quick Start Guide
 
-## WhatsFeed 快速入门指南
+## ExploreChat 快速入门指南
 
 ---
 
@@ -24,8 +24,8 @@ docker --version
 ## 2. Install | 安装
 
 ```bash
-git clone <repo-url> whatsfeed
-cd whatsfeed
+git clone <repo-url> explore-chat
+cd explore-chat
 pnpm install
 ```
 

@@ -1,4 +1,4 @@
-# WhatsFeed API Documentation
+# ExploreChat API Documentation
 
 ## Base URL
 

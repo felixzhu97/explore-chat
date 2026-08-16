@@ -6,7 +6,7 @@ LAYOUT_WITH_LEGEND()
 title 部署图 (C4) - 生产（当前状态 / 计划）
 
 note as N1
-  **现状**：WhatsFeed API 尚未作为托管 Web Service 上线。
+  **现状**：ExploreChat API 尚未作为托管 Web Service 上线。
   下图描述 **目标 MVP** 拓扑（Docker 镜像 + 托管 Postgres/Redis），
   非已运行生产证明。
 end note

@@ -5,7 +5,7 @@ skinparam activityBorderColor #333333
 skinparam arrowColor #333333
 skinparam packageStyle rectangle
 
-title CI/CD Workflow Overview - WhatsFeed (GitHub Actions)
+title CI/CD Workflow Overview - ExploreChat (GitHub Actions)
 
 |#palegreen|**Workflow: ci.yml**|
 start

@@ -3,14 +3,14 @@
 
 LAYOUT_WITH_LEGEND()
 
-title 系统上下文图 (C1) - WhatsFeed
+title 系统上下文图 (C1) - ExploreChat
 
 Person(user_web, "Web 用户", "浏览器使用信息流、聊天、通话与探索")
 Person(user_mobile, "移动端用户", "移动应用使用信息流、Reels、聊天与通话")
 Person(admin_user, "管理员", "管理后台运营用户、内容与配置")
 
-System_Boundary(whatsfeed, "WhatsFeed") {
-  System(whatsfeed_sys, "WhatsFeed", "社交与即时通讯：聊天、音视频、信息流、帖子、评论、关注、推荐与探索、内容审核、群组")
+System_Boundary(whatsfeed, "ExploreChat") {
+  System(whatsfeed_sys, "ExploreChat", "社交与即时通讯：聊天、音视频、信息流、帖子、评论、关注、推荐与探索、内容审核、群组")
 }
 
 System_Ext(email, "邮件服务", "事务邮件（SMTP/SES）")
