@@ -1,5 +1,5 @@
 ---
-title: WhatsFeed - 用户故事地图
+title: ExploreChat - 用户故事地图
 ---
 
 # 用户故事地图

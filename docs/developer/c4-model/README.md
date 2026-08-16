@@ -1,6 +1,6 @@
 # C4 模型文档
 
-使用 PlantUML（C4-PlantUML）描述 WhatsFeed 软件架构。`.puml` 为源文件；`png/` 为导出预览。
+使用 PlantUML（C4-PlantUML）描述 ExploreChat 软件架构。`.puml` 为源文件；`png/` 为导出预览。
 
 产品交付状态见 [User Story Map](../../product-owner/User-Story-Map.md)。本目录聚焦 **C4 软件架构**。
 
@@ -10,7 +10,7 @@
 
 | 文件                            | 层级 | 说明                                                      |
 | ------------------------------- | ---- | --------------------------------------------------------- |
-| `C1-Context.puml`               | C1   | 系统上下文（用户、WhatsFeed、外部系统）                   |
+| `C1-Context.puml`               | C1   | 系统上下文（用户、ExploreChat、外部系统）                 |
 | `C2-Container.puml`             | C2   | 容器（Web/Admin/Mobile、Nest API、Python 服务、数据存储） |
 | `C3-Component-Backend.puml`     | C3   | NestJS API 组件与 Clean Architecture 端口/适配器          |
 | `C3-Component-Frontend.puml`    | C3   | Web（Next.js）主要 UI / 状态 / 客户端；Mobile/Admin 见 C2 |

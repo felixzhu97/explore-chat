@@ -1,5 +1,5 @@
 {
-  "name": "whats-chat",
+  "name": "explore-chat",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -9,7 +9,7 @@
   "author": "felix zhu <z1434866867@gmail.com>",
   "license": "MIT",
   "keywords": [
-    "whats-chat",
+    "explore-chat",
     "instagram",
     "chat"
   ],

@@ -1,10 +1,10 @@
-# WhatsFeed
+# ExploreChat
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22-brightgreen.svg)](https://nodejs.org/)
 [![pnpm](https://img.shields.io/badge/pnpm-%3E%3D10-orange.svg)](https://pnpm.io/)
 
-WhatsFeed brings social connection into everyday life. Our mission is to help people share, message, and discover — simply and beautifully.
+ExploreChat brings social connection into everyday life. Our mission is to help people share, message, and discover — simply and beautifully.
 
 **Live:** [https://whatschat-web.vercel.app](https://whatschat-web.vercel.app)
 
@@ -136,8 +136,8 @@ Optional for AI / media flows: Ollama, and the Python services under `services/`
 ## Quick start
 
 ```bash
-git clone https://github.com/felixzhu97/whatsfeed.git
-cd whatsfeed
+git clone https://github.com/felixzhu97/explore-chat.git
+cd explore-chat
 pnpm install
 pnpm setup
 ```

@@ -1,6 +1,6 @@
 # Python ML helpers — identical minimal layout
 
-WhatsFeed keeps four optional Python HTTP helpers. Clients call **Nest only**; Nest calls these over loopback.
+ExploreChat keeps four optional Python HTTP helpers. Clients call **Nest only**; Nest calls these over loopback.
 
 Every helper uses the **same top-level directory** and the same two layers: `api` → `service` → `domain`.
 
