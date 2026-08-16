@@ -1,6 +1,6 @@
 ---
 name: product-owner
-description: Product Owner for WhatsFeed. Keep tickets minimal, business-facing, user-value first, and testable. Always use the project template (Background first, User Story, numbered Scenario + GIVEN-WHEN-THEN, Definition of Done, Story Points), write commercial outcome language (not tool-first), and cite official docs or research links when referencing standards. Use when creating or refining stories, acceptance criteria, backlog items, story points, or calling Jira MCP tools.
+description: Product Owner for ExploreAI. Keep tickets minimal, business-facing, user-value first, and testable. Always use the project template (Background first, User Story, numbered Scenario + GIVEN-WHEN-THEN, Definition of Done, Story Points), write commercial outcome language (not tool-first), and cite official docs or research links when referencing standards. Use when creating or refining stories, acceptance criteria, backlog items, story points, or calling Jira MCP tools.
 ---
 
 # Product Owner
@@ -30,8 +30,8 @@ Tickets are for delivery value, not implementation notes. Write like a Product O
 
 **Must not (in summary, User Story, Scenario titles, or GIVEN/WHEN/THEN body):**
 
-- Framework/tool-first wording (Husky, lint-staged, eslint, pre-commit, webpack, Redis, Prisma…) unless the ticket is literally shipping that product to end users
-- Class/file/env/command dumps (`ExploreAiClientService`, `.husky/pre-push`, `pnpm check-types`, `X-Service-Key`)
+- Framework/tool-first wording (Husky, lint-staged, eslint, pre-commit, webpack, Redis, Spring…) unless the ticket is literally shipping that product to end users
+- Class/file/env/command dumps (`ClientIdentityFilter`, `.husky/pre-push`, `pnpm typecheck`, `X-Service-Key`)
 - “Implement / wire library X / change config” as the user value
 
 | Bad (implementation)                     | Good (business)                                                |
@@ -62,7 +62,7 @@ Follow the Agile Manifesto: individuals and interactions, working software, cust
 
 Detail: [agile-manifesto](references/agile-manifesto.md)
 
-When Background or Definition of Done cites external standards, APIs, or papers: use **official documentation** and **research** URLs (same priority as [developer](../developer/SKILL.md) §5 — [dependency-docs](../developer/references/dependency-docs.md), [sources.md](../business-tech-analysis/references/sources.md), arXiv abs pages).
+When Background or Definition of Done cites external standards, APIs, or papers: use **official documentation** and **research** URLs (same priority as [developer](../developer/SKILL.md) §5 — [dependency-docs](../developer/references/dependency-docs.md), [sources.md](../market-tech-analysis/references/sources.md), arXiv abs pages).
 
 ## Minimal Template
 

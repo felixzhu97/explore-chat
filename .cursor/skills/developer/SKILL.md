@@ -1,6 +1,6 @@
 ---
 name: developer
-description: Feature development for WhatsFeed — XP, DDD, BDD, TDD, Glossary naming, Apple HIG + Instagram minimal UX (Emotion), living docs sync (C4 / Glossary / User Story Map), and mandatory commit/PR standards (why body + References from official docs and research). Use when implementing features, writing tests, committing, opening PRs, UI work, or DDD/TDD/BDD/XP/clean-code tasks.
+description: Feature development for this repo — XP, DDD, BDD, TDD, Glossary naming, Apple HIG minimal UX, living docs sync (C4 / Glossary / User Story Map), and mandatory commit/PR standards (why body + References from official docs and research). Use when implementing features, writing tests, committing, opening PRs, UI work, or DDD/TDD/BDD/XP/clean-code tasks.
 ---
 
 # Developer
@@ -9,18 +9,20 @@ description: Feature development for WhatsFeed — XP, DDD, BDD, TDD, Glossary n
 
 **Every** commit and PR must follow §6 (project standards). **Every** Jira ticket must follow [Product Owner](../product-owner/SKILL.md). Do not invent alternate formats.
 
+Stack (WhatsFeed): NestJS API, Next.js web, Expo mobile, Emotion UI, Redux Toolkit on clients. Clients call **only** Nest `/api/v1`.
+
 ## Hard constraints
 
-1. Layers: [architecture](../../rules/architecture.mdc) — `presentation → application → domain ← infrastructure`
-2. No new `domain/port`, hexagonal `adapter/in|out` packages, or `*Port` suffixes (legacy `*ApiAdapter` OK)
-3. Tests: `should_expectedResult_when_condition`
+1. Layers: [architecture](../../rules/architecture.mdc) — Nest: `presentation → application → domain ← infrastructure` inside domain folders; web/mobile: business-domain folders (no CA layer trees)
+2. No `domain/port`, hexagonal `adapter/in|out` packages, or `*Port` suffix in new code
+3. Tests: `should_expectedResult_when_condition` (TypeScript); prefer behavior over implementation
 4. Names: Glossary [Preferred Term](../../../docs/Glossary.md) + [clean-code-naming](references/clean-code-naming.md)
-5. UI: Apple HIG + Instagram style + Emotion + [apple-minimal-ux](references/apple-minimal-ux.md)
-6. Prefer Redux Toolkit and lodash where they clarify client/state code
-7. **Commit / PR / Jira / branches**: always reuse §6 + [Product Owner](../product-owner/SKILL.md); branch `<type>/<slug>` (type matches commit); References = official docs + research
+5. UI: Apple HIG + Instagram-consistent + Emotion + [apple-minimal-ux](references/apple-minimal-ux.md)
+6. Prefer Redux Toolkit and lodash on clients where they clarify state/collections
+7. **Commit / PR / Jira / branches**: always reuse §6 + [Product Owner](../product-owner/SKILL.md); branch `<type>/<slug>`; References = official docs + research
 8. **XP**: follow [extreme-programming](references/extreme-programming.md) — Simple Design / YAGNI, CI green, small releases, customer / AC feedback
-9. **Living docs**: when the change hits the trigger matrix, update Glossary, C4, and/or User Story Map in the **same PR** — see §4 and [living-docs](references/living-docs.md)
-10. Clients call NestJS only — never browser→Python / browser→explore-ai
+9. **Living docs**: when the change hits the trigger matrix, update Glossary, C4 `.puml`, and/or User Story Map in the **same PR** — see §4 and [living-docs](references/living-docs.md)
+10. Clients never call Python microservices or explore-ai directly — only Nest
 
 ## Workflow
 
@@ -49,13 +51,14 @@ Detail: [testing](references/testing.md)
 
 ### 2. DDD
 
-| Concept                | Package                                              |
-| ---------------------- | ---------------------------------------------------- |
-| Entity / Aggregate     | `domain/` — factory + rich behavior                  |
-| Value Object           | `domain/` — immutable types                          |
-| Repository / Gateway   | `domain/` interface → impl in `infrastructure/`      |
-| Use Case / App service | `application/` — orchestration only                  |
-| Presentation           | Nest controllers / React screens — no business rules |
+| Concept              | Nest path (per business domain)                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| Entity / Aggregate   | `<domain>/domain/` — rich behavior where it pays off                                        |
+| Value Object         | `<domain>/domain/` — immutable types                                                        |
+| Repository / Gateway | interface in `<domain>/domain/` → adapter in `<domain>/infrastructure/` or `core/`          |
+| Application service  | `<domain>/application/` — orchestration only                                                |
+| Presentation         | `<domain>/presentation/` — Nest controllers / modules; no business rules                    |
+| Web / Mobile UI      | `apps/web/src/<domain>/`, `apps/mobile/src/<domain>/` — screens + `*.api.ts` / `*.model.ts` |
 
 Detail: [ddd-rich-model](references/ddd-rich-model.md)
 
@@ -69,90 +72,89 @@ Detail: [clean-code-naming](references/clean-code-naming.md)
 
 When a change matches the trigger matrix, update the matching living docs in the **same PR** (same commit or a docs commit on the same branch). Unmatched rows → N/A. Do not skip with “optional” or “later”.
 
-| Document       | Path                                                                                  |
-| -------------- | ------------------------------------------------------------------------------------- |
-| Glossary       | [docs/Glossary.md](../../../docs/Glossary.md)                                         |
-| C4             | [docs/developer/c4-model/](../../../docs/developer/c4-model/)                         |
-| User Story Map | [docs/product-owner/User-Story-Map.md](../../../docs/product-owner/User-Story-Map.md) |
+| Document       | Path                                                                                                                                                       |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Glossary       | [docs/Glossary.md](../../../docs/Glossary.md)                                                                                                              |
+| C4             | [docs/developer/c4-model/](../../../docs/developer/c4-model/) (`.puml` source; refresh `png/` when PlantUML is available)                                  |
+| User Story Map | [docs/product-owner/User-Story-Map.md](../../../docs/product-owner/User-Story-Map.md) (+ [user-stories/E\*.md](../../../docs/product-owner/user-stories/)) |
 
-| Change                                                                                                     | Must update                                           |
-| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| New/changed Preferred Term, module package, route, API prefix, business concept                            | Glossary                                              |
-| New module/subdomain, container boundary, external system, deploy topology, front/back component structure | Matching C4 layer(s); cross-layer → multiple diagrams |
-| New user-visible capability, delivery status (Delivered / In Progress / Future), primary nav add/remove    | User Story Map                                        |
-| Pure tests / pure styling / no product or architecture semantics                                           | None (N/A)                                            |
+| Change                                                                                                     | Must update                                                   |
+| ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| New/changed Preferred Term, module package, route, API prefix, business concept                            | Glossary                                                      |
+| New module/subdomain, container boundary, external system, deploy topology, front/back component structure | Matching C4 `.puml` layer(s); cross-layer → multiple diagrams |
+| New user-visible capability, delivery status (已实现 / 进行中 / 规划中), primary nav add/remove            | User Story Map index + matching `user-stories/E*.md`          |
+| Pure tests / pure styling / no product or architecture semantics                                           | None (N/A)                                                    |
 
-Flow: implement code → apply trigger matrix → update docs → reflect in commit/PR. Prefer editing `.puml`; if PlantUML is unavailable, note in the PR that PNGs are pending render.
+Flow: implement code → apply trigger matrix → update docs → reflect in commit/PR. Prefer editing `.puml`; if PlantUML is unavailable, note in the PR that `png/` is pending render.
 
 Detail + examples: [living-docs](references/living-docs.md)
 
 ### 5. UI — Apple HIG + Instagram + Emotion
 
-Official: [HIG](https://developer.apple.com/design/human-interface-guidelines/). Clarity, deference, one primary action; no decorative noise. Match Instagram-style patterns already in `apps/web`. Style with Emotion.
+Official: [HIG](https://developer.apple.com/design/human-interface-guidelines/). Clarity, deference, one primary action; no decorative noise. Match Instagram-style patterns already in `apps/web` / `apps/mobile`. Style with Emotion.
 
 Detail: [apple-minimal-ux](references/apple-minimal-ux.md)
 
 ### 6. Branches / Commit / PR (mandatory every time)
 
-#### Language (same as explore-ai)
+#### Language
 
 | Artifact                          | Language                                               |
 | --------------------------------- | ------------------------------------------------------ |
-| Branch name                       | English kebab-case (`feat/explore-ai-bff`)             |
+| Branch name                       | English kebab-case (`feat/minimal-clean-prompts`)      |
 | Commit subject + why + References | English                                                |
 | PR title + body                   | English                                                |
 | Jira **summary**                  | English (`As a … I want … so that …`)                  |
 | Jira description                  | English (headings, prefixes, body, Definition of Done) |
 
+Jira tickets follow [Product Owner](../product-owner/SKILL.md): business-facing, short descriptions.
+
 #### Branch naming
 
-**Prefix = change type** (same set as commit types). Do **not** default every branch to `feat`.
+**Prefix = change type**. Do **not** default every branch to `feat`.
 
-| Type     | Pattern           | Example                    |
-| -------- | ----------------- | -------------------------- |
-| feat     | `feat/<slug>`     | `feat/explore-ai-bff`      |
-| fix      | `fix/<slug>`      | `fix/feed-pagination`      |
-| refactor | `refactor/<slug>` | `refactor/post-aggregate`  |
-| docs     | `docs/<slug>`     | `docs/glossary-feed`       |
-| test     | `test/<slug>`     | `test/explore-service`     |
-| chore    | `chore/<slug>`    | `chore/sync-cursor-skills` |
-| perf     | `perf/<slug>`     | `perf/feed-cache`          |
-| ci       | `ci/<slug>`       | `ci/turbo-cache`           |
+| Type     | Pattern           | Example                       |
+| -------- | ----------------- | ----------------------------- |
+| feat     | `feat/<slug>`     | `feat/minimal-clean-prompts`  |
+| fix      | `fix/<slug>`      | `fix/prompt-style-typo`       |
+| refactor | `refactor/<slug>` | `refactor/chat-session-model` |
+| docs     | `docs/<slug>`     | `docs/branch-naming-slug`     |
+| test     | `test/<slug>`     | `test/rag-prompt-builder`     |
+| chore    | `chore/<slug>`    | `chore/update-deps`           |
+| perf     | `perf/<slug>`     | `perf/vector-search`          |
+| ci       | `ci/<slug>`       | `ci/codeql-paths`             |
 
 Allowed types: `feat` | `fix` | `refactor` | `docs` | `test` | `chore` | `perf` | `ci`
 
 Rules:
 
-- Branch prefix **must** match the primary change type
-- Always use `<type>/<slug>` with an **English** kebab-case slug that describes the change
+- Always use `<type>/<slug>` with a kebab-case slug that describes the change
 - With a Jira ticket: still use `<type>/<slug>` — put the issue key only in commit/PR body (`Jira: https://…/AI-xxx`), not in the branch name
-- Do **not** use `feature/` for new branches
+- Do **not** use `feature/` for new branches (legacy only; CI still accepts it)
 - Do **not** embed `AI-<key>` in new branch names
-- Long-lived integration line: `main` (do not push work directly except via PR)
+- Long-lived integration lines: `main`, `java-angular` (do not push work directly to these except via PR)
 
 #### Branch / PR flow (Chain PRs)
 
 ```
 main
- └── feat/explore-ai-bff              # PR #1 → base: main
-      └── fix/explore-stream-headers  # PR #2 → base: feat/explore-ai-bff
+ └── feat/minimal-clean-prompts     # PR #1 → base: main
+      └── fix/prompt-style-typo     # PR #2 → base: feat/minimal-clean-prompts
 ```
 
-1. First branch in a chain: create from `main`; PR **base** = `main`
+1. First branch in a chain: create from `main` (or current integration line); PR **base** = `main`
 2. Follow-up work in the same chain: create from the **previous branch**; PR **base** = that branch (not `main`)
-3. Standalone work with no dependency: `<type>/<slug>` from `main`, PR base = `main`
+3. Standalone work with no dependency: `<type>/<slug>` from `main`, PR base = `main`; use the type that matches the change
 
 #### Commit message
 
-**Always** use this format. No alternate layouts. Same as explore-ai: `type: subject` with **no** Conventional Commit scope (`feat(ai):` is wrong; use `feat:`).
+**Always** use this format. No alternate layouts.
 
 1. One complete change per commit
-2. Subject ≤ 50 chars, imperative, no trailing period; form `type: subject` only (no `(scope)`)
-3. After the subject, add a **short why** (1–3 sentences); each Reference must corroborate a claim in that why
-4. Always add **References** (see priority below); PR body must use the **same** References links
-5. Never: `Co-authored-by`, `Made with`, emoji in subject, markdown `##` headings in PR body
-
-PR body (plain sections only, matching explore-ai): why paragraph → what paragraph → `References:` → `Jira:` — **no Test plan section**.
+2. Subject ≤ 50 chars, imperative, no trailing period
+3. After the subject, add a **short why** (1–3 sentences)
+4. Always add **References** (see priority below)
+5. Never: `Co-authored-by`, `Made with`, emoji in subject
 
 #### References priority (required)
 
@@ -161,7 +163,7 @@ Prefer **specific** pages, not homepages. Search the web in real time when neede
 | Priority | Source                                  | Where to look                                                                                                                                                                                                                                                                                                |
 | -------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1        | Project dependency official docs        | [dependency-docs](references/dependency-docs.md) (**claim → URL** catalog; every row corroborates why)                                                                                                                                                                                                       |
-| 2        | Vendor / lab **research** + open-source | [business-tech-analysis sources](../business-tech-analysis/references/sources.md) (research hubs + GitHub)                                                                                                                                                                                                   |
+| 2        | Vendor / lab **research** + open-source | [market-tech-analysis sources](../market-tech-analysis/references/sources.md) (research hubs + GitHub)                                                                                                                                                                                                       |
 | 3        | **arXiv** papers (abs page)             | [arXiv](https://arxiv.org/) — when the change cites a method/paper                                                                                                                                                                                                                                           |
 | 4        | Standards / HIG / Google ecosystem      | **UI design:** [Apple HIG](https://developer.apple.com/design/human-interface-guidelines/) + Instagram-consistent Emotion patterns in `apps/web`. **Google ecosystem** (eng practices, style guides, SRE, AI, Cloud — not Material UI) — [dependency-docs](references/dependency-docs.md) § Google Ecosystem |
 
@@ -186,7 +188,7 @@ When these source types exist, include all of them in both the commit and the PR
 For framework or dependency-only changes, keep using official docs first. For AI / model changes, prefer the full reference set above over a single docs link.
 
 ```
-<type>: <short description>
+<short description>
 
 <why: brief motivation for this change>
 
@@ -194,12 +196,10 @@ References:
 - [Title](URL)
 ```
 
-Types: `feat` | `fix` | `refactor` | `docs` | `test` | `chore` | `perf` | `ci`
-
 Example:
 
 ```
- docs: add Qwen3-ASR reference guidance to PR skill
+Add Qwen3-ASR reference guidance to PR skill
 
 Contributors need a consistent citation set for model-related changes so commits and PRs point to the paper, release notes, distribution page, and upstream implementation.
 
@@ -213,18 +213,19 @@ References:
 PR body (no markdown headings — plain sections only):
 
 ```
-<why paragraph>
-
-<what paragraph>
+This change updates the commit and PR skill so model-related work cites a full reference set instead of a single generic docs link. It makes AI-facing changes easier to review and trace back to the paper, release notes, distribution page, and source implementation.
 
 References:
-- [Title](URL)
+- [Qwen3-ASR Technical Report](https://arxiv.org/abs/2601.21337)
+- [Qwen3-ASR - a Qwen Collection](https://huggingface.co/collections/Qwen/qwen3-asr)
+- [Qwen3-ASR & Qwen3-ForcedAligner is Now Open Sourced](https://qwen.ai/blog?id=qwen3asr)
+- [QwenLM/Qwen3-ASR](https://github.com/QwenLM/Qwen3-ASR)
 
 Jira:
 - https://felixzhu.atlassian.net/browse/AI-XXX
 ```
 
-PR **References** must match the commit References (same links). No Test plan. No `Made with` / `Co-authored-by` footers.
+PR **References** must match the commit References (same links). Use the same official/research priority.
 
 ## Checklist
 
@@ -234,11 +235,12 @@ PR **References** must match the commit References (same links). No Test plan. N
 - [ ] YAGNI / Simple Design — no speculative extras
 - [ ] Domain holds rules; use case orchestrates
 - [ ] Glossary Preferred Terms; Glossary updated per trigger matrix (or N/A)
-- [ ] C4 updated per trigger matrix (or N/A); PNGs refreshed or PR notes pending render
+- [ ] C4 `.puml` updated per trigger matrix (or N/A); `png/` refreshed or PR notes pending render
 - [ ] User Story Map updated per trigger matrix (or N/A)
-- [ ] UI (if any): HIG + Instagram + Emotion
-- [ ] Branch: `<type>/<slug>` (type matches commit); Chain PR base correct
+- [ ] UI (if any): HIG + minimal
+- [ ] Branch: `<type>/<slug>`; Chain PR base correct
 - [ ] Commit: subject + why + References (official/research)
+- [ ] Each References link maps to a claim in the why text (or N/A with note)
 - [ ] PR: plain body + same References + Jira link; chain base; CI green
 - [ ] Jira (if any): [Product Owner](../product-owner/SKILL.md) template followed
 
@@ -253,6 +255,9 @@ PR **References** must match the commit References (same links). No Test plan. N
 | C4 model                 | [c4-model](../../../docs/developer/c4-model/README.md)          |
 | User Story Map           | [User-Story-Map](../../../docs/product-owner/User-Story-Map.md) |
 | Testing core             | [testing](references/testing.md)                                |
-| Business / tech strategy | [business-tech-analysis](../business-tech-analysis/SKILL.md)    |
-| Research / OSS watchlist | [sources.md](../business-tech-analysis/references/sources.md)   |
+| Angular depth            | [angular-developer](../angular-developer/SKILL.md)              |
+| Spring AI                | [spring-ai](../spring-ai/SKILL.md)                              |
+| Business Analysis        | [business-analysis](../business-analysis/SKILL.md)              |
+| Market / tech strategy   | [market-tech-analysis](../market-tech-analysis/SKILL.md)        |
+| Research / OSS watchlist | [sources.md](../market-tech-analysis/references/sources.md)     |
 | Product Owner            | [Product Owner](../product-owner/SKILL.md)                      |
