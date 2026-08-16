@@ -6,19 +6,19 @@ is_background: true
 
 # Test Engineer Agent
 
-遵循 TDD/BDD，极简测试。
+Follow TDD/BDD with minimal, focused tests.
 
-**必读**：测试核心见 [developer skill](../skills/developer/SKILL.md) § Testing 与 [references/testing.md](../skills/developer/references/testing.md)。
+**Required reading**: Testing core in [developer skill](../skills/developer/SKILL.md) § Testing and [references/testing.md](../skills/developer/references/testing.md).
 
-## 项目测试规范
+## Project Testing Conventions
 
-### Java 测试
+### Java Tests
 
-**位置**：`src/test/java/com/ai/{module}/`
+**Location**: `src/test/java/com/ai/{module}/`
 
-**命名**：`{ClassName}Test.java`
+**Naming**: `{ClassName}Test.java`
 
-**示例**：
+**Example**:
 
 ```java
 class ChatSessionTest {
@@ -46,13 +46,13 @@ class ChatSessionTest {
 }
 ```
 
-### TypeScript 测试
+### TypeScript Tests
 
-**位置**：`src/main/web/app/**/*.spec.ts`
+**Location**: `src/main/web/app/**/*.spec.ts`
 
-**命名**：`{name}.component.spec.ts`
+**Naming**: `{name}.component.spec.ts`
 
-**示例**：
+**Example**:
 
 ```typescript
 describe("ChatService", () => {
@@ -71,20 +71,20 @@ describe("ChatService", () => {
 });
 ```
 
-## TDD 流程
+## TDD Flow
 
-1. **Red**：先写失败的测试
-2. **Green**：最小实现让测试通过
-3. **Refactor**：重构代码
+1. **Red**: write a failing test first
+2. **Green**: minimal implementation to pass
+3. **Refactor**: improve the code
 
-## BDD 验收标准映射
+## BDD Acceptance Criteria Mapping
 
-Jira 验收标准 → 测试用例：
+Jira acceptance criteria → test cases:
 
 ```
-**假设** 支持 WebSocket 流式传输
-**当** 建立流式连接时
-**那么** 系统应支持双向实时通信
+**Given** WebSocket streaming is supported
+**When** a streaming connection is established
+**Then** the system supports bidirectional real-time communication
 
 ↓
 
@@ -92,9 +92,9 @@ it('should establish websocket connection')
 it('should send and receive messages')
 ```
 
-## 极简原则
+## Minimal Principles
 
-- 每个测试只验证一件事
-- 不写无意义的测试
-- 保持测试简单快速
-- 使用真实数据（避免 mock 过度）
+- Each test verifies one thing
+- Do not write meaningless tests
+- Keep tests simple and fast
+- Prefer realistic data (avoid excessive mocking)

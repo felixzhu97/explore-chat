@@ -16,7 +16,7 @@ This project uses `plugin-atlassian-atlassian` MCP Server for Jira operations.
 | Project Key | Name      | Issue Types                              |
 | ----------- | --------- | ---------------------------------------- |
 | `AI`        | ExploreAI | Epic, Story, Task, Subtask, Bug, Feature |
-| `FVXI`      | 支持      | Service Request, Incident, Task, Subtask |
+| `FVXI`      | Support   | Service Request, Incident, Task, Subtask |
 
 > Always include `cloudId` when calling Jira MCP tools.
 
@@ -45,9 +45,9 @@ This project uses `plugin-atlassian-atlassian` MCP Server for Jira operations.
   "arguments": {
     "cloudId": "75684fb5-daf5-4962-9581-c4948b9c12cf",
     "projectKey": "AI",
-    "issueTypeName": "任务",
-    "summary": "任务标题",
-    "description": "任务描述内容（支持 wiki markup）",
+    "issueTypeName": "Task",
+    "summary": "Task title",
+    "description": "Task description (supports wiki markup)",
     "assignee_account_id": "62ee247ff15eecaf500efa39"
   }
 }
@@ -93,19 +93,19 @@ This project uses `plugin-atlassian-atlassian` MCP Server for Jira operations.
 **Required Parameters:**
 
 - `cloudId` - Must be obtained from `getAccessibleAtlassianResources` tool first (or use fixed value: `75684fb5-daf5-4962-9581-c4948b9c12cf`)
-- `issueTypeName` - **Must use localized name** (e.g., `任务` not `Task`)
+- `issueTypeName` - **Must use the localized name from your Jira instance** (query via `getJiraProjectIssueTypesMetadata`; do not assume English names like `Task` will work)
 
-**Common Issue Types:**
-| English | API Value (Localized) |
+**Common Issue Types (AI project — use localized names from Jira metadata):**
+| Concept | Typical English label |
 |---------|----------------------|
-| Epic | 长篇故事 |
-| Story | 故事 |
-| Task | 任务 |
+| Epic | Epic |
+| Story | Story |
+| Task | Task |
 | Subtask | Subtask |
-| Bug | 缺陷 |
-| Feature | 功能 |
+| Bug | Bug |
+| Feature | Feature |
 
-> **Important**: Using English names like "Task" will result in error: `指定有效的事务类型`. Always use localized Chinese names.
+> **Important**: Using an incorrect or English-only name when Jira expects a localized label will fail with an invalid issue type error. Always fetch issue types from `getJiraProjectIssueTypesMetadata` and use the exact `name` value returned.
 
 **Workflow:**
 

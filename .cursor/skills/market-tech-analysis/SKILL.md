@@ -6,7 +6,7 @@ description: >-
   NVIDIA, Meta, OpenAI, DeepMind, Vercel, Anthropic, Cursor, Hugging Face
   trending, and arXiv papers. Use when analyzing commercial dynamics, market
   moves, competitive landscape, tech adoption, product strategy, or when the
-  user asks for 市场分析、技术分析、商业动向、技术商业建议、竞品、趋势研判.
+  user asks for market analysis, technical analysis, commercial dynamics, tech–business advice, competitive landscape, or trend assessment.
   Not for Business Analysis / domain modeling (use business-analysis + business-analyst).
 ---
 
@@ -18,7 +18,7 @@ Complementary skill: personal `business-model-generator` covers BMC / unit econo
 
 ## When to run
 
-- User asks for 商业动向、行业趋势、竞品、技术选型与商业匹配、Go-to-market vs build
+- User asks for commercial dynamics, industry trends, competitors, tech selection matched to business needs, or Go-to-market vs build
 - Planning features, monetization, or platform bets for AI/chat/RAG/agent products
 - Need a short strategy memo with evidence and next steps
 
@@ -180,9 +180,9 @@ Scoring: [references/rubric.md](references/rubric.md). Sources: [references/sour
 
 | Need                                    | Where                                                                                                     |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| 行业动向（子 Agent）                    | [market-analyst](../../agents/market-analyst.md)                                                          |
+| Market dynamics (sub-agent)             | [market-analyst](../../agents/market-analyst.md)                                                          |
 | Business Analysis                       | [business-analyst](../../agents/business-analyst.md) + [business-analysis](../business-analysis/SKILL.md) |
-| 前沿研究（子 Agent）                    | [tech-analyst](../../agents/tech-analyst.md)                                                              |
+| Frontier research (sub-agent)           | [tech-analyst](../../agents/tech-analyst.md)                                                              |
 | BMC / LTV / CAC deep dive               | `business-model-generator` (personal skill)                                                               |
 | Implement chosen bet                    | [developer](../developer/SKILL.md)                                                                        |
 | Product Owner story from recommendation | [Product Owner](../product-owner/SKILL.md)                                                                |

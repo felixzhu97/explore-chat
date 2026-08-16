@@ -9,7 +9,7 @@ description: Feature development for this repo — XP, DDD, BDD, TDD, Glossary n
 
 **Every** commit and PR must follow §6 (project standards). **Every** Jira ticket must follow [Product Owner](../product-owner/SKILL.md). Do not invent alternate formats.
 
-Stack (WhatsFeed): NestJS API, Next.js web, Expo mobile, Emotion UI, Redux Toolkit on clients. Clients call **only** Nest `/api/v1`.
+Stack (ExploreChat): NestJS API, Next.js web, Expo mobile, Emotion UI, Redux Toolkit on clients. Clients call **only** Nest `/api/v1`.
 
 ## Hard constraints
 
@@ -82,7 +82,7 @@ When a change matches the trigger matrix, update the matching living docs in the
 | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
 | New/changed Preferred Term, module package, route, API prefix, business concept                            | Glossary                                                      |
 | New module/subdomain, container boundary, external system, deploy topology, front/back component structure | Matching C4 `.puml` layer(s); cross-layer → multiple diagrams |
-| New user-visible capability, delivery status (已实现 / 进行中 / 规划中), primary nav add/remove            | User Story Map index + matching `user-stories/E*.md`          |
+| New user-visible capability, delivery status (Implemented / In progress / Planned), primary nav add/remove | User Story Map index + matching `user-stories/E*.md`          |
 | Pure tests / pure styling / no product or architecture semantics                                           | None (N/A)                                                    |
 
 Flow: implement code → apply trigger matrix → update docs → reflect in commit/PR. Prefer editing `.puml`; if PlantUML is unavailable, note in the PR that `png/` is pending render.

@@ -8,25 +8,25 @@ lastUpdated: "2026-07-18"
 
 # Angular Developer Guidelines
 
-> **本仓库**：前端深度指南用本 skill；无独立 angular rule。项目硬约束见 [architecture rule](../../rules/architecture.mdc)。本仓库为 **Angular 22**；ESLint / schematics 已锁定现代写法（见根目录 `eslint.config.js`、`angular.json`）。
+> **This repo**: Use this skill for in-depth frontend guidance; there is no separate Angular rule. Project hard constraints live in the [architecture rule](../../rules/architecture.mdc). This repo targets **Angular 22**; ESLint / schematics enforce modern patterns (see root `eslint.config.js`, `angular.json`).
 
-## ExploreAI — 现代写法硬约束（必须遵守）
+## ExploreAI — modern pattern hard constraints (required)
 
-| 禁止                             | 使用                                      |
-| -------------------------------- | ----------------------------------------- |
-| `NgModule` / `standalone: false` | Standalone 组件 / 指令 / 管道（默认即可） |
-| 构造函数参数注入                 | `inject()`                                |
-| `@HostListener` / `@HostBinding` | `@Component` / `@Directive` 的 `host: {}` |
-| `@Input()` / `@Output()`         | `input()` / `output()` / `model()`        |
-| `*ngIf` / `*ngFor` / `*ngSwitch` | `@if` / `@for` / `@switch`                |
-| `ngClass` / `ngStyle`            | `[class]` / `[class.x]` / `[style]`       |
+| Avoid                            | Use                                                  |
+| -------------------------------- | ---------------------------------------------------- |
+| `NgModule` / `standalone: false` | Standalone components / directives / pipes (default) |
+| Constructor parameter injection  | `inject()`                                           |
+| `@HostListener` / `@HostBinding` | `host: {}` on `@Component` / `@Directive`            |
+| `@Input()` / `@Output()`         | `input()` / `output()` / `model()`                   |
+| `*ngIf` / `*ngFor` / `*ngSwitch` | `@if` / `@for` / `@switch`                           |
+| `ngClass` / `ngStyle`            | `[class]` / `[class.x]` / `[style]`                  |
 
-补充约定：
+Additional conventions:
 
-- **不要**再写冗余的 `standalone: true`（v20+ 默认已是 standalone；写了无功能差异，增加噪音）
-- 新服务：`inject()` + `providedIn: 'root'`（或团队统一采用 v22 `@Service()` 后再改）
-- 静态图片优先 `NgOptimizedImage`（`ngSrc`）；动态 / base64 预览除外（lint 已对 media/chat-shell/vision 放行）
-- 用 CLI 生成：`ng generate` 已配置 standalone + OnPush + functional guard/interceptor/resolver
+- **Do not** add redundant `standalone: true` (v20+ defaults to standalone; it adds noise with no functional benefit)
+- New services: `inject()` + `providedIn: 'root'` (or migrate to v22 `@Service()` once the team standardizes on it)
+- Prefer `NgOptimizedImage` (`ngSrc`) for static images; exclude dynamic / base64 previews (lint allows media/chat-shell/vision)
+- Generate via CLI: `ng generate` is configured for standalone + OnPush + functional guard/interceptor/resolver
 
 1. Always analyze the project's Angular version before providing guidance, as best practices and available features can vary significantly between versions. If creating a new project with Angular CLI, do not specify a version unless prompted by the user.
 

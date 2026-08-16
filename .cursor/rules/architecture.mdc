@@ -3,7 +3,7 @@ description: Core project constraints — Clean Architecture layers, monorepo la
 alwaysApply: true
 ---
 
-# Architecture & WhatsFeed Core
+# Architecture & ExploreChat Core
 
 ## Dependency Rule
 
