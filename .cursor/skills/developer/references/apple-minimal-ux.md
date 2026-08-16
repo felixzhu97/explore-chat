@@ -66,4 +66,4 @@ Apple framing: technology should feel **invisible**; simplicity is sophisticatio
 - [ ] Minimal: removing an element would not hurt understanding or task completion
 - [ ] Feedback for async/error states exists and is non-blocking where possible
 - [ ] Accessibility: contrast, focus, labels (HIG Accessibility)
-- [ ] WhatsFeed UI: Emotion + Instagram-consistent patterns in `apps/web` / `apps/mobile`
+- [ ] Angular UI details: [angular-developer](../../angular-developer/SKILL.md)

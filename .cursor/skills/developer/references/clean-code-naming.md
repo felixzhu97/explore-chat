@@ -31,7 +31,7 @@ const items = msgs.filter((m) => m.flag);
 const userMessages = chatMessages.filter((message) => message.role === "user");
 ```
 
-If the glossary lacks a term you need: update the glossary (developer ownership: implement with Preferred Terms; coordinate with domain-expert for consistency), then code.
+If the glossary lacks a term you need: update the glossary (developer ownership: implement with Preferred Terms; coordinate with business-analyst for consistency), then code.
 
 ## Naming form (Clean Code)
 

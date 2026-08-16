@@ -59,7 +59,7 @@ Use **numbered scenarios** with **Scenario / GIVEN / WHEN / THEN** (and optional
    **Scenario** Run eslint --fix
    **GIVEN** staged *.ts files
    **WHEN** husky pre-commit runs lint-staged
-   **THEN** pnpm check-types passes
+   **THEN** pnpm typecheck passes
 ```
 
 ## OpenAI-Style Interaction Patterns

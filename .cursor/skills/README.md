@@ -1,34 +1,39 @@
-# Skills 索引
+# Skills index (ExploreChat)
 
-本目录包含 WhatsFeed 项目的 Skills。Rules（始终遵守的薄约束）只有 [`.cursor/rules/architecture.mdc`](../rules/architecture.mdc)。
+Project skills live here. The always-on thin rule is [`.cursor/rules/architecture.mdc`](../rules/architecture.mdc) (ExploreChat monorepo — Nest / Next / Expo).
+
+Agents under [`.cursor/agents/`](../agents/) were synced from [explore-ai](https://github.com/felixzhu97/explore-ai) and point at these skills.
 
 ## Rules vs Skills
 
-|          | Rules                   | Skills                        |
-| -------- | ----------------------- | ----------------------------- |
-| 何时加载 | alwaysApply             | Agent 按 description 按需读取 |
-| 本仓库   | 唯一 `architecture.mdc` | 下方按任务触发                |
+|             | Rules                            | Skills                     |
+| ----------- | -------------------------------- | -------------------------- |
+| When loaded | `alwaysApply`                    | Agent reads by description |
+| This repo   | `architecture.mdc` (ExploreChat) | Table below                |
 
 ## Skills
 
-| Skill                                               | 描述                                                                                             |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| [developer](./developer/)                           | **主技能**：XP / DDD / BDD / TDD / 术语表 / Apple HIG + Instagram 极简 UX / Commit·PR / 测试核心 |
-| [business-tech-analysis](./business-tech-analysis/) | 商业动向 + 技术分析 → 技术商业建议（需实时检索）                                                 |
-| [product-owner](./product-owner/)                   | Product Owner：用户故事、验收标准、DoD、Jira MCP                                                 |
+| Skill                                           | Description                                                                                                           |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| [developer](./developer/)                       | **Primary**: XP / DDD / BDD / TDD / Glossary / Apple HIG + Instagram Emotion UX / Commit·PR                           |
+| [business-analysis](./business-analysis/)       | Business analysis: ubiquitous language, domain understanding, business rules                                          |
+| [market-tech-analysis](./market-tech-analysis/) | Market + tech analysis → tech-business recommendations (needs live search)                                            |
+| [product-owner](./product-owner/)               | User stories, acceptance criteria, DoD, Jira MCP                                                                      |
+| [angular-developer](./angular-developer/)       | Angular deep guide (synced from explore-ai; secondary for this repo)                                                  |
+| [angular-new-app](./angular-new-app/)           | Angular greenfield (synced; secondary)                                                                                |
+| [spring-ai](./spring-ai/)                       | Spring AI 2.0 (synced; ExploreChat AI goes through Nest BFF / Ollama / Python — use when reading explore-ai patterns) |
 
-## 从 explore-ai 同步
+## Synced from explore-ai
 
-已同步 `developer` / `product-owner` / `business-tech-analysis`（含 claim→URL 的 dependency-docs、References 佐证 why、Google Ecosystem、AI model citation set）。栈描述已改为 NestJS + Next.js + Expo + Emotion。
+- Copied `.cursor/agents/*`, skills above, and root `.mcp.json` (Atlassian MCP).
+- **Kept** ExploreChat [architecture.mdc](../rules/architecture.mdc) (did not overwrite with explore-ai Java rule).
+- Adapted [developer](./developer/) hard constraints and DDD paths for Nest domain folders + Next/Expo clients.
 
-## 刻意未拷贝
+## How to use
 
-- `angular-developer` / `angular-new-app` — 本仓为 Next.js + Expo，非 Angular
-- `spring-ai` — 本仓 AI 经 NestJS + Ollama / explore-ai BFF / Python RAG，非 Spring AI
-
-## 如何使用
-
-- 日常开发 / 测试 / 提交 / UX / XP 节奏 → `developer`
-- 商业动向 / 竞品 / GTM → Agent `business-analyst`（skill：`business-tech-analysis`）
-- 前沿研究 / 论文 / 模型趋势 → Agent `tech-analyst`（skill：`business-tech-analysis`）
-- 写用户故事 / 梳理待办 / 建 Jira 票 → `product-owner`
+- Day-to-day feature / test / commit / UX → `developer` (+ Agent `developer`)
+- Domain / business rules / ubiquitous language → Agent `business-analyst` + `business-analysis`
+- Market / competitors / GTM → Agent `market-analyst` + `market-tech-analysis`
+- Research / papers / models → Agent `tech-analyst` + `market-tech-analysis`
+- User stories / Jira → `product-owner` (+ Agent `product-owner`)
+- Orchestrate multi-agent flow → Agent `orchestrator`

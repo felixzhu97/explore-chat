@@ -1,15 +1,16 @@
 ---
-name: business-tech-analysis
+name: market-tech-analysis
 description: >-
   Performs business and technical analysis of market trends and recommends
   technology–business strategy. Always starts from Google, Apple, Microsoft,
   NVIDIA, Meta, OpenAI, DeepMind, Vercel, Anthropic, Cursor, Hugging Face
   trending, and arXiv papers. Use when analyzing commercial dynamics, market
   moves, competitive landscape, tech adoption, product strategy, or when the
-  user asks for 商业分析、技术分析、商业动向、技术商业建议、竞品、趋势研判.
+  user asks for market analysis, technical analysis, commercial dynamics, tech–business advice, competitive landscape, or trend assessment.
+  Not for Business Analysis / domain modeling (use business-analysis + business-analyst).
 ---
 
-# Business & Tech Analysis
+# Market & Tech Analysis
 
 Combine **real-time commercial signal** with **technical feasibility** to recommend what this product (or a named domain) should do next.
 
@@ -17,7 +18,7 @@ Complementary skill: personal `business-model-generator` covers BMC / unit econo
 
 ## When to run
 
-- User asks for 商业动向、行业趋势、竞品、技术选型与商业匹配、Go-to-market vs build
+- User asks for commercial dynamics, industry trends, competitors, tech selection matched to business needs, or Go-to-market vs build
 - Planning features, monetization, or platform bets for AI/chat/RAG/agent products
 - Need a short strategy memo with evidence and next steps
 
@@ -177,11 +178,12 @@ Scoring: [references/rubric.md](references/rubric.md). Sources: [references/sour
 
 ## Related
 
-| Need                                    | Where                                                |
-| --------------------------------------- | ---------------------------------------------------- |
-| 行业动向（子 Agent）                    | [business-analyst](../../agents/business-analyst.md) |
-| 前沿研究（子 Agent）                    | [tech-analyst](../../agents/tech-analyst.md)         |
-| BMC / LTV / CAC deep dive               | `business-model-generator` (personal skill)          |
-| Implement chosen bet                    | [developer](../developer/SKILL.md)                   |
-| Product Owner story from recommendation | [Product Owner](../product-owner/SKILL.md)           |
-| Spring AI capabilities                  | [spring-ai](../spring-ai/SKILL.md)                   |
+| Need                                    | Where                                                                                                     |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Market dynamics (sub-agent)             | [market-analyst](../../agents/market-analyst.md)                                                          |
+| Business Analysis                       | [business-analyst](../../agents/business-analyst.md) + [business-analysis](../business-analysis/SKILL.md) |
+| Frontier research (sub-agent)           | [tech-analyst](../../agents/tech-analyst.md)                                                              |
+| BMC / LTV / CAC deep dive               | `business-model-generator` (personal skill)                                                               |
+| Implement chosen bet                    | [developer](../developer/SKILL.md)                                                                        |
+| Product Owner story from recommendation | [Product Owner](../product-owner/SKILL.md)                                                                |
+| Spring AI capabilities                  | [spring-ai](../spring-ai/SKILL.md)                                                                        |

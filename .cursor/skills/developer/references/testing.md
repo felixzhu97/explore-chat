@@ -4,11 +4,11 @@ Minimal testing standards for this repo. Applied via the [developer skill](../SK
 
 ## Pyramid
 
-| Layer       | Share | Focus                                                               |
-| ----------- | ----- | ------------------------------------------------------------------- |
-| Unit        | ~70%  | Domain / pure logic; &lt; 1ms; no I/O                               |
-| Integration | ~20%  | Collaborators (DB, Nest, Redis, queues); Testcontainers when needed |
-| E2E         | ~10%  | Critical user journeys only (Playwright / Detox); keep few          |
+| Layer       | Share | Focus                                                          |
+| ----------- | ----- | -------------------------------------------------------------- |
+| Unit        | ~70%  | Domain / pure logic; &lt; 1ms; no I/O                          |
+| Integration | ~20%  | Collaborators (DB, Spring, queues); Testcontainers when needed |
+| E2E         | ~10%  | Critical user journeys only (Playwright); keep few             |
 
 Prefer many fast unit tests over a wide E2E suite.
 
@@ -31,9 +31,16 @@ Red (failing test) → Green (minimal code) → Refactor (keep green)
 
 ## Naming
 
+Natural language with spaces — do **not** use `should_result_when_condition` snake_case:
+
 ```
-should_expectedResult_when_condition
+should expected result when condition
 ```
+
+| Surface                                 | Example                                                  |
+| --------------------------------------- | -------------------------------------------------------- |
+| Vitest `it(...)` / JUnit `@DisplayName` | `should open popover below chip when space is available` |
+| Java method identifier                  | `shouldOpenPopoverBelowChipWhenSpaceIsAvailable`         |
 
 ## Test doubles
 
