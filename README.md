@@ -1,3 +1,5 @@
+
+
 # ExploreChat
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -157,7 +159,7 @@ Migrate and generate Prisma client:
 ```bash
 cd services/server
 pnpm db:generate
-pnpm migrate          # or: pnpm exec prisma migrate deploy
+pnpm migrate          # or: pnpm migrate:deploy
 pnpm db:seed          # optional demo data
 cd ../..
 ```
