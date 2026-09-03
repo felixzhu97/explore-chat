@@ -1,0 +1,395 @@
+@startuml C4-Code-Domain-Model
+!include style-zinc.puml
+
+title Code diagram (C4) — ExploreChat domain model (DDD + behavior)
+' Show fields and behavior methods on aggregates/entities; hide empty VOs/repos
+' Aligns with services/server/src/*/domain + Prisma/Cassandra persistence
+
+legend right
+  |= Stereotype |= Meaning |
+  | <<AggregateRoot>> | Consistency boundary; rich behavior on root |
+  | <<Entity>> | Identity + lifecycle; factory + domain methods |
+  | <<ValueObject>> | Immutable; equality by value |
+  | <<DomainService>> | Stateless domain logic / outbound orchestration port |
+  | <<Repository>> | Outbound port (interface in domain/) |
+  | | |
+  | **Behavior** | Methods reflect live Nest domain classes |
+  | **Preferred Terms** | See docs/Glossary.md |
+endlegend
+
+note as N_LAYERS
+  presentation → application → domain ← infrastructure
+  Clients call only Nest (/api/v1); Explore AI via BFF.
+  Rich TS entities use immutable copy-on-write (factory + with*).
+  Post / Comment / Call / Status currently lean on rows or Prisma
+  in application — shown as target domain language.
+  Packages map to Nest vertical slices under services/server/src.
+end note
+
+' ── users ──────────────────────────────────────────────────
+package "users/domain" as pkg_users {
+  class User <<AggregateRoot>> {
+    String id
+    String username
+    String email
+    String phone
+    String avatar
+    String status
+    boolean isOnline
+    Date lastSeen
+    --
+    {static} create(data)
+    updateStatus(status)
+    setOnline(isOnline)
+  }
+  interface IUserRepository <<Repository>> {
+    findById(id)
+    findByEmail(email)
+    findByUsername(username)
+    save(user)
+  }
+}
+
+' ── follow ─────────────────────────────────────────────────
+package "follow (UserFollow)" as pkg_follow {
+  class UserFollow <<Entity>> {
+    String id
+    String followerId
+    String followingId
+    Date createdAt
+  }
+}
+
+User "1" o-- "0..*" UserFollow : follower
+User "1" o-- "0..*" UserFollow : following
+
+' ── chats ──────────────────────────────────────────────────
+package "chats/domain" as pkg_chats {
+  class Chat <<AggregateRoot>> {
+    String id
+    ChatType type
+    String name
+    String avatar
+    int unreadCount
+    --
+    {static} create(data)
+    updateLastMessage(message)
+    incrementUnreadCount()
+    resetUnreadCount()
+  }
+  enum ChatType <<ValueObject>> {
+    PRIVATE
+    GROUP
+  }
+  class ChatParticipant <<Entity>> {
+    String userId
+    ParticipantRole role
+    boolean isArchived
+    boolean isMuted
+  }
+}
+
+Chat "1" *-- "1..*" ChatParticipant
+Chat --> ChatType
+Chat "1" o-- "0..1" Message : lastMessage
+ChatParticipant --> User
+
+' ── messages ───────────────────────────────────────────────
+package "messages/domain" as pkg_messages {
+  class Message <<AggregateRoot>> {
+    String id
+    String chatId
+    String senderId
+    MessageType type
+    String content
+    String mediaUrl
+    boolean isEdited
+    boolean isDeleted
+    boolean isForwarded
+    --
+    {static} create(data)
+    edit(content)
+    delete()
+    addReaction(userId, emoji)
+    markAsRead(userId)
+  }
+  enum MessageType <<ValueObject>> {
+    TEXT
+    IMAGE
+    VIDEO
+    AUDIO
+    FILE
+    LOCATION
+    CONTACT
+  }
+  class MessageReaction <<ValueObject>> {
+    String userId
+    String emoji
+    Date createdAt
+  }
+  class ContactInfo <<ValueObject>> {
+    String name
+    String phone
+    String email
+  }
+  interface IMessageRepository <<Repository>> {
+    save(message)
+    findByChatId(chatId)
+  }
+}
+
+Chat "1" *-- "0..*" Message
+Message --> MessageType
+Message "1" *-- "0..*" MessageReaction
+Message --> ContactInfo
+Message --> User : senderId
+
+' ── groups ─────────────────────────────────────────────────
+package "groups/domain" as pkg_groups {
+  class Group <<AggregateRoot>> {
+    String id
+    String name
+    String creatorId
+    String description
+    String avatar
+    --
+    {static} create(data)
+    addParticipant(userId, addedBy, role)
+    removeParticipant(userId)
+    promoteToAdmin(userId)
+  }
+  class GroupParticipant <<ValueObject>> {
+    String userId
+    ParticipantRole role
+    Date joinedAt
+    String addedBy
+  }
+  class GroupSettings <<ValueObject>> {
+    boolean onlyAdminsCanSendMessages
+    boolean onlyAdminsCanEditInfo
+    boolean onlyAdminsCanAddParticipants
+  }
+  enum ParticipantRole <<ValueObject>> {
+    ADMIN
+    MEMBER
+  }
+}
+
+Group "1" *-- "0..*" GroupParticipant
+Group --> GroupSettings
+GroupParticipant --> ParticipantRole
+ChatParticipant --> ParticipantRole
+Group --> User : creatorId
+
+' ── post + engagement + explore ────────────────────────────
+package "post/domain" as pkg_post {
+  class Post <<AggregateRoot>> {
+    String postId
+    String userId
+    String caption
+    String type
+    String[] mediaUrls
+    String coverUrl
+    String location
+    Date createdAt
+    --
+    ' Anemic today (PostRow); target rich API
+    {static} create(input)
+  }
+  class FeedEntry <<ValueObject>> {
+    String postId
+    String authorId
+  }
+  interface IPostRepository <<Repository>> {
+    insertPost(input)
+    getPostById(postId)
+    getPostsByUserId(userId, limit)
+    deletePost(postId, userId)
+  }
+  interface IEngagementRepository <<Repository>> {
+    like(userId, postId)
+    unlike(userId, postId)
+    save(userId, postId)
+    unsave(userId, postId)
+    getEngagementCounts(postId)
+  }
+  class EngagementCounts <<ValueObject>> {
+    int likeCount
+    int commentCount
+    int saveCount
+  }
+}
+
+Post --> User : author
+Post --> FeedEntry
+Post --> EngagementCounts
+Post "1" o-- "0..*" Comment
+
+' ── comments ───────────────────────────────────────────────
+package "comments/domain" as pkg_comments {
+  class Comment <<Entity>> {
+    String id
+    String postId
+    String userId
+    String content
+    String parentId
+    --
+    ' Persisted as CommentDocRow (Mongo optional)
+  }
+  interface ICommentRepository <<Repository>> {
+    insert(doc)
+    findByPostId(postId, limit, skip)
+    findById(id)
+    deleteOne(id, userId)
+  }
+}
+
+Comment --> User : author
+Comment "0..1" o-- "0..*" Comment : parent
+
+' ── calls ──────────────────────────────────────────────────
+package "calls (Prisma)" as pkg_calls {
+  class Call <<AggregateRoot>> {
+    String id
+    CallType type
+    CallStatus status
+    String initiatorId
+    String chatId
+    Date startTime
+    Date endTime
+    int duration
+  }
+  class CallParticipant <<Entity>> {
+    String userId
+    CallParticipantStatus status
+    Date joinedAt
+    Date leftAt
+  }
+  class Meeting <<Entity>> {
+    String chimeMeetingId
+    String mediaRegion
+  }
+  enum CallType <<ValueObject>> {
+    AUDIO
+    VIDEO
+  }
+  enum CallStatus <<ValueObject>> {
+    INCOMING
+    OUTGOING
+    ONGOING
+    ENDED
+    MISSED
+    REJECTED
+  }
+  enum CallParticipantStatus <<ValueObject>> {
+    CALLING
+    CONNECTED
+    DISCONNECTED
+    BUSY
+    REJECTED
+  }
+}
+
+Call "1" *-- "1..*" CallParticipant
+Call "1" o-- "0..1" Meeting
+Call --> CallType
+Call --> CallStatus
+CallParticipant --> CallParticipantStatus
+Call --> User : initiatorId
+Call --> Chat : optional
+
+' ── status ─────────────────────────────────────────────────
+package "status (Prisma)" as pkg_status {
+  class Status <<AggregateRoot>> {
+    String id
+    String userId
+    StatusType type
+    String content
+    String mediaUrl
+    Date expiresAt
+  }
+  class StatusView <<Entity>> {
+    String userId
+    Date viewedAt
+  }
+  enum StatusType <<ValueObject>> {
+    TEXT
+    IMAGE
+    VIDEO
+  }
+}
+
+Status "1" *-- "0..*" StatusView
+Status --> StatusType
+Status --> User
+
+' ── notifications ──────────────────────────────────────────
+package "notifications/domain" as pkg_notifications {
+  class NotificationItem <<Entity>> {
+    String id
+    String recipientId
+    String actorId
+    NotificationType type
+    String postId
+    String commentId
+    String contentPreview
+    Date createdAt
+    Date readAt
+  }
+  enum NotificationType <<ValueObject>> {
+    like
+    comment
+  }
+  interface INotificationRepository <<Repository>> {
+    upsertLike(recipientId, actorId, postId)
+    insertComment(...)
+    findByRecipient(recipientId, limit)
+    markRead(recipientId, id)
+    markAllRead(recipientId)
+  }
+}
+
+NotificationItem --> NotificationType
+NotificationItem --> User : recipient / actor
+NotificationItem --> Post
+
+' ── media ──────────────────────────────────────────────────
+package "media" as pkg_media {
+  class FileUpload <<Entity>> {
+    String id
+    String originalName
+    String filename
+    String mimetype
+    int size
+    String url
+    String thumbnailUrl
+    String uploadedBy
+  }
+}
+
+FileUpload --> User : uploadedBy
+Post ..> FileUpload : mediaUrls
+Message ..> FileUpload : mediaUrl
+
+' ── auth (application port) ────────────────────────────────
+package "auth/domain" as pkg_auth {
+  interface IAuthService <<DomainService>> {
+    register(data)
+    login(data)
+    refresh(token)
+  }
+  class AuthTokens <<ValueObject>> {
+    String accessToken
+    String refreshToken
+  }
+}
+
+IAuthService ..> User
+IAuthService ..> AuthTokens
+
+N_LAYERS .. pkg_users
+N_LAYERS .. pkg_chats
+N_LAYERS .. pkg_post
+N_LAYERS .. pkg_messages
+
+@enduml

@@ -1,0 +1,244 @@
+' Shared zinc look for Code domain model + Dynamic sequence diagrams.
+' Do NOT use with structural C4 New Style diagrams (C1–C3 / Deployment).
+' Canonical tokens aligned with Academic / explore-portfolio style-zinc.puml.
+
+!theme plain
+
+<style>
+  document {
+    BackgroundColor #FAFAFA
+    FontColor #18181B
+  }
+  title {
+    FontColor #09090B
+    FontSize 18
+    FontStyle bold
+    Margin 20
+  }
+  legend {
+    BackgroundColor #FFFFFF
+    BorderColor #E4E4E7
+    FontColor #3F3F46
+    FontSize 11
+    RoundCorner 12
+    Padding 10
+  }
+  note {
+    BackgroundColor #F8FAFC
+    BorderColor #CBD5E1
+    FontColor #334155
+    FontSize 11
+    RoundCorner 10
+    Padding 10
+    Shadowing 0
+  }
+  classDiagram {
+    LineColor #A1A1AA
+    LineThickness 1.2
+    FontColor #52525B
+    FontSize 11
+    Padding 8
+    Margin 10
+    RoundCorner 12
+    Shadowing 0
+
+    class {
+      BackgroundColor #FFFFFF
+      BorderColor #D4D4D8
+      FontColor #18181B
+      FontSize 12
+      RoundCorner 12
+      Padding 8
+      Shadowing 0
+    }
+    interface {
+      BackgroundColor #F4F4F5
+      BorderColor #A1A1AA
+      FontColor #3F3F46
+      FontStyle italic
+      RoundCorner 12
+      Padding 8
+    }
+    enum {
+      BackgroundColor #FFFBEB
+      BorderColor #F59E0B
+      FontColor #78350F
+      RoundCorner 12
+      Padding 8
+    }
+    package {
+      BackgroundColor #FFFFFF
+      BorderColor #E4E4E7
+      FontColor #3F3F46
+      FontSize 13
+      FontStyle bold
+      RoundCorner 16
+      Padding 14
+      Margin 12
+    }
+    arrow {
+      LineColor #71717A
+      LineThickness 1.25
+      FontColor #52525B
+      FontSize 11
+    }
+
+    .AggregateRoot {
+      BackgroundColor #ECFDF5
+      BorderColor #10B981
+      FontColor #064E3B
+      BorderThickness 1.5
+    }
+    .Entity {
+      BackgroundColor #EFF6FF
+      BorderColor #3B82F6
+      FontColor #1E3A8A
+      BorderThickness 1.5
+    }
+    .ValueObject {
+      BackgroundColor #FFF7ED
+      BorderColor #FB923C
+      FontColor #7C2D12
+    }
+    .DomainService {
+      BackgroundColor #EEF2FF
+      BorderColor #6366F1
+      FontColor #312E81
+      FontStyle italic
+    }
+    .Repository {
+      BackgroundColor #F4F4F5
+      BorderColor #71717A
+      FontColor #27272A
+      FontStyle italic
+    }
+  }
+  sequenceDiagram {
+    LineColor #A1A1AA
+    FontColor #3F3F46
+    FontSize 12
+    RoundCorner 12
+    Padding 10
+    Shadowing 0
+
+    lifeLine {
+      LineColor #D4D4D8
+      LineThickness 1.2
+    }
+    lifeLineHeader {
+      BackgroundColor #FFFFFF
+      BorderColor #D4D4D8
+      FontColor #18181B
+      FontSize 12
+      RoundCorner 12
+      Shadowing 0
+    }
+    participant {
+      BackgroundColor #FFFFFF
+      BorderColor #D4D4D8
+      FontColor #18181B
+      RoundCorner 12
+      Shadowing 0
+    }
+    actor {
+      BackgroundColor #ECFDF5
+      BorderColor #10B981
+      FontColor #064E3B
+    }
+    database {
+      BackgroundColor #FFFBEB
+      BorderColor #F59E0B
+      FontColor #78350F
+      RoundCorner 12
+    }
+    arrow {
+      LineColor #71717A
+      LineThickness 1.25
+      FontColor #52525B
+      FontSize 11
+    }
+    divider {
+      BackgroundColor #F4F4F5
+      BorderColor #E4E4E7
+      FontColor #52525B
+    }
+    group {
+      BackgroundColor #FFFFFF
+      BorderColor #E4E4E7
+      FontColor #3F3F46
+      RoundCorner 12
+    }
+
+    .ui {
+      BackgroundColor #F8FAFC
+      BorderColor #64748B
+      FontColor #0F172A
+      BorderThickness 1.5
+    }
+    .java {
+      BackgroundColor #EFF6FF
+      BorderColor #3B82F6
+      FontColor #1E3A8A
+      BorderThickness 1.5
+    }
+    .python {
+      BackgroundColor #F0FDFA
+      BorderColor #14B8A6
+      FontColor #134E4A
+      BorderThickness 1.5
+    }
+    .db {
+      BackgroundColor #FFFBEB
+      BorderColor #F59E0B
+      FontColor #78350F
+      BorderThickness 1.5
+    }
+    .bus {
+      BackgroundColor #FFF7ED
+      BorderColor #FB923C
+      FontColor #7C2D12
+      BorderThickness 1.5
+    }
+    .external {
+      BackgroundColor #F4F4F5
+      BorderColor #A1A1AA
+      FontColor #3F3F46
+      BorderThickness 1.5
+    }
+  }
+</style>
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam nodesep 42
+skinparam ranksep 52
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 20
+skinparam BoxPadding 12
+
+skinparam participant {
+  BackgroundColor<<ui>> #F8FAFC
+  BorderColor<<ui>> #64748B
+  FontColor<<ui>> #0F172A
+  BackgroundColor<<java>> #EFF6FF
+  BorderColor<<java>> #3B82F6
+  FontColor<<java>> #1E3A8A
+  BackgroundColor<<python>> #F0FDFA
+  BorderColor<<python>> #14B8A6
+  FontColor<<python>> #134E4A
+  BackgroundColor<<db>> #FFFBEB
+  BorderColor<<db>> #F59E0B
+  FontColor<<db>> #78350F
+  BackgroundColor<<bus>> #FFF7ED
+  BorderColor<<bus>> #FB923C
+  FontColor<<bus>> #7C2D12
+  BackgroundColor<<external>> #F4F4F5
+  BorderColor<<external>> #A1A1AA
+  FontColor<<external>> #3F3F46
+}
+skinparam database {
+  BackgroundColor<<db>> #FFFBEB
+  BorderColor<<db>> #F59E0B
+  FontColor<<db>> #78350F
+}
