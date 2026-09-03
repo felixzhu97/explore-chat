@@ -21,8 +21,7 @@ Do not mix `C4_blue_new` into domain/dynamic diagrams（也不要把 `style-zinc
 | ------------------------------- | ---- | --------------------------------------------------------- |
 | `C1-Context.puml`               | C1   | 系统上下文（用户、ExploreChat、外部系统）                 |
 | `C2-Container.puml`             | C2   | 容器（Web/Admin/Mobile、Nest API、Python 服务、数据存储） |
-| `C3-Component-Backend.puml`     | C3   | NestJS API 组件与 Clean Architecture 端口/适配器          |
-| `C3-Component-Frontend.puml`    | C3   | Web（Next.js）主要 UI / 状态 / 客户端；Mobile/Admin 见 C2 |
+| `C3-Component.puml`             | C3   | Web（Next.js）与 NestJS API 组件；Mobile/Admin 见 C2     |
 | `C4-Code-Domain-Model.puml`     | Code | 领域模型（Aggregate 行为 + VO / Repository；zinc 风格）   |
 | `style-zinc.puml`               | Shared | Code + Dynamics 共用 zinc 样式（与 explore-ai 对齐）    |
 | `C4-Deployment.puml`            | C4   | 本地开发（compose + Nest `:3001`）                        |
@@ -40,13 +39,9 @@ Do not mix `C4_blue_new` into domain/dynamic diagrams（也不要把 `style-zinc
 
 ![C2-Container](png/C2-Container.png)
 
-### C3 - 后端
+### C3 - 组件
 
-![C3-Component-Backend](png/C3-Component-Backend.png)
-
-### C3 - 前端
-
-![C3-Component-Frontend](png/C3-Component-Frontend.png)
+![C3-Component](png/C3-Component.png)
 
 ### Code - 领域模型
 

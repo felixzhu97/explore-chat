@@ -251,13 +251,7 @@ Architecture diagrams live under [docs/developer/c4-model/](docs/developer/c4-mo
 
 ### C3 — Components
 
-#### API server
-
-![C3 API server](./docs/developer/c4-model/png/C3-Component-Backend.png)
-
-#### Web app
-
-![C3 web app](./docs/developer/c4-model/png/C3-Component-Frontend.png)
+![C3 components](./docs/developer/c4-model/png/C3-Component.png)
 
 ## Contributing
 
