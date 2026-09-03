@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 HOST = os.getenv("HOST", "0.0.0.0")
-PORT = int(os.getenv("PORT", "8002"))
+PORT = int(os.getenv("PORT", "8120"))
 DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 WORKERS = int(os.getenv("WORKERS", "4"))
 

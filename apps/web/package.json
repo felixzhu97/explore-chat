@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "pnpm exec next build",
-    "dev": "pnpm exec next dev -p 4000",
+    "dev": "pnpm exec next dev -p 4220",
     "check-types": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
     "start": "pnpm exec next start",
@@ -51,6 +51,7 @@
     "@whatschat/analytics": "workspace:*",
     "@whatschat/im": "workspace:*",
     "@whatschat/shared-types": "workspace:*",
+    "@explore/ui": "file:../../../packages/ui",
     "amazon-chime-sdk-js": "^3.0.0",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",

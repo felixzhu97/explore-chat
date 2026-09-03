@@ -1,7 +1,7 @@
 # RAG Service
 
 Layout (same as other Python helpers): `main.py` / `config.py` / `api.py` / `service.py` / `domain/` / `tests/`.
-Start: `uvicorn main:app --host 0.0.0.0 --port 8002`.
+Start: `uvicorn main:app --host 0.0.0.0 --port 8120`.
 
 Retrieval Augmented Generation (RAG) service for WhatsChat, providing semantic search and AI-powered question answering capabilities.
 
@@ -79,7 +79,7 @@ cp .env.example .env
 
 ```bash
 cd services/rag
-uvicorn main:app --host 0.0.0.0 --port 8002
+uvicorn main:app --host 0.0.0.0 --port 8120
 ```
 
 ## Configuration
@@ -160,7 +160,7 @@ GET    /health/ready               Readiness probe
 ### Upload a Document
 
 ```bash
-curl -X POST "http://localhost:8002/api/v1/documents/upload" \
+curl -X POST "http://localhost:8120/api/v1/documents/upload" \
   -H "Content-Type: multipart/form-data" \
   -F "file=@document.pdf"
 ```
@@ -168,7 +168,7 @@ curl -X POST "http://localhost:8002/api/v1/documents/upload" \
 ### Scrape a Webpage
 
 ```bash
-curl -X POST "http://localhost:8002/api/v1/crawler/scrape" \
+curl -X POST "http://localhost:8120/api/v1/crawler/scrape" \
   -H "Content-Type: application/json" \
   -d '{
     "url": "https://en.wikipedia.org/wiki/Black_Myth_Wukong",
@@ -180,7 +180,7 @@ curl -X POST "http://localhost:8002/api/v1/crawler/scrape" \
 ### Query the RAG System
 
 ```bash
-curl -X POST "http://localhost:8002/api/v1/query" \
+curl -X POST "http://localhost:8120/api/v1/query" \
   -H "Content-Type: application/json" \
   -d '{
     "query": "What is the main topic of the documents?",
@@ -195,7 +195,7 @@ curl -X POST "http://localhost:8002/api/v1/query" \
 Available collections: `documents`, `posts`, `comments`, `webpages`
 
 ```bash
-curl -X POST "http://localhost:8002/api/v1/query" \
+curl -X POST "http://localhost:8120/api/v1/query" \
   -H "Content-Type: application/json" \
   -d '{
     "query": "What did users say about this post?",
@@ -208,7 +208,7 @@ curl -X POST "http://localhost:8002/api/v1/query" \
 ### Streaming Query
 
 ```bash
-curl -X POST "http://localhost:8002/api/v1/query/stream" \
+curl -X POST "http://localhost:8120/api/v1/query/stream" \
   -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
   -d '{
@@ -221,15 +221,15 @@ curl -X POST "http://localhost:8002/api/v1/query/stream" \
 ### List Collections
 
 ```bash
-curl -s "http://localhost:8002/api/v1/query/collections" | python3 -m json.tool
+curl -s "http://localhost:8120/api/v1/query/collections" | python3 -m json.tool
 ```
 
 ## API Documentation
 
 Once running, visit:
 
-- Swagger UI: http://localhost:8002/docs
-- ReDoc: http://localhost:8002/redoc
+- Swagger UI: http://localhost:8120/docs
+- ReDoc: http://localhost:8120/redoc
 
 ## Architecture
 

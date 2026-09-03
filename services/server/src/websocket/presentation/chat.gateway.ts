@@ -29,7 +29,7 @@ const onlineUsers = new Map<string, string>();
 @WebSocketGateway({
   cors: {
     origin: process.env["CORS_ORIGIN"]?.split(",") || [
-      "http://localhost:4000",
+      "http://localhost:4220",
       "http://localhost:4001",
     ],
     credentials: true,

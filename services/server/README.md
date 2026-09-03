@@ -81,9 +81,10 @@ pnpm dev
 ```
 
 启动后访问：
-- **API**: http://localhost:3001/api/v1
-- **API 文档 (Swagger)**: http://localhost:3001/api/docs
-- **健康检查**: http://localhost:3001/api/v1/health
+
+- **API**: http://localhost:9200/api/v1
+- **API 文档 (Swagger)**: http://localhost:9200/api/docs
+- **健康检查**: http://localhost:9200/api/v1/health
 
 ## 🛠️ 开发命令
 
@@ -134,4 +135,3 @@ pnpm db:push         # 推送 schema 变更
 - **日志**: Winston
 
 更多详细信息请查看 [完整文档](../../docs/server/README.md)。
-

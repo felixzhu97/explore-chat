@@ -35,7 +35,7 @@ async function bootstrap() {
   // CORS配置
   const corsOptions = {
     origin: process.env["CORS_ORIGIN"]?.split(",") || [
-      "http://localhost:4000",
+      "http://localhost:4220",
       "http://localhost:4001",
     ],
     credentials: true,
@@ -79,7 +79,7 @@ async function bootstrap() {
     SwaggerModule.setup("api/docs", app, document);
   }
 
-  const port = parseInt(process.env["PORT"] || "3001", 10);
+  const port = parseInt(process.env["PORT"] || "9200", 10);
   const host = process.env["HOST"] || "0.0.0.0";
 
   await app.listen(port, host);

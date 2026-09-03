@@ -37,10 +37,11 @@ trap cleanup SIGINT SIGTERM
 echo -e "${GREEN}WhatsChat (${ENV})${NC}\n"
 
 echo "[1/6] Stopping old processes..."
-lsof -ti:3001 2>/dev/null | xargs kill -9 2>/dev/null || true
+lsof -ti:9200 2>/dev/null | xargs kill -9 2>/dev/null || true
 lsof -ti:3456 2>/dev/null | xargs kill -9 2>/dev/null || true
-lsof -ti:8000 2>/dev/null | xargs kill -9 2>/dev/null || true
-lsof -ti:8001 2>/dev/null | xargs kill -9 2>/dev/null || true
+lsof -ti:8100 2>/dev/null | xargs kill -9 2>/dev/null || true
+lsof -ti:8110 2>/dev/null | xargs kill -9 2>/dev/null || true
+lsof -ti:8120 2>/dev/null | xargs kill -9 2>/dev/null || true
 pkill -f "whatschat-server.*dev" 2>/dev/null || true
 pkill -f "services/media-gen/main.py" 2>/dev/null || true
 pkill -f "services/video-gen/app.py" 2>/dev/null || true
@@ -60,7 +61,7 @@ $COMPOSE_CMD -f docker-compose.yml down 2>/dev/null || true
 $COMPOSE_CMD -f docker-compose.yml up -d --wait postgres redis kafka cassandra mongodb elasticsearch qdrant 2>/dev/null || true
 for i in $(seq 1 60); do
   nc -z 127.0.0.1 5433 2>/dev/null && nc -z 127.0.0.1 6379 2>/dev/null && nc -z 127.0.0.1 9092 2>/dev/null && \
-  nc -z 127.0.0.1 9042 2>/dev/null && nc -z 127.0.0.1 27017 2>/dev/null && nc -z 127.0.0.1 9200 2>/dev/null && \
+  nc -z 127.0.0.1 9042 2>/dev/null && nc -z 127.0.0.1 27017 2>/dev/null && nc -z 127.0.0.1 9520 2>/dev/null && \
   nc -z 127.0.0.1 6333 2>/dev/null && break
   sleep 1
 done
@@ -72,7 +73,7 @@ export JWT_SECRET="${JWT_SECRET:-whatschat-dev-jwt-secret}"
 export JWT_REFRESH_SECRET="${JWT_REFRESH_SECRET:-whatschat-dev-refresh-secret}"
 export CASSANDRA_CONTACT_POINTS="${CASSANDRA_CONTACT_POINTS:-127.0.0.1:9042}"
 export MONGODB_URI="${MONGODB_URI:-mongodb://localhost:27017/whatschat}"
-export ELASTICSEARCH_NODE="${ELASTICSEARCH_NODE:-http://localhost:9200}"
+export ELASTICSEARCH_NODE="${ELASTICSEARCH_NODE:-http://localhost:9520}"
 export NODE_ENV=$([ "$ENV" == "prod" ] && echo production || echo development)
 cd "$ROOT_DIR"
 
@@ -96,11 +97,11 @@ if [ -d "$VISION_DIR" ] && [ -f "$VISION_DIR/requirements.txt" ] && command -v p
   (cd "$VISION_DIR" && {
     [ ! -d ".venv" ] && python3 -m venv .venv
     .venv/bin/pip install -r requirements.txt -q 2>/dev/null || true
-    exec .venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8001
+    exec .venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8110
   }) &
   VISION_PID=$!
   sleep 2
-  kill -0 $VISION_PID 2>/dev/null && echo -e "${GREEN}Vision service started on http://localhost:8001${NC}" || VISION_PID=""
+  kill -0 $VISION_PID 2>/dev/null && echo -e "${GREEN}Vision service started on http://localhost:8110${NC}" || VISION_PID=""
 fi
 
 echo "[5.5/6] Starting RAG service..."
@@ -111,10 +112,10 @@ if [ -d "$RAG_DIR" ] && [ -f "$RAG_DIR/requirements.txt" ] && command -v python3
     fi
     .venv/bin/pip install -r requirements.txt -q 2>/dev/null || true
   }) &
-  (cd "$RAG_DIR" && .venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8002) &
+  (cd "$RAG_DIR" && .venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8120) &
   RAG_PID=$!
   sleep 2
-  kill -0 $RAG_PID 2>/dev/null && echo -e "${GREEN}RAG service started on http://localhost:8002${NC}" || RAG_PID=""
+  kill -0 $RAG_PID 2>/dev/null && echo -e "${GREEN}RAG service started on http://localhost:8120${NC}" || RAG_PID=""
 fi
 
 [ ! -d "$ROOT_DIR/node_modules" ] && pnpm install
@@ -126,7 +127,7 @@ kill -0 $SERVER_PID 2>/dev/null || { echo -e "${RED}Server failed${NC}"; exit 1;
 
 for i in $(seq 1 90); do
   kill -0 $SERVER_PID 2>/dev/null || { echo -e "${RED}Server exited${NC}"; exit 1; }
-  nc -z 127.0.0.1 3001 2>/dev/null && break
+  nc -z 127.0.0.1 9200 2>/dev/null && break
   [ $i -eq 90 ] && { kill $SERVER_PID 2>/dev/null; echo -e "${RED}Server listen timeout${NC}"; exit 1; }
   sleep 3
 done
@@ -152,15 +153,15 @@ if [ -d "$RECOMMENDATION_DIR" ] && command -v python3 >/dev/null 2>&1; then
   fi
   if [ -f "$RECOMMENDATION_DIR/main.py" ]; then
     if [ -d "$RECOMMENDATION_DIR/.venv" ]; then
-      (cd "$RECOMMENDATION_DIR" && . .venv/bin/activate && python3 -m uvicorn main:app --host 0.0.0.0 --port 8000) &
+      (cd "$RECOMMENDATION_DIR" && . .venv/bin/activate && python3 -m uvicorn main:app --host 0.0.0.0 --port 8100) &
     else
-      (cd "$RECOMMENDATION_DIR" && python3 -m uvicorn main:app --host 0.0.0.0 --port 8000) &
+      (cd "$RECOMMENDATION_DIR" && python3 -m uvicorn main:app --host 0.0.0.0 --port 8100) &
     fi
     RECOMMENDATION_API_PID=$!
     sleep 1
-    kill -0 $RECOMMENDATION_API_PID 2>/dev/null && echo -e "${GREEN}Recommendation API started on http://localhost:8000${NC}" || RECOMMENDATION_API_PID=""
+    kill -0 $RECOMMENDATION_API_PID 2>/dev/null && echo -e "${GREEN}Recommendation API started on http://localhost:8100${NC}" || RECOMMENDATION_API_PID=""
   fi
 fi
 
-echo -e "\n${GREEN}Ready. API: http://localhost:3001  Vision: http://localhost:8001  RAG: http://localhost:8002  (Ctrl+C to stop)${NC}\n"
+echo -e "\n${GREEN}Ready. API: http://localhost:9200  Vision: http://localhost:8110  RAG: http://localhost:8120  (Ctrl+C to stop)${NC}\n"
 wait $SERVER_PID

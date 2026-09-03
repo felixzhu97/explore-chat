@@ -1,6 +1,8 @@
-# ExploreChat Quick Start Guide
+<!-- Ports: @explore/dev-ports — API 9200, Web 4220 -->
 
-## ExploreChat 快速入门指南
+# WhatsFeed Quick Start Guide
+
+## WhatsFeed 快速入门指南
 
 ---
 
@@ -24,8 +26,8 @@ docker --version
 ## 2. Install | 安装
 
 ```bash
-git clone <repo-url> explore-chat
-cd explore-chat
+git clone <repo-url> whatsfeed
+cd whatsfeed
 pnpm install
 ```
 
@@ -74,12 +76,12 @@ pnpm start:server
 
 | 服务                     | 默认地址                            |
 | ------------------------ | ----------------------------------- |
-| Web                      | http://localhost:3000               |
-| API                      | http://localhost:3001               |
-| API 健康检查             | http://localhost:3001/api/v1/health |
-| Swagger（非 production） | http://localhost:3001/api/docs      |
+| Web                      | http://localhost:4220               |
+| API                      | http://localhost:9200               |
+| API 健康检查             | http://localhost:9200/api/v1/health |
+| Swagger（非 production） | http://localhost:9200/api/docs      |
 
-可选旁路服务：recommendation `:8000`、vision `:8001`、rag `:8002`、media-gen `:3456`。
+可选旁路服务：recommendation `:8100`、vision `:8110`、rag `:8120`、media-gen `:3456`。
 
 ---
 

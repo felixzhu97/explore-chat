@@ -166,7 +166,7 @@ export class ConfigService {
 
     const config: AppConfig = {
       server: {
-        port: parseInt(process.env["PORT"] || "3001", 10),
+        port: parseInt(process.env["PORT"] || "9200", 10),
         host: process.env["HOST"] || "0.0.0.0",
         nodeEnv: process.env["NODE_ENV"] || "development",
         isProduction: process.env["NODE_ENV"] === "production",
@@ -239,7 +239,7 @@ export class ConfigService {
         },
         minio: {
           endpoint: process.env["MINIO_ENDPOINT"] || "localhost",
-          port: parseInt(process.env["MINIO_PORT"] || "9000", 10),
+          port: parseInt(process.env["MINIO_PORT"] || "8500", 10),
           useSsl: process.env["MINIO_USE_SSL"] === "true",
           accessKey: process.env["MINIO_ACCESS_KEY"] || "minioadmin",
           secretKey: process.env["MINIO_SECRET_KEY"] || "minioadmin",
@@ -247,7 +247,7 @@ export class ConfigService {
           region: process.env["MINIO_REGION"] || "us-east-1",
           publicBaseUrl:
             process.env["MINIO_PUBLIC_BASE_URL"] ||
-            "http://localhost:3001/uploads/media",
+            "http://localhost:9200/uploads/media",
         },
       },
       email: {
@@ -315,7 +315,7 @@ export class ConfigService {
       security: {
         cors: {
           origin: process.env["CORS_ORIGIN"]?.split(",") || [
-            "http://localhost:4000",
+            "http://localhost:4220",
             "http://localhost:4001",
           ],
           credentials: true,
@@ -399,12 +399,12 @@ export class ConfigService {
       },
       recommendation: {
         apiBaseUrl:
-          process.env["RECOMMENDATION_API_URL"] || "http://localhost:8000",
+          process.env["RECOMMENDATION_API_URL"] || "http://localhost:8100",
       },
       vision: {
         enabled: process.env["VISION_ENABLED"] !== "false",
         serviceUrl: (
-          process.env["VISION_SERVICE_URL"] || "http://localhost:8001"
+          process.env["VISION_SERVICE_URL"] || "http://localhost:8110"
         ).replace(/\/$/, ""),
         timeoutMs: parseInt(process.env["VISION_TIMEOUT_MS"] || "15000", 10),
         maxImagesPerPost: parseInt(

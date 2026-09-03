@@ -18,7 +18,10 @@ SERVER_DIR="$ROOT_DIR/services/server"
 echo -e "${GREEN}Stopping WhatsChat (${ENV})${NC}\n"
 
 echo "[1/2] Stopping processes..."
-lsof -ti:3001 2>/dev/null | xargs kill -9 2>/dev/null || true
+lsof -ti:9200 2>/dev/null | xargs kill -9 2>/dev/null || true
+lsof -ti:8100 2>/dev/null | xargs kill -9 2>/dev/null || true
+lsof -ti:8110 2>/dev/null | xargs kill -9 2>/dev/null || true
+lsof -ti:8120 2>/dev/null | xargs kill -9 2>/dev/null || true
 lsof -ti:3456 2>/dev/null | xargs kill -9 2>/dev/null || true
 pkill -f "services/media-gen/main.py" 2>/dev/null || true
 pkill -f "services/video-gen/app.py" 2>/dev/null || true

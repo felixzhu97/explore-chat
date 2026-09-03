@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 HOST = os.getenv("HOST", "0.0.0.0")
-PORT = int(os.getenv("PORT", os.getenv("RECOMMENDATION_PORT", "8000")))
+PORT = int(os.getenv("PORT", os.getenv("RECOMMENDATION_PORT", "8100")))
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
