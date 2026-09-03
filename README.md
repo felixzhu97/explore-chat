@@ -47,7 +47,7 @@ pnpm + Turbo monorepo.
 | **Python services**              | Media generation, vision, recommendation, RAG — reached only through Nest.                                                                                                                                    |
 
 Canonical terms and package paths: [docs/Glossary.md](docs/Glossary.md).  
-Rules summary: [.cursor/rules/architecture.mdc](.cursor/rules/architecture.mdc).
+Architecture diagrams: [docs/developer/c4-model/README.md](docs/developer/c4-model/README.md).
 
 ```text
 Browser / Mobile ──HTTPS / WS──► NestJS (:3001, /api/v1)
@@ -255,11 +255,9 @@ Architecture diagrams live under [docs/developer/c4-model/](docs/developer/c4-mo
 
 ## Contributing
 
-1. Use branch names `<type>/<slug>` (for example `feat/…`, `fix/…`, `docs/…`, `refactor/…`).
+1. Use branch names as a single English kebab-case slug (for example `c3-component-diagram`, `remove-cursor-config`).
 2. Prefer small PRs with a clear why, References, and linked Jira when applicable.
 3. Keep Glossary Preferred Terms and architecture docs in sync when package layout or APIs change.
-
-See [.cursor/skills/developer/SKILL.md](.cursor/skills/developer/SKILL.md) for project commit and PR conventions.
 
 ## License
 
