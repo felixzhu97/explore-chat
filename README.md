@@ -47,6 +47,7 @@ pnpm + Turbo monorepo.
 | **Python services**              | Media generation, vision, recommendation, RAG — reached only through Nest.                                                                                                                                    |
 
 Canonical terms and package paths: [docs/Glossary.md](docs/Glossary.md).  
+Design guideline: [docs/Guideline.md](docs/Guideline.md).  
 Architecture diagrams: [docs/developer/c4-model/README.md](docs/developer/c4-model/README.md).
 
 ```text
@@ -75,6 +76,8 @@ packages/
   im               # IM / RTC client module
   analytics        # Analytics SDK
 docs/
+  Guideline.md     # Product / integration design guideline
+  Glossary.md      # Ubiquitous language
   developer/       # Quick start, API, C4, CI notes
   product-owner/   # User story map
 ```
@@ -229,11 +232,12 @@ Pre-commit hooks run via Husky (`lint-staged` + typecheck).
 
 | Doc             | Path                                                                         |
 | --------------- | ---------------------------------------------------------------------------- |
+| Guideline       | [docs/Guideline.md](docs/Guideline.md)                                       |
+| Glossary        | [docs/Glossary.md](docs/Glossary.md)                                         |
 | Quick start     | [docs/developer/QUICKSTART.md](docs/developer/QUICKSTART.md)                 |
 | API             | [docs/developer/api.md](docs/developer/api.md)                               |
 | Python services | [docs/developer/python-services.md](docs/developer/python-services.md)       |
 | C4 model        | [docs/developer/c4-model/](docs/developer/c4-model/)                         |
-| Glossary        | [docs/Glossary.md](docs/Glossary.md)                                         |
 | User story map  | [docs/product-owner/User-Story-Map.md](docs/product-owner/User-Story-Map.md) |
 | CI / coverage   | [docs/developer/cicd/](docs/developer/cicd/)                                 |
 

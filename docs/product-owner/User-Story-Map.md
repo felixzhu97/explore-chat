@@ -108,5 +108,6 @@ journey
 ## 参考
 
 - [User Story Mapping — Jeff Patton](https://www.jpattonassociates.com/user-story-mapping/)
+- [Guideline](../Guideline.md)
 - [Domain Glossary](../Glossary.md)
 - [C4 模型](../developer/c4-model/README.md)

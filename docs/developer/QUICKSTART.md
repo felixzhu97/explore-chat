@@ -99,9 +99,10 @@ Pre-commit：`lint-staged` + `pnpm check-types`（Husky）。
 
 | 文档            | 路径                                                                     |
 | --------------- | ------------------------------------------------------------------------ |
+| Guideline       | [../Guideline.md](../Guideline.md)                                       |
+| Glossary        | [../Glossary.md](../Glossary.md)                                         |
 | API             | [api.md](./api.md)                                                       |
 | Postman         | [postman_collection.json](./postman_collection.json)                     |
 | C4              | [c4-model/](./c4-model/)                                                 |
-| Glossary        | [../Glossary.md](../Glossary.md)                                         |
 | User Story Map  | [../product-owner/User-Story-Map.md](../product-owner/User-Story-Map.md) |
 | Python services | [python-services.md](./python-services.md)                               |
