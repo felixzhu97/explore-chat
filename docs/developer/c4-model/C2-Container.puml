@@ -1,7 +1,6 @@
 @startuml
 !ROUNDED_STYLE=1
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
-' 样式内联自 style.puml（勿改为 !include）
 UpdateElementStyle("person", "#FFFFFF", "#000000", "#000000")
 UpdateElementStyle("external_person", "#FFFFFF", "#000000", "#000000")
 UpdateElementStyle("system", "#FFFFFF", "#000000", "#000000")
@@ -27,8 +26,8 @@ System_Boundary(explorechat, "ExploreChat") {
   Container(web_app, "Web 应用", "Next.js / React", "Feed、Reels、探索、聊天；:4000")
   Container(admin_app, "管理端", "Next.js", "用户与内容运营；:4001")
   Container(mobile_app, "移动端", "Expo / React Native", "Feed、聊天、探索")
-  Container(api_server, "API 服务", "NestJS / TypeScript", "REST / GraphQL / Socket.IO；:3001；进程内缓存与 fan-out")
-  ContainerDb(sqlite, "SQLite", "Prisma file:./dev.db", "用户、聊天、帖子、Feed、评论、通知、FTS")
+  Container(api_server, "API 服务", "Spring Boot / Java", "REST /api/v1；Socket.IO :9002；HTTP :9001")
+  ContainerDb(h2db, "H2 / Postgres", "JPA + Liquibase", "用户、聊天、帖子、评论、通知")
   Container(media_gen, "媒体生成", "Python FastAPI", "可选旁路 :3456")
   Container(recommendation_svc, "推荐服务", "Python", "可选旁路 :8000")
   Container(vision_svc, "视觉服务", "Python", "可选旁路 :8001")
@@ -42,10 +41,10 @@ Container_Ext(explore_ai, "Explore AI", "外部 AI 平台", "可选 BFF")
 Rel(user_web, web_app, "使用", "HTTP :4000")
 Rel(user_mobile, mobile_app, "使用", "HTTPS / Expo")
 Rel(admin_user, admin_app, "使用", "HTTP :4001")
-Rel(web_app, api_server, "REST / GraphQL / WS", "HTTP :3001")
-Rel(mobile_app, api_server, "REST / GraphQL / WS", "HTTP :3001")
-Rel(admin_app, api_server, "REST", "HTTP :3001")
-Rel(api_server, sqlite, "读写", "Prisma")
+Rel(web_app, api_server, "REST / Socket.IO", "HTTP :9001 / WS :9002")
+Rel(mobile_app, api_server, "REST / Socket.IO", "HTTP :9001 / WS :9002")
+Rel(admin_app, api_server, "REST", "HTTP :9001")
+Rel(api_server, h2db, "读写", "JPA")
 Rel(api_server, file_storage, "上传 / 下载", "本地 FS")
 Rel(api_server, media_gen, "媒体生成", "HTTP :3456")
 Rel(api_server, vision_svc, "审核 / 标签", "HTTP :8001")
@@ -56,11 +55,9 @@ Rel(api_server, explore_ai, "AI BFF", "HTTPS")
 Rel(rag_svc, file_storage, "向量目录", "本地 path")
 
 note right of api_server
-  本地默认无 Docker。
-  Cache = 进程内 Memory；
-  Feed fan-out = FeedFanoutService；
-  Search = SQLite FTS5。
-  compose 仅 CI / 实验。
+  根目录 Gradle + Spring Boot。
+  NestJS 已移除。
+  Socket.IO = netty-socketio :9002。
 end note
 
 SHOW_LEGEND()

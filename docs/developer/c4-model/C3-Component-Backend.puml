@@ -1,0 +1,39 @@
+@startuml C3-Component-Backend
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title 组件图 (C3) - API 服务（Spring Boot）
+
+' Per-feature packages: controller → service → domain ← infra (+ mapper)
+
+Container_Boundary(api_server, "API 服务 (com.chat)") {
+  Component(controllers, "REST 控制器", "Spring MVC", "auth、users、chats、messages、posts、comments、media、search、calls、ai、health")
+  Component(websocket, "Socket.IO", "netty-socketio", "chat:join/leave、message:send/typing、message:received；:9002")
+  Component(app_services, "应用服务", "@Service", "Auth、Users、Chats、Messages、Post、Follow、Notifications、Media、Search、Calls、AiProxy")
+  Component(domain_model, "领域模型", "JPA entities / VOs", "User、Chat、Message、Post、Comment、Follow、Notification")
+  Component(domain_repos, "仓储接口", "domain.repository", "UserRepository、ChatRepository、MessageRepository、…")
+  Component(infra_adapters, "基础设施", "infra/", "JPA repos、JwtService、SocketIoConfig、Upstream WebClient")
+  ComponentDb(jpa_store, "持久化", "H2 / Postgres", "Liquibase 0.1.xml；ddl-auto validate")
+}
+
+Container_Ext(web_app, "Web / Mobile / Admin", "客户端", "调用 API")
+Container_Ext(media_gen, "Media Gen", "Python", ":3456")
+Container_Ext(vision, "Vision", "Python", ":8001")
+Container_Ext(recommendation, "Recommendation", "Python", ":8000")
+Container_Ext(ollama, "Ollama", "LLM", ":11434")
+
+Rel(web_app, controllers, "REST /api/v1")
+Rel(web_app, websocket, "Socket.IO")
+Rel(controllers, app_services, "调用")
+Rel(websocket, app_services, "消息写路径")
+Rel(app_services, domain_repos, "依赖")
+Rel(app_services, domain_model, "编排")
+Rel(infra_adapters, domain_repos, "实现")
+Rel(infra_adapters, jpa_store, "JPA")
+Rel(app_services, media_gen, "HTTP")
+Rel(app_services, vision, "HTTP")
+Rel(app_services, recommendation, "HTTP")
+Rel(app_services, ollama, "HTTP")
+
+@enduml
