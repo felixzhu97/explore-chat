@@ -16,7 +16,7 @@ from domain.schemas.query import QueryRequest, QueryResponse, SourceDocument
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/query", tags=["Query"])
+router = APIRouter(tags=["Query"])
 
 
 def build_context_and_prompt(
@@ -161,7 +161,7 @@ async def search_collections(
     return all_results
 
 
-@router.post("", response_model=QueryResponse)
+@router.post("/documents:query", response_model=QueryResponse)
 async def query(
     request: QueryRequest,
     embeddings: EmbeddingService = Depends(rag_service.get_embeddings),
@@ -230,7 +230,7 @@ async def query(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/stream")
+@router.post("/documents:streamQuery")
 async def query_stream(
     request: QueryRequest,
     embeddings: EmbeddingService = Depends(rag_service.get_embeddings),

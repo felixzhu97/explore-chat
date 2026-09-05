@@ -16,10 +16,10 @@ from domain.schemas.query import SyncCommentsRequest, SyncPostsRequest, SyncResu
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/sync", tags=["Sync"])
+router = APIRouter(tags=["Sync"])
 
 
-@router.post("/posts", response_model=SyncResult)
+@router.post("/posts:sync", response_model=SyncResult)
 async def sync_posts(
     request: Optional[SyncPostsRequest] = None,
     processor: DocumentProcessor = Depends(rag_service.get_processor),
@@ -128,7 +128,7 @@ async def sync_posts(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/comments", response_model=SyncResult)
+@router.post("/comments:sync", response_model=SyncResult)
 async def sync_comments(
     request: Optional[SyncCommentsRequest] = None,
     processor: DocumentProcessor = Depends(rag_service.get_processor),
@@ -247,7 +247,7 @@ async def sync_comments(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/all", response_model=dict)
+@router.post("/resources:sync", response_model=dict)
 async def sync_all(
     processor: DocumentProcessor = Depends(rag_service.get_processor),
     embeddings: EmbeddingService = Depends(rag_service.get_embeddings),

@@ -1,16 +1,20 @@
-"""Document management API routes."""
+"""Document management API routes (AIP REST)."""
 import logging
 import time
-from typing import Annotated
+from typing import Annotated, Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Response, UploadFile, status
 
 import service as rag_service
+from aip.page_token import (
+    clamp_page_size,
+    next_offset_page_token,
+    offset_from_page_token,
+)
 from domain.core.document_processor import DocumentProcessor
 from domain.core.embedding import EmbeddingService
 from domain.core.qdrant_client import QdrantService
 from domain.schemas.document import (
-    DocumentDeleteResponse,
     DocumentInfo,
     DocumentListResponse,
     DocumentUploadResponse,
@@ -21,18 +25,14 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
 
-@router.post("/upload", response_model=DocumentUploadResponse)
-async def upload_document(
+@router.post("", response_model=DocumentUploadResponse, status_code=status.HTTP_201_CREATED)
+async def create_document(
     file: Annotated[UploadFile, File(description="Document to upload")],
     processor: DocumentProcessor = Depends(rag_service.get_processor),
     embeddings: EmbeddingService = Depends(rag_service.get_embeddings),
     qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
-    """
-    Upload and process a document.
-
-    Supports: PDF, HTML, Markdown, DOCX, TXT
-    """
+    """Create (upload and index) a document. Supports PDF, HTML, Markdown, DOCX, TXT."""
     start_time = time.time()
 
     if not file.filename:
@@ -136,12 +136,15 @@ async def upload_document(
 
 @router.get("", response_model=DocumentListResponse)
 async def list_documents(
-    skip: int = Query(default=0, ge=0),
-    limit: int = Query(default=20, ge=1, le=100),
+    page_size: Optional[int] = Query(default=None, ge=1, le=100),
+    page_token: Optional[str] = Query(default=None),
     qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
-    """List all uploaded documents."""
+    """List uploaded documents (AIP-158 pagination)."""
     try:
+        size = clamp_page_size(page_size)
+        offset = offset_from_page_token(page_token, size)
+
         results = await qdrant.search(
             collection="documents",
             query_vector=[0] * 768,
@@ -175,14 +178,13 @@ async def list_documents(
                 updated_at=None,
             ))
 
-        total = len(documents)
-        documents = documents[skip:skip + limit]
+        page = documents[offset:offset + size]
+        has_more = offset + size < len(documents)
+        next_token = next_offset_page_token(offset, size, has_more)
 
         return DocumentListResponse(
-            documents=documents,
-            total=total,
-            skip=skip,
-            limit=limit,
+            documents=page,
+            next_page_token=next_token,
         )
     except Exception as e:
         logger.error("Failed to list documents: %s", e)
@@ -227,12 +229,12 @@ async def get_document(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/{doc_id}", response_model=DocumentDeleteResponse)
+@router.delete("/{doc_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_document(
     doc_id: str,
     qdrant: QdrantService = Depends(rag_service.get_qdrant),
 ):
-    """Delete a document and all its chunks."""
+    """Delete a document and all its chunks (AIP-135)."""
     try:
         results = await qdrant.search(
             collection="documents",
@@ -249,12 +251,7 @@ async def delete_document(
         await qdrant.delete_points("documents", point_ids)
 
         logger.info("Deleted document '%s' with %s chunks", doc_id, len(point_ids))
-
-        return DocumentDeleteResponse(
-            id=doc_id,
-            deleted=True,
-            chunks_deleted=len(point_ids),
-        )
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     except HTTPException:
         raise
