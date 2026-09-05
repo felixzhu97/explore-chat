@@ -1,4 +1,4 @@
-# ExploreChat Mobile (`apps/mobile`)
+# ExploreChat Mobile (`src/main/mobile`)
 
 React Native + Expo（SDK 55+）客户端，与 Spring Boot API (`:9001`) 对接；UI 对齐 Instagram（信息流、Reels、私信、探索/搜索、个人主页与「Settings and activity」设置栈）。
 

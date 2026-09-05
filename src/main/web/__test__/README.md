@@ -25,7 +25,7 @@ __test__/
 
 ## Running Tests
 
-### From the web app directory (`apps/web/`):
+### From the web app directory (`src/main/web/`):
 
 ```bash
 # Run all tests once
