@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { PostRepositoryImpl } from "@/post/infra/post-repository.adapter";
+import { PostRepositoryImpl } from "@/post/infra/post.repository";
 import { CassandraPostRepository } from "@/core/database/cassandra-post.repository";
 
 describe("PostRepositoryImpl", () => {

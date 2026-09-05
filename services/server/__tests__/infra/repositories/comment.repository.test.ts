@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { CommentRepositoryImpl } from "@/comments/infra/comment-repository.adapter";
+import { CommentRepositoryImpl } from "@/comments/infra/comment.repository";
 import { MongoCommentRepository } from "@/core/database/mongo-comment.repository";
 
 describe("CommentRepositoryImpl", () => {

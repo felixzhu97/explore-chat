@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { EngagementRepositoryImpl } from "@/post/infra/engagement-repository.adapter";
+import { EngagementRepositoryImpl } from "@/post/infra/engagement.repository";
 import { CassandraEngagementRepository } from "@/core/database/cassandra-engagement.repository";
 
 describe("EngagementRepositoryImpl", () => {
