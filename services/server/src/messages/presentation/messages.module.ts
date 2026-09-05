@@ -3,11 +3,19 @@ import { MessagesController } from "./messages.controller";
 import { MessagesService } from "@/messages/application/messages.service";
 import { DatabaseModule } from "@/core/database/database.module";
 import { WebSocketModule } from "@/websocket/presentation/websocket.module";
+import { PrismaMessageRepository } from "@/messages/infra/prisma-message.repository";
+import { PrismaChatRepository } from "@/chats/infra/prisma-chat.repository";
 
 @Module({
   imports: [DatabaseModule, forwardRef(() => WebSocketModule)],
   controllers: [MessagesController],
-  providers: [MessagesService],
+  providers: [
+    MessagesService,
+    PrismaMessageRepository,
+    PrismaChatRepository,
+    { provide: "MessageRepository", useExisting: PrismaMessageRepository },
+    { provide: "ChatRepository", useExisting: PrismaChatRepository },
+  ],
   exports: [MessagesService],
 })
 export class MessagesModule {}
