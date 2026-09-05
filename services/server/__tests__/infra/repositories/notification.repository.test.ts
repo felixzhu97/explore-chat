@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { NotificationRepositoryImpl } from "@/notifications/infra/notification-repository.adapter";
+import { NotificationRepositoryImpl } from "@/notifications/infra/notification.repository";
 import { MongoNotificationRepository } from "@/core/database/mongo-notification.repository";
 
 describe("NotificationRepositoryImpl", () => {
