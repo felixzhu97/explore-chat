@@ -5,6 +5,7 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { Response } from "express";
+import { buildRpcStatus } from "@/core/aip/rpc-status";
 
 @Catch(BadRequestException)
 export class ValidationExceptionFilter implements ExceptionFilter {
@@ -19,13 +20,25 @@ export class ValidationExceptionFilter implements ExceptionFilter {
     const message =
       typeof exceptionResponse === "string"
         ? exceptionResponse
-        : (exceptionResponse as any).message || exception.message;
+        : (exceptionResponse as { message?: string | string[] }).message ||
+          exception.message;
 
-    response.status(400).json({
-      success: false,
-      message: Array.isArray(message) ? message.join(", ") : message,
-      code: "VALIDATION_ERROR",
-      timestamp: new Date().toISOString(),
-    });
+    const text = Array.isArray(message) ? message.join(", ") : String(message);
+    const details =
+      typeof exceptionResponse === "object" &&
+      exceptionResponse !== null &&
+      "message" in exceptionResponse &&
+      Array.isArray((exceptionResponse as { message: unknown }).message)
+        ? [
+            {
+              "@type": "google.rpc.BadRequest",
+              fieldViolations: (
+                exceptionResponse as { message: string[] }
+              ).message.map((description) => ({ description })),
+            },
+          ]
+        : undefined;
+
+    response.status(400).json(buildRpcStatus(400, text, details));
   }
 }
