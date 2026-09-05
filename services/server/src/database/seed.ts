@@ -6,8 +6,7 @@ import { seedPosts } from "./seed-posts";
 import logger from "@/shared/utils/logger";
 
 if (!process.env["DATABASE_URL"]) {
-  process.env["DATABASE_URL"] =
-    "postgresql://whatschat:whatschat123@localhost:5433/whatschat?schema=public";
+  process.env["DATABASE_URL"] = "file:./dev.db";
 }
 
 const config = ConfigService.loadConfig();
@@ -182,7 +181,28 @@ export async function main() {
     logger.info(`创建了 ${users.length} 个用户`);
 
     for (const user of users) {
-      await prisma.userSettings.create({ data: { userId: user.id } });
+      await prisma.userSettings.create({
+        data: {
+          userId: user.id,
+          notifications: {
+            messages: true,
+            calls: true,
+            groups: true,
+            status: true,
+          },
+          privacy: {
+            lastSeen: "everyone",
+            profilePhoto: "everyone",
+            status: "everyone",
+            readReceipts: true,
+          },
+          chat: {
+            enterToSend: true,
+            mediaAutoDownload: true,
+            fontSize: "medium",
+          },
+        },
+      });
     }
     logger.info("创建了用户设置");
 
@@ -390,7 +410,6 @@ export async function main() {
           },
         ];
       }),
-      skipDuplicates: true,
     });
     logger.info("创建了联系人关系");
 
