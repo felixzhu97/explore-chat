@@ -6,7 +6,7 @@ import {
   mapUnknownToMessageCreate,
   type ApiChatRow,
   type ApiMessageRow,
-} from "../chats.mapper";
+} from "../services/chats.service";
 
 describe("chats.mapper", () => {
   describe("mapApiChatRowToContact", () => {

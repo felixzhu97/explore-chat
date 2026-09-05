@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ChatsService } from "@/chat/services/chats.service";
 
-vi.mock("@/chat/chats.mapper", () => ({
+vi.mock("@/chat/services/chats.service", () => ({
   mapApiChatRowToContact: vi.fn((chat: any) => ({
     id: chat.id,
     name: chat.name || "Chat",
