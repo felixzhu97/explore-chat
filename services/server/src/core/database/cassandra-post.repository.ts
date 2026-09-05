@@ -3,72 +3,78 @@ import type {
   PostRow,
   CreatePostInput,
 } from "@/post/domain/post.repository.interface";
-import { CassandraService } from "./cassandra.service";
+import { PrismaService } from "./prisma.service";
 
 export type {
   PostRow,
   CreatePostInput,
 } from "@/post/domain/post.repository.interface";
 
+function encodePageState(createdAt: Date, postId: string): string {
+  return Buffer.from(
+    JSON.stringify({ t: createdAt.toISOString(), id: postId }),
+    "utf8",
+  ).toString("base64url");
+}
+
+function decodePageState(pageState?: string): { t: Date; id: string } | null {
+  if (!pageState) return null;
+  try {
+    const raw = Buffer.from(pageState, "base64url").toString("utf8");
+    const o = JSON.parse(raw) as { t?: string; id?: string };
+    if (typeof o.t !== "string" || typeof o.id !== "string") return null;
+    return { t: new Date(o.t), id: o.id };
+  } catch {
+    return null;
+  }
+}
+
+function toRow(p: {
+  id: string;
+  userId: string;
+  createdAt: Date;
+  caption: string | null;
+  type: string;
+  mediaUrls: unknown;
+  location: string | null;
+  coverUrl: string | null;
+}): PostRow {
+  const media = Array.isArray(p.mediaUrls) ? (p.mediaUrls as string[]) : [];
+  return {
+    post_id: p.id,
+    user_id: p.userId,
+    created_at: p.createdAt,
+    caption: p.caption,
+    type: p.type,
+    media_urls: media,
+    location: p.location,
+    cover_url: p.coverUrl,
+  };
+}
+
 @Injectable()
 export class CassandraPostRepository {
-  constructor(private readonly cassandra: CassandraService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async insertPost(input: CreatePostInput): Promise<void> {
-    const client = this.cassandra.getClient();
-    if (!client) return;
-    const createdAt = new Date();
-    const coverUrl = input.coverUrl ?? null;
-    await client.execute(
-      `INSERT INTO posts (user_id, created_at, post_id, caption, type, media_urls, location, cover_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        input.userId,
-        createdAt,
-        input.postId,
-        input.caption,
-        input.type,
-        input.mediaUrls,
-        input.location ?? null,
-        coverUrl,
-      ],
-      { prepare: true },
-    );
-    await client.execute(
-      `INSERT INTO post_by_id (post_id, user_id, created_at, caption, type, media_urls, location, cover_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        input.postId,
-        input.userId,
-        createdAt,
-        input.caption,
-        input.type,
-        input.mediaUrls,
-        input.location ?? null,
-        coverUrl,
-      ],
-      { prepare: true },
-    );
+    await this.prisma.socialPost.create({
+      data: {
+        id: input.postId,
+        userId: input.userId,
+        caption: input.caption,
+        type: input.type,
+        mediaUrls: input.mediaUrls ?? [],
+        location: input.location ?? null,
+        coverUrl: input.coverUrl ?? null,
+      },
+    });
   }
 
   async getPostById(postId: string): Promise<PostRow | null> {
-    const client = this.cassandra.getClient();
-    if (!client) return null;
-    const result = await client.execute(
-      `SELECT post_id, user_id, created_at, caption, type, media_urls, location, cover_url FROM post_by_id WHERE post_id = ?`,
-      [postId],
-      { prepare: true },
-    );
-    const row = result.rows[0] as Record<string, unknown> | undefined;
-    if (!row) return null;
-    return {
-      post_id: row["post_id"] as string,
-      user_id: row["user_id"] as string,
-      created_at: row["created_at"] as Date,
-      caption: row["caption"] as string | null,
-      type: row["type"] as string,
-      media_urls: (row["media_urls"] as string[] | null) ?? [],
-      location: row["location"] as string | null,
-      cover_url: (row["cover_url"] as string | null) ?? null,
-    };
+    const p = await this.prisma.socialPost.findUnique({
+      where: { id: postId },
+    });
+    return p ? toRow(p) : null;
   }
 
   async getPostsByUserId(
@@ -76,45 +82,46 @@ export class CassandraPostRepository {
     limit: number,
     pageState?: string,
   ): Promise<{ rows: PostRow[]; pageState?: string }> {
-    const client = this.cassandra.getClient();
-    if (!client) return { rows: [] };
-    const opts: { prepare: boolean; fetchSize: number; pageState?: string } = {
-      prepare: true,
-      fetchSize: limit,
+    const cursor = decodePageState(pageState);
+    const rows = await this.prisma.socialPost.findMany({
+      where: {
+        userId,
+        ...(cursor
+          ? {
+              OR: [
+                { createdAt: { lt: cursor.t } },
+                { createdAt: cursor.t, id: { lt: cursor.id } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+      take: limit + 1,
+    });
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const out: { rows: PostRow[]; pageState?: string } = {
+      rows: page.map(toRow),
     };
-    if (pageState !== undefined) opts.pageState = pageState;
-    const result = await client.execute(
-      `SELECT user_id, created_at, post_id, caption, type, media_urls, location, cover_url FROM posts WHERE user_id = ?`,
-      [userId],
-      opts,
-    );
-    const rows = (result.rows || []).map((row: Record<string, unknown>) => ({
-      user_id: row["user_id"] as string,
-      created_at: row["created_at"] as Date,
-      post_id: row["post_id"] as string,
-      caption: row["caption"] as string | null,
-      type: row["type"] as string,
-      media_urls: (row["media_urls"] as string[] | null) ?? [],
-      location: row["location"] as string | null,
-      cover_url: (row["cover_url"] as string | null) ?? null,
-    }));
-    const out: { rows: PostRow[]; pageState?: string } = { rows };
-    if (result.pageState != null) out.pageState = result.pageState;
+    if (hasMore && page.length > 0) {
+      const last = page[page.length - 1]!;
+      out.pageState = encodePageState(last.createdAt, last.id);
+    }
     return out;
   }
 
   async deletePost(postId: string, userId: string): Promise<void> {
-    const client = this.cassandra.getClient();
-    if (!client) return;
-    const existing = await this.getPostById(postId);
-    if (!existing || existing.user_id !== userId) return;
-    await client.execute(
-      `DELETE FROM posts WHERE user_id = ? AND created_at = ? AND post_id = ?`,
-      [userId, existing.created_at, postId],
-      { prepare: true },
-    );
-    await client.execute(`DELETE FROM post_by_id WHERE post_id = ?`, [postId], {
-      prepare: true,
+    const existing = await this.prisma.socialPost.findUnique({
+      where: { id: postId },
     });
+    if (!existing || existing.userId !== userId) return;
+    await this.prisma.$transaction([
+      this.prisma.postLike.deleteMany({ where: { postId } }),
+      this.prisma.postSave.deleteMany({ where: { postId } }),
+      this.prisma.postComment.deleteMany({ where: { postId } }),
+      this.prisma.feedEntry.deleteMany({ where: { postId } }),
+      this.prisma.activityNotification.deleteMany({ where: { postId } }),
+      this.prisma.socialPost.delete({ where: { id: postId } }),
+    ]);
   }
 }
