@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { NotificationRepositoryAdapter } from "@/notifications/infrastructure/notification-repository.adapter";
+import { NotificationRepositoryImpl } from "@/notifications/infra/notification-repository.adapter";
 import { MongoNotificationRepository } from "@/core/database/mongo-notification.repository";
 
-describe("NotificationRepositoryAdapter", () => {
-  let adapter: NotificationRepositoryAdapter;
+describe("NotificationRepositoryImpl", () => {
+  let adapter: NotificationRepositoryImpl;
   let mockImpl: ReturnType<typeof vi.mocked<MongoNotificationRepository>>;
 
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe("NotificationRepositoryAdapter", () => {
       markReadMany: vi.fn().mockResolvedValue(0),
       markAllRead: vi.fn().mockResolvedValue(0),
     } as never;
-    adapter = new NotificationRepositoryAdapter(mockImpl);
+    adapter = new NotificationRepositoryImpl(mockImpl);
   });
 
   describe("upsertLike", () => {

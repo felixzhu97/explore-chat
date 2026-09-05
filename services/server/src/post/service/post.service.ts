@@ -6,14 +6,14 @@ import {
 } from "@nestjs/common";
 import compact from "lodash/compact";
 import uniq from "lodash/uniq";
-import type { IPostRepository } from "@/post/domain/post.repository.interface";
-import type { IEngagementRepository } from "@/post/domain/engagement.repository.interface";
+import type { PostRepository } from "@/post/domain/repository/post.repository";
+import type { EngagementRepository } from "@/post/domain/repository/engagement.repository";
 import { KafkaProducerService } from "@/core/messaging/kafka-producer.service";
 import { AiService } from "@/ai/application/ai.service";
 import { UsersService } from "@/users/service/users.service";
 import { VisionClientService } from "@/ai/application/vision-client.service";
 import { ConfigService } from "@/core/config/config.service";
-import { FeedFanoutService } from "@/post/application/feed-fanout.service";
+import { FeedFanoutService } from "@/post/service/feed-fanout.service";
 import { SearchService } from "@/search/application/search.service";
 import { HTTP_URL_PREFIX, parseDataUrl } from "@/shared/utils/media-url";
 import logger from "@/shared/utils/logger";
@@ -30,10 +30,10 @@ export interface CreatePostData {
 @Injectable()
 export class PostService {
   constructor(
-    @Inject("IPostRepository")
-    private readonly postRepo: IPostRepository,
-    @Inject("IEngagementRepository")
-    private readonly engagementRepo: IEngagementRepository,
+    @Inject("PostRepository")
+    private readonly postRepo: PostRepository,
+    @Inject("EngagementRepository")
+    private readonly engagementRepo: EngagementRepository,
     private readonly kafka: KafkaProducerService,
     private readonly usersService: UsersService,
     private readonly aiService: AiService,

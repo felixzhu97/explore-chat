@@ -3,9 +3,9 @@ import keyBy from "lodash/keyBy";
 import mapValues from "lodash/mapValues";
 import { PrismaService } from "@/core/database/prisma.service";
 import { ElasticsearchService } from "@/core/database/elasticsearch.service";
-import type { IPostRepository } from "@/post/domain/post.repository.interface";
-import type { IEngagementRepository } from "@/post/domain/engagement.repository.interface";
-import type { ICommentRepository } from "@/comments/domain/comment.repository.interface";
+import type { PostRepository } from "@/post/domain/repository/post.repository";
+import type { EngagementRepository } from "@/post/domain/repository/engagement.repository";
+import type { CommentRepository } from "@/comments/domain/repository/comment.repository";
 import { VisionClientService } from "@/ai/application/vision-client.service";
 import { ConfigService } from "@/core/config/config.service";
 import { HTTP_URL_PREFIX, parseDataUrl } from "@/shared/utils/media-url";
@@ -15,12 +15,12 @@ export class AdminService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly elasticsearch: ElasticsearchService,
-    @Inject("IPostRepository")
-    private readonly postRepo: IPostRepository,
-    @Inject("IEngagementRepository")
-    private readonly engagementRepo: IEngagementRepository,
-    @Inject("ICommentRepository")
-    private readonly commentRepo: ICommentRepository,
+    @Inject("PostRepository")
+    private readonly postRepo: PostRepository,
+    @Inject("EngagementRepository")
+    private readonly engagementRepo: EngagementRepository,
+    @Inject("CommentRepository")
+    private readonly commentRepo: CommentRepository,
     private readonly visionClient: VisionClientService,
   ) {}
 

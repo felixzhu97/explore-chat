@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { EngagementRepositoryAdapter } from "@/post/infrastructure/engagement-repository.adapter";
+import { EngagementRepositoryImpl } from "@/post/infra/engagement-repository.adapter";
 import { CassandraEngagementRepository } from "@/core/database/cassandra-engagement.repository";
 
-describe("EngagementRepositoryAdapter", () => {
-  let adapter: EngagementRepositoryAdapter;
+describe("EngagementRepositoryImpl", () => {
+  let adapter: EngagementRepositoryImpl;
   let mockImpl: ReturnType<typeof vi.mocked<CassandraEngagementRepository>>;
 
   beforeEach(() => {
@@ -22,7 +22,7 @@ describe("EngagementRepositoryAdapter", () => {
       incrementCommentCount: vi.fn().mockResolvedValue(undefined),
       decrementCommentCount: vi.fn().mockResolvedValue(undefined),
     } as never;
-    adapter = new EngagementRepositoryAdapter(mockImpl);
+    adapter = new EngagementRepositoryImpl(mockImpl);
   });
 
   describe("like", () => {

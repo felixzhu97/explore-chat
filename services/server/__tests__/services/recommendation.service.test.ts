@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { RecommendationService } from "@/post/application/recommendation.service";
+import { RecommendationService } from "@/post/service/recommendation.service";
 
 vi.mock("@/core/config/config.service", () => ({
   ConfigService: {

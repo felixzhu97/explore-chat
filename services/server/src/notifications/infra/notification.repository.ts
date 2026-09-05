@@ -1,13 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import type {
-  INotificationRepository,
+  NotificationRepository,
   NotificationItem,
-} from "@/notifications/domain/notification.repository.interface";
-import { MongoNotificationRepository } from "@/core/database/mongo-notification.repository";
+} from "@/notifications/domain/repository/notification.repository";
+import { MongoNotificationRepository as MongoNotificationStore } from "@/core/database/mongo-notification.repository";
 
 @Injectable()
-export class NotificationRepositoryAdapter implements INotificationRepository {
-  constructor(private readonly impl: MongoNotificationRepository) {}
+export class NotificationRepositoryImpl implements NotificationRepository {
+  constructor(private readonly impl: MongoNotificationStore) {}
 
   upsertLike(
     recipientId: string,

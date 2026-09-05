@@ -11,7 +11,7 @@ import { PrismaService } from "../database/prisma.service";
 import { CassandraFeedRepository } from "../database/cassandra-feed.repository";
 import { CacheService } from "../cache/cache.service";
 import { ElasticsearchService } from "../database/elasticsearch.service";
-import type { IPostRepository } from "@/post/domain/post.repository.interface";
+import type { PostRepository } from "@/post/domain/repository/post.repository";
 import { VisionClientService } from "@/ai/application/vision-client.service";
 import logger from "@/shared/utils/logger";
 import { HTTP_URL_PREFIX, parseDataUrl } from "@/shared/utils/media-url";
@@ -47,8 +47,8 @@ export class KafkaConsumerService implements OnModuleInit, OnModuleDestroy {
     private readonly feedRepo: CassandraFeedRepository,
     private readonly cache: CacheService,
     private readonly elasticsearch: ElasticsearchService,
-    @Inject("IPostRepository")
-    private readonly postRepo: IPostRepository,
+    @Inject("PostRepository")
+    private readonly postRepo: PostRepository,
     private readonly visionClient: VisionClientService,
   ) {
     this.config = ConfigService.loadConfig();

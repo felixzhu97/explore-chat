@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { FeedService } from "@/post/application/feed.service";
+import { FeedService } from "@/post/service/feed.service";
 
 describe("FeedService", () => {
   describe("constructor", () => {

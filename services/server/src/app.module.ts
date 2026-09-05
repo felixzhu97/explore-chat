@@ -20,13 +20,13 @@ import { VideoModule } from "@/ai/presentation/video.module";
 import { ImageModule } from "@/ai/presentation/image.module";
 import { VisionModule } from "@/ai/presentation/vision.module";
 import { VoiceModule } from "@/ai/presentation/voice.module";
-import { PostModule } from "@/post/presentation/post.module";
+import { PostModule } from "@/post/post.module";
 import { MediaModule } from "@/media/presentation/media.module";
-import { CommentsModule } from "@/comments/presentation/comments.module";
+import { CommentsModule } from "@/comments/comments.module";
 import { SearchModule } from "@/search/presentation/search.module";
 import { FollowModule } from "@/follow/presentation/follow.module";
 import { GraphqlModule } from "@/graphql/graphql.module";
-import { NotificationsModule } from "@/notifications/presentation/notifications.module";
+import { NotificationsModule } from "@/notifications/notifications.module";
 import { AdsModule } from "@/ads/presentation/ads.module";
 
 @Module({

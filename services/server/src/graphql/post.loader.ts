@@ -2,7 +2,7 @@ import { Injectable, Scope, Inject } from "@nestjs/common";
 import { REQUEST } from "@nestjs/core";
 import type { Request } from "express";
 import DataLoader from "dataloader";
-import { PostService } from "@/post/application/post.service";
+import { PostService } from "@/post/service/post.service";
 
 export type PostGql = Record<string, unknown> & {
   postId: string;

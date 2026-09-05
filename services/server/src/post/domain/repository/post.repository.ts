@@ -19,7 +19,7 @@ export interface CreatePostInput {
   coverUrl?: string;
 }
 
-export interface IPostRepository {
+export interface PostRepository {
   insertPost(input: CreatePostInput): Promise<void>;
   getPostById(postId: string): Promise<PostRow | null>;
   getPostsByUserId(

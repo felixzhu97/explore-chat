@@ -4,23 +4,23 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import type { ICommentRepository } from "@/comments/domain/comment.repository.interface";
-import type { IEngagementRepository } from "@/post/domain/engagement.repository.interface";
-import type { IPostRepository } from "@/post/domain/post.repository.interface";
+import type { CommentRepository } from "@/comments/domain/repository/comment.repository";
+import type { EngagementRepository } from "@/post/domain/repository/engagement.repository";
+import type { PostRepository } from "@/post/domain/repository/post.repository";
 import { KafkaProducerService } from "@/core/messaging/kafka-producer.service";
 import { AiService } from "@/ai/application/ai.service";
-import { NotificationService } from "@/notifications/application/notification.service";
+import { NotificationService } from "@/notifications/service/notification.service";
 import { ChatGateway } from "@/websocket/presentation/chat.gateway";
 
 @Injectable()
 export class CommentService {
   constructor(
-    @Inject("ICommentRepository")
-    private readonly commentRepo: ICommentRepository,
-    @Inject("IEngagementRepository")
-    private readonly engagementRepo: IEngagementRepository,
-    @Inject("IPostRepository")
-    private readonly postRepo: IPostRepository,
+    @Inject("CommentRepository")
+    private readonly commentRepo: CommentRepository,
+    @Inject("EngagementRepository")
+    private readonly engagementRepo: EngagementRepository,
+    @Inject("PostRepository")
+    private readonly postRepo: PostRepository,
     private readonly kafka: KafkaProducerService,
     private readonly notificationService: NotificationService,
     private readonly chatGateway: ChatGateway,

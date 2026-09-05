@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { ExploreService } from "@/post/application/explore.service";
-import { RecommendationService } from "@/post/application/recommendation.service";
+import { ExploreService } from "@/post/service/explore.service";
+import { RecommendationService } from "@/post/service/recommendation.service";
 import { ExperimentService } from "@/analytics/application/experiment.service";
 import { AdService } from "@/ads/application/ad.service";
 

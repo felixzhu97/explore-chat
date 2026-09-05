@@ -12,7 +12,7 @@ export interface NotificationItem {
   readAt?: string;
 }
 
-export interface INotificationRepository {
+export interface NotificationRepository {
   upsertLike(
     recipientId: string,
     actorId: string,

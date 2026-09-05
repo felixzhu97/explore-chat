@@ -13,10 +13,10 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { CurrentUser } from "@/auth/controller/current-user.decorator";
-import { PostService } from "@/post/application/post.service";
-import { FeedService } from "@/post/application/feed.service";
-import { EngagementService } from "@/post/application/engagement.service";
-import { ExploreService } from "@/post/application/explore.service";
+import { PostService } from "@/post/service/post.service";
+import { FeedService } from "@/post/service/feed.service";
+import { EngagementService } from "@/post/service/engagement.service";
+import { ExploreService } from "@/post/service/explore.service";
 
 @ApiTags("帖子")
 @Controller("posts")

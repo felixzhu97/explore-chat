@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { PostRepositoryAdapter } from "@/post/infrastructure/post-repository.adapter";
+import { PostRepositoryImpl } from "@/post/infra/post-repository.adapter";
 import { CassandraPostRepository } from "@/core/database/cassandra-post.repository";
 
-describe("PostRepositoryAdapter", () => {
-  let adapter: PostRepositoryAdapter;
+describe("PostRepositoryImpl", () => {
+  let adapter: PostRepositoryImpl;
   let mockImpl: ReturnType<typeof vi.mocked<CassandraPostRepository>>;
 
   beforeEach(() => {
@@ -14,7 +14,7 @@ describe("PostRepositoryAdapter", () => {
       getPostsByUserId: vi.fn().mockResolvedValue({ rows: [] }),
       deletePost: vi.fn().mockResolvedValue(undefined),
     } as never;
-    adapter = new PostRepositoryAdapter(mockImpl);
+    adapter = new PostRepositoryImpl(mockImpl);
   });
 
   describe("insertPost", () => {

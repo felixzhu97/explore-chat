@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { FeedSeenService } from "@/post/application/feed-seen.service";
+import { FeedSeenService } from "@/post/service/feed-seen.service";
 import {
   USER_DOMAIN,
   BOUNDARY,

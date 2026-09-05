@@ -13,7 +13,7 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { CurrentUser } from "@/auth/controller/current-user.decorator";
-import { CommentService } from "@/comments/application/comment.service";
+import { CommentService } from "@/comments/service/comment.service";
 
 @ApiTags("评论")
 @Controller("posts/:postId/comments")
