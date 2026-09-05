@@ -83,6 +83,15 @@ flowchart TB
 | Voice Translate Target Language | 语音翻译目标语言 | Voice translate：`zh` / `en`（无 `auto`）                                                        |
 | Client Message ID               | 客户端消息 ID    | 发送方生成的幂等键（`clientMsgId`）；服务端 ack 原样回传，用于乐观气泡对账                       |
 | Message Delivery Status         | 消息投递状态     | `sending`（仅客户端）→ `sent` → `delivered` → `read`；失败为 `failed`                            |
+| Abstract Immutable              | 不可变基类       | 领域内核：`id`（cuid String）、`createdAt`；对齐 Prisma；身份只落基类                            |
+| Abstract Entity                 | 实体基类         | 继承 Abstract Immutable；`updatedAt`、计划中的 `version`；可变实体继承它                         |
+| Abstract Aggregate Root         | 聚合根基类       | 继承 Abstract Entity；一致性边界（User / Chat / Message / Group / Post）                         |
+| Abstract Participant            | 参与者基类       | 继承 Abstract Entity；`userId` / `role` / `joinedAt`；Chat 与 Group 参与者共用                   |
+| Abstract Embeddable             | 嵌入值对象基类   | 无独立表身份的值对象内核                                                                         |
+| Soft Delete                     | 软删除           | Message 等领域：`isDeleted` + `delete()`；不物理删行                                             |
+| Ensure Participant              | 确保参与者       | Chat 聚合校验 userId 是否为会话参与者                                                            |
+| Assert Sendable By              | 断言可发送       | Message / Chat 侧规则：发送方须有权发往该会话                                                    |
+| Abstract Prisma Repository      | Prisma 仓储基类  | infra 通用基类，持有 PrismaClient；各 `*Repository` 实现继承它以减样板；domain 不依赖 Prisma     |
 
 ---
 
