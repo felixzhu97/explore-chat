@@ -3,7 +3,7 @@ import { persistStore, persistReducer, PersistConfig } from "redux-persist";
 import { useDispatch, useSelector } from "react-redux";
 import type { TypedUseSelectorHook } from "react-redux";
 import { getStorage } from "@/auth/storage";
-import callsReducer from "@/calls/callsSlice";
+import callsReducer from "@/calls/calls.service";
 import contactsReducer from "@/chat/contactsSlice";
 import messagesReducer from "@/chat/messagesSlice";
 import notificationsReducer from "@/layout/notificationsSlice";
