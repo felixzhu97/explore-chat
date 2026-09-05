@@ -4,7 +4,7 @@ import type {
   VoiceGenTargetLanguage,
   VoiceTranslateTargetLanguage,
 } from "@whatschat/shared-types";
-import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
+import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { VoiceService } from "@/ai/application/voice.service";
 
 @ApiTags("语音生成")

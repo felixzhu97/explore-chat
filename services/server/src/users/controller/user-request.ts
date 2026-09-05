@@ -1,6 +1,6 @@
 import { IsOptional, IsString, IsNumber, Min, Max } from "class-validator";
 
-export class GetUsersDto {
+export class GetUsersRequest {
   @IsOptional()
   @IsNumber({}, { message: "页码必须是数字" })
   @Min(1, { message: "页码必须大于0" })
@@ -17,7 +17,7 @@ export class GetUsersDto {
   search?: string;
 }
 
-export class UpdateUserDto {
+export class UpdateUserRequest {
   @IsOptional()
   @IsString({ message: "用户名必须是字符串" })
   username?: string;

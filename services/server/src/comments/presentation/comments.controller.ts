@@ -11,8 +11,8 @@ import {
   HttpStatus,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
-import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
-import { CurrentUser } from "@/auth/presentation/current-user.decorator";
+import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
+import { CurrentUser } from "@/auth/controller/current-user.decorator";
 import { CommentService } from "@/comments/application/comment.service";
 
 @ApiTags("评论")

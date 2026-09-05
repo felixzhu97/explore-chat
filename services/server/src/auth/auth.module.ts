@@ -2,12 +2,11 @@ import { Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import { ConfigService } from "@/core/config/config.service";
-import { AuthController } from "./auth.controller";
-import { AuthService } from "@/auth/application/auth.service";
-import { JwtStrategy } from "./jwt.strategy";
-import { UserRepositoryAdapter } from "@/users/infrastructure/user.repository.adapter";
+import { AuthController } from "./controller/auth.controller";
+import { AuthService } from "@/auth/service/auth.service";
+import { JwtStrategy } from "./controller/jwt.strategy";
 import { DatabaseModule } from "@/core/database/database.module";
-import { UsersModule } from "@/users/presentation/users.module";
+import { UsersModule } from "@/users/users.module";
 
 @Module({
   imports: [
@@ -30,10 +29,6 @@ import { UsersModule } from "@/users/presentation/users.module";
   providers: [
     AuthService,
     JwtStrategy,
-    {
-      provide: "IUserRepository",
-      useClass: UserRepositoryAdapter,
-    },
     {
       provide: "IAuthService",
       useClass: AuthService,

@@ -9,20 +9,17 @@ import {
   HttpStatus,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
-import { AuthService } from "@/auth/application/auth.service";
+import { AuthService } from "@/auth/service/auth.service";
+import { UpdateUserData, UsersService } from "@/users/service/users.service";
 import {
-  UpdateUserData,
-  UsersService,
-} from "@/users/application/users.service";
-import {
-  RegisterDto,
-  LoginDto,
-  RefreshTokenDto,
-  UpdateProfileDto,
-  ChangePasswordDto,
-  ForgotPasswordDto,
-  ResetPasswordDto,
-} from "@/auth/application/auth.dto";
+  RegisterRequest,
+  LoginRequest,
+  RefreshTokenRequest,
+  UpdateProfileRequest,
+  ChangePasswordRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+} from "@/auth/controller/auth-request";
 import { JwtAuthGuard } from "./jwt-auth.guard";
 import { CurrentUser } from "./current-user.decorator";
 import { Public } from "./public.decorator";
@@ -39,7 +36,7 @@ export class AuthController {
   @Post("register")
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: "用户注册" })
-  async register(@Body() registerDto: RegisterDto) {
+  async register(@Body() registerDto: RegisterRequest) {
     const result = await this.authService.register(registerDto);
     return {
       success: true,
@@ -63,7 +60,7 @@ export class AuthController {
   @Post("login")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "用户登录" })
-  async login(@Body() loginDto: LoginDto) {
+  async login(@Body() loginDto: LoginRequest) {
     const result = await this.authService.login(loginDto);
     return {
       success: true,
@@ -87,7 +84,7 @@ export class AuthController {
   @Post("refresh-token")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "刷新令牌" })
-  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+  async refreshToken(@Body() refreshTokenDto: RefreshTokenRequest) {
     const tokens = await this.authService.refreshToken(
       refreshTokenDto.refreshToken,
     );
@@ -133,7 +130,7 @@ export class AuthController {
   @ApiOperation({ summary: "更新用户资料" })
   async updateProfile(
     @CurrentUser() user: { id: string },
-    @Body() updateProfileDto: UpdateProfileDto,
+    @Body() updateProfileDto: UpdateProfileRequest,
   ) {
     const data: UpdateUserData = {};
     if (updateProfileDto.username !== undefined)
@@ -161,7 +158,7 @@ export class AuthController {
   @ApiOperation({ summary: "修改密码" })
   async changePassword(
     @CurrentUser() _user: any,
-    @Body() _changePasswordDto: ChangePasswordDto,
+    @Body() _changePasswordDto: ChangePasswordRequest,
   ) {
     // TODO: 实现修改密码逻辑
     return {
@@ -174,7 +171,7 @@ export class AuthController {
   @Public()
   @Post("forgot-password")
   @ApiOperation({ summary: "忘记密码" })
-  async forgotPassword(@Body() _forgotPasswordDto: ForgotPasswordDto) {
+  async forgotPassword(@Body() _forgotPasswordDto: ForgotPasswordRequest) {
     // TODO: 实现忘记密码逻辑
     return {
       success: false,
@@ -186,7 +183,7 @@ export class AuthController {
   @Public()
   @Post("reset-password")
   @ApiOperation({ summary: "重置密码" })
-  async resetPassword(@Body() _resetPasswordDto: ResetPasswordDto) {
+  async resetPassword(@Body() _resetPasswordDto: ResetPasswordRequest) {
     // TODO: 实现重置密码逻辑
     return {
       success: false,

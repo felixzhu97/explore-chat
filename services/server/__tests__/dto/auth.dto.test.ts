@@ -1,16 +1,16 @@
 import { describe, it, expect } from "vitest";
 import { plainToInstance } from "class-transformer";
 import {
-  RegisterDto,
-  LoginDto,
-  RefreshTokenDto,
-  UpdateProfileDto,
-} from "@/auth/application/auth.dto";
+  RegisterRequest,
+  LoginRequest,
+  RefreshTokenRequest,
+  UpdateProfileRequest,
+} from "@/auth/controller/auth-request";
 
 describe("Auth DTOs", () => {
-  describe("RegisterDto", () => {
+  describe("RegisterRequest", () => {
     it("should pass validation with valid data", () => {
-      const dto = plainToInstance(RegisterDto, {
+      const dto = plainToInstance(RegisterRequest, {
         email: "test@example.com",
         password: "password123",
         username: "testuser",
@@ -24,7 +24,7 @@ describe("Auth DTOs", () => {
     });
 
     it("should pass validation without optional phone", () => {
-      const dto = plainToInstance(RegisterDto, {
+      const dto = plainToInstance(RegisterRequest, {
         email: "test@example.com",
         password: "password123",
         username: "testuser",
@@ -35,7 +35,7 @@ describe("Auth DTOs", () => {
     });
 
     it("should reject invalid email format", () => {
-      const dto = plainToInstance(RegisterDto, {
+      const dto = plainToInstance(RegisterRequest, {
         email: "invalid-email",
         password: "password123",
         username: "testuser",
@@ -45,7 +45,7 @@ describe("Auth DTOs", () => {
     });
 
     it("should accept password with minimum 6 characters", () => {
-      const dto = plainToInstance(RegisterDto, {
+      const dto = plainToInstance(RegisterRequest, {
         email: "test@example.com",
         password: "123456",
         username: "testuser",
@@ -55,7 +55,7 @@ describe("Auth DTOs", () => {
     });
 
     it("should reject username with less than 2 characters", () => {
-      const dto = plainToInstance(RegisterDto, {
+      const dto = plainToInstance(RegisterRequest, {
         email: "test@example.com",
         password: "password123",
         username: "a",
@@ -65,7 +65,7 @@ describe("Auth DTOs", () => {
     });
 
     it("should validate Chinese phone numbers", () => {
-      const dto = plainToInstance(RegisterDto, {
+      const dto = plainToInstance(RegisterRequest, {
         email: "test@example.com",
         password: "password123",
         username: "testuser",
@@ -76,9 +76,9 @@ describe("Auth DTOs", () => {
     });
   });
 
-  describe("LoginDto", () => {
+  describe("LoginRequest", () => {
     it("should pass validation with valid data", () => {
-      const dto = plainToInstance(LoginDto, {
+      const dto = plainToInstance(LoginRequest, {
         email: "test@example.com",
         password: "password123",
       });
@@ -88,7 +88,7 @@ describe("Auth DTOs", () => {
     });
 
     it("should reject missing email", () => {
-      const dto = plainToInstance(LoginDto, {
+      const dto = plainToInstance(LoginRequest, {
         password: "password123",
       });
 
@@ -96,9 +96,9 @@ describe("Auth DTOs", () => {
     });
   });
 
-  describe("RefreshTokenDto", () => {
+  describe("RefreshTokenRequest", () => {
     it("should pass validation with valid token", () => {
-      const dto = plainToInstance(RefreshTokenDto, {
+      const dto = plainToInstance(RefreshTokenRequest, {
         refreshToken: "valid-token-string",
       });
 
@@ -106,9 +106,9 @@ describe("Auth DTOs", () => {
     });
   });
 
-  describe("UpdateProfileDto", () => {
+  describe("UpdateProfileRequest", () => {
     it("should pass validation with all fields", () => {
-      const dto = plainToInstance(UpdateProfileDto, {
+      const dto = plainToInstance(UpdateProfileRequest, {
         username: "newname",
         phone: "13812345678",
         status: "online",
@@ -122,7 +122,7 @@ describe("Auth DTOs", () => {
     });
 
     it("should pass validation with partial fields", () => {
-      const dto = plainToInstance(UpdateProfileDto, {
+      const dto = plainToInstance(UpdateProfileRequest, {
         status: "away",
       });
 

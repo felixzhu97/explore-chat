@@ -14,8 +14,8 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { Response } from "express";
 import { ExploreAiClientService } from "@/ai/application/explore-ai-client.service";
-import { CurrentUser } from "@/auth/presentation/current-user.decorator";
-import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
+import { CurrentUser } from "@/auth/controller/current-user.decorator";
+import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 
 const CHAT_RATE_LIMIT_MAX = 20;
 const CHAT_RATE_LIMIT_WINDOW_MS = 60_000;

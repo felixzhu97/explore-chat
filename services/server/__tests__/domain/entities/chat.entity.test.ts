@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { Chat, ChatType } from "@/chats/domain/model/chat";
 import { Message } from "@/messages/domain/model/message";
-import { User } from "@/users/domain/user.entity";
+import { User } from "@/users/domain/model/user";
 import {
   CHAT_DOMAIN,
   MESSAGE_DOMAIN,

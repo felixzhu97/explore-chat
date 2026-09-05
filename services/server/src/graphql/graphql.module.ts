@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 import { PostModule } from "@/post/presentation/post.module";
-import { AuthModule } from "@/auth/presentation/auth.module";
+import { AuthModule } from "@/auth/auth.module";
 import { FeedResolver, FeedEntryResolver } from "./feed.resolver";
 import { PostLoader } from "./post.loader";
 

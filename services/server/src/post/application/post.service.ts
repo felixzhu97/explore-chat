@@ -10,7 +10,7 @@ import type { IPostRepository } from "@/post/domain/post.repository.interface";
 import type { IEngagementRepository } from "@/post/domain/engagement.repository.interface";
 import { KafkaProducerService } from "@/core/messaging/kafka-producer.service";
 import { AiService } from "@/ai/application/ai.service";
-import { UsersService } from "@/users/application/users.service";
+import { UsersService } from "@/users/service/users.service";
 import { VisionClientService } from "@/ai/application/vision-client.service";
 import { ConfigService } from "@/core/config/config.service";
 import { FeedFanoutService } from "@/post/application/feed-fanout.service";

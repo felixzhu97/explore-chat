@@ -6,7 +6,7 @@ import {
   Matches,
 } from "class-validator";
 
-export class RegisterDto {
+export class RegisterRequest {
   @IsEmail({}, { message: "邮箱格式不正确" })
   email!: string;
 
@@ -24,7 +24,7 @@ export class RegisterDto {
   phone?: string;
 }
 
-export class LoginDto {
+export class LoginRequest {
   @IsEmail({}, { message: "邮箱格式不正确" })
   email!: string;
 
@@ -32,12 +32,12 @@ export class LoginDto {
   password!: string;
 }
 
-export class RefreshTokenDto {
+export class RefreshTokenRequest {
   @IsString({ message: "Refresh token必须是字符串" })
   refreshToken!: string;
 }
 
-export class UpdateProfileDto {
+export class UpdateProfileRequest {
   @IsOptional()
   @IsString({ message: "用户名必须是字符串" })
   @MinLength(2, { message: "用户名长度至少2位" })
@@ -57,7 +57,7 @@ export class UpdateProfileDto {
   avatar?: string;
 }
 
-export class ChangePasswordDto {
+export class ChangePasswordRequest {
   @IsString({ message: "当前密码必须是字符串" })
   currentPassword!: string;
 
@@ -66,12 +66,12 @@ export class ChangePasswordDto {
   newPassword!: string;
 }
 
-export class ForgotPasswordDto {
+export class ForgotPasswordRequest {
   @IsEmail({}, { message: "邮箱格式不正确" })
   email!: string;
 }
 
-export class ResetPasswordDto {
+export class ResetPasswordRequest {
   @IsString({ message: "Token必须是字符串" })
   token!: string;
 

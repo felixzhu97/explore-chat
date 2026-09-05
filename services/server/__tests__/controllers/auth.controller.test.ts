@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { AuthController } from "@/auth/presentation/auth.controller";
+import { AuthController } from "@/auth/controller/auth.controller";
 import { ConflictException, UnauthorizedException } from "@nestjs/common";
-import { User } from "@/users/domain/user.entity";
+import { User } from "@/users/domain/model/user";
 
 describe("AuthController", () => {
   let authController: AuthController;

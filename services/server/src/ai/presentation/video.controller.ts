@@ -1,6 +1,6 @@
 import { Controller, Post, Get, Body, Param, UseGuards } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
-import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
+import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { VideoService } from "@/ai/application/video.service";
 
 @ApiTags("视频生成")

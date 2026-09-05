@@ -10,10 +10,10 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
-import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
+import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { AdminGuard } from "./admin.guard";
 import { AdminService } from "@/admin/application/admin.service";
-import { UsersService } from "@/users/application/users.service";
+import { UsersService } from "@/users/service/users.service";
 import { AnalyticsService } from "@/analytics/application/analytics.service";
 
 @ApiTags("管理员")

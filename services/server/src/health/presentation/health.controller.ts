@@ -6,7 +6,7 @@ import {
   MemoryHealthIndicator,
   DiskHealthIndicator,
 } from "@nestjs/terminus";
-import { Public } from "@/auth/presentation/public.decorator";
+import { Public } from "@/auth/controller/public.decorator";
 
 @ApiTags("健康检查")
 @Controller("health")

@@ -2,7 +2,7 @@ import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { Throttle, ThrottlerGuard } from "@nestjs/throttler";
 import { SearchScopes, type SearchScope } from "@whatschat/shared-types";
-import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
+import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { SearchService } from "@/search/application/search.service";
 
 @ApiTags("搜索")

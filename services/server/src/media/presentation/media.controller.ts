@@ -18,7 +18,7 @@ import {
   ApiOperation,
   ApiTags,
 } from "@nestjs/swagger";
-import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
+import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { MediaService } from "@/media/application/media.service";
 import { ConfigService } from "@/core/config/config.service";
 

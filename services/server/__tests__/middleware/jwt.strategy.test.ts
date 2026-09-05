@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ExecutionContext, UnauthorizedException } from "@nestjs/common";
-import { JwtStrategy, JwtPayload } from "@/auth/presentation/jwt.strategy";
+import { JwtStrategy, JwtPayload } from "@/auth/controller/jwt.strategy";
 import { ConfigService } from "@/core/config/config.service";
 
 vi.mock("@/core/config/config.service", () => ({
