@@ -4,7 +4,7 @@ import {
   answerCall,
   endCallRecord,
   markCallMissed,
-} from "../call.model";
+} from "../calls.service";
 
 const baseCall = {
   id: "call-1",

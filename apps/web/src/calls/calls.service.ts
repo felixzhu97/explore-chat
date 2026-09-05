@@ -1,19 +1,117 @@
-import {
-  type Call,
-  answerCall,
-  endCallRecord,
-  mapCall,
-  markCallMissed,
-} from "./call.model";
-import { store } from "@/layout/store";
-import {
-  addCall,
-  updateCall,
+export type CallType = "voice" | "video";
+export type CallStatus =
+  | "incoming"
+  | "outgoing"
+  | "missed"
+  | "answered"
+  | "ended";
+
+export interface Call {
+  id: string;
+  contactId: string;
+  contactName: string;
+  contactAvatar: string;
+  type: CallType;
+  status: CallStatus;
+  startTime: string;
+  endTime?: string;
+  duration?: number;
+  isGroup?: boolean;
+  participants?: string[];
+}
+
+export function mapCall(
+  data: Pick<
+    Call,
+    | "id"
+    | "contactId"
+    | "contactName"
+    | "contactAvatar"
+    | "type"
+    | "status"
+    | "startTime"
+  > &
+    Partial<Call>,
+): Call {
+  return data;
+}
+
+export function answerCall(call: Call): Call {
+  return { ...call, status: "answered" };
+}
+
+export function endCallRecord(
+  call: Call,
+  endTime: string,
+  duration: number,
+): Call {
+  return { ...call, status: "ended", endTime, duration };
+}
+
+export function markCallMissed(call: Call): Call {
+  return { ...call, status: "missed" };
+}
+
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+interface CallsState {
+  calls: Call[];
+  activeCall: Call | null;
+  incomingCall: Call | null;
+  callHistory: Call[];
+}
+
+const initialState: CallsState = {
+  calls: [],
+  activeCall: null,
+  incomingCall: null,
+  callHistory: [],
+};
+
+const callsSlice = createSlice({
+  name: "calls",
+  initialState,
+  reducers: {
+    setActiveCall: (state, action: PayloadAction<Call | null>) => {
+      state.activeCall = action.payload;
+    },
+    setIncomingCall: (state, action: PayloadAction<Call | null>) => {
+      state.incomingCall = action.payload;
+    },
+    addCall: (state, action: PayloadAction<Call>) => {
+      state.calls.push(action.payload);
+      state.callHistory.push(action.payload);
+    },
+    updateCall: (
+      state,
+      action: PayloadAction<{ callId: string; call: Call }>,
+    ) => {
+      const { callId, call } = action.payload;
+      const idx = state.calls.findIndex((c) => c.id === callId);
+      if (idx !== -1) state.calls[idx] = call;
+      const histIdx = state.callHistory.findIndex((c) => c.id === callId);
+      if (histIdx !== -1) state.callHistory[histIdx] = call;
+    },
+    setActiveCallNull: (state) => {
+      state.activeCall = null;
+    },
+    setIncomingCallNull: (state) => {
+      state.incomingCall = null;
+    },
+  },
+});
+
+export const {
   setActiveCall,
   setIncomingCall,
+  addCall,
+  updateCall,
   setActiveCallNull,
   setIncomingCallNull,
-} from "@/calls/callsSlice";
+} = callsSlice.actions;
+export const callsReducer = callsSlice.reducer;
+export default callsReducer;
+
+import { store } from "@/layout/store";
 
 export class CallsService {
   private getState() {
