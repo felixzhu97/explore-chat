@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { NotFoundException } from "@nestjs/common";
+import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import {
   MessagesService,
   CreateMessageData,
@@ -65,6 +65,10 @@ describe("MessagesService", () => {
         delete: vi.fn(),
       },
       chatParticipant: {
+        findUnique: vi.fn().mockResolvedValue({
+          chatId: "chat-1",
+          userId: "user-1",
+        }),
         findMany: vi.fn(),
       },
     };
@@ -111,7 +115,7 @@ describe("MessagesService", () => {
 
       const result = await messagesService.createMessage(createMessageData);
 
-      expect(result).toEqual(mockMessage);
+      expect(result).toEqual({ ...mockMessage, status: "sent" });
       expect(mockPrisma.message!.create).toHaveBeenCalledWith({
         data: {
           chatId: createMessageData.chatId,
@@ -128,6 +132,35 @@ describe("MessagesService", () => {
             },
           },
         },
+      });
+    });
+
+    it("should throw ForbiddenException when sender is not a participant", async () => {
+      mockPrisma.chat!.findUnique = vi.fn().mockResolvedValue(mockChat);
+      mockPrisma.chatParticipant!.findUnique = vi.fn().mockResolvedValue(null);
+
+      await expect(
+        messagesService.createMessage(createMessageData),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it("should echo clientMsgId on create", async () => {
+      mockPrisma.chat!.findUnique = vi.fn().mockResolvedValue(mockChat);
+      mockPrisma.message!.create = vi.fn().mockResolvedValue(mockMessage);
+      mockPrisma.chat!.update = vi.fn().mockResolvedValue({});
+      mockPrisma.chatParticipant!.findMany = vi
+        .fn()
+        .mockResolvedValue([{ userId: "user-1" }]);
+
+      const result = await messagesService.createMessage({
+        ...createMessageData,
+        clientMsgId: "cmsg-1",
+      });
+
+      expect(result).toEqual({
+        ...mockMessage,
+        clientMsgId: "cmsg-1",
+        status: "sent",
       });
     });
 

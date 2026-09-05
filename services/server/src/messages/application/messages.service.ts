@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { PrismaService } from "@/core/database/prisma.service";
 import { CacheService } from "@/core/cache/cache.service";
 import { toMessageType } from "@/shared/utils/message-type";
@@ -8,6 +12,7 @@ export interface CreateMessageData {
   type: string;
   senderId: string;
   chatId: string;
+  clientMsgId?: string;
   mediaUrl?: string;
   replyToMessageId?: string;
 }
@@ -27,6 +32,7 @@ export class MessagesService {
     private readonly cache: CacheService,
   ) {}
 
+  /** Single write path for REST and WS. */
   async createMessage(data: CreateMessageData) {
     const chat = await this.prisma.chat.findUnique({
       where: { id: data.chatId },
@@ -34,6 +40,21 @@ export class MessagesService {
 
     if (!chat) {
       throw new NotFoundException("聊天不存在");
+    }
+
+    const participant = await this.prisma.chatParticipant.findUnique({
+      where: {
+        chatId_userId: {
+          chatId: data.chatId,
+          userId: data.senderId,
+        },
+      },
+    });
+
+    if (!participant) {
+      throw new ForbiddenException(
+        "No permission to send messages to this chat",
+      );
     }
 
     const message = await this.prisma.message.create({
@@ -73,7 +94,11 @@ export class MessagesService {
       participants.map((p) => CHATS_CACHE_KEY(p.userId)),
     );
 
-    return message;
+    return {
+      ...message,
+      ...(data.clientMsgId != null && { clientMsgId: data.clientMsgId }),
+      status: "sent" as const,
+    };
   }
 
   async getMessages(chatId: string, options: GetMessagesOptions) {

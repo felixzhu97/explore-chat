@@ -15,6 +15,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
 import { CurrentUser } from "@/auth/presentation/current-user.decorator";
 import { MessagesService } from "@/messages/application/messages.service";
+import { CreateMessageDto } from "@/messages/application/message.dto";
 import { ChatGateway } from "@/websocket/presentation/chat.gateway";
 import type { QueuedMessagePayload } from "@/messages/application/offline-message-queue.service";
 
@@ -53,21 +54,16 @@ export class MessagesController {
   @ApiOperation({ summary: "发送消息" })
   async createMessage(
     @CurrentUser() user: any,
-    @Body()
-    createMessageDto: {
-      content: string;
-      type: string;
-      chatId: string;
-      metadata?: any;
-      mediaUrl?: string;
-      replyToMessageId?: string;
-    },
+    @Body() createMessageDto: CreateMessageDto,
   ) {
     const message = await this.messagesService.createMessage({
       content: createMessageDto.content,
       type: createMessageDto.type,
       chatId: createMessageDto.chatId,
       senderId: user.id,
+      ...(createMessageDto.clientMsgId != null && {
+        clientMsgId: createMessageDto.clientMsgId,
+      }),
       ...(createMessageDto.mediaUrl != null && {
         mediaUrl: createMessageDto.mediaUrl,
       }),

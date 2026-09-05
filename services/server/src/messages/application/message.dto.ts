@@ -32,6 +32,10 @@ export class CreateMessageDto {
   @IsOptional()
   @IsString({ message: "回复的消息ID必须是字符串" })
   replyToMessageId?: string;
+
+  @IsOptional()
+  @IsString({ message: "客户端消息ID必须是字符串" })
+  clientMsgId?: string;
 }
 
 export class GetMessagesDto {

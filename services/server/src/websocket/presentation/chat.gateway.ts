@@ -7,6 +7,12 @@ import {
   ConnectedSocket,
   MessageBody,
 } from "@nestjs/websockets";
+import {
+  ForbiddenException,
+  Inject,
+  NotFoundException,
+  forwardRef,
+} from "@nestjs/common";
 import { Server, Socket } from "socket.io";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@/core/config/config.service";
@@ -16,7 +22,7 @@ import {
   OfflineMessageQueueService,
   QueuedMessagePayload,
 } from "@/messages/application/offline-message-queue.service";
-import { toMessageType } from "@/shared/utils/message-type";
+import { MessagesService } from "@/messages/application/messages.service";
 import logger from "@/shared/utils/logger";
 
 interface AuthenticatedSocket extends Socket {
@@ -45,6 +51,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly prisma: PrismaService,
     private readonly cache: CacheService,
     private readonly offlineQueue: OfflineMessageQueueService,
+    @Inject(forwardRef(() => MessagesService))
+    private readonly messagesService: MessagesService,
   ) {}
 
   async handleConnection(socket: AuthenticatedSocket) {
@@ -82,7 +90,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       socket.userId = user.id;
       socket.user = user;
 
-      // Add to online users list
       onlineUsers.set(user.id, socket.id);
 
       await this.prisma.user.update({
@@ -91,10 +98,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
       await this.cache.del(`jwt:user:${user.id}`);
 
-      // Join user room
       socket.join(`user:${user.id}`);
 
-      // Notify other users that this user is online
       socket.broadcast.emit("user:online", { userId: user.id });
 
       socket.emit("user:connect", { userId: user.id });
@@ -140,7 +145,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleDisconnect(socket: AuthenticatedSocket) {
     if (socket.userId) {
-      // Remove from online users list
       onlineUsers.delete(socket.userId);
 
       await this.prisma.user.update({
@@ -152,13 +156,46 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
       await this.cache.del(`jwt:user:${socket.userId}`);
 
-      // Notify other users that this user is offline
       socket.broadcast.emit("user:offline", { userId: socket.userId });
 
       logger.info(
         `User disconnected: ${socket.user?.username} (${socket.userId})`,
       );
     }
+  }
+
+  @SubscribeMessage("chat:join")
+  async handleChatJoin(
+    @ConnectedSocket() socket: AuthenticatedSocket,
+    @MessageBody() data: { chatId: string },
+  ) {
+    if (!socket.userId || !data?.chatId) {
+      return;
+    }
+    const participant = await this.prisma.chatParticipant.findUnique({
+      where: {
+        chatId_userId: {
+          chatId: data.chatId,
+          userId: socket.userId,
+        },
+      },
+    });
+    if (!participant) {
+      socket.emit("error", { message: "No permission to join this chat" });
+      return;
+    }
+    socket.join(`chat:${data.chatId}`);
+  }
+
+  @SubscribeMessage("chat:leave")
+  handleChatLeave(
+    @ConnectedSocket() socket: AuthenticatedSocket,
+    @MessageBody() data: { chatId: string },
+  ) {
+    if (!data?.chatId) {
+      return;
+    }
+    socket.leave(`chat:${data.chatId}`);
   }
 
   @SubscribeMessage("message:send")
@@ -168,68 +205,47 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     data: {
       chatId: string;
       content: string;
-      type: string;
+      type?: string;
+      clientMsgId?: string;
       mediaUrl?: string;
       replyToMessageId?: string;
     },
   ) {
     try {
-      const { chatId, content, type, mediaUrl, replyToMessageId } = data;
-
       if (!socket.userId) {
         socket.emit("error", { message: "Unauthorized" });
         return;
       }
 
-      // Verify user is a chat participant
-      const participant = await this.prisma.chatParticipant.findUnique({
-        where: {
-          chatId_userId: {
-            chatId,
-            userId: socket.userId,
-          },
-        },
-      });
-
-      if (!participant) {
-        socket.emit("error", {
-          message: "No permission to send messages to this chat",
-        });
-        return;
-      }
-
-      const message = await this.prisma.message.create({
-        data: {
-          chatId,
-          senderId: socket.userId,
-          type: toMessageType(type ?? "text"),
-          content,
-          ...(mediaUrl && { mediaUrl }),
-          ...(replyToMessageId && { replyToMessageId }),
-        },
-        include: {
-          sender: {
-            select: {
-              id: true,
-              username: true,
-              avatar: true,
-            },
-          },
-        },
+      const message = await this.messagesService.createMessage({
+        chatId: data.chatId,
+        content: data.content,
+        type: data.type ?? "text",
+        senderId: socket.userId,
+        ...(data.clientMsgId != null && { clientMsgId: data.clientMsgId }),
+        ...(data.mediaUrl != null && { mediaUrl: data.mediaUrl }),
+        ...(data.replyToMessageId != null && {
+          replyToMessageId: data.replyToMessageId,
+        }),
       });
 
       await this.deliverToParticipants(
         message as QueuedMessagePayload,
-        chatId,
+        data.chatId,
         socket.userId,
       );
 
       socket.emit("message:sent", message);
 
-      logger.info(`Message sent: ${socket.userId} -> ${chatId}`);
+      logger.info(`Message sent: ${socket.userId} -> ${data.chatId}`);
     } catch (error) {
       logger.error(`Message send error: ${error}`);
-      socket.emit("error", { message: "Failed to send message" });
+      const message =
+        error instanceof ForbiddenException ||
+        error instanceof NotFoundException
+          ? error.message
+          : "Failed to send message";
+      socket.emit("error", { message });
     }
   }
 
@@ -245,7 +261,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
-      // Mark message as read
       await this.prisma.messageRead.upsert({
         where: {
           messageId_userId: {
@@ -294,7 +309,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
-      // Add or update reaction
       const reaction = await this.prisma.messageReaction.upsert({
         where: {
           messageId_userId_emoji: {
@@ -311,7 +325,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
       });
 
-      // Notify other users
       socket.broadcast.emit("message:reaction", {
         messageId,
         reaction,
@@ -457,15 +470,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
-      // Create status
       const status = await this.prisma.status.create({
         data: {
           userId: socket.userId,
-          content: content || "", // content is required field
+          content: content || "",
           type: type as any,
           ...(mediaUrl && { mediaUrl }),
           ...(duration && { duration }),
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Expires after 24 hours
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         },
         include: {
           user: {
