@@ -356,12 +356,16 @@ export class ConfigService {
         }),
         ...(process.env["MEDIA_GENERATION_API_URL"]
           ? {
-              videoApiBaseUrl:
-                process.env["MEDIA_GENERATION_API_URL"].replace(/\/$/, "") +
-                "/video",
+              videoApiBaseUrl: process.env["MEDIA_GENERATION_API_URL"].replace(
+                /\/$/,
+                "",
+              ),
             }
           : process.env["VIDEO_GENERATION_API_URL"] && {
-              videoApiBaseUrl: process.env["VIDEO_GENERATION_API_URL"],
+              videoApiBaseUrl: process.env["VIDEO_GENERATION_API_URL"].replace(
+                /\/$/,
+                "",
+              ),
             }),
       },
       image: {
@@ -370,23 +374,31 @@ export class ConfigService {
         }),
         ...(process.env["MEDIA_GENERATION_API_URL"]
           ? {
-              imageApiBaseUrl:
-                process.env["MEDIA_GENERATION_API_URL"].replace(/\/$/, "") +
-                "/image",
+              imageApiBaseUrl: process.env["MEDIA_GENERATION_API_URL"].replace(
+                /\/$/,
+                "",
+              ),
             }
           : process.env["IMAGE_GENERATION_API_URL"] && {
-              imageApiBaseUrl: process.env["IMAGE_GENERATION_API_URL"],
+              imageApiBaseUrl: process.env["IMAGE_GENERATION_API_URL"].replace(
+                /\/$/,
+                "",
+              ),
             }),
       },
       voice: {
         ...(process.env["MEDIA_GENERATION_API_URL"]
           ? {
-              voiceApiBaseUrl:
-                process.env["MEDIA_GENERATION_API_URL"].replace(/\/$/, "") +
-                "/voice",
+              voiceApiBaseUrl: process.env["MEDIA_GENERATION_API_URL"].replace(
+                /\/$/,
+                "",
+              ),
             }
           : process.env["VOICE_GENERATION_API_URL"] && {
-              voiceApiBaseUrl: process.env["VOICE_GENERATION_API_URL"],
+              voiceApiBaseUrl: process.env["VOICE_GENERATION_API_URL"].replace(
+                /\/$/,
+                "",
+              ),
             }),
       },
       business: {

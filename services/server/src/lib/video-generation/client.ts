@@ -20,19 +20,31 @@ export function createClient(options: VideoClientOptions) {
   const baseUrl = options.videoApiBaseUrl.replace(/\/$/, '');
   return {
     async generate(payload: GeneratePayload): Promise<GenerateResult> {
-      const res = await fetch(`${baseUrl}/generate`, {
+      const res = await fetch(`${baseUrl}/api/v1/videos:generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          prompt: payload.prompt,
+          ...(payload.imageUrl != null && { image_url: payload.imageUrl }),
+        }),
       });
       if (!res.ok) throw new Error(`Video API error: ${res.status}`);
-      const data = (await res.json()) as { jobId: string };
-      return { jobId: data.jobId };
+      const data = (await res.json()) as { job_id: string };
+      return { jobId: data.job_id };
     },
     async getResult(jobId: string): Promise<GetResultResponse> {
-      const res = await fetch(`${baseUrl}/generate/${jobId}`);
+      const res = await fetch(`${baseUrl}/api/v1/videoJobs/${jobId}`);
       if (!res.ok) throw new Error(`Video API error: ${res.status}`);
-      return res.json() as Promise<GetResultResponse>;
+      const data = (await res.json()) as {
+        status: GetResultResponse['status'];
+        video_url?: string;
+        error?: string;
+      };
+      return {
+        status: data.status,
+        ...(data.video_url != null && { videoUrl: data.video_url }),
+        ...(data.error != null && { error: data.error }),
+      };
     },
   };
 }

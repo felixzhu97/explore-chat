@@ -96,7 +96,7 @@ export class VoiceService {
       voice = VOICE_ZH;
     }
     const base = cfg.voiceApiBaseUrl.replace(/\/$/, "");
-    const url = `${base}/synthesize`;
+    const url = `${base}/api/v1/voices:synthesize`;
     try {
       const res = await fetch(url, {
         method: "POST",
@@ -107,10 +107,10 @@ export class VoiceService {
         const body = await res.text();
         throw new Error(body || `HTTP ${res.status}`);
       }
-      const data = (await res.json()) as { audioUrl?: string };
-      const audioUrl = data?.audioUrl;
+      const data = (await res.json()) as { audio_url?: string; audioUrl?: string };
+      const audioUrl = data?.audio_url ?? data?.audioUrl;
       if (!audioUrl?.trim()) {
-        throw new Error("语音服务未返回 audioUrl");
+        throw new Error("语音服务未返回 audio_url");
       }
       return { audioUrl, text };
     } catch (err: unknown) {
