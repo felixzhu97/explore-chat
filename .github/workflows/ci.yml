@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -33,3 +33,9 @@ jobs:
 
       - name: Lint
         run: pnpm lint
+
+      - name: AIP REST controller guard
+        run: pnpm check:aip-rest
+
+      - name: Spectral (AIP OpenAPI fragment)
+        run: pnpm lint:openapi

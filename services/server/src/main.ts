@@ -70,8 +70,12 @@ async function bootstrap() {
   // Swagger文档配置
   if (process.env["NODE_ENV"] !== "production") {
     const config = new DocumentBuilder()
-      .setTitle("WhatsChat API")
-      .setDescription("WhatsChat即时通讯应用API文档")
+      .setTitle("ExploreChat API")
+      .setDescription(
+        "AIP-style REST under /api/v1: resource bodies (no success/data envelope), " +
+          "page_size/page_token lists, and google.rpc.Status-shaped errors. " +
+          "See docs/developer/aip-rest.md.",
+      )
       .setVersion("1.0")
       .addBearerAuth()
       .build();
