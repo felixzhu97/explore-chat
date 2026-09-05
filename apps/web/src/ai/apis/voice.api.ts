@@ -3,7 +3,7 @@ import type {
   VoiceTranslateTargetLanguage,
 } from "@whatschat/shared-types";
 import type { ApiClient } from "@/auth/api-client";
-import type { ApiResponse } from "@/auth/api-response.model";
+import type { ApiResponse } from "@/auth/api-client";
 
 export interface VoiceGenerateResponse {
   audioUrl: string;

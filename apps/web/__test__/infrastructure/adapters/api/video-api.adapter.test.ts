@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { VideoApi } from "@/ai/apis/video.api";
 import type { ApiClient } from "@/auth/api-client";
-import type { ApiResponse } from "@/auth/api-response.model";
+import type { ApiResponse } from "@/auth/api-client";
 
 describe("VideoApi", () => {
   let adapter: VideoApi;

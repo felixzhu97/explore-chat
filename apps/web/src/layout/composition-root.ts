@@ -1,5 +1,5 @@
 import { getApiClient, type ApiClient } from "@/auth/api-client";
-import { AuthApi } from "@/auth/auth.api";
+import { AuthApi } from "@/auth/auth-session";
 import { ChatApi } from "@/chat/chat.api";
 import { UserApi } from "@/profile/user.api";
 
