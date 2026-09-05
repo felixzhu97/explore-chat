@@ -1,9 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { ObjectId } from "mongodb";
-import { MongoService } from "./mongo.service";
+import { PrismaService } from "./prisma.service";
 
 export interface CommentDoc {
-  _id?: ObjectId;
+  _id?: { toString(): string } | string;
   postId: string;
   userId: string;
   content: string;
@@ -12,27 +11,43 @@ export interface CommentDoc {
   updatedAt: Date;
 }
 
+function toDoc(row: {
+  id: string;
+  postId: string;
+  userId: string;
+  content: string;
+  parentId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}): CommentDoc {
+  const doc: CommentDoc = {
+    _id: row.id,
+    postId: row.postId,
+    userId: row.userId,
+    content: row.content,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+  if (row.parentId != null) doc.parentId = row.parentId;
+  return doc;
+}
+
 @Injectable()
 export class MongoCommentRepository {
-  private get collection() {
-    const db = this.mongo.getDb();
-    return db?.collection<CommentDoc>("comments") ?? null;
-  }
-
-  constructor(private readonly mongo: MongoService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async insert(
     doc: Omit<CommentDoc, "_id" | "createdAt" | "updatedAt">,
   ): Promise<string> {
-    const col = this.collection;
-    if (!col) throw new Error("MongoDB not connected");
-    const now = new Date();
-    const result = await col.insertOne({
-      ...doc,
-      createdAt: now,
-      updatedAt: now,
+    const created = await this.prisma.postComment.create({
+      data: {
+        postId: doc.postId,
+        userId: doc.userId,
+        content: doc.content,
+        parentId: doc.parentId ?? null,
+      },
     });
-    return result.insertedId.toString();
+    return created.id;
   }
 
   async findByPostId(
@@ -40,38 +55,24 @@ export class MongoCommentRepository {
     limit: number,
     skip: number,
   ): Promise<CommentDoc[]> {
-    const col = this.collection;
-    if (!col) return [];
-    const cursor = col
-      .find({ postId })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-    return cursor.toArray();
+    const rows = await this.prisma.postComment.findMany({
+      where: { postId },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    });
+    return rows.map(toDoc);
   }
 
   async findById(id: string): Promise<CommentDoc | null> {
-    const col = this.collection;
-    if (!col) return null;
-    let oid: ObjectId;
-    try {
-      oid = new ObjectId(id);
-    } catch {
-      return null;
-    }
-    return col.findOne({ _id: oid });
+    const row = await this.prisma.postComment.findUnique({ where: { id } });
+    return row ? toDoc(row) : null;
   }
 
   async deleteOne(id: string, userId: string): Promise<boolean> {
-    const col = this.collection;
-    if (!col) return false;
-    let oid: ObjectId;
-    try {
-      oid = new ObjectId(id);
-    } catch {
-      return false;
-    }
-    const result = await col.deleteOne({ _id: oid, userId });
-    return result.deletedCount === 1;
+    const result = await this.prisma.postComment.deleteMany({
+      where: { id, userId },
+    });
+    return result.count === 1;
   }
 }
