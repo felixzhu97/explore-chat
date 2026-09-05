@@ -122,10 +122,12 @@ package "messages/domain" as pkg_messages {
     String userId
     String emoji
   }
-  interface IMessageRepository <<Repository>> {
-    save(message)
-    findByChatId(chatId)
-  }
+  note right of Message
+    Runtime write path:
+    MessagesService.createMessage
+    (REST + WS). clientMsgId
+    echoed on ack only.
+  end note
 }
 
 Chat "1" *-- "0..*" Message

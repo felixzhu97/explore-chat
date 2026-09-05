@@ -9,6 +9,7 @@ pnpm add @whatschat/im
 ```
 
 **peerDependencies:**
+
 - `@reduxjs/toolkit ^2.0.0`
 - `react ^18.0.0`
 
@@ -44,9 +45,7 @@ import {
 
   // Presentation
   useChatsWithLiveMessages,
-  useRealChat,
   type UseChatsWithLiveMessagesOptions,
-  type UseRealChatOptions,
 
   // RTC
   type RTCCallState,
@@ -130,13 +129,13 @@ interface IWebSocketAdapter {
 
 **支持的事件:**
 
-| 事件名 | 描述 |
-|---|---|
-| `connected` | WebSocket 连接成功 |
-| `disconnected` | WebSocket 连接断开 |
-| `message` | 收到新消息 |
-| `message_status` | 消息状态更新 |
-| `typing` | 对方正在输入 |
+| 事件名           | 描述               |
+| ---------------- | ------------------ |
+| `connected`      | WebSocket 连接成功 |
+| `disconnected`   | WebSocket 连接断开 |
+| `message`        | 收到新消息         |
+| `message_status` | 消息状态更新       |
+| `typing`         | 对方正在输入       |
 
 ### IChatsService
 
@@ -153,7 +152,7 @@ interface IChatsService {
   }): Promise<ChatListItem>;
   getChatMessages(
     chatId: string,
-    params?: { page?: number; limit?: number }
+    params?: { page?: number; limit?: number },
   ): Promise<Message[]>;
   sendMessage(
     chatId: string,
@@ -161,7 +160,7 @@ interface IChatsService {
       content: string;
       type?: "text" | "image" | "video" | "audio" | "file";
       replyToMessageId?: string;
-    }
+    },
   ): Promise<Message>;
   markMessageAsRead(chatId: string, messageId: string): Promise<void>;
 }
@@ -274,13 +273,14 @@ interface State {
 
 ### useChatsWithLiveMessages
 
-用于聊天列表页的 hook，合并 API 历史消息和 WebSocket 实时消息。
+用于聊天列表与会话的 hook：HTTP 拉历史，WebSocket
+`message:send` 发送，并按 `message:sent` / `delivered` / `read` 推进状态。
 
 ```ts
 function useChatsWithLiveMessages(
   selectedContactId: string | null,
   currentUserId: string | undefined,
-  options: UseChatsWithLiveMessagesOptions
+  options: UseChatsWithLiveMessagesOptions,
 ): {
   apiChats: ChatListItem[];
   isApiChat: boolean;
@@ -289,7 +289,7 @@ function useChatsWithLiveMessages(
   handleSendMessage: (
     content: string,
     type?: "text" | "image" | "video" | "audio" | "file",
-    options?: { mediaUrl?: string }
+    options?: { mediaUrl?: string },
   ) => void;
 };
 ```
@@ -319,62 +319,6 @@ function ChatListPage({ contactId, userId }) {
   const handleSend = (text) => {
     handleSendMessage(text, "text");
   };
-
-  return <div>...</div>;
-}
-```
-
-### useRealChat
-
-用于单聊页的 hook，处理消息收发、输入状态、编辑和删除。
-
-```ts
-function useRealChat(
-  contactId: string,
-  options: UseRealChatOptions
-): {
-  messages: Message[];
-  isTyping: boolean;
-  typingUsers: string[];
-  isConnected: boolean;
-  sendMessage: (
-    text: string,
-    type?: Message["type"],
-    fileData?: Partial<Message>,
-    duration?: number
-  ) => void;
-  startTyping: () => void;
-  stopTyping: () => void;
-  deleteMessage: (messageId: string) => void;
-  editMessage: (messageId: string, newText: string) => void;
-};
-```
-
-**UseRealChatOptions:**
-
-```ts
-interface UseRealChatOptions {
-  getWebSocketAdapter: () => IWebSocketAdapter;
-  storage?: StorageAdapter;
-}
-
-interface StorageAdapter {
-  getItem: (key: string) => string | null;
-  setItem: (key: string, value: string) => void;
-}
-```
-
-**用法示例:**
-
-```tsx
-import { useRealChat } from "@whatschat/im";
-
-function ChatPage({ contactId }) {
-  const { messages, isConnected, sendMessage, deleteMessage, editMessage } =
-    useRealChat(contactId, {
-      getWebSocketAdapter: () => wsAdapter,
-      storage: localStorage, // 可选
-    });
 
   return <div>...</div>;
 }
@@ -421,7 +365,7 @@ interface ICallManager {
     contactName: string,
     contactAvatar: string,
     callType: "voice" | "video",
-    options?: StartCallOptions
+    options?: StartCallOptions,
   ): Promise<void>;
   answerCall(): Promise<void>;
   endCall(): void;
@@ -433,13 +377,13 @@ interface ICallManager {
 
 **通话事件:**
 
-| 事件名 | 描述 |
-|---|---|
-| `callStateChanged` | 通话状态变更 |
-| `localStream` | 本地媒体流就绪 |
-| `remoteStream` | 远程媒体流就绪 |
-| `callEnded` | 通话结束 |
-| `incomingCall` | 收到来电 |
+| 事件名             | 描述           |
+| ------------------ | -------------- |
+| `callStateChanged` | 通话状态变更   |
+| `localStream`      | 本地媒体流就绪 |
+| `remoteStream`     | 远程媒体流就绪 |
+| `callEnded`        | 通话结束       |
+| `incomingCall`     | 收到来电       |
 
 ### createCallManager
 
@@ -453,9 +397,9 @@ function createCallManager(config: RTCCallConfig): ICallManager;
 
 ```ts
 interface RTCCallConfig {
-  signaling: RTCSignalingAdapter;    // 信令适配器（WebSocket）
-  media: RTCMediaAdapter;           // 媒体适配器（WebRTC）
-  api: RTCApiAdapter;               // API 适配器（通话创建/接听/结束）
+  signaling: RTCSignalingAdapter; // 信令适配器（WebSocket）
+  media: RTCMediaAdapter; // 媒体适配器（WebRTC）
+  api: RTCApiAdapter; // API 适配器（通话创建/接听/结束）
   getCurrentUserId: () => string | null;
 }
 ```
@@ -538,7 +482,7 @@ function useCall(options: UseCallOptions): {
     contactName: string,
     contactAvatar: string,
     callType: "voice" | "video",
-    opts?: { chatId?: string }
+    opts?: { chatId?: string },
   ) => Promise<void>;
   answerCall: () => Promise<void>;
   endCall: () => void;
@@ -571,7 +515,11 @@ function CallButton({ contact }) {
 
   return (
     <div>
-      <button onClick={() => startCall(contact.id, contact.name, contact.avatar, "voice")}>
+      <button
+        onClick={() =>
+          startCall(contact.id, contact.name, contact.avatar, "voice")
+        }
+      >
         拨打语音
       </button>
       <button onClick={toggleMute}>静音</button>
@@ -590,8 +538,8 @@ function CallButton({ contact }) {
 function formatDuration(seconds: number): string;
 
 // 示例
-formatDuration(65);   // "01:05"
-formatDuration(3661);  // "01:01:01"
+formatDuration(65); // "01:05"
+formatDuration(3661); // "01:01:01"
 ```
 
 ### ICE_SERVERS
@@ -657,8 +605,7 @@ const RTC_EVENTS = {
 │   └── Message Slice (Redux)              消息列表状态管理
 │
 ├── Presentation (React Hooks)
-│   ├── useChatsWithLiveMessages           聊天列表页
-│   └── useRealChat                        单聊页
+│   └── useChatsWithLiveMessages           会话列表 + 发送/回执
 │
 └── RTC (实时通话)
     ├── Domain
@@ -698,7 +645,8 @@ const rootReducer = combineReducers({
 });
 ```
 
-4. **本地存储**: `useRealChat` 的 `storage` 参数支持自定义存储适配器，可传入 `localStorage` 或 `sessionStorage` 等。
+4. **乐观对账**: 发送方生成 `clientMsgId`，以 `message:sent` /
+   `message:delivered` / `message:read` 推进状态，勿在客户端伪造回执。
 
 ---
 
@@ -731,19 +679,19 @@ src/__tests__/
 ├── mappers.test.ts                   # 消息映射函数测试
 ├── chat.slice.test.ts               # Chat Redux slice 测试
 ├── message.slice.test.ts            # Message Redux slice 测试
-├── use-real-chat.test.ts             # useRealChat hook 测试
+├── use-chats-with-live-messages.test.ts  # 会话 hook 测试
 ├── use-chats-with-live-messages.test.ts  # useChatsWithLiveMessages hook 测试
 └── rtc.test.ts                      # RTC 通话管理器测试
 ```
 
 ### 测试覆盖范围
 
-| 模块 | 覆盖率 |
-|------|--------|
-| Domain (类型/接口) | ✓ |
-| Application (mappers, Redux slices) | ✓ |
-| Presentation (hooks 接口) | ✓ |
-| RTC (call manager, constants) | ✓ |
+| 模块                                | 覆盖率 |
+| ----------------------------------- | ------ |
+| Domain (类型/接口)                  | ✓      |
+| Application (mappers, Redux slices) | ✓      |
+| Presentation (hooks 接口)           | ✓      |
+| RTC (call manager, constants)       | ✓      |
 
 ### 编写新测试
 
