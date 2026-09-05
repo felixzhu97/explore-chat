@@ -83,7 +83,7 @@ export class WebSocketAdapter implements IWebSocketAdapter {
     }
     this.isConnecting = true;
     const socketIoUrl =
-      process.env.NEXT_PUBLIC_SOCKET_IO_URL || "http://localhost:3001";
+      process.env.NEXT_PUBLIC_SOCKET_IO_URL || "http://localhost:9002";
     const token = this.getAuthToken();
     logSocket("Socket.IO connect", { socketIoUrl, hasToken: !!token });
 

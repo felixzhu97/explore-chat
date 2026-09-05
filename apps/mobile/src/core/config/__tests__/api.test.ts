@@ -7,7 +7,7 @@ describe("api configuration", () => {
     it("should return localhost URL when EXPO_PUBLIC_API_URL is not set", () => {
       delete process.env.EXPO_PUBLIC_API_URL;
       const { API_BASE_URL } = require("../../config/api");
-      expect(API_BASE_URL).toBe("http://localhost:3001");
+      expect(API_BASE_URL).toBe("http://localhost:9001");
     });
 
     it("should use EXPO_PUBLIC_API_URL when set", () => {
@@ -33,7 +33,7 @@ describe("api configuration", () => {
     it("should append /api/v1 to localhost base URL", () => {
       delete process.env.EXPO_PUBLIC_API_URL;
       const { API_V1 } = require("../../config/api");
-      expect(API_V1).toBe("http://localhost:3001/api/v1");
+      expect(API_V1).toBe("http://localhost:9001/api/v1");
     });
 
     it("should not have double slashes when base URL has no trailing slash", () => {

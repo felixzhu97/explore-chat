@@ -1,17 +1,11 @@
 #!/usr/bin/env bash
 # Guard against reintroducing the legacy { success, data } HTTP envelope
-# in Nest controllers and Python helpers (AIP REST cutover).
+# in Python helpers (AIP REST cutover). Nest server removed.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 failed=0
-
-if rg -n 'success:\s*true' services/server/src --glob '*controller*.ts' >/tmp/aip-rest-hits.txt; then
-  echo "AIP REST check failed: legacy success:true envelope in controllers:" >&2
-  cat /tmp/aip-rest-hits.txt >&2
-  failed=1
-fi
 
 if rg -n '["'\'']success["'\'']\s*:\s*(False|false|True|true)' \
   services/recommendation services/vision services/rag services/media-gen \

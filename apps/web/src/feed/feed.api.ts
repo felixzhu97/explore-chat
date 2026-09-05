@@ -62,58 +62,15 @@ export class FeedApi {
   }
 
   async getFeedGraphql(limit: number, pageState?: string) {
-    const query = `query Feed($limit: Int, $pageState: String) {
-      feed(limit: $limit, pageState: $pageState) {
-        pageState
-        entries {
-          postId
-          authorId
-          createdAt
-          isSponsored
-          adAccountId
-          adCampaignId
-          adGroupId
-          adCreativeId
-          post {
-            postId
-            userId
-            caption
-            type
-            mediaUrls
-            coverUrl
-            location
-            createdAt
-            username
-            avatar
-            likeCount
-            commentCount
-            saveCount
-            isLiked
-            isSaved
-            autoTags
-          }
-        }
-      }
-    }`;
-    const variables: { limit: number; pageState?: string } = { limit };
-    if (pageState) variables.pageState = pageState;
-    const res = await this.api.post<unknown>("/graphql", { query, variables });
-    const body = res as {
-      errors?: Array<{ message: string }>;
-      data?: {
-        feed?: {
-          pageState?: string | null;
-          entries?: Array<{ postId: string; post?: PostDetailRes | null }>;
-        };
-      };
-    };
-    if (body.errors?.length) {
-      throw new Error(body.errors[0]?.message ?? "GraphQL error");
-    }
-    const feed = body.data?.feed;
+    const q = new URLSearchParams({ page_size: String(limit) });
+    if (pageState) q.set("page_token", pageState);
+    const res = await this.api.get<{
+      entries?: Array<{ postId: string; post?: PostDetailRes | null }>;
+      next_page_token?: string;
+    }>(`/posts/feed?${q}`);
     return {
-      entries: Array.isArray(feed?.entries) ? feed.entries : [],
-      pageState: feed?.pageState ?? undefined,
+      entries: Array.isArray(res.entries) ? res.entries : [],
+      pageState: res.next_page_token,
     };
   }
 

@@ -1,14 +1,6 @@
 #!/bin/bash
-
-set -e
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-ENV=${1:-dev}
-
-if [ "$ENV" = "dev" ]; then
-  export DATABASE_URL="postgresql://whatschat:whatschat123@localhost:5433/whatschat?schema=public"
-fi
-
-cd "$ROOT_DIR"
-pnpm --filter whatschat-server db:seed
+# Demo user is seeded by Spring DemoDataLoader on boot (cristiano@whatschat.com / 123456).
+set -euo pipefail
+echo "Java API seeds the demo user on startup when chat.demo-seed=true (default)."
+echo "Start the API with: ./gradlew bootRun"
+echo "Login: cristiano@whatschat.com / 123456"

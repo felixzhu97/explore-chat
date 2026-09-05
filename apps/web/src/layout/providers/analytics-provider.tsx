@@ -9,7 +9,7 @@ import {
 const baseURL =
   typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL
     ? process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "")
-    : "http://localhost:3001/api/v1";
+    : "http://localhost:9001/api/v1";
 
 export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   const transport = useMemo(
