@@ -6,10 +6,10 @@ import logging
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
+from aip import register_aip_exception_handlers
 from api import router
 from config import get_settings
 import service as rag_service
@@ -61,15 +61,7 @@ async def log_requests(request: Request, call_next):
     return response
 
 
-@app.exception_handler(Exception)
-async def global_exception_handler(_request: Request, exc: Exception):
-    logger.error("Unhandled exception: %s", exc, exc_info=True)
-    return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"success": False, "error": "Internal server error"},
-    )
-
-
+register_aip_exception_handlers(app)
 app.include_router(router)
 
 
