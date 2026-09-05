@@ -107,11 +107,15 @@ describe("useSocket", () => {
         result.current.sendMessage("chat-1", "Hello", "TEXT");
       });
 
-      expect(mockSocket.emit).toHaveBeenCalledWith("message:send", {
-        chatId: "chat-1",
-        content: "Hello",
-        type: "TEXT",
-      });
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        "message:send",
+        expect.objectContaining({
+          chatId: "chat-1",
+          content: "Hello",
+          type: "TEXT",
+          clientMsgId: expect.any(String),
+        }),
+      );
     });
 
     it("uses TEXT as default message type", () => {
@@ -132,11 +136,15 @@ describe("useSocket", () => {
         result.current.sendMessage("chat-1", "Hello");
       });
 
-      expect(mockSocket.emit).toHaveBeenCalledWith("message:send", {
-        chatId: "chat-1",
-        content: "Hello",
-        type: "TEXT",
-      });
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        "message:send",
+        expect.objectContaining({
+          chatId: "chat-1",
+          content: "Hello",
+          type: "TEXT",
+          clientMsgId: expect.any(String),
+        }),
+      );
     });
   });
 

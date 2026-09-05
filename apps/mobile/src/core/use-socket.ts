@@ -8,13 +8,24 @@ import {
 } from "@/core/store/hooks";
 import { mapServerMessagePayload } from "@/chat/message.mapper";
 import { Message } from "@/chat/message.model";
+import { ImWsEvents } from "@whatschat/shared-types";
 
 type OnMessageReceived = (message: Message) => void;
 type OnMessageSent = (message: Message) => void;
+type OnMessageDelivered = (payload: {
+  messageId: string;
+  chatId: string;
+  clientMsgId?: string;
+}) => void;
+
+function newClientMsgId(): string {
+  return `cmsg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
 
 export function useSocket(
   onMessageReceived?: OnMessageReceived,
   onMessageSent?: OnMessageSent,
+  onMessageDelivered?: OnMessageDelivered,
 ) {
   const dispatch = useAppDispatch();
   const token = useAuthStore((s) => s.token);
@@ -22,8 +33,10 @@ export function useSocket(
   const connected = useSocketStore((s) => s.connected);
   const onReceivedRef = useRef(onMessageReceived);
   const onSentRef = useRef(onMessageSent);
+  const onDeliveredRef = useRef(onMessageDelivered);
   onReceivedRef.current = onMessageReceived;
   onSentRef.current = onMessageSent;
+  onDeliveredRef.current = onMessageDelivered;
 
   useEffect(() => {
     if (token) dispatch(connectSocket(token));
@@ -38,22 +51,60 @@ export function useSocket(
     const onSent = (payload: Record<string, unknown>) => {
       onSentRef.current?.(mapServerMessagePayload(payload));
     };
-    socket.on("message:received", onReceived);
-    socket.on("message:sent", onSent);
+    const onDelivered = (payload: {
+      messageId: string;
+      chatId: string;
+      clientMsgId?: string;
+    }) => {
+      onDeliveredRef.current?.(payload);
+    };
+    socket.on(ImWsEvents.messageReceived, onReceived);
+    socket.on(ImWsEvents.messageSent, onSent);
+    socket.on(ImWsEvents.messageDelivered, onDelivered);
     return () => {
-      socket.off("message:received", onReceived);
-      socket.off("message:sent", onSent);
+      socket.off(ImWsEvents.messageReceived, onReceived);
+      socket.off(ImWsEvents.messageSent, onSent);
+      socket.off(ImWsEvents.messageDelivered, onDelivered);
     };
   }, [socket]);
 
   const sendMessage = useCallback(
-    (chatId: string, content: string, type: string = "TEXT") => {
+    (
+      chatId: string,
+      content: string,
+      type: string = "TEXT",
+      clientMsgId: string = newClientMsgId(),
+    ) => {
       if (socket?.connected) {
-        socket.emit("message:send", { chatId, content, type });
+        socket.emit(ImWsEvents.messageSend, {
+          chatId,
+          content,
+          type,
+          clientMsgId,
+        });
+      }
+      return clientMsgId;
+    },
+    [socket],
+  );
+
+  const joinChat = useCallback(
+    (chatId: string) => {
+      if (socket?.connected) {
+        socket.emit(ImWsEvents.chatJoin, { chatId });
       }
     },
     [socket],
   );
 
-  return { sendMessage, connected, socket };
+  const leaveChat = useCallback(
+    (chatId: string) => {
+      if (socket?.connected) {
+        socket.emit(ImWsEvents.chatLeave, { chatId });
+      }
+    },
+    [socket],
+  );
+
+  return { sendMessage, joinChat, leaveChat, connected, socket };
 }

@@ -16,6 +16,7 @@ export enum MessageType {
 }
 
 export enum MessageStatus {
+  Sending = "sending",
   Sent = "sent",
   Delivered = "delivered",
   Read = "read",
@@ -36,6 +37,7 @@ export interface Message extends Omit<DomainMessage, "type" | "status"> {
 export class MessageEntity implements Message {
   id: string;
   chatId: string;
+  clientMsgId?: string;
   senderId: string;
   senderName: string;
   senderAvatar?: string;
@@ -62,6 +64,7 @@ export class MessageEntity implements Message {
   constructor(data: Message) {
     this.id = data.id;
     this.chatId = data.chatId;
+    this.clientMsgId = data.clientMsgId;
     this.senderId = data.senderId;
     this.senderName = data.senderName;
     this.senderAvatar = data.senderAvatar;
@@ -90,6 +93,7 @@ export class MessageEntity implements Message {
     return new MessageEntity({
       id: updates.id ?? this.id,
       chatId: updates.chatId ?? this.chatId,
+      clientMsgId: updates.clientMsgId ?? this.clientMsgId,
       senderId: updates.senderId ?? this.senderId,
       senderName: updates.senderName ?? this.senderName,
       senderAvatar: updates.senderAvatar ?? this.senderAvatar,

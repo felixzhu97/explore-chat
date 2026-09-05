@@ -23,6 +23,7 @@ export function mapServerMessagePayloadToMessage(m: {
   content: string;
   createdAt: string;
   updatedAt?: string;
+  clientMsgId?: string;
   sender?: { id: string; username: string; avatar?: string };
 }): Message {
   return new MessageEntity({
@@ -38,6 +39,7 @@ export function mapServerMessagePayloadToMessage(m: {
     updatedAt: m.updatedAt ? new Date(m.updatedAt) : undefined,
     isForwarded: false,
     forwardedFrom: [],
+    ...(m.clientMsgId != null && { clientMsgId: m.clientMsgId }),
   });
 }
 
@@ -49,6 +51,7 @@ export function mapRecordToServerMessagePayload(p: Record<string, unknown>): {
   content: string;
   createdAt: string;
   updatedAt?: string;
+  clientMsgId?: string;
   sender?: { id: string; username: string; avatar?: string };
 } {
   return {
@@ -59,6 +62,7 @@ export function mapRecordToServerMessagePayload(p: Record<string, unknown>): {
     content: (p.content as string) ?? "",
     createdAt: (p.createdAt as string) ?? new Date().toISOString(),
     updatedAt: p.updatedAt as string | undefined,
+    ...(typeof p.clientMsgId === "string" && { clientMsgId: p.clientMsgId }),
     sender: p.sender as
       | { id: string; username: string; avatar?: string }
       | undefined,

@@ -25,6 +25,7 @@ export class MessageApi {
     chatId: string,
     content: string,
     type: string = "TEXT",
+    clientMsgId?: string,
   ): Promise<Message> {
     const { data } = await this.http.post<{ success: boolean; data: unknown }>(
       "/messages",
@@ -32,6 +33,7 @@ export class MessageApi {
         chatId,
         content,
         type,
+        ...(clientMsgId != null && { clientMsgId }),
       },
     );
     if (!data.success || !data.data) throw new Error("Send failed");
