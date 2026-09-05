@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { VisionApi } from "@/ai/apis/vision.api";
-import type { ApiClient } from "@/core/api-client";
+import type { ApiClient } from "@/auth/api-client";
 
 describe("VisionApi", () => {
   let adapter: VisionApi;

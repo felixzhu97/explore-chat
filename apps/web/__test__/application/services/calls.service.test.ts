@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { CallsService } from "@/calls/calls.service";
-import { store } from "@/core/store/store";
+import { store } from "@/layout/store";
 
-vi.mock("@/core/store/store", () => ({
+vi.mock("@/layout/store", () => ({
   store: {
     getState: vi.fn(() => ({
       calls: {

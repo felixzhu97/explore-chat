@@ -10,13 +10,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { styled } from "@/src/shared/utils/emotion";
 import { useTranslation } from "@/src/shared/i18n";
 import type { SuggestedUser } from "@/shared/types";
-import type { RootState, AppDispatch } from "@/core/store/store";
+import type { RootState, AppDispatch } from "@/layout/store";
 import {
   fetchNotifications,
   loadMoreNotifications,
   prependNotification,
-} from "@/core/store/slices/notificationsSlice";
-import { getWebSocketAdapter } from "@/core/websocket/websocket";
+} from "@/layout/notificationsSlice";
+import { getWebSocketAdapter } from "@/chat/websocket";
 import type { NotificationItemRes } from "@/feed/feed.api";
 
 const SheetPortal = SheetPrimitive.Portal;

@@ -1,4 +1,4 @@
-import { getStorage } from "@/core/storage/storage";
+import { getStorage } from "@/auth/storage";
 
 /**
  * Custom storage for redux-persist that uses the app's storage adapter.

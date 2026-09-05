@@ -233,3 +233,5 @@ export const getWebSocketAdapter = (): IWebSocketAdapter => {
   if (!wsManager) wsManager = new WebSocketAdapter();
   return wsManager;
 };
+
+export const getWebSocketManager = getWebSocketAdapter;

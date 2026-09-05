@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import compact from "lodash/compact";
 import uniq from "lodash/uniq";
 import uniqBy from "lodash/uniqBy";
-import { getApiClient } from "@/core/api-client";
+import { getApiClient } from "@/auth/api-client";
 import { FeedApi, type PostDetailRes } from "@/feed/feed.api";
 import type { FeedPost, SuggestedUser } from "@/shared/types";
 

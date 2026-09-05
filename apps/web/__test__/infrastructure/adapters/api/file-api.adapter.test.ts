@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { FileApi } from "@/ai/apis/file.api";
-import type { ApiClient } from "@/core/api-client";
-import type { ApiResponse } from "@/core/api-response.model";
+import type { ApiClient } from "@/auth/api-client";
+import type { ApiResponse } from "@/auth/api-response.model";
 
 describe("FileApi", () => {
   let adapter: FileApi;

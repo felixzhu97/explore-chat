@@ -1,4 +1,4 @@
-import type { Contact, Message, StoryItem } from "@/shared/types";
+import type { Contact, Message } from "@/shared/types";
 
 export const mockContacts: Contact[] = [
   {
@@ -106,57 +106,3 @@ export const mockMessages: Record<string, Message[]> = {
     },
   ],
 };
-
-export const mockUser = {
-  id: "current-user",
-  username: "me",
-  name: "我",
-  avatar: "/placeholder.svg?height=40&width=40&text=我",
-  phone: "+86 138 0000 0000",
-  email: "me@example.com",
-  status: "在线",
-  isOnline: true,
-  lastSeen: new Date().toISOString(),
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
-
-export const mockStories: StoryItem[] = [
-  {
-    id: "s1",
-    userId: "u1",
-    username: "appletv",
-    avatar: "/placeholder.svg?height=64&width=64&text=A",
-    hasUnseen: true,
-  },
-  {
-    id: "s2",
-    userId: "u2",
-    username: "redbull",
-    avatar: "/placeholder.svg?height=64&width=64&text=R",
-  },
-  {
-    id: "s3",
-    userId: "u3",
-    username: "architect",
-    avatar: "/placeholder.svg?height=64&width=64&text=Ar",
-  },
-  {
-    id: "s4",
-    userId: "u4",
-    username: "olympics",
-    avatar: "/placeholder.svg?height=64&width=64&text=O",
-  },
-  {
-    id: "s5",
-    userId: "u5",
-    username: "dezeen",
-    avatar: "/placeholder.svg?height=64&width=64&text=D",
-  },
-  {
-    id: "s6",
-    userId: "u6",
-    username: "archdaily",
-    avatar: "/placeholder.svg?height=64&width=64&text=Ad",
-  },
-];

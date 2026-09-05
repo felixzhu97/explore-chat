@@ -6,7 +6,7 @@ import {
   type IChatsService as ImChatsService,
 } from "@whatschat/im";
 import { getChatsService } from "@/chat/services/chats.service";
-import { getWebSocketAdapter } from "@/core/websocket";
+import { getWebSocketAdapter } from "@/chat/websocket";
 
 export function useChatsWithLiveMessages(
   selectedContactId: string | null,

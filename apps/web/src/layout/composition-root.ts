@@ -1,4 +1,4 @@
-import { getApiClient, type ApiClient } from "@/core/api-client";
+import { getApiClient, type ApiClient } from "@/auth/api-client";
 import { AuthApi } from "@/auth/auth.api";
 import { ChatApi } from "@/chat/chat.api";
 import { UserApi } from "@/profile/user.api";

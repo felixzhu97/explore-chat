@@ -47,7 +47,7 @@ import {
   setStoredLocale,
   type AppLocale,
 } from "@/src/shared/i18n";
-import { getApiClient } from "@/core/api-client";
+import { getApiClient } from "@/auth/api-client";
 import { FileApi } from "@/ai/apis/file.api";
 import { useToast } from "@/shared/ui/use-toast";
 

@@ -1,9 +1,9 @@
 import type { AuthState, LoginData, RegisterData } from "./auth.model";
 import { mapUser, mergeUserProfile, type User } from "./user.model";
-import type { ApiClient } from "@/core/api-client";
+import type { ApiClient } from "@/auth/api-client";
 import { AuthApi } from "./auth.api";
-import { getAppComposition } from "@/core/composition-root";
-import { getStorage, type AppStorage } from "@/core/storage/storage";
+import { getAppComposition } from "@/layout/composition-root";
+import { getStorage, type AppStorage } from "@/auth/storage";
 
 const STORAGE_KEYS = {
   USER: "instagram_user",
