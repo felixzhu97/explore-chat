@@ -1,13 +1,9 @@
-import { Client } from "cassandra-driver";
-import { Client as EsClient } from "@elastic/elasticsearch";
 import { v4 as uuidv4 } from "uuid";
 import { prisma } from "./client";
-import { ConfigService } from "@/core/config/config.service";
 import logger from "@/shared/utils/logger";
 
 if (!process.env["DATABASE_URL"]) {
-  process.env["DATABASE_URL"] =
-    "postgresql://whatschat:whatschat123@localhost:5433/whatschat?schema=public";
+  process.env["DATABASE_URL"] = "file:./dev.db";
 }
 
 const SAMPLE_CAPTIONS = [
@@ -37,55 +33,7 @@ const PRIORITY_USERNAMES = [
   "rihanna",
 ];
 
-async function ensureCassandra(client: Client, keyspace: string) {
-  await client.execute(
-    `CREATE KEYSPACE IF NOT EXISTS ${keyspace} WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}`,
-  );
-  await client.execute(`
-    CREATE TABLE IF NOT EXISTS ${keyspace}.posts (
-      user_id text,
-      created_at timestamp,
-      post_id text,
-      caption text,
-      type text,
-      media_urls list<text>,
-      location text,
-      cover_url text,
-      PRIMARY KEY (user_id, created_at, post_id)
-    ) WITH CLUSTERING ORDER BY (created_at DESC, post_id ASC)
-  `);
-  await client.execute(`
-    CREATE TABLE IF NOT EXISTS ${keyspace}.post_by_id (
-      post_id text PRIMARY KEY,
-      user_id text,
-      created_at timestamp,
-      caption text,
-      type text,
-      media_urls list<text>,
-      location text,
-      cover_url text
-    )
-  `);
-  await client.execute(`
-    CREATE TABLE IF NOT EXISTS ${keyspace}.feed_by_user (
-      user_id text,
-      created_at timestamp,
-      post_id text,
-      author_id text,
-      PRIMARY KEY (user_id, created_at, post_id)
-    ) WITH CLUSTERING ORDER BY (created_at DESC, post_id ASC)
-  `);
-  client.keyspace = keyspace;
-}
-
 export async function seedPosts(): Promise<void> {
-  const config = ConfigService.loadConfig();
-  const { contactPoints, keyspace, localDatacenter } = config.cassandra;
-  if (!contactPoints.length) {
-    logger.warn("Cassandra 未配置，跳过帖子种子");
-    return;
-  }
-
   const priorityUsers = await prisma.user.findMany({
     where: { username: { in: PRIORITY_USERNAMES } },
     select: { id: true, username: true },
@@ -102,27 +50,6 @@ export async function seedPosts(): Promise<void> {
     return;
   }
 
-  const client = new Client({
-    contactPoints,
-    localDataCenter: localDatacenter,
-  });
-  await client.connect();
-  await ensureCassandra(client, keyspace);
-
-  const esNode = config.elasticsearch.node;
-  const es = esNode
-    ? new EsClient({
-        node: esNode,
-        ...(config.elasticsearch.username &&
-          config.elasticsearch.password && {
-            auth: {
-              username: config.elasticsearch.username,
-              password: config.elasticsearch.password,
-            },
-          }),
-      })
-    : null;
-
   let created = 0;
   const posts: {
     postId: string;
@@ -133,14 +60,11 @@ export async function seedPosts(): Promise<void> {
 
   for (let i = 0; i < users.length; i++) {
     const user = users[i]!;
-    const existing = await client.execute(
-      `SELECT post_id FROM posts WHERE user_id = ? LIMIT 1`,
-      [user.id],
-      { prepare: true },
-    );
-    if (existing.rows.length > 0) {
-      continue;
-    }
+    const existing = await prisma.socialPost.findFirst({
+      where: { userId: user.id },
+      select: { id: true },
+    });
+    if (existing) continue;
 
     const perUser = i < 4 ? 2 : 1;
     for (let j = 0; j < perUser; j++) {
@@ -148,83 +72,71 @@ export async function seedPosts(): Promise<void> {
       const createdAt = new Date(Date.now() - (i * 3 + j) * 3600_000);
       const caption = SAMPLE_CAPTIONS[(i + j) % SAMPLE_CAPTIONS.length]!;
       const mediaUrl = `https://picsum.photos/seed/${postId.slice(0, 8)}/800/800`;
-      await client.execute(
-        `INSERT INTO posts (user_id, created_at, post_id, caption, type, media_urls, location, cover_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          user.id,
-          createdAt,
-          postId,
-          caption,
-          "IMAGE",
-          [mediaUrl],
-          null,
-          mediaUrl,
-        ],
-        { prepare: true },
-      );
-      await client.execute(
-        `INSERT INTO post_by_id (post_id, user_id, created_at, caption, type, media_urls, location, cover_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          postId,
-          user.id,
+      await prisma.socialPost.create({
+        data: {
+          id: postId,
+          userId: user.id,
           createdAt,
           caption,
-          "IMAGE",
-          [mediaUrl],
-          null,
-          mediaUrl,
-        ],
-        { prepare: true },
-      );
+          type: "IMAGE",
+          mediaUrls: [mediaUrl],
+          coverUrl: mediaUrl,
+        },
+      });
+      const rawTags = caption.match(/#\w+/g) || [];
+      for (const t of rawTags) {
+        const tag = t.replace(/^#/, "").toLowerCase();
+        if (!tag) continue;
+        await prisma.hashtag.upsert({
+          where: { tag },
+          create: { tag },
+          update: {},
+        });
+      }
       posts.push({ postId, userId: user.id, createdAt, caption });
       created += 1;
-
-      if (es) {
-        const hashtags = (caption.match(/#\w+/g) || []).map((t) => t.slice(1));
-        try {
-          await es.index({
-            index: "posts",
-            id: postId,
-            refresh: true,
-            document: {
-              postId,
-              userId: user.id,
-              caption,
-              type: "IMAGE",
-              hashtags,
-              autoTags: [],
-              mediaUrls: [mediaUrl],
-              createdAt: createdAt.toISOString(),
-              moderationStatus: "approved",
-            },
-          });
-        } catch (err) {
-          logger.warn(
-            `帖子 ES 索引失败 (${postId}): ${err instanceof Error ? err.message : String(err)}`,
-          );
-        }
-      }
     }
   }
 
-  // Put newly created posts into every sampled user's feed.
   for (const viewer of users) {
     for (const post of posts) {
       if (post.userId === viewer.id) continue;
-      await client.execute(
-        `INSERT INTO feed_by_user (user_id, created_at, post_id, author_id) VALUES (?, ?, ?, ?)`,
-        [viewer.id, post.createdAt, post.postId, post.userId],
-        { prepare: true },
-      );
+      await prisma.feedEntry.upsert({
+        where: {
+          userId_postId: { userId: viewer.id, postId: post.postId },
+        },
+        create: {
+          userId: viewer.id,
+          authorId: post.userId,
+          postId: post.postId,
+          createdAt: post.createdAt,
+        },
+        update: {},
+      });
     }
+  }
+
+  // Author's own posts also appear in their feed
+  for (const post of posts) {
+    await prisma.feedEntry.upsert({
+      where: {
+        userId_postId: { userId: post.userId, postId: post.postId },
+      },
+      create: {
+        userId: post.userId,
+        authorId: post.userId,
+        postId: post.postId,
+        createdAt: post.createdAt,
+      },
+      update: {},
+    });
   }
 
   if (created === 0) {
     logger.info("目标用户均已有帖子，无需补种");
   } else {
-    logger.info(`新建 ${created} 条 Cassandra 帖子，并写入 feed_by_user`);
+    logger.info(`新建 ${created} 条 SQLite 帖子，并写入 feed_entries`);
   }
-  await client.shutdown();
 }
 
 async function main() {

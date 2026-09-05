@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { CassandraService } from "./cassandra.service";
+import { PrismaService } from "./prisma.service";
 
 export interface FeedEntry {
   user_id: string;
@@ -8,9 +8,28 @@ export interface FeedEntry {
   author_id: string;
 }
 
+function encodePageState(createdAt: Date, postId: string): string {
+  return Buffer.from(
+    JSON.stringify({ t: createdAt.toISOString(), id: postId }),
+    "utf8",
+  ).toString("base64url");
+}
+
+function decodePageState(pageState?: string): { t: Date; id: string } | null {
+  if (!pageState) return null;
+  try {
+    const raw = Buffer.from(pageState, "base64url").toString("utf8");
+    const o = JSON.parse(raw) as { t?: string; id?: string };
+    if (typeof o.t !== "string" || typeof o.id !== "string") return null;
+    return { t: new Date(o.t), id: o.id };
+  } catch {
+    return null;
+  }
+}
+
 @Injectable()
 export class CassandraFeedRepository {
-  constructor(private readonly cassandra: CassandraService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async insertFeedEntry(
     followerUserId: string,
@@ -18,13 +37,21 @@ export class CassandraFeedRepository {
     postId: string,
     createdAt: Date,
   ): Promise<void> {
-    const client = this.cassandra.getClient();
-    if (!client) return;
-    await client.execute(
-      `INSERT INTO feed_by_user (user_id, created_at, post_id, author_id) VALUES (?, ?, ?, ?)`,
-      [followerUserId, createdAt, postId, authorId],
-      { prepare: true },
-    );
+    await this.prisma.feedEntry.upsert({
+      where: {
+        userId_postId: { userId: followerUserId, postId },
+      },
+      create: {
+        userId: followerUserId,
+        authorId,
+        postId,
+        createdAt,
+      },
+      update: {
+        authorId,
+        createdAt,
+      },
+    });
   }
 
   async getFeedPage(
@@ -32,26 +59,35 @@ export class CassandraFeedRepository {
     limit: number,
     pageState?: string,
   ): Promise<{ entries: FeedEntry[]; pageState?: string }> {
-    const client = this.cassandra.getClient();
-    if (!client) return { entries: [] };
-    const opts: { prepare: boolean; fetchSize: number; pageState?: string } = {
-      prepare: true,
-      fetchSize: limit,
-    };
-    if (pageState !== undefined) opts.pageState = pageState;
-    const result = await client.execute(
-      `SELECT user_id, created_at, post_id, author_id FROM feed_by_user WHERE user_id = ?`,
-      [userId],
-      opts,
-    );
-    const entries = (result.rows || []).map((row: Record<string, unknown>) => ({
-      user_id: row["user_id"] as string,
-      created_at: row["created_at"] as Date,
-      post_id: row["post_id"] as string,
-      author_id: row["author_id"] as string,
+    const cursor = decodePageState(pageState);
+    const rows = await this.prisma.feedEntry.findMany({
+      where: {
+        userId,
+        ...(cursor
+          ? {
+              OR: [
+                { createdAt: { lt: cursor.t } },
+                { createdAt: cursor.t, postId: { lt: cursor.id } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: [{ createdAt: "desc" }, { postId: "asc" }],
+      take: limit + 1,
+    });
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const entries: FeedEntry[] = page.map((row) => ({
+      user_id: row.userId,
+      created_at: row.createdAt,
+      post_id: row.postId,
+      author_id: row.authorId,
     }));
     const out: { entries: FeedEntry[]; pageState?: string } = { entries };
-    if (result.pageState != null) out.pageState = result.pageState;
+    if (hasMore && page.length > 0) {
+      const last = page[page.length - 1]!;
+      out.pageState = encodePageState(last.createdAt, last.postId);
+    }
     return out;
   }
 }
