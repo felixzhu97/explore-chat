@@ -26,6 +26,9 @@ import com.chat.status.domain.model.UserStatus;
 import com.chat.status.domain.repository.UserStatusRepository;
 import com.chat.users.domain.model.ChatUser;
 import com.chat.users.domain.repository.UserRepository;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -34,6 +37,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+/** Seeds local demo users and Unsplash feed media. */
 @Component
 @ConditionalOnProperty(
     prefix = "chat",
@@ -43,6 +47,23 @@ import org.springframework.stereotype.Component;
 public class DemoDataLoader implements ApplicationRunner {
 
   private static final Logger log = LoggerFactory.getLogger(DemoDataLoader.class);
+
+  /** Classic anonymous cast (alice … judy). */
+  private static final String[] DEMO_USERS = {
+    "alice", "bob", "carol", "dave", "eve", "frank", "grace", "heidi", "ivan", "judy"
+  };
+
+  private static final String[] FEED_CAPTIONS = {
+    "strategic planning", "map", "analysis", "meditation", "city"
+  };
+
+  private static final String[] FEED_IMAGES = {
+    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=1000&fit=crop",
+    "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&h=1000&fit=crop",
+    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=1000&fit=crop",
+    "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&h=1000&fit=crop",
+    "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=1000&fit=crop"
+  };
 
   private final UserRepository userRepository;
   private final SocialPostRepository postRepository;
@@ -92,94 +113,133 @@ public class DemoDataLoader implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
-    if (postRepository.countAll() > 0) {
-      return;
+    List<ChatUser> users = ensureDemoUsers();
+    if (postRepository.countAll() == 0) {
+      seedFresh(users);
+    }
+    enrichFeedMedia();
+  }
+
+  private List<ChatUser> ensureDemoUsers() {
+    String hash = passwordEncoder.encode("123456");
+    List<ChatUser> users = new ArrayList<>(DEMO_USERS.length);
+    for (String name : DEMO_USERS) {
+      String label = capitalize(name);
+      users.add(ensureUser(name, name + "@example.com", hash, "", avatar(label)));
+    }
+    log.info("Demo users ready ({}): *@example.com / 123456", users.size());
+    return users;
+  }
+
+  private void seedFresh(List<ChatUser> users) {
+    final ChatUser alice = users.get(0);
+    final ChatUser bob = users.get(1);
+
+    SocialPost first = null;
+    SocialPost last = null;
+    for (int i = 0; i < users.size(); i++) {
+      ChatUser author = users.get(i);
+      String caption = FEED_CAPTIONS[i % FEED_CAPTIONS.length];
+      String image = FEED_IMAGES[i % FEED_IMAGES.length];
+      boolean reel = i % 5 == 2;
+      SocialPost post =
+          postRepository.save(
+              SocialPost.create(
+                  author.getId(),
+                  caption,
+                  json(image),
+                  reel ? "VIDEO" : "IMAGE",
+                  reel ? image : null,
+                  null));
+      if (first == null) {
+        first = post;
+      }
+      last = post;
     }
 
-    String hash = passwordEncoder.encode("123456");
-    ChatUser cristiano =
-        userRepository
-            .findByEmail("cristiano@whatschat.com")
-            .orElseGet(
-                () ->
-                    userRepository.save(
-                        ChatUser.register("cristiano", "cristiano@whatschat.com", hash)));
-    ChatUser messi =
-        userRepository
-            .findByEmail("messi@whatschat.com")
-            .orElseGet(
-                () -> userRepository.save(ChatUser.register("messi", "messi@whatschat.com", hash)));
-    ChatUser neymar =
-        userRepository
-            .findByEmail("neymar@whatschat.com")
-            .orElseGet(
-                () ->
-                    userRepository.save(
-                        ChatUser.register("neymar", "neymar@whatschat.com", hash)));
+    first.applyLike();
+    postRepository.save(first);
+    postLikeRepository.save(PostLike.of(first.getId(), bob.getId()));
+    postSaveRepository.save(PostSave.of(last.getId(), alice.getId()));
 
-    cristiano.updateProfile(null, null, "Demo captain", null);
-    messi.updateProfile(null, null, "Inter Miami", null);
-    neymar.updateProfile(null, null, "Santos", null);
-    userRepository.save(cristiano);
-    userRepository.save(messi);
-    userRepository.save(neymar);
-
-    SocialPost welcome =
-        postRepository.save(
-            SocialPost.create(
-                cristiano.getId(),
-                "Welcome to ExploreChat — first Post from the demo seed.",
-                "[]"));
-    postRepository.save(SocialPost.create(neymar.getId(), "Sunset run", "[]"));
-    postRepository.save(
-        SocialPost.create(
-            cristiano.getId(),
-            "Shipping the Java API. Feed should no longer be empty.",
-            "[]",
-            "VIDEO",
-            null,
-            null));
-
-    final SocialPost training =
-        postRepository.save(
-            SocialPost.create(messi.getId(), "Training day. #football #explore", "[]"));
-    welcome.applyLike();
-    postRepository.save(welcome);
-    postLikeRepository.save(PostLike.of(welcome.getId(), messi.getId()));
-    postSaveRepository.save(PostSave.of(training.getId(), cristiano.getId()));
-
-    seedFollow(cristiano.getId(), messi.getId());
-    seedFollow(cristiano.getId(), neymar.getId());
-    seedFollow(messi.getId(), cristiano.getId());
+    for (int i = 1; i < users.size(); i++) {
+      seedFollow(alice.getId(), users.get(i).getId());
+    }
+    seedFollow(bob.getId(), alice.getId());
 
     Chat chat = chatRepository.save(Chat.createPrivate());
-    participantRepository.save(ChatParticipant.join(chat.getId(), cristiano.getId(), "MEMBER"));
-    participantRepository.save(ChatParticipant.join(chat.getId(), messi.getId(), "MEMBER"));
-    messageRepository.save(Message.send(chat.getId(), messi.getId(), "Hey Cristiano 👋"));
-    messageRepository.save(Message.send(chat.getId(), cristiano.getId(), "Hello Messi!"));
+    participantRepository.save(ChatParticipant.join(chat.getId(), alice.getId(), "MEMBER"));
+    participantRepository.save(ChatParticipant.join(chat.getId(), bob.getId(), "MEMBER"));
+    messageRepository.save(Message.send(chat.getId(), bob.getId(), "hi"));
+    messageRepository.save(Message.send(chat.getId(), alice.getId(), "hello"));
 
     statusRepository.save(
-        UserStatus.create(cristiano.getId(), "On the pitch", null, "TEXT"));
+        UserStatus.create(alice.getId(), FEED_CAPTIONS[3], FEED_IMAGES[3], "IMAGE"));
 
-    SocialGroup group =
-        groupRepository.save(
-            SocialGroup.create("Football Legends", cristiano.getId(), "Demo group"));
-    groupParticipantRepository.save(
-        GroupParticipant.join(group.getId(), cristiano.getId(), "owner"));
-    groupParticipantRepository.save(GroupParticipant.join(group.getId(), messi.getId(), "member"));
+    SocialGroup group = groupRepository.save(SocialGroup.create("demo", alice.getId(), "demo"));
+    groupParticipantRepository.save(GroupParticipant.join(group.getId(), alice.getId(), "owner"));
+    groupParticipantRepository.save(GroupParticipant.join(group.getId(), bob.getId(), "member"));
 
-    adAccountRepository.save(AdAccount.create(cristiano.getId(), "Demo Ads"));
+    adAccountRepository.save(AdAccount.create(alice.getId(), "demo"));
     analyticsEventRepository.save(
-        AnalyticsEvent.record(cristiano.getId(), "demo_seed", "{\"source\":\"DemoDataLoader\"}"));
+        AnalyticsEvent.record(alice.getId(), "demo_seed", "{\"source\":\"DemoDataLoader\"}"));
 
-    log.info(
-        "Seeded demo users (cristiano/messi/neymar @whatschat.com / 123456),"
-            + " posts, likes/saves, status, group, ads, analytics");
+    log.info("Seeded demo posts, follows, chat, status, group");
+  }
+
+  private void enrichFeedMedia() {
+    List<SocialPost> posts = postRepository.listFeed(0, 50);
+    int index = 0;
+    for (SocialPost post : posts) {
+      String url = FEED_IMAGES[index % FEED_IMAGES.length];
+      if (post.isReel()) {
+        post.replaceMedia(json(url), "VIDEO", url);
+      } else {
+        post.replaceMedia(json(url), "IMAGE", null);
+      }
+      postRepository.save(post);
+      index++;
+    }
+    log.info("Enriched feed media");
+  }
+
+  private ChatUser ensureUser(
+      String username, String email, String hash, String status, String avatarUrl) {
+    return userRepository
+        .findByEmail(email)
+        .map(
+            existing -> {
+              existing.updateProfile(username, null, status, avatarUrl);
+              return userRepository.save(existing);
+            })
+        .orElseGet(
+            () -> {
+              if (userRepository.findByUsername(username).isPresent()) {
+                return userRepository.findByUsername(username).orElseThrow();
+              }
+              ChatUser created = userRepository.save(ChatUser.register(username, email, hash));
+              created.updateProfile(null, null, status, avatarUrl);
+              return userRepository.save(created);
+            });
   }
 
   private void seedFollow(String followerId, String followingId) {
     if (followRepository.findByFollowerIdAndFollowingId(followerId, followingId).isEmpty()) {
       followRepository.save(UserFollow.of(followerId, followingId));
     }
+  }
+
+  private static String capitalize(String name) {
+    return name.substring(0, 1).toUpperCase(Locale.ROOT) + name.substring(1);
+  }
+
+  private static String avatar(String name) {
+    return "https://ui-avatars.com/api/?name="
+        + name
+        + "&background=000000&color=ffffff&size=150&bold=true";
+  }
+
+  private static String json(String url) {
+    return "[\"" + url + "\"]";
   }
 }
