@@ -8,12 +8,13 @@ import compact from "lodash/compact";
 import uniq from "lodash/uniq";
 import type { IPostRepository } from "@/post/domain/post.repository.interface";
 import type { IEngagementRepository } from "@/post/domain/engagement.repository.interface";
-import { ElasticsearchService } from "@/core/database/elasticsearch.service";
 import { KafkaProducerService } from "@/core/messaging/kafka-producer.service";
 import { AiService } from "@/ai/application/ai.service";
 import { UsersService } from "@/users/application/users.service";
 import { VisionClientService } from "@/ai/application/vision-client.service";
 import { ConfigService } from "@/core/config/config.service";
+import { FeedFanoutService } from "@/post/application/feed-fanout.service";
+import { SearchService } from "@/search/application/search.service";
 import { HTTP_URL_PREFIX, parseDataUrl } from "@/shared/utils/media-url";
 import logger from "@/shared/utils/logger";
 import { v4 as uuidv4 } from "uuid";
@@ -33,11 +34,12 @@ export class PostService {
     private readonly postRepo: IPostRepository,
     @Inject("IEngagementRepository")
     private readonly engagementRepo: IEngagementRepository,
-    private readonly elasticsearch: ElasticsearchService,
     private readonly kafka: KafkaProducerService,
     private readonly usersService: UsersService,
     private readonly aiService: AiService,
     private readonly visionClient: VisionClientService,
+    private readonly feedFanout: FeedFanoutService,
+    private readonly searchService: SearchService,
   ) {}
 
   async createPost(userId: string, data: CreatePostData) {
@@ -118,32 +120,14 @@ export class PostService {
         data.coverUrl !== "" && { coverUrl: data.coverUrl }),
     });
     const createdAt = new Date().toISOString();
-    const es = this.elasticsearch.getClient();
-    if (es) {
-      const rawTags = (data.caption || "").match(/#\w+/g) || [];
-      try {
-        await es.index({
-          index: "posts",
-          id: postId,
-          refresh: true,
-          document: {
-            postId,
-            userId,
-            caption: data.caption,
-            type: data.type,
-            hashtags: rawTags,
-            autoTags: [],
-            mediaUrls,
-            createdAt,
-            moderationStatus: "pending",
-          },
-        });
-      } catch (err) {
-        logger.warn(
-          `Post ES index failed (postId=${postId}): ${err instanceof Error ? err.message : String(err)}`,
-        );
-      }
-    }
+    await this.searchService.indexPost(postId, data.caption);
+    await this.feedFanout.fanoutPostCreated({
+      postId,
+      userId,
+      createdAt,
+      caption: data.caption,
+    });
+    // Optional Kafka (no-op when brokers empty)
     await this.kafka.sendPostCreated({
       postId,
       userId,
@@ -192,29 +176,6 @@ export class PostService {
       result["isLiked"] = isLiked;
       result["isSaved"] = isSaved;
     }
-    const es = this.elasticsearch.getClient();
-    if (es) {
-      try {
-        const doc = await es.get({ index: "posts", id: postId });
-        const source = (
-          doc as unknown as {
-            _source?: {
-              autoTags?: string[];
-              moderationStatus?: string;
-              hidden?: boolean;
-            };
-          }
-        )._source;
-        if (source?.hidden === true || source?.moderationStatus === "reject") {
-          throw new NotFoundException("Post not found");
-        }
-        if (source?.autoTags && source.autoTags.length > 0) {
-          result["autoTags"] = source.autoTags;
-        }
-      } catch (err) {
-        if (err instanceof NotFoundException) throw err;
-      }
-    }
     return result;
   }
 
@@ -242,44 +203,9 @@ export class PostService {
         ),
       );
     }
-    let autoTagsByPostId: Map<string, string[]> = new Map();
-    const rejectedPostIds = new Set<string>();
-    const es = this.elasticsearch.getClient();
-    if (es && postIds.length > 0) {
-      try {
-        const mget = await es.mget({ index: "posts", ids: postIds });
-        const docs =
-          (
-            mget as {
-              docs?: Array<{
-                _source?: {
-                  autoTags?: string[];
-                  moderationStatus?: string;
-                  hidden?: boolean;
-                };
-                _id?: string;
-              }>;
-            }
-          ).docs ?? [];
-        for (const d of docs) {
-          const id = d._id;
-          if (
-            id &&
-            (d._source?.hidden === true ||
-              d._source?.moderationStatus === "reject")
-          )
-            rejectedPostIds.add(id);
-          const tags = d._source?.autoTags;
-          if (id && Array.isArray(tags) && tags.length > 0)
-            autoTagsByPostId.set(id, tags);
-        }
-      } catch {
-        /**/
-      }
-    }
     return postIds.map((postId, idx) => {
       const row = rows[idx];
-      if (!row || rejectedPostIds.has(postId)) return null;
+      if (!row) return null;
       const author = userMap.get(row.user_id);
       const counts = countsMap.get(postId) ?? {
         likeCount: 0,
@@ -308,8 +234,6 @@ export class PostService {
         result["isLiked"] = likedSaved[idx][0];
         result["isSaved"] = likedSaved[idx][1];
       }
-      const tags = autoTagsByPostId.get(postId);
-      if (tags?.length) result["autoTags"] = tags;
       return result;
     });
   }
@@ -320,36 +244,8 @@ export class PostService {
       limit,
       pageState,
     );
-    const postIds = rows.map((r) => r.post_id);
-    const rejectedPostIds = new Set<string>();
-    const es = this.elasticsearch.getClient();
-    if (es && postIds.length > 0) {
-      try {
-        const mget = await es.mget({ index: "posts", ids: postIds });
-        const docs =
-          (
-            mget as {
-              docs?: Array<{
-                _source?: { moderationStatus?: string; hidden?: boolean };
-                _id?: string;
-              }>;
-            }
-          ).docs ?? [];
-        for (const d of docs) {
-          if (
-            d._id &&
-            (d._source?.hidden === true ||
-              d._source?.moderationStatus === "reject")
-          )
-            rejectedPostIds.add(d._id);
-        }
-      } catch {
-        /**/
-      }
-    }
-    const filtered = rows.filter((r) => !rejectedPostIds.has(r.post_id));
     return {
-      posts: filtered.map((r) => ({
+      posts: rows.map((r) => ({
         postId: r.post_id,
         userId: r.user_id,
         createdAt: r.created_at,
