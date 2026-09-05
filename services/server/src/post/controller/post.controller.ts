@@ -17,8 +17,15 @@ import { PostService } from "@/post/service/post.service";
 import { FeedService } from "@/post/service/feed.service";
 import { EngagementService } from "@/post/service/engagement.service";
 import { ExploreService } from "@/post/service/explore.service";
+import {
+  clampPageSize,
+  pageStateFromPageToken,
+  nextPageStateToken,
+  offsetFromPageToken,
+  nextOffsetPageToken,
+} from "@/core/aip/page-token";
 
-@ApiTags("帖子")
+@ApiTags("posts")
 @Controller("posts")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
@@ -32,7 +39,7 @@ export class PostController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: "发帖" })
+  @ApiOperation({ summary: "Create post" })
   async createPost(
     @CurrentUser() user: { id: string },
     @Body()
@@ -44,7 +51,7 @@ export class PostController {
       coverUrl?: string;
     },
   ) {
-    const data = await this.postService.createPost(user.id, {
+    return this.postService.createPost(user.id, {
       caption: body.caption,
       type: body.type,
       ...(body.mediaUrls != null && { mediaUrls: body.mediaUrls }),
@@ -52,115 +59,131 @@ export class PostController {
       ...(body.coverUrl != null &&
         body.coverUrl !== "" && { coverUrl: body.coverUrl }),
     });
-    return { success: true, data };
   }
 
   @Get("feed")
-  @ApiOperation({ summary: "获取当前用户 Feed" })
+  @ApiOperation({ summary: "List feed entries" })
   async getFeed(
     @CurrentUser() user: { id: string },
-    @Query("limit") limit = "20",
-    @Query("pageState") pageState?: string,
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
   ) {
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
     const data = await this.feedService.getFeed(
       user.id,
-      parseInt(limit, 10),
-      pageState,
+      pageSize,
+      pageStateFromPageToken(pageToken),
     );
-    return { success: true, ...data };
+    return {
+      entries: data.entries,
+      next_page_token: nextPageStateToken(data.pageState),
+    };
   }
 
   @Get("explore")
-  @ApiOperation({ summary: "探索流" })
+  @ApiOperation({ summary: "List explore entries" })
   async getExplore(
     @CurrentUser() user: { id: string },
-    @Query("limit") limit = "20",
-    @Query("offset") offset = "0",
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
   ) {
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
+    const offset = offsetFromPageToken(pageToken, pageSize);
     const data = await this.exploreService.getExplore(
       user.id,
-      Math.min(parseInt(limit, 10) || 20, 50),
-      Math.max(0, parseInt(offset, 10) || 0),
+      Math.min(pageSize, 50),
+      offset,
     );
-    return { success: true, ...data };
+    const entries = data.entries ?? [];
+    const hasMore = offset + entries.length < (data.total ?? 0);
+    return {
+      entries,
+      total_size: data.total,
+      next_page_token: nextOffsetPageToken(offset, pageSize, hasMore),
+    };
   }
 
-  @Get("user/:userId")
-  @ApiOperation({ summary: "获取用户帖子列表" })
+  @Get("user/:user")
+  @ApiOperation({ summary: "List posts by user" })
   async getPostsByUser(
-    @Param("userId") userId: string,
-    @Query("limit") limit = "20",
-    @Query("pageState") pageState?: string,
+    @Param("user") userId: string,
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
   ) {
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
     const data = await this.postService.getPostsByUser(
       userId,
-      parseInt(limit, 10),
-      pageState,
+      pageSize,
+      pageStateFromPageToken(pageToken),
     );
-    return { success: true, ...data };
+    return {
+      posts: data.posts,
+      next_page_token: nextPageStateToken(data.pageState),
+    };
   }
 
-  @Post(":postId/like")
+  @Post(":post\\:like")
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "点赞" })
+  @ApiOperation({ summary: "Like post" })
   async like(
     @CurrentUser() user: { id: string },
-    @Param("postId") postId: string,
+    @Param("post") postId: string,
   ) {
-    const data = await this.engagementService.like(user.id, postId);
-    return { success: true, data };
+    return this.engagementService.like(user.id, postId);
   }
 
-  @Delete(":postId/like")
+  @Post(":post\\:unlike")
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "取消点赞" })
+  @ApiOperation({ summary: "Unlike post" })
   async unlike(
     @CurrentUser() user: { id: string },
-    @Param("postId") postId: string,
+    @Param("post") postId: string,
   ) {
-    const data = await this.engagementService.unlike(user.id, postId);
-    return { success: true, data };
+    return this.engagementService.unlike(user.id, postId);
   }
 
-  @Post(":postId/save")
+  @Post(":post\\:save")
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "收藏" })
+  @ApiOperation({ summary: "Save post" })
   async save(
     @CurrentUser() user: { id: string },
-    @Param("postId") postId: string,
+    @Param("post") postId: string,
   ) {
-    const data = await this.engagementService.save(user.id, postId);
-    return { success: true, data };
+    return this.engagementService.save(user.id, postId);
   }
 
-  @Delete(":postId/save")
+  @Post(":post\\:unsave")
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "取消收藏" })
+  @ApiOperation({ summary: "Unsave post" })
   async unsave(
     @CurrentUser() user: { id: string },
-    @Param("postId") postId: string,
+    @Param("post") postId: string,
   ) {
-    const data = await this.engagementService.unsave(user.id, postId);
-    return { success: true, data };
+    return this.engagementService.unsave(user.id, postId);
   }
 
-  @Get(":postId")
-  @ApiOperation({ summary: "获取帖子详情" })
+  @Get(":post")
+  @ApiOperation({ summary: "Get post" })
   async getPost(
     @CurrentUser() user: { id: string } | undefined,
-    @Param("postId") postId: string,
+    @Param("post") postId: string,
   ) {
-    const data = await this.postService.getPost(postId, user?.id);
-    return { success: true, data };
+    return this.postService.getPost(postId, user?.id);
   }
 
-  @Delete(":postId")
-  @ApiOperation({ summary: "删除帖子" })
+  @Delete(":post")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Delete post" })
   async deletePost(
     @CurrentUser() user: { id: string },
-    @Param("postId") postId: string,
+    @Param("post") postId: string,
   ) {
     await this.postService.deletePost(postId, user.id);
-    return { success: true, message: "已删除" };
   }
 }
