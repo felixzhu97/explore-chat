@@ -27,7 +27,7 @@ ExploreChat brings social connection into everyday life. Our mission is to help 
 
 - Real-time messaging (Socket.IO) and WebRTC voice/video calls
 - Social feed, Reels, stories, comments, likes, and saves
-- Explore grid and global search (Elasticsearch optional)
+- Explore grid and global search (Elasticsearch in local compose)
 - Media upload and post creation
 - JWT authentication
 - AI text/image/video/voice flows proxied through Nest (including Explore AI BFF)
@@ -142,40 +142,13 @@ Optional for AI / media flows: Ollama, and the Python services under `services/`
 git clone https://github.com/felixzhu97/explore-chat.git
 cd explore-chat
 pnpm install
-pnpm setup
-```
-
-Start local data stores (from `services/server`, at least Postgres and Redis):
-
-```bash
-cd services/server
-docker compose up -d postgres redis
-cd ../..
-cp services/server/.env.example services/server/.env
-# Set DATABASE_URL, REDIS_URL, JWT_SECRET (production secrets must be strong)
-```
-
-Migrate and generate Prisma client:
-
-```bash
-cd services/server
-pnpm db:generate
-pnpm migrate          # or: pnpm exec prisma migrate deploy
-pnpm db:seed          # optional demo data
-cd ../..
-```
-
-Run apps (from repo root):
-
-```bash
-pnpm start:server          # Nest API — http://localhost:3001
-pnpm start:web             # Web — http://localhost:4000
-pnpm start:admin           # Admin — http://localhost:4001
-pnpm start:mobile:ios      # Expo iOS (or start:mobile / start:mobile:android)
-
-# Web + API together
 pnpm dev
 ```
+
+That single command ensures `.env`, starts the full local Docker stack
+(Postgres 18, Redis, Redpanda, ScyllaDB, Elasticsearch, MongoDB, Qdrant),
+runs migrations, builds shared types, and runs Web + API. It never runs
+`docker compose down`.
 
 | Service                  | Default URL                         |
 | ------------------------ | ----------------------------------- |
@@ -185,7 +158,15 @@ pnpm dev
 | Health                   | http://localhost:3001/api/v1/health |
 | Swagger (non-production) | http://localhost:3001/api/docs      |
 
-Stop helpers: `pnpm stop` (dev) / `pnpm stop:prod`.
+Local Kafka/CQL drop-ins: **Redpanda** (`KAFKA_BROKERS`) and **ScyllaDB**
+(`CASSANDRA_*`) — same Nest clients, lighter containers. Postgres major is
+pinned to 18 (`postgres_18_data` volume); bumping the image major needs a
+new volume or an explicit volume remove.
+
+Apps only (infra already up): `pnpm dev:apps`.  
+Admin / mobile: `pnpm start:admin`, `pnpm start:mobile:ios`, …  
+Stop helpers: `pnpm stop` (dev). Wipe volumes only with
+`./scripts/app/stop.sh --remove-volumes`.
 
 More detail: [docs/developer/QUICKSTART.md](docs/developer/QUICKSTART.md).
 
@@ -200,13 +181,16 @@ Copy examples and adjust for your machine:
 | Web           | `apps/web/.env.local` — typically `NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1` |
 | Admin         | `apps/admin/.env.local` — API URL + `ADMIN_EMAILS`                                   |
 
-Common server variables:
+Common server variables (defaults match `pnpm dev` / `.env.example`):
 
 ```bash
-# services/server/.env (illustrative)
 DATABASE_URL=postgresql://whatschat:whatschat123@localhost:5433/whatschat?schema=public
 REDIS_URL=redis://localhost:6379
-JWT_SECRET=whatschat-dev-jwt-secret
+JWT_SECRET=whatschat-dev-jwt-secret-key-32chars
+KAFKA_BROKERS=localhost:9092
+CASSANDRA_CONTACT_POINTS=localhost:9042
+ELASTICSEARCH_NODE=http://localhost:9200
+MONGODB_URI=mongodb://localhost:27017/whatschat
 OLLAMA_BASE_URL=http://localhost:11434
 MEDIA_GENERATION_API_URL=http://localhost:3456
 VISION_SERVICE_URL=http://localhost:8001

@@ -19,22 +19,24 @@ echo -e "${GREEN}Stopping WhatsChat (${ENV})${NC}\n"
 
 echo "[1/2] Stopping processes..."
 lsof -ti:3001 2>/dev/null | xargs kill -9 2>/dev/null || true
+lsof -ti:4000 2>/dev/null | xargs kill -9 2>/dev/null || true
 lsof -ti:3456 2>/dev/null | xargs kill -9 2>/dev/null || true
 pkill -f "services/media-gen/main.py" 2>/dev/null || true
 pkill -f "services/video-gen/app.py" 2>/dev/null || true
 pkill -f "services/image-gen/app.py" 2>/dev/null || true
 pkill -f "services/voice-gen/app.py" 2>/dev/null || true
 pkill -f "celery.*celery_app" 2>/dev/null || true
-SERVER_PIDS=$(ps aux | grep -E "(nest start|node.*dist/main.js|pnpm.*dev)" | grep -v grep | awk '{print $2}' || true)
+pkill -f "uvicorn main:app" 2>/dev/null || true
+SERVER_PIDS=$(ps aux | grep -E "(nest start|node.*dist/main.js|turbo run dev|whatschat-web|whatschat-server)" | grep -v grep | awk '{print $2}' || true)
 for PID in $SERVER_PIDS; do kill $PID 2>/dev/null || true; done
 sleep 1
 for PID in $SERVER_PIDS; do kill -9 $PID 2>/dev/null || true; done
 
-echo "[2/2] Docker down..."
+echo "[2/2] Docker stop (volumes kept unless --remove-volumes)..."
 COMPOSE_CMD="docker compose"
 docker compose version >/dev/null 2>&1 || COMPOSE_CMD="docker-compose"
 cd "$SERVER_DIR"
-export COMPOSE_PROJECT_NAME=whatschat
+# Do not force COMPOSE_PROJECT_NAME — use directory default for continuity.
 [ "$REMOVE_VOLUMES" = "true" ] && $COMPOSE_CMD -f docker-compose.yml down -v || $COMPOSE_CMD -f docker-compose.yml down
 cd "$ROOT_DIR"
 
