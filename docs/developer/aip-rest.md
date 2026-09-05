@@ -47,12 +47,40 @@ Shared types: `RpcStatus` / `ListQuery` / `ListResponse` in `@whatschat/shared-t
 | `POST /chats/:id/archive` | `POST /chats/{chat}:archive`  |
 | `POST /users/:id/follow`  | `POST /users/{user}:follow`   |
 
+## Python ML helpers (loopback)
+
+Same AIP rules apply to FastAPI helpers under `services/{recommendation,vision,rag,media-gen}`.
+Clients still call Nest only; Nest calls these over loopback with **snake_case** JSON.
+
+| Service        | Legacy                         | AIP                                      |
+| -------------- | ------------------------------ | ---------------------------------------- |
+| recommendation | `POST /v1/feed/rank`           | `POST /api/v1/feeds:rank`                |
+| recommendation | `POST /v1/explore/rank`        | `POST /api/v1/explores:rank`             |
+| recommendation | `POST /v1/reels/rank`          | `POST /api/v1/reels:rank`                |
+| recommendation | `POST /v1/feed/recall`         | `POST /api/v1/feeds:recall`              |
+| vision         | `POST /predict`                | `POST /api/v1/images:predict`            |
+| vision         | `POST /moderate`               | `POST /api/v1/images:moderate`           |
+| vision         | `POST /moderate-video`         | `POST /api/v1/videos:moderate`           |
+| media-gen      | `POST /image/generate`         | `POST /api/v1/images:generate`           |
+| media-gen      | `GET /image/generate/{id}`     | `GET /api/v1/imageJobs/{image_job}`      |
+| media-gen      | `POST /video/generate`         | `POST /api/v1/videos:generate`           |
+| media-gen      | `GET /video/generate/{id}`     | `GET /api/v1/videoJobs/{video_job}`      |
+| media-gen      | `POST /voice/synthesize`       | `POST /api/v1/voices:synthesize`         |
+| rag            | `POST /api/v1/documents/upload`| `POST /api/v1/documents`                 |
+| rag            | list `skip`/`limit`            | `page_size` / `page_token`               |
+| rag            | `POST /api/v1/query`           | `POST /api/v1/documents:query`           |
+| rag            | `POST /api/v1/crawler/scrape`  | `POST /api/v1/webpages:scrape`           |
+| rag            | `POST /api/v1/sync/posts`      | `POST /api/v1/posts:sync`                |
+
+Each helper ships `aip/` (`rpc_status`, exception handlers, `page_token` for RAG lists).
+`/health` and `/metrics` stay unversioned.
+
 ## Validation
 
 - No protobuf → no `api-linter`
 - OpenAPI via Nest Swagger at `/api/docs` (non-production)
 - Spectral rules: [`.spectral.yml`](../../.spectral.yml) against [`openapi-aip-contract.yaml`](./openapi-aip-contract.yaml)
-- Controller guard: `pnpm check:aip-rest` (rejects legacy `success: true` envelopes in Nest controllers)
+- Controller / Python guard: `pnpm check:aip-rest` (rejects legacy `success` envelopes in Nest controllers and Python helpers)
 
 ## Package layout note
 

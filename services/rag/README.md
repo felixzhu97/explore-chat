@@ -160,7 +160,7 @@ GET    /health/ready               Readiness probe
 ### Upload a Document
 
 ```bash
-curl -X POST "http://localhost:8002/api/v1/documents/upload" \
+curl -X POST "http://localhost:8002/api/v1/documents" \
   -H "Content-Type: multipart/form-data" \
   -F "file=@document.pdf"
 ```
@@ -168,7 +168,7 @@ curl -X POST "http://localhost:8002/api/v1/documents/upload" \
 ### Scrape a Webpage
 
 ```bash
-curl -X POST "http://localhost:8002/api/v1/crawler/scrape" \
+curl -X POST "http://localhost:8002/api/v1/webpages:scrape" \
   -H "Content-Type: application/json" \
   -d '{
     "url": "https://en.wikipedia.org/wiki/Black_Myth_Wukong",
@@ -180,7 +180,7 @@ curl -X POST "http://localhost:8002/api/v1/crawler/scrape" \
 ### Query the RAG System
 
 ```bash
-curl -X POST "http://localhost:8002/api/v1/query" \
+curl -X POST "http://localhost:8002/api/v1/documents:query" \
   -H "Content-Type: application/json" \
   -d '{
     "query": "What is the main topic of the documents?",
@@ -195,7 +195,7 @@ curl -X POST "http://localhost:8002/api/v1/query" \
 Available collections: `documents`, `posts`, `comments`, `webpages`
 
 ```bash
-curl -X POST "http://localhost:8002/api/v1/query" \
+curl -X POST "http://localhost:8002/api/v1/documents:query" \
   -H "Content-Type: application/json" \
   -d '{
     "query": "What did users say about this post?",
@@ -208,7 +208,7 @@ curl -X POST "http://localhost:8002/api/v1/query" \
 ### Streaming Query
 
 ```bash
-curl -X POST "http://localhost:8002/api/v1/query/stream" \
+curl -X POST "http://localhost:8002/api/v1/documents:streamQuery" \
   -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
   -d '{
@@ -221,7 +221,7 @@ curl -X POST "http://localhost:8002/api/v1/query/stream" \
 ### List Collections
 
 ```bash
-curl -s "http://localhost:8002/api/v1/query/collections" | python3 -m json.tool
+curl -s "http://localhost:8002/api/v1/collections" | python3 -m json.tool
 ```
 
 ## API Documentation

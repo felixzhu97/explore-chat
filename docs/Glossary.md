@@ -78,7 +78,7 @@ flowchart TB
 | Explore AI BFF                  | Explore AI BFF   | Nest 服务间代理；`X-Service-Key` + `X-Client-Id`                                                                 |
 | Client Identity                 | 客户端身份       | 映射到 Explore AI 的稳定客户端 ID（UUID）                                                                        |
 | Primary Destination             | 主目的地         | 跨端规范导航身份：`feed` / `chat` / `reels` / `explore` / `user` / `search`；path/tab 由各端映射                 |
-| AIP REST                        | AIP REST         | Google API Improvement Proposals 风格的 REST：资源路径、标准方法、page_token、RpcStatus 错误；前缀仍为 `/api/v1` |
+| AIP REST                        | AIP REST         | Google API Improvement Proposals 风格的 REST：资源路径、标准方法、page_token、RpcStatus 错误；前缀仍为 `/api/v1`；Nest 与 Python ML helpers 共用 |
 | RpcStatus                       | RPC 状态         | AIP-193 错误体：`{ code, message, details[] }`，对齐 google.rpc.Status JSON                                      |
 | Page Token                      | 分页令牌         | AIP-158 不透明 `page_token` / `next_page_token`；客户端不解析内部 offset/cursor                                  |
 | Custom Method                   | 自定义方法       | AIP-136：`POST …/{resource}:verb`（如 `:archive`、`:follow`）                                                    |
