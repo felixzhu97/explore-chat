@@ -1,5 +1,7 @@
 # Single-file compose for local dev (aligned with finpulse style).
 # Override via env: POSTGRES_*, REDIS_*, KAFKA_*.
+# Local drop-ins: Redpanda (Kafka API) for kafka, Scylla (CQL) for cassandra.
+# Postgres 18 — bumping major needs a new volume or `docker volume rm`.
 services:
   postgres:
     image: postgres:18-alpine
@@ -11,7 +13,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5433}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_18_data:/var/lib/postgresql/data
       - ../../scripts/db/init-grants.sql:/docker-entrypoint-initdb.d/02-init-grants.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-whatschat}"]
@@ -35,41 +37,40 @@ services:
       retries: 5
 
   kafka:
-    image: apache/kafka:3.7.0
+    image: redpandadata/redpanda:v24.2.4
+    command:
+      - redpanda
+      - start
+      - --smp
+      - "1"
+      - --memory
+      - 512M
+      - --overprovisioned
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - PLAINTEXT://localhost:9092
     ports:
       - "${KAFKA_PORT:-9092}:9092"
-    environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
     healthcheck:
-      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 || exit 1"]
+      test:
+        ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy.*true' || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 10
       start_period: 20s
 
   cassandra:
-    image: cassandra:4.1
+    image: scylladb/scylla:5.4.9
+    command: --smp 1 --memory 750M --overprovisioned 1 --developer-mode 1
     ports:
       - "${CASSANDRA_PORT:-9042}:9042"
-    environment:
-      CASSANDRA_CLUSTER_NAME: "Test Cluster"
-      CASSANDRA_DC: datacenter1
-      CASSANDRA_RACK: rack1
-      CASSANDRA_ENDPOINT_SNITCH: SimpleSnitch
     volumes:
-      - cassandra_data:/var/lib/cassandra
+      - cassandra_data:/var/lib/scylla
     healthcheck:
-      test: ["CMD-SHELL", "nodetool status 2>/dev/null || exit 1"]
+      test: ["CMD-SHELL", "cqlsh -e 'SELECT now() FROM system.local' || exit 1"]
       interval: 15s
       timeout: 10s
       retries: 15
@@ -98,7 +99,11 @@ services:
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -sf 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' || exit 1",
+        ]
       interval: 10s
       timeout: 10s
       retries: 15
@@ -119,9 +124,11 @@ services:
       start_period: 10s
 
 volumes:
-  postgres_data:
+  postgres_18_data:
     driver: local
   redis_data:
+    driver: local
+  redpanda_data:
     driver: local
   cassandra_data:
     driver: local
