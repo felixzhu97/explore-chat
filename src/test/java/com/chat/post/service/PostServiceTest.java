@@ -19,6 +19,7 @@ import com.chat.post.domain.repository.PostHashtagRepository;
 import com.chat.post.domain.repository.PostLikeRepository;
 import com.chat.post.domain.repository.PostSaveRepository;
 import com.chat.post.domain.repository.SocialPostRepository;
+import com.chat.users.domain.repository.UserRepository;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,7 @@ class PostServiceTest {
   @Mock private UserFollowRepository followRepository;
   @Mock private HashtagRepository hashtagRepository;
   @Mock private PostHashtagRepository postHashtagRepository;
+  @Mock private UserRepository userRepository;
   @Mock private ChatEventPublisher chatEventPublisher;
   @Mock private NotificationsService notificationsService;
 
@@ -48,6 +50,7 @@ class PostServiceTest {
     lenient().when(postSaveRepository.countByPostId(any())).thenReturn(0L);
     lenient().when(postLikeRepository.existsByPostIdAndUserId(any(), any())).thenReturn(false);
     lenient().when(postSaveRepository.existsByPostIdAndUserId(any(), any())).thenReturn(false);
+    lenient().when(userRepository.findById(any())).thenReturn(Optional.empty());
   }
 
   @Test

@@ -6,6 +6,7 @@ import com.chat.common.messaging.ChatEventPublisher;
 import com.chat.notifications.service.NotificationsService;
 import com.chat.post.domain.model.SocialPost;
 import com.chat.post.domain.repository.SocialPostRepository;
+import com.chat.users.domain.repository.UserRepository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,16 +20,19 @@ public class CommentsService {
 
   private final PostCommentRepository comments;
   private final SocialPostRepository posts;
+  private final UserRepository userRepository;
   private final ChatEventPublisher chatEventPublisher;
   private final NotificationsService notificationsService;
 
   public CommentsService(
       PostCommentRepository comments,
       SocialPostRepository posts,
+      UserRepository userRepository,
       ChatEventPublisher chatEventPublisher,
       NotificationsService notificationsService) {
     this.comments = comments;
     this.posts = posts;
+    this.userRepository = userRepository;
     this.chatEventPublisher = chatEventPublisher;
     this.notificationsService = notificationsService;
   }
@@ -88,8 +92,18 @@ public class CommentsService {
     body.put("id", comment.getId());
     body.put("postId", comment.getPostId());
     body.put("authorId", comment.getAuthorId());
+    body.put("userId", comment.getAuthorId());
     body.put("content", comment.getContent());
+    body.put("createdAt", comment.getCreatedAt().toString());
     body.put("createTime", comment.getCreatedAt().toString());
+    var authorOpt = userRepository.findById(comment.getAuthorId());
+    if (authorOpt != null) {
+      authorOpt.ifPresent(
+          author -> {
+            body.put("username", author.getUsername());
+            body.put("avatar", author.getAvatar());
+          });
+    }
     return body;
   }
 }

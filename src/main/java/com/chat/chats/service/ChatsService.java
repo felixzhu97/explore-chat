@@ -2,12 +2,16 @@ package com.chat.chats.service;
 
 import com.chat.chats.domain.model.Chat;
 import com.chat.chats.domain.model.ChatParticipant;
+import com.chat.chats.domain.model.ChatType;
 import com.chat.chats.domain.repository.ChatParticipantRepository;
 import com.chat.chats.domain.repository.ChatRepository;
 import com.chat.groups.domain.model.GroupParticipant;
 import com.chat.groups.domain.model.SocialGroup;
 import com.chat.groups.domain.repository.GroupParticipantRepository;
 import com.chat.groups.domain.repository.SocialGroupRepository;
+import com.chat.messages.domain.model.Message;
+import com.chat.messages.domain.repository.MessageRepository;
+import com.chat.users.domain.repository.UserRepository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,16 +27,22 @@ public class ChatsService {
   private final ChatParticipantRepository participantRepository;
   private final SocialGroupRepository socialGroupRepository;
   private final GroupParticipantRepository groupParticipantRepository;
+  private final UserRepository userRepository;
+  private final MessageRepository messageRepository;
 
   public ChatsService(
       ChatRepository chatRepository,
       ChatParticipantRepository participantRepository,
       SocialGroupRepository socialGroupRepository,
-      GroupParticipantRepository groupParticipantRepository) {
+      GroupParticipantRepository groupParticipantRepository,
+      UserRepository userRepository,
+      MessageRepository messageRepository) {
     this.chatRepository = chatRepository;
     this.participantRepository = participantRepository;
     this.socialGroupRepository = socialGroupRepository;
     this.groupParticipantRepository = groupParticipantRepository;
+    this.userRepository = userRepository;
+    this.messageRepository = messageRepository;
   }
 
   @Transactional
@@ -40,7 +50,7 @@ public class ChatsService {
     Chat chat = chatRepository.save(Chat.createPrivate());
     participantRepository.save(ChatParticipant.join(chat.getId(), creatorId, "MEMBER"));
     participantRepository.save(ChatParticipant.join(chat.getId(), peerUserId, "MEMBER"));
-    return toResponse(chat);
+    return toResponse(chat, creatorId);
   }
 
   @Transactional
@@ -60,7 +70,7 @@ public class ChatsService {
         groupParticipantRepository.save(GroupParticipant.join(group.getId(), memberId, "member"));
       }
     }
-    Map<String, Object> body = toResponse(chat);
+    Map<String, Object> body = toResponse(chat, creatorId);
     body.put("groupId", group.getId());
     return body;
   }
@@ -76,7 +86,7 @@ public class ChatsService {
                     chatRepository
                         .findById(id)
                         .filter(c -> !c.isDeleted())
-                        .map(this::toResponse)
+                        .map(c -> toResponse(c, userId))
                         .orElse(null))
             .filter(m -> m != null)
             .toList();
@@ -93,7 +103,7 @@ public class ChatsService {
     if (chat.isDeleted()) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat not found");
     }
-    return toResponse(chat);
+    return toResponse(chat, userId);
   }
 
   @Transactional
@@ -106,7 +116,7 @@ public class ChatsService {
     if (name != null) {
       chat.rename(name);
     }
-    return toResponse(chatRepository.save(chat));
+    return toResponse(chatRepository.save(chat), userId);
   }
 
   @Transactional
@@ -152,14 +162,40 @@ public class ChatsService {
     }
   }
 
-  private Map<String, Object> toResponse(Chat chat) {
+  private Map<String, Object> toResponse(Chat chat, String viewerId) {
     Map<String, Object> body = new HashMap<>();
     body.put("id", chat.getId());
     body.put("type", chat.getType().name());
     body.put("name", chat.getName());
     body.put("avatar", chat.getAvatar());
     body.put("deleted", chat.isDeleted());
+    body.put("createdAt", chat.getCreatedAt().toString());
     body.put("createTime", chat.getCreatedAt().toString());
+    if (chat.getType() == ChatType.PRIVATE && viewerId != null) {
+      participantRepository.findByChatId(chat.getId()).stream()
+          .map(ChatParticipant::getUserId)
+          .filter(id -> !id.equals(viewerId))
+          .findFirst()
+          .flatMap(userRepository::findById)
+          .ifPresent(
+              peer -> {
+                body.put("name", peer.getUsername());
+                body.put("avatar", peer.getAvatar());
+                body.put("peerUserId", peer.getId());
+              });
+    }
+    List<Message> latest = messageRepository.findByChatId(chat.getId(), 0, 1);
+    if (!latest.isEmpty()) {
+      Message message = latest.get(0);
+      Map<String, Object> last = new HashMap<>();
+      last.put("id", message.getId());
+      last.put("chatId", message.getChatId());
+      last.put("senderId", message.getSenderId());
+      last.put("type", message.getType());
+      last.put("content", message.getContent());
+      last.put("createdAt", message.getCreatedAt().toString());
+      body.put("lastMessage", last);
+    }
     return body;
   }
 }
