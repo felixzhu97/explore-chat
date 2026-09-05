@@ -26,24 +26,33 @@ export class AiApi {
     messages: AiChatMessage[],
     onChunk: (text: string) => void,
     model?: string,
-  ): Promise<void> {
-    const res = await this.apiClient.postStream("/ai/chat/stream", {
-      messages,
-      ...(model != null && { model }),
-    });
-    await this.consumeTextSse(res, onChunk);
-  }
-
+  ): Promise<void>;
   async postChatStream(
     messages: AiChatMessage[],
     onChunk: (text: string) => void,
     opts?: { model?: string; provider?: string; sessionId?: string },
+  ): Promise<void>;
+  async postChatStream(
+    messages: AiChatMessage[],
+    onChunk: (text: string) => void,
+    modelOrOpts?: string | { model?: string; provider?: string; sessionId?: string },
   ): Promise<void> {
-    const res = await this.apiClient.postStream("/ai/explore/chat/stream", {
+    if (typeof modelOrOpts === "object" && modelOrOpts !== null) {
+      const res = await this.apiClient.postStream("/ai/explore/chat/stream", {
+        messages,
+        ...(modelOrOpts.model != null && { model: modelOrOpts.model }),
+        ...(modelOrOpts.provider != null && { provider: modelOrOpts.provider }),
+        ...(modelOrOpts.sessionId != null && {
+          sessionId: modelOrOpts.sessionId,
+        }),
+      });
+      await this.consumeTextSse(res, onChunk);
+      return;
+    }
+
+    const res = await this.apiClient.postStream("/ai/chat/stream", {
       messages,
-      ...(opts?.model != null && { model: opts.model }),
-      ...(opts?.provider != null && { provider: opts.provider }),
-      ...(opts?.sessionId != null && { sessionId: opts.sessionId }),
+      ...(modelOrOpts != null && { model: modelOrOpts }),
     });
     await this.consumeTextSse(res, onChunk);
   }

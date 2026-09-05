@@ -3,7 +3,9 @@ name: Java CI
 on:
   push:
     paths:
-      - "src/**"
+      - "src/main/java/**"
+      - "src/main/resources/**"
+      - "src/test/**"
       - "build.gradle.kts"
       - "settings.gradle.kts"
       - "gradle/**"
@@ -11,7 +13,9 @@ on:
       - ".github/workflows/java-ci.yml"
   pull_request:
     paths:
-      - "src/**"
+      - "src/main/java/**"
+      - "src/main/resources/**"
+      - "src/test/**"
       - "build.gradle.kts"
       - "settings.gradle.kts"
       - "gradle/**"

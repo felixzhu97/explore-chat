@@ -133,8 +133,8 @@ export function TextGenerateDialog({
     const messages = [{ role: "user", content: prompt.trim() }];
     const onChunk = (chunk: string) => setOutput((prev) => prev + chunk);
     try {
-      if (backend === "explore" && service.postChatStream) {
-        await service.postChatStream(messages, onChunk);
+      if (backend === "explore") {
+        await service.postChatStream(messages, onChunk, {});
       } else {
         await service.postChatStream(messages, onChunk);
       }
