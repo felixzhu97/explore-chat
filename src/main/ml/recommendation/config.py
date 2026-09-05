@@ -8,7 +8,7 @@ PORT = int(os.getenv("PORT", os.getenv("RECOMMENDATION_PORT", "8000")))
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://whatschat:whatschat123@localhost:5433/whatschat",
+    "postgresql://chat:chat123@localhost:5433/chat",
 )
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD") or None
@@ -18,7 +18,7 @@ CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL") or os.getenv(
 CASSANDRA_CONTACT_POINTS = (os.getenv("CASSANDRA_CONTACT_POINTS") or "localhost").split(
     ","
 )
-CASSANDRA_KEYSPACE = os.getenv("CASSANDRA_KEYSPACE", "whatschat")
+CASSANDRA_KEYSPACE = os.getenv("CASSANDRA_KEYSPACE", "chat")
 CASSANDRA_LOCAL_DC = os.getenv("CASSANDRA_LOCAL_DC", "datacenter1")
 
 SUGGESTION_REDIS_KEY_PREFIX = "recommendation:user:"

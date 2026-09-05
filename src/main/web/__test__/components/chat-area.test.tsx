@@ -13,7 +13,7 @@ vi.mock("@/shared/i18n", () => ({
     language: "zh",
     use: vi.fn(),
   },
-  LANG_STORAGE_KEY: "whatschat_web_lang",
+  LANG_STORAGE_KEY: "chat_web_lang",
   setStoredLocale: vi.fn(),
   getLocale: vi.fn(),
   useTranslation: vi.fn(() => ({

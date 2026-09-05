@@ -9,7 +9,7 @@ import {
 } from "react";
 import type { ThemeMode } from "@/src/shared/theme";
 
-const THEME_STORAGE_KEY = "whatschat_admin_theme";
+const THEME_STORAGE_KEY = "chat_admin_theme";
 
 type ThemeContextValue = {
   mode: ThemeMode;

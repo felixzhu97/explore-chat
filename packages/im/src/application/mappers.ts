@@ -1,4 +1,4 @@
-import type { Message } from "@whatschat/shared-types";
+import type { Message } from "@chat/shared-types";
 import sortBy from "lodash/sortBy";
 import uniqBy from "lodash/uniqBy";
 import type {

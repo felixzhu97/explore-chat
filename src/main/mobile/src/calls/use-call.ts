@@ -1,4 +1,4 @@
-import { useCall as useRtcCall } from "@whatschat/im";
+import { useCall as useRtcCall } from "@chat/im";
 import { useSocketStore } from "@/core/store/hooks";
 import { getCallManager } from "@/core/call/callManagerLoader";
 

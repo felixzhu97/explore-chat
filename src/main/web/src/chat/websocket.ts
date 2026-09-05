@@ -1,6 +1,6 @@
 "use client";
 
-import type { IWebSocketAdapter, WebSocketMessage } from "@whatschat/im";
+import type { IWebSocketAdapter, WebSocketMessage } from "@chat/im";
 import { io, Socket } from "socket.io-client";
 
 const SOCKET_DEBUG = process.env.NEXT_PUBLIC_SOCKET_DEBUG === "true";

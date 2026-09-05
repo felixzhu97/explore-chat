@@ -1,4 +1,4 @@
-import type { AuthTokens } from "@whatschat/shared-types";
+import type { AuthTokens } from "@chat/shared-types";
 import type { User } from "./user.model";
 import type { ApiClient } from "@/auth/api-client";
 import { getAppComposition } from "@/layout/composition-root";

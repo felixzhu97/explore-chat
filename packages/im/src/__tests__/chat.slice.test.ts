@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { configureStore } from "@reduxjs/toolkit";
-import type { Chat } from "@whatschat/shared-types";
+import type { Chat } from "@chat/shared-types";
 import {
   chatReducer,
   setChats,

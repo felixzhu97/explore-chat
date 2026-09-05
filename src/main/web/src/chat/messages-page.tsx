@@ -22,7 +22,7 @@ import {
   SEND_MESSAGE,
   CALL_START,
   AI_ACTION,
-} from "@whatschat/analytics";
+} from "@chat/analytics";
 import { useSearch } from "@/search/use-search";
 import { useDialogs } from "@/layout/use-dialogs";
 import { useChatsWithLiveMessages } from "@/chat/hooks/use-chats-with-live-messages";

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import type { Message } from "@whatschat/shared-types";
-import { ImWsEvents } from "@whatschat/shared-types";
+import type { Message } from "@chat/shared-types";
+import { ImWsEvents } from "@chat/shared-types";
 import type { IWebSocketAdapter, IChatsService, ChatListItem } from "../domain";
 import {
   type ApiMessageLike,

@@ -1,7 +1,7 @@
 import {
   PrimaryDestinations,
   type PrimaryDestination,
-} from "@whatschat/shared-types";
+} from "@chat/shared-types";
 
 /**
  * Expo Router tab file names for each Primary Destination (platform-specific).

@@ -26,8 +26,8 @@ import { useTranslation } from "@/shared/i18n";
 import { useAuthStore } from "@/core/store/hooks";
 import { useSocket } from "@/core/use-socket";
 import { useCall } from "@/calls/use-call";
-import { useAnalytics } from "@whatschat/analytics";
-import { CHAT_OPEN, SEND_MESSAGE, CALL_START } from "@whatschat/analytics";
+import { useAnalytics } from "@chat/analytics";
+import { CHAT_OPEN, SEND_MESSAGE, CALL_START } from "@chat/analytics";
 import { getChatApi, getMessageApi } from "@/core/composition-root";
 
 const Container = styled.View`

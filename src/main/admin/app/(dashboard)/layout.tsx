@@ -950,7 +950,7 @@ export default function DashboardLayout({
               </svg>
             </LogoIcon>
             <LogoTextStack>
-              <LogoBrand>WhatsChat</LogoBrand>
+              <LogoBrand>Chat</LogoBrand>
               <LogoProduct>Admin</LogoProduct>
             </LogoTextStack>
           </Logo>

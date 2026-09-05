@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { Chat } from "@whatschat/shared-types";
+import type { Chat } from "@chat/shared-types";
 
 interface State {
   chats: Chat[];

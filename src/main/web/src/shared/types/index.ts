@@ -31,7 +31,7 @@ export type {
   Settings,
   VideoLayout,
   CameraPosition,
-} from "@whatschat/shared-types";
-export type { WebSocketMessage } from "@whatschat/im";
+} from "@chat/shared-types";
+export type { WebSocketMessage } from "@chat/im";
 export type { FileUpload, CallState, CallParticipant } from "./web-only";
 

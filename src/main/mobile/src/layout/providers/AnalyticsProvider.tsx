@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import {
   AnalyticsProvider as AnalyticsProviderBase,
   HttpTransport,
-} from "@whatschat/analytics";
+} from "@chat/analytics";
 import { API_V1 } from "@/core/config/api";
 import type { RootState } from "@/core/store";
 

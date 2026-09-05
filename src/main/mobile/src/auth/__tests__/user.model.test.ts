@@ -36,7 +36,7 @@ describe("UserEntity", () => {
       const data = createValidUserData({ about: undefined });
       const entity = new UserEntity(data);
 
-      expect(entity.about).toBe("嗨，我正在使用 WhatsChat！");
+      expect(entity.about).toBe("嗨，我正在使用 Chat！");
     });
 
     it("should default isOnline to false when undefined", () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import type { Message } from "@whatschat/shared-types";
+import type { Message } from "@chat/shared-types";
 import {
   mapApiMessageToMessage,
   mapSocketPayloadToMessage,

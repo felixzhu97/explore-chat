@@ -6,7 +6,7 @@ import {
   SearchScopes,
   SearchUiScopes,
   type SearchUiScope,
-} from "@whatschat/shared-types";
+} from "@chat/shared-types";
 import { FeedApi } from "@/feed/feed.api";
 import { getApiClient } from "@/auth/api-client";
 
@@ -14,7 +14,7 @@ const api = new FeedApi(getApiClient());
 const LIMIT = 20;
 const DEBOUNCE_MS = 350;
 
-/** @deprecated Prefer SearchUiScope from @whatschat/shared-types */
+/** @deprecated Prefer SearchUiScope from @chat/shared-types */
 export type SearchType = SearchUiScope;
 
 export interface SearchHit {

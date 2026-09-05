@@ -2,7 +2,7 @@
 skinparam packageStyle rectangle
 skinparam shadowing false
 
-title CodeQL Workflow - Planned for ExploreChat
+title CodeQL Workflow - Planned for Chat
 
 rectangle "Trigger" as T {
   rectangle "push / pull_request (main)" as T1

@@ -1,11 +1,11 @@
-# @whatschat/im
+# @chat/im
 
 即时通讯（IM）和实时通话（RTC）逻辑的共享包，提供聊天管理和 WebRTC 通话功能。
 
 ## 安装
 
 ```bash
-pnpm add @whatschat/im
+pnpm add @chat/im
 ```
 
 **peerDependencies:**
@@ -63,7 +63,7 @@ import {
   ICE_SERVERS,
   INITIAL_CALL_STATE,
   RTC_EVENTS,
-} from "@whatschat/im";
+} from "@chat/im";
 ```
 
 ---
@@ -306,8 +306,8 @@ interface UseChatsWithLiveMessagesOptions {
 **用法示例:**
 
 ```tsx
-import { useChatsWithLiveMessages } from "@whatschat/im";
-import type { Message } from "@whatschat/shared-types";
+import { useChatsWithLiveMessages } from "@chat/im";
+import type { Message } from "@chat/shared-types";
 
 function ChatListPage({ contactId, userId }) {
   const { apiChats, messagesForSelected, isConnected, handleSendMessage } =
@@ -447,7 +447,7 @@ interface RTCApiAdapter {
 **用法示例:**
 
 ```ts
-import { createCallManager } from "@whatschat/im";
+import { createCallManager } from "@chat/im";
 
 // 假设已实现了以下适配器
 const callManager = createCallManager({
@@ -505,7 +505,7 @@ interface UseCallOptions {
 **用法示例:**
 
 ```tsx
-import { useCall, CallManagerStub, getCallManagerStub } from "@whatschat/im";
+import { useCall, CallManagerStub, getCallManagerStub } from "@chat/im";
 
 function CallButton({ contact }) {
   const { callState, startCall, endCall, answerCall, toggleMute, toggleVideo } =
@@ -593,7 +593,7 @@ const RTC_EVENTS = {
 ## 整体架构
 
 ```
-@whatschat/im
+@chat/im
 ├── Domain (核心接口)
 │   ├── WebSocketMessage / ChatState       类型定义
 │   ├── IWebSocketAdapter                  WebSocket 接口
@@ -634,7 +634,7 @@ const RTC_EVENTS = {
 
 ```ts
 import { combineReducers } from "@reduxjs/toolkit";
-import { chatReducer, messageReducer } from "@whatschat/im";
+import { chatReducer, messageReducer } from "@chat/im";
 
 const rootReducer = combineReducers({
   im: combineReducers({

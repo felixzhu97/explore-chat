@@ -1,4 +1,4 @@
-import { SearchScopes } from "@whatschat/shared-types";
+import { SearchScopes } from "@chat/shared-types";
 import type { HttpClient } from "@/core/api-client";
 import type { FeedPost } from "@/feed/feed-post.model";
 import type { StoryUser } from "@/feed/story-user.model";

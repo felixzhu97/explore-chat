@@ -57,12 +57,12 @@ importers:
 
   packages/im:
     dependencies:
+      '@chat/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
       '@types/lodash':
         specifier: ^4.17.24
         version: 4.17.24
-      '@whatschat/shared-types':
-        specifier: workspace:*
-        version: link:../shared-types
       lodash:
         specifier: ^4.17.23
         version: 4.17.23
@@ -230,6 +230,15 @@ importers:
 
   src/main/mobile:
     dependencies:
+      '@chat/analytics':
+        specifier: workspace:*
+        version: link:../../../packages/analytics
+      '@chat/im':
+        specifier: workspace:*
+        version: link:../../../packages/im
+      '@chat/shared-types':
+        specifier: workspace:*
+        version: link:../../../packages/shared-types
       '@emotion/native':
         specifier: ^11.11.0
         version: 11.11.0(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.0))(react-native@0.83.0(@babel/core@7.29.0)(@react-native-community/cli@19.1.2(typescript@5.8.2))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
@@ -260,15 +269,6 @@ importers:
       '@types/lodash':
         specifier: ^4.17.16
         version: 4.17.24
-      '@whatschat/analytics':
-        specifier: workspace:*
-        version: link:../../../packages/analytics
-      '@whatschat/im':
-        specifier: workspace:*
-        version: link:../../../packages/im
-      '@whatschat/shared-types':
-        specifier: workspace:*
-        version: link:../../../packages/shared-types
       axios:
         specifier: ^1.8.4
         version: 1.13.5
@@ -438,6 +438,15 @@ importers:
 
   src/main/web:
     dependencies:
+      '@chat/analytics':
+        specifier: workspace:*
+        version: link:../../../packages/analytics
+      '@chat/im':
+        specifier: workspace:*
+        version: link:../../../packages/im
+      '@chat/shared-types':
+        specifier: workspace:*
+        version: link:../../../packages/shared-types
       '@emotion/cache':
         specifier: ^11.14.0
         version: 11.14.0
@@ -540,15 +549,6 @@ importers:
       '@types/lodash':
         specifier: ^4.17.24
         version: 4.17.24
-      '@whatschat/analytics':
-        specifier: workspace:*
-        version: link:../../../packages/analytics
-      '@whatschat/im':
-        specifier: workspace:*
-        version: link:../../../packages/im
-      '@whatschat/shared-types':
-        specifier: workspace:*
-        version: link:../../../packages/shared-types
       amazon-chime-sdk-js:
         specifier: ^3.0.0
         version: 3.30.0

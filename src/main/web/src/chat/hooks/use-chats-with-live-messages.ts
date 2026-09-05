@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import {
   useChatsWithLiveMessages as useChatsWithLiveMessagesBase,
   type IChatsService as ImChatsService,
-} from "@whatschat/im";
+} from "@chat/im";
 import { getChatsService } from "@/chat/services/chats.service";
 import { getWebSocketAdapter } from "@/chat/websocket";
 

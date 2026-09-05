@@ -1,8 +1,8 @@
 {
-  "name": "@whatschat/analytics",
+  "name": "@chat/analytics",
   "version": "0.1.0",
   "private": true,
-  "description": "Behavior analytics SDK for WhatsChat",
+  "description": "Behavior analytics SDK for Chat",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

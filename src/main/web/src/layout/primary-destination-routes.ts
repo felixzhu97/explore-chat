@@ -1,7 +1,7 @@
 import {
   PrimaryDestinations,
   type PrimaryDestination,
-} from "@whatschat/shared-types";
+} from "@chat/shared-types";
 
 /** Web path for each Primary Destination (platform-specific). */
 export const WebPrimaryDestinationPaths: Record<PrimaryDestination, string> = {

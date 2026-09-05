@@ -3,9 +3,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthUser } from "@/auth/auth.model";
 import { setApiToken } from "@/core/api-client";
 
-const TOKEN_KEY = "@whatschat_token";
-const REFRESH_TOKEN_KEY = "@whatschat_refresh_token";
-const USER_KEY = "@whatschat_user";
+const TOKEN_KEY = "@chat_token";
+const REFRESH_TOKEN_KEY = "@chat_refresh_token";
+const USER_KEY = "@chat_user";
 
 interface AuthState {
   token: string | null;

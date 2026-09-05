@@ -14,13 +14,13 @@ import {
   POST_VIEW,
   POST_LIKE,
   POST_SAVE,
-} from "@whatschat/analytics";
+} from "@chat/analytics";
 import { useTranslation } from "@/src/shared/i18n";
 import { mockUser } from "@/profile/users.service";
 import type { FeedPost, StoryItem } from "@/shared/types";
 import { CenterColumn, FloatingMessagesBtn } from "@/layout/shell-styles";
 
-const SEEN_STORIES_KEY = "whatschat:seen_story_user_ids";
+const SEEN_STORIES_KEY = "chat:seen_story_user_ids";
 
 function getSeenStoryUserIdsFromStorage(): Set<string> {
   if (typeof window === "undefined") return new Set();

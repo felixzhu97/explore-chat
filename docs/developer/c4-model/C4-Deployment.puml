@@ -17,7 +17,7 @@ skinparam backgroundColor #FFFFFF
 skinparam shadowing false
 
 LAYOUT_WITH_LEGEND()
-title [C4 Deployment] ExploreChat - 本地开发（+ 生产简述）
+title [C4 Deployment] Chat - 本地开发（+ 生产简述）
 
 Deployment_Node(dev_machine, "开发机", "macOS / Linux") {
   Deployment_Node(browser, "浏览器", "") {

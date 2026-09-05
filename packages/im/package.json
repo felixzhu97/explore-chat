@@ -1,8 +1,8 @@
 {
-  "name": "@whatschat/im",
+  "name": "@chat/im",
   "version": "0.1.0",
   "private": true,
-  "description": "Shared instant messaging logic for WhatsChat",
+  "description": "Shared instant messaging logic for Chat",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@types/lodash": "^4.17.24",
-    "@whatschat/shared-types": "workspace:*",
+    "@chat/shared-types": "workspace:*",
     "lodash": "^4.17.23"
   },
   "devDependencies": {

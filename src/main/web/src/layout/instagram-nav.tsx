@@ -17,7 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import {
   PrimaryDestinations,
   type PrimaryDestination,
-} from "@whatschat/shared-types";
+} from "@chat/shared-types";
 import type { User } from "@/shared/types";
 import { styled } from "@/src/shared/utils/emotion";
 import { useTranslation } from "@/src/shared/i18n";

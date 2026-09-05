@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { chatReducer, messageReducer } from "@whatschat/im";
+import { chatReducer, messageReducer } from "@chat/im";
 import authReducer from "./slices/authSlice";
 import themeReducer from "./slices/themeSlice";
 import socketReducer from "./slices/socketSlice";

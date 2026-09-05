@@ -1,5 +1,5 @@
 {
-  "name": "whatschat-web",
+  "name": "chat-web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -47,9 +47,9 @@
     "@radix-ui/react-visually-hidden": "1.1.1",
     "@reduxjs/toolkit": "^2.5.0",
     "@types/lodash": "^4.17.24",
-    "@whatschat/analytics": "workspace:*",
-    "@whatschat/im": "workspace:*",
-    "@whatschat/shared-types": "workspace:*",
+    "@chat/analytics": "workspace:*",
+    "@chat/im": "workspace:*",
+    "@chat/shared-types": "workspace:*",
     "amazon-chime-sdk-js": "^3.0.0",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",

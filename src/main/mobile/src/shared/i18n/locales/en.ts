@@ -82,7 +82,7 @@ export const en = {
     loadFailed: "Failed to load",
   },
   chats: {
-    title: "WhatsChat",
+    title: "Chat",
     searchPlaceholder: "Search",
     noChats: "No chats yet",
     chat: "Chat",

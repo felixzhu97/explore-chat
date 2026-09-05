@@ -6,7 +6,7 @@ export default {
   t: (key: string) => key,
   language: "zh",
 };
-export const LANG_STORAGE_KEY = "whatschat_web_lang";
+export const LANG_STORAGE_KEY = "chat_web_lang";
 export const setStoredLocale = () => {};
 export const getLocale = () => "zh" as const;
 export const useTranslation = () => ({

@@ -1,7 +1,7 @@
 import type {
   VoiceGenTargetLanguage,
   VoiceTranslateTargetLanguage,
-} from "@whatschat/shared-types";
+} from "@chat/shared-types";
 import type { ApiClient } from "@/auth/api-client";
 
 export interface VoiceGenerateResponse {
@@ -13,7 +13,7 @@ export interface VoiceTranslateResponse {
   translatedText: string;
 }
 
-/** @deprecated Prefer VoiceGenTargetLanguage from @whatschat/shared-types */
+/** @deprecated Prefer VoiceGenTargetLanguage from @chat/shared-types */
 export type VoiceTargetLang = VoiceGenTargetLanguage;
 
 export class VoiceApi {

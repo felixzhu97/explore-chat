@@ -80,7 +80,7 @@ describe("i18n storage utilities", () => {
       await setStoredLanguage("en");
 
       expect(mockAsyncStorage.setItem).toHaveBeenCalledWith(
-        "@whatschat_language",
+        "@chat_language",
         "en",
       );
     });
@@ -92,7 +92,7 @@ describe("i18n storage utilities", () => {
       await setStoredLanguage("zh");
 
       expect(mockAsyncStorage.setItem).toHaveBeenCalledWith(
-        "@whatschat_language",
+        "@chat_language",
         "zh",
       );
     });
@@ -121,7 +121,7 @@ describe("i18n storage utilities", () => {
   describe("LANG_STORAGE_KEY", () => {
     it("should export correct storage key", () => {
       const { LANG_STORAGE_KEY } = require("../i18n");
-      expect(LANG_STORAGE_KEY).toBe("@whatschat_language");
+      expect(LANG_STORAGE_KEY).toBe("@chat_language");
     });
   });
 });

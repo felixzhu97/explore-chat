@@ -1,8 +1,8 @@
 {
-  "name": "@whatschat/shared-types",
+  "name": "@chat/shared-types",
   "version": "0.1.0",
   "private": true,
-  "description": "Shared domain types and entities for WhatsChat",
+  "description": "Shared domain types and entities for Chat",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

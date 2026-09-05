@@ -3,7 +3,7 @@ import { usePathname } from "next/navigation";
 import {
   PrimaryDestinations,
   type PrimaryDestination,
-} from "@whatschat/shared-types";
+} from "@chat/shared-types";
 import { primaryDestinationFromPathname } from "./primary-destination-routes";
 
 export type { PrimaryDestination };

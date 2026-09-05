@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: ExploreChat AIP REST contract (fragment)
+  title: Chat AIP REST contract (fragment)
   version: 1.0.0
   description: >
     Minimal OpenAPI fragment for Spectral checks of AIP list/error

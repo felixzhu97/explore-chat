@@ -8,7 +8,7 @@ import {
   type RTCPeerHandle,
   type RTCApiAdapter,
   type WebSocketMessage,
-} from "@whatschat/im";
+} from "@chat/im";
 import { getWebSocketManager } from "@/chat/websocket";
 import { API_CONFIG } from "@/auth/api-client";
 

@@ -10,7 +10,7 @@ import {
   POST_VIEW,
   POST_LIKE,
   POST_SAVE,
-} from "@whatschat/analytics";
+} from "@chat/analytics";
 import type { FeedPost } from "@/shared/types";
 import { CenterColumn } from "@/layout/shell-styles";
 

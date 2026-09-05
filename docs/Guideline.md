@@ -2,7 +2,7 @@
 
 ## Introduce
 
-ExploreChat brings social connection into everyday life. Use it so people can share Posts, browse Feed and Reels, discover others in Explore, message in Chat, and place Calls—simply and beautifully.
+Chat brings social connection into everyday life. Use it so people can share Posts, browse Feed and Reels, discover others in Explore, message in Chat, and place Calls—simply and beautifully.
 
 A social messaging product defines how people publish content, discover others, stay in conversation, and stay safe. Prefer one API boundary (Spring Boot at the repo root), durable Preferred Terms, and real-time delivery that complements persisted history. This guideline describes how to design those experiences so people stay in control and integrations stay interoperable.
 
@@ -96,7 +96,7 @@ Feed, Post, Chat, Message, Call, Notification, and related terms come from the G
 
 ### Message
 
-**Persist Messages; deliver live updates on Socket.IO.** Empty bodies do not render as bubbles. After reconnect, reconcile streamed events with Message history on the API. Transport sits on [WebSocket (RFC 6455)](https://datatracker.ietf.org/doc/html/rfc6455); ExploreChat uses [Socket.IO](https://socket.io/docs/v4/) for Message, presence, and Notification signals.
+**Persist Messages; deliver live updates on Socket.IO.** Empty bodies do not render as bubbles. After reconnect, reconcile streamed events with Message history on the API. Transport sits on [WebSocket (RFC 6455)](https://datatracker.ietf.org/doc/html/rfc6455); Chat uses [Socket.IO](https://socket.io/docs/v4/) for Message, presence, and Notification signals.
 
 ### Group
 

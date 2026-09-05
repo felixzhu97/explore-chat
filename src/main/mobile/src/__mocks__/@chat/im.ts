@@ -1,4 +1,4 @@
-// Mock for @whatschat/im workspace package
+// Mock for @chat/im workspace package
 const mock = {
   // Redux slices
   setChats: jest.fn(),

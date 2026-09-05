@@ -1,6 +1,6 @@
 # Python ML helpers — identical minimal layout
 
-ExploreChat keeps four optional Python HTTP helpers. Clients call **Nest only**; Nest calls these over loopback.
+Chat keeps four optional Python HTTP helpers. Clients call **Nest only**; Nest calls these over loopback.
 
 Every helper uses the **same top-level directory** and the same two layers: `api` → `service` → `domain`.
 
@@ -51,7 +51,7 @@ uvicorn main:app --host 0.0.0.0 --port $PORT
 
 ## References
 
-- [AIP REST (ExploreChat)](./aip-rest.md)
+- [AIP REST (Chat)](./aip-rest.md)
 - [AIP-193 Errors](https://google.aip.dev/193)
 - [FastAPI bigger applications](https://fastapi.tiangolo.com/tutorial/bigger-applications/)
 - [Uvicorn](https://docs.uvicorn.org/)
