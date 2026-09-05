@@ -1,21 +1,30 @@
 import {
   Controller,
   Get,
-  Put,
+  Patch,
   Delete,
   Post,
   Param,
   Body,
   Query,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
-import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
-import { CurrentUser } from "@/auth/controller/current-user.decorator";
-import { UsersService } from "@/users/service/users.service";
-import { FollowService } from "@/follow/service/follow.service";
+import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
+import { CurrentUser } from "@/auth/presentation/current-user.decorator";
+import { UsersService } from "@/users/application/users.service";
+import { FollowService } from "@/follow/application/follow.service";
+import {
+  clampPageSize,
+  offsetFromPageToken,
+  nextOffsetPageToken,
+  pageStateFromPageToken,
+  nextPageStateToken,
+} from "@/core/aip/page-token";
 
-@ApiTags("用户")
+@ApiTags("users")
 @Controller("users")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
@@ -26,103 +35,108 @@ export class UsersController {
   ) {}
 
   @Get("suggestions")
-  @ApiOperation({ summary: "获取推荐关注用户" })
+  @ApiOperation({ summary: "List suggested users to follow" })
   async getSuggestions(
     @CurrentUser() user: { id: string },
-    @Query("limit") limit?: string,
+    @Query("page_size") pageSize?: string,
   ) {
-    const data = await this.followService.getSuggestions(
+    const users = await this.followService.getSuggestions(
       user.id,
-      limit ? Math.min(parseInt(limit, 10) || 10, 50) : 10,
+      clampPageSize(pageSize ? parseInt(pageSize, 10) : undefined, 10),
     );
-    return { success: true, data };
+    return { users };
   }
 
   @Get()
-  @ApiOperation({ summary: "获取用户列表" })
+  @ApiOperation({ summary: "List users" })
   async getUsers(
-    @Query("page") page: string = "1",
-    @Query("limit") limit: string = "20",
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
     @Query("search") search?: string,
   ) {
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
+    const offset = offsetFromPageToken(pageToken, pageSize);
+    const page = Math.floor(offset / pageSize) + 1;
     const result = await this.usersService.getUsers({
-      page: parseInt(page, 10),
-      limit: parseInt(limit, 10),
+      page,
+      limit: pageSize,
       ...(search && { search }),
     });
+    const hasMore = offset + result.data.length < result.pagination.total;
 
     return {
-      success: true,
-      message: "获取用户列表成功",
-      data: result.data,
-      pagination: result.pagination,
+      users: result.data,
+      next_page_token: nextOffsetPageToken(offset, pageSize, hasMore),
+      total_size: result.pagination.total,
     };
   }
 
-  @Get(":id/followers")
-  @ApiOperation({ summary: "获取粉丝列表" })
+  @Get(":user/followers")
+  @ApiOperation({ summary: "List followers" })
   async getFollowers(
     @CurrentUser() user: { id: string },
-    @Param("id") id: string,
-    @Query("limit") limit?: string,
-    @Query("pageState") pageState?: string,
+    @Param("user") id: string,
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
   ) {
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
     const result = await this.followService.getFollowers(
       id,
-      limit ? parseInt(limit, 10) || 20 : 20,
-      pageState,
+      pageSize,
+      pageStateFromPageToken(pageToken),
       user.id,
     );
     return {
-      success: true,
-      data: result.list,
-      total: result.total,
-      pageState: result.pageState,
+      users: result.list,
+      total_size: result.total,
+      next_page_token: nextPageStateToken(result.pageState),
     };
   }
 
-  @Get(":id/following")
-  @ApiOperation({ summary: "获取关注列表" })
+  @Get(":user/following")
+  @ApiOperation({ summary: "List following" })
   async getFollowing(
     @CurrentUser() user: { id: string },
-    @Param("id") id: string,
-    @Query("limit") limit?: string,
-    @Query("pageState") pageState?: string,
+    @Param("user") id: string,
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
   ) {
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
     const result = await this.followService.getFollowing(
       id,
-      limit ? parseInt(limit, 10) || 20 : 20,
-      pageState,
+      pageSize,
+      pageStateFromPageToken(pageToken),
       user.id,
     );
     return {
-      success: true,
-      data: result.list,
-      total: result.total,
-      pageState: result.pageState,
+      users: result.list,
+      total_size: result.total,
+      next_page_token: nextPageStateToken(result.pageState),
     };
   }
 
-  @Get(":id")
-  @ApiOperation({ summary: "获取用户详情" })
-  async getUser(@Param("id") id: string) {
-    const user = await this.usersService.getUserById(id);
+  @Get(":user")
+  @ApiOperation({ summary: "Get user" })
+  async getUser(@Param("user") id: string) {
+    const profile = await this.usersService.getUserById(id);
     const [followersCount, followingCount] = await Promise.all([
       this.followService.getFollowersCount(id),
       this.followService.getFollowingCount(id),
     ]);
 
-    return {
-      success: true,
-      message: "获取用户详情成功",
-      data: { ...user, followersCount, followingCount },
-    };
+    return { ...profile, followersCount, followingCount };
   }
 
-  @Put(":id")
-  @ApiOperation({ summary: "更新用户信息" })
+  @Patch(":user")
+  @ApiOperation({ summary: "Update user" })
   async updateUser(
-    @Param("id") id: string,
+    @Param("user") id: string,
     @Body()
     updateData: {
       username?: string;
@@ -132,57 +146,46 @@ export class UsersController {
       status?: string;
     },
   ) {
-    const user = await this.usersService.updateUser(id, updateData);
-
-    return {
-      success: true,
-      message: "更新用户信息成功",
-      data: user,
-    };
+    return this.usersService.updateUser(id, updateData);
   }
 
-  @Delete(":id")
-  @ApiOperation({ summary: "删除用户" })
-  async deleteUser(@Param("id") id: string) {
+  @Delete(":user")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Delete user" })
+  async deleteUser(@Param("user") id: string) {
     await this.usersService.deleteUser(id);
-
-    return {
-      success: true,
-      message: "用户删除成功",
-    };
   }
 
-  @Post("following/check")
-  @ApiOperation({ summary: "批量检查关注状态" })
+  @Post("following:check")
+  @ApiOperation({ summary: "Batch check following state" })
   async checkFollowing(
     @CurrentUser() user: { id: string },
     @Body() body: { userIds?: string[] },
   ) {
     const ids = Array.isArray(body?.userIds) ? body.userIds : [];
     const set = await this.followService.checkFollowing(user.id, ids);
-    const data = ids.map((id) => ({ userId: id, isFollowing: set.has(id) }));
-    return { success: true, data };
+    return {
+      results: ids.map((id) => ({ userId: id, isFollowing: set.has(id) })),
+    };
   }
 
-  @Post(":id/block")
-  @ApiOperation({ summary: "阻止用户" })
-  async blockUser(@CurrentUser() user: any, @Param("id") blockedId: string) {
+  @Post(":user\\:block")
+  @ApiOperation({ summary: "Block user" })
+  async blockUser(
+    @CurrentUser() user: { id: string },
+    @Param("user") blockedId: string,
+  ) {
     await this.usersService.blockUser(user.id, blockedId);
-
-    return {
-      success: true,
-      message: "用户已被阻止",
-    };
+    return {};
   }
 
-  @Delete(":id/block")
-  @ApiOperation({ summary: "取消阻止用户" })
-  async unblockUser(@CurrentUser() user: any, @Param("id") blockedId: string) {
+  @Post(":user\\:unblock")
+  @ApiOperation({ summary: "Unblock user" })
+  async unblockUser(
+    @CurrentUser() user: { id: string },
+    @Param("user") blockedId: string,
+  ) {
     await this.usersService.unblockUser(user.id, blockedId);
-
-    return {
-      success: true,
-      message: "已取消阻止用户",
-    };
+    return {};
   }
 }
