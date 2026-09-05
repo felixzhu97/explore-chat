@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   OfflineMessageQueueService,
   QueuedMessagePayload,
-} from "@/messages/application/offline-message-queue.service";
+} from "@/messages/service/offline-message-queue.service";
 
 describe("OfflineMessageQueueService", () => {
   let service: OfflineMessageQueueService;

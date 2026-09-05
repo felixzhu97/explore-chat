@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MessagesController } from "@/messages/presentation/messages.controller";
+import { MessagesController } from "@/messages/controller/messages.controller";
 import { NotFoundException } from "@nestjs/common";
 
 describe("MessagesController", () => {

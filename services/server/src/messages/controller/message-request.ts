@@ -9,7 +9,7 @@ import {
 } from "class-validator";
 import type { MessageType } from "@whatschat/shared-types";
 
-export class CreateMessageDto {
+export class CreateMessageRequest {
   @IsString({ message: "内容必须是字符串" })
   content!: string;
 
@@ -38,7 +38,7 @@ export class CreateMessageDto {
   clientMsgId?: string;
 }
 
-export class GetMessagesDto {
+export class GetMessagesRequest {
   @IsOptional()
   @IsNumber({}, { message: "页码必须是数字" })
   @Min(1, { message: "页码必须大于0" })
@@ -55,7 +55,7 @@ export class GetMessagesDto {
   search?: string;
 }
 
-export class UpdateMessageDto {
+export class UpdateMessageRequest {
   @IsOptional()
   @IsString({ message: "内容必须是字符串" })
   content?: string;

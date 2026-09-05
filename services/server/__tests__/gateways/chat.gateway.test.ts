@@ -3,8 +3,8 @@ import { ChatGateway } from "@/websocket/presentation/chat.gateway";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "@/core/database/prisma.service";
 import { CacheService } from "@/core/cache/cache.service";
-import { OfflineMessageQueueService } from "@/messages/application/offline-message-queue.service";
-import { MessagesService } from "@/messages/application/messages.service";
+import { OfflineMessageQueueService } from "@/messages/service/offline-message-queue.service";
+import { MessagesService } from "@/messages/service/messages.service";
 import { ForbiddenException } from "@nestjs/common";
 import { Server, Socket } from "socket.io";
 

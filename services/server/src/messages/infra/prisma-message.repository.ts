@@ -4,7 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { PrismaService } from "@/core/database/prisma.service";
 import { AbstractPrismaRepository } from "@/base/infra/abstract-prisma.repository";
 import { MessageRepository } from "@/messages/domain/repository/message.repository";
-import { Message } from "@/messages/domain/message.entity";
+import { Message } from "@/messages/domain/model/message";
 import { toMessageType } from "@/shared/utils/message-type";
 
 @Injectable()

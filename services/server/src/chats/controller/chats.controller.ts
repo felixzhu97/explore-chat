@@ -11,7 +11,7 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
 import { CurrentUser } from "@/auth/presentation/current-user.decorator";
-import { ChatsService } from "@/chats/application/chats.service";
+import { ChatsService } from "@/chats/service/chats.service";
 
 @ApiTags("聊天")
 @Controller("chats")

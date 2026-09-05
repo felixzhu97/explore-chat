@@ -1,4 +1,4 @@
-import { Message } from "../message.entity";
+import { Message } from "../model/message";
 
 export interface MessageRepository {
   save(message: Message): Promise<Message>;

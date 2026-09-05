@@ -14,10 +14,10 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
 import { CurrentUser } from "@/auth/presentation/current-user.decorator";
-import { MessagesService } from "@/messages/application/messages.service";
-import { CreateMessageDto } from "@/messages/application/message.dto";
+import { MessagesService } from "@/messages/service/messages.service";
+import { CreateMessageRequest } from "@/messages/controller/message-request";
 import { ChatGateway } from "@/websocket/presentation/chat.gateway";
-import type { QueuedMessagePayload } from "@/messages/application/offline-message-queue.service";
+import type { QueuedMessagePayload } from "@/messages/service/offline-message-queue.service";
 
 @ApiTags("消息")
 @Controller("messages")
@@ -54,7 +54,7 @@ export class MessagesController {
   @ApiOperation({ summary: "发送消息" })
   async createMessage(
     @CurrentUser() user: any,
-    @Body() createMessageDto: CreateMessageDto,
+    @Body() createMessageDto: CreateMessageRequest,
   ) {
     const message = await this.messagesService.createMessage({
       content: createMessageDto.content,

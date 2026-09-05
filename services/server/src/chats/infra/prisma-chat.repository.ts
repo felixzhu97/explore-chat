@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/core/database/prisma.service";
 import { AbstractPrismaRepository } from "@/base/infra/abstract-prisma.repository";
 import { ChatRepository } from "@/chats/domain/repository/chat.repository";
-import { Chat } from "@/chats/domain/chat.entity";
+import { Chat } from "@/chats/domain/model/chat";
 import { User } from "@/users/domain/user.entity";
 
 @Injectable()

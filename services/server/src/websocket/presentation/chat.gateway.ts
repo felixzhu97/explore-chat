@@ -21,8 +21,8 @@ import { CacheService } from "@/core/cache/cache.service";
 import {
   OfflineMessageQueueService,
   QueuedMessagePayload,
-} from "@/messages/application/offline-message-queue.service";
-import { MessagesService } from "@/messages/application/messages.service";
+} from "@/messages/service/offline-message-queue.service";
+import { MessagesService } from "@/messages/service/messages.service";
 import logger from "@/shared/utils/logger";
 
 interface AuthenticatedSocket extends Socket {
