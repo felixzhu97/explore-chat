@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { Message, MessageType } from "@/messages/domain/message.entity";
+import { Message, MessageType } from "@/messages/domain/model/message";
 import type { MessageReaction, ContactInfo } from "@whatschat/shared-types";
 import {
   MESSAGE_DOMAIN,

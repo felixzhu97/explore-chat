@@ -4,7 +4,7 @@ import {
   ChatsService,
   CreateChatData,
   UpdateChatData,
-} from "@/chats/application/chats.service";
+} from "@/chats/service/chats.service";
 import { PrismaService } from "@/core/database/prisma.service";
 import { CacheService } from "@/core/cache/cache.service";
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ChatsController } from "@/chats/presentation/chats.controller";
+import { ChatsController } from "@/chats/controller/chats.controller";
 import { NotFoundException, BadRequestException } from "@nestjs/common";
 
 describe("ChatsController", () => {

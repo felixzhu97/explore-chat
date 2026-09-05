@@ -1,5 +1,5 @@
 import { User } from "@/users/domain/user.entity";
-import { Message } from "@/messages/domain/message.entity";
+import { Message } from "@/messages/domain/model/message";
 
 export type ChatType = "PRIVATE" | "GROUP";
 

@@ -8,7 +8,7 @@ import { randomUUID } from "node:crypto";
 import { PrismaService } from "@/core/database/prisma.service";
 import { CacheService } from "@/core/cache/cache.service";
 import { toMessageType } from "@/shared/utils/message-type";
-import { Message } from "@/messages/domain/message.entity";
+import { Message } from "@/messages/domain/model/message";
 import type { MessageRepository } from "@/messages/domain/repository/message.repository";
 import type { ChatRepository } from "@/chats/domain/repository/chat.repository";
 

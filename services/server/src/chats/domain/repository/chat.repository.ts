@@ -1,4 +1,4 @@
-import { Chat } from "../chat.entity";
+import { Chat } from "../model/chat";
 
 export interface ChatRepository {
   findById(id: string): Promise<Chat | null>;
