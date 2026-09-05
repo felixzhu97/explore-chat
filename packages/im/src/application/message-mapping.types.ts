@@ -7,11 +7,12 @@ export interface ApiMessageLike {
   type?: string;
   status?: string;
   createdAt?: string;
+  clientMsgId?: string;
 }
 
 export interface SocketMessagePayload {
   from?: string;
   to?: string;
-  data?: { id?: string; text?: string; type?: string };
+  data?: { id?: string; text?: string; type?: string; clientMsgId?: string };
   timestamp?: number;
 }

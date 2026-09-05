@@ -6,7 +6,10 @@ import {
   mergeAndSortMessages,
 } from "../application/mappers";
 import { MESSAGE_LIMIT } from "../application/constants";
-import type { ApiMessageLike, SocketMessagePayload } from "../application/message-mapping.types";
+import type {
+  ApiMessageLike,
+  SocketMessagePayload,
+} from "../application/message-mapping.types";
 
 describe("Mappers", () => {
   describe("MESSAGE_LIMIT", () => {
@@ -116,7 +119,7 @@ describe("Mappers", () => {
       expect(result.type).toBe("text");
     });
 
-    it("should default status to delivered", () => {
+    it("should default status to sent", () => {
       const apiMessage: ApiMessageLike = {
         id: "msg-8",
         senderId: "user-105",
@@ -125,7 +128,7 @@ describe("Mappers", () => {
 
       const result = mapApiMessageToMessage(apiMessage);
 
-      expect(result.status).toBe("delivered");
+      expect(result.status).toBe("sent");
     });
 
     it("should map mediaUrl when present", () => {
@@ -154,7 +157,13 @@ describe("Mappers", () => {
     });
 
     it("should map all message types correctly", () => {
-      const types: Message["type"][] = ["text", "image", "video", "audio", "file"];
+      const types: Message["type"][] = [
+        "text",
+        "image",
+        "video",
+        "audio",
+        "file",
+      ];
 
       types.forEach((type) => {
         const apiMessage: ApiMessageLike = {
@@ -374,8 +383,38 @@ describe("Mappers", () => {
 
     it("should handle empty arrays", () => {
       expect(mergeAndSortMessages([], [])).toEqual([]);
-      expect(mergeAndSortMessages([], [{ id: "1", senderId: "u", senderName: "U", content: "C", timestamp: "2024-01-01T00:00:00.000Z", type: "text", status: "sent" }])).toHaveLength(1);
-      expect(mergeAndSortMessages([{ id: "1", senderId: "u", senderName: "U", content: "C", timestamp: "2024-01-01T00:00:00.000Z", type: "text", status: "sent" }], [])).toHaveLength(1);
+      expect(
+        mergeAndSortMessages(
+          [],
+          [
+            {
+              id: "1",
+              senderId: "u",
+              senderName: "U",
+              content: "C",
+              timestamp: "2024-01-01T00:00:00.000Z",
+              type: "text",
+              status: "sent",
+            },
+          ],
+        ),
+      ).toHaveLength(1);
+      expect(
+        mergeAndSortMessages(
+          [
+            {
+              id: "1",
+              senderId: "u",
+              senderName: "U",
+              content: "C",
+              timestamp: "2024-01-01T00:00:00.000Z",
+              type: "text",
+              status: "sent",
+            },
+          ],
+          [],
+        ),
+      ).toHaveLength(1);
     });
 
     it("should handle messages with missing timestamp", () => {

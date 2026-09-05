@@ -203,8 +203,7 @@ export function MessagesPage() {
     isRecordingVoice,
     isTyping,
     handleMessageChange,
-    handleKeyDown,
-    handleSendMessage,
+    handleSendMessage: handleMockSendMessage,
     handleEmojiSelect,
     handleToggleEmojiPicker,
     handleFileSelect,
@@ -244,10 +243,20 @@ export function MessagesPage() {
       );
       clearInput();
     } else {
-      handleSendMessage(content, type);
+      handleMockSendMessage(content, type);
     }
     if (selectedContactId) {
       analytics.track(SEND_MESSAGE, { chatId: selectedContactId, type });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      const text = messageText.trim();
+      if (text) {
+        handleSendMessageWrapper(text);
+      }
     }
   };
 
