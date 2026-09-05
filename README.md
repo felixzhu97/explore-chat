@@ -1,6 +1,6 @@
 # Chat
 
-`Chat` is a social messaging app you can use to share posts, browse Feed and Reels, message friends, and place calls. It is a pnpm + Turbo monorepo with a **Spring Boot API at the repo root**, Next.js web and admin apps, an Expo mobile client, and optional Python side services.
+`Chat` is a social messaging app you can use to share posts, browse Feed and Reels, message friends, and place calls. It is a pnpm + Turbo monorepo with a **Spring Boot API at the repo root**, Next.js web/admin under `src/main/web` and `src/main/admin`, Expo mobile under `src/main/mobile`, and optional Python side services under `src/main/ml`.
 
 Clients talk only to the Spring API over HTTPS and Socket.IO (plus WebRTC signaling). Optional AI, vision, recommendation, and RAG side services stay behind the API. Local Java defaults use H2 + Liquibase.
 
@@ -15,7 +15,7 @@ Clients talk only to the Spring API over HTTPS and Socket.IO (plus WebRTC signal
 - pnpm 10 or later
 - Git
 
-Optional: [Ollama](https://ollama.com/) and Python services under `services/`. See [Guideline](docs/Guideline.md) and [Glossary](docs/Glossary.md).
+Optional: [Ollama](https://ollama.com/) and Python services under `src/main/ml/`. See [Guideline](docs/Guideline.md) and [Glossary](docs/Glossary.md).
 
 ### Initial setup
 
@@ -33,17 +33,21 @@ pnpm install
 
 # Web + API (scripts/app/start.sh)
 pnpm dev
+
+# Mobile (Expo)
+pnpm start:mobile
 ```
 
 | Surface   | Default URL                           |
 | --------- | ------------------------------------- |
 | Web       | http://localhost:4000                 |
 | Admin     | http://localhost:4001                 |
+| Mobile    | Expo (`pnpm start:mobile`)                |
 | HTTP API  | http://localhost:9001                 |
 | Health    | http://localhost:9001/api/v1/health   |
 | Socket.IO | http://localhost:9002 (`/socket.io`)  |
 
-Demo user (seeded on API boot): `cristiano@whatschat.com` / `123456`.
+Demo user (seeded on API boot): `alice@example.com` / `123456`.
 
 ```bash
 ./gradlew checkstyleMain checkstyleTest test
@@ -59,7 +63,7 @@ pnpm test
 | Java API | [`src/main/resources/application.yml`](src/main/resources/application.yml) |
 | Web | `NEXT_PUBLIC_API_URL=http://localhost:9001/api/v1` · `NEXT_PUBLIC_SOCKET_IO_URL=http://localhost:9002` |
 | Admin | `NEXT_PUBLIC_API_URL=http://localhost:9001/api/v1` |
-| Mobile | `EXPO_PUBLIC_API_URL=http://localhost:9001` · `EXPO_PUBLIC_SOCKET_IO_URL=http://localhost:9002` |
+| Mobile (Expo) | `EXPO_PUBLIC_API_URL=http://localhost:9001` · `EXPO_PUBLIC_SOCKET_IO_URL=http://localhost:9002` |
 
 ## Screenshots
 
@@ -80,15 +84,12 @@ pnpm test
 ## Repository layout
 
 ```text
-src/main/java/com.chat   Spring Boot API (:9001 HTTP, :9002 Socket.IO)
-apps/web                 Next.js (:4000)
-apps/admin               Admin (:4001)
-apps/mobile              Expo / React Native
-services/media-gen       Media generation (:3456)
-services/recommendation  Recommendation
-services/vision          Moderation / vision (:8001)
-services/rag             RAG Q&A (:8002)
-packages/                Shared types, IM, analytics
+src/main/java            Spring Boot API (:9001 HTTP, :9002 Socket.IO)
+src/main/web             Next.js (:4000)
+src/main/admin           Admin (:4001)
+src/main/mobile          Expo / React Native
+src/main/ml              Python ML helpers (recommendation / vision / rag / media-gen)
+packages/                Shared types, IM, analytics (web / Expo)
 docs/                    Guideline, Glossary, developer, C4
 ```
 

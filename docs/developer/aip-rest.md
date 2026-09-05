@@ -36,7 +36,7 @@ List example:
 }
 ```
 
-Shared types: `RpcStatus` / `ListQuery` / `ListResponse` in `@whatschat/shared-types`.
+Shared types: `RpcStatus` / `ListQuery` / `ListResponse` in `@chat/shared-types`.
 
 ## Key path remaps
 
@@ -49,8 +49,8 @@ Shared types: `RpcStatus` / `ListQuery` / `ListResponse` in `@whatschat/shared-t
 
 ## Python ML helpers (loopback)
 
-Same AIP rules apply to FastAPI helpers under `services/{recommendation,vision,rag,media-gen}`.
-Clients still call Nest only; Nest calls these over loopback with **snake_case** JSON.
+Same AIP rules apply to FastAPI helpers under `src/main/ml/{recommendation,vision,rag,media-gen}`.
+Clients still call the Spring API only; the API calls these over loopback with **snake_case** JSON.
 
 | Service        | Legacy                         | AIP                                      |
 | -------------- | ------------------------------ | ---------------------------------------- |

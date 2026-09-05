@@ -8,11 +8,11 @@ is_background: true
 
 Minimal orchestrator. Read Jira issues and invoke sub-agents as needed.
 
-Hard constraints: [architecture rule](../rules/architecture.mdc) (ExploreChat: Nest / Next / Expo).
+Hard constraints: [architecture rule](../rules/architecture.mdc) (Chat: Nest / Next / Expo).
 
 ## Project Notes
 
-This repo is the **ExploreChat** monorepo (not explore-ai Java/Angular). Orchestrate using this repo's skills and architecture; `angular-*` / `spring-ai` skills are reference only.
+This repo is the **Chat** monorepo (not explore-ai Java/Angular). Orchestrate using this repo's skills and architecture; `angular-*` / `spring-ai` skills are reference only.
 
 - **Minimal**: do only what is necessary
 - **Small scope**: each agent focuses on one thing

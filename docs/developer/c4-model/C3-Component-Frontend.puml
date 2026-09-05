@@ -9,7 +9,7 @@ Container_Boundary(web_app, "Web 应用") {
   Component(pages, "页面 / App Router", "Next.js", "登录、主站（Feed/Reels/消息）、设置")
   Component(nav_ui, "导航与抽屉", "React、Emotion", "首页、Reels、消息、搜索、探索、通知、发帖")
   Component(feed_ui, "信息流 / Reels / 探索", "React、Emotion", "帖子、互动、封面 coverUrl、评论弹窗")
-  Component(chat_ui, "聊天与通话", "React、@whatschat/im", "私信气泡、WebRTC 通话 UI")
+  Component(chat_ui, "聊天与通话", "React、@chat/im", "私信气泡、WebRTC 通话 UI")
   Component(profile_ui, "个人页与发帖", "React、Emotion", "网格、关注列表、媒体上传 + createPost")
   Component(state, "状态层", "Redux Toolkit", "消息、通知、通话等切片；认证经 auth-session")
   Component(api_client, "API 客户端", "Fetch", "REST：auth、posts、search、media、ai/explore")
