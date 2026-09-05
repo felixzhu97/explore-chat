@@ -1,14 +1,14 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type {
-  INotificationRepository,
+  NotificationRepository,
   NotificationItem,
-} from "@/notifications/domain/notification.repository.interface";
+} from "@/notifications/domain/repository/notification.repository";
 
 @Injectable()
 export class NotificationService {
   constructor(
-    @Inject("INotificationRepository")
-    private readonly repo: INotificationRepository,
+    @Inject("NotificationRepository")
+    private readonly repo: NotificationRepository,
   ) {}
 
   async list(recipientId: string, limit: number, cursor?: string) {

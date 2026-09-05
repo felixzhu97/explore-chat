@@ -3,7 +3,7 @@ import keyBy from "lodash/keyBy";
 import orderBy from "lodash/orderBy";
 import { RedisService } from "@/core/database/redis.service";
 import { PrismaService } from "@/core/database/prisma.service";
-import type { IPostRepository } from "@/post/domain/post.repository.interface";
+import type { PostRepository } from "@/post/domain/repository/post.repository";
 import { RecommendationService } from "./recommendation.service";
 import { ExperimentService } from "@/analytics/application/experiment.service";
 import { AdService, AdCandidate } from "@/ads/application/ad.service";
@@ -31,8 +31,8 @@ export class ExploreService {
   constructor(
     private readonly redis: RedisService,
     private readonly prisma: PrismaService,
-    @Inject("IPostRepository")
-    private readonly postRepo: IPostRepository,
+    @Inject("PostRepository")
+    private readonly postRepo: PostRepository,
     private readonly recommendation: RecommendationService,
     private readonly experiments: ExperimentService,
     private readonly ads: AdService,

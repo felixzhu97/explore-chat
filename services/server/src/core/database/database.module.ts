@@ -9,10 +9,10 @@ import { ElasticsearchService } from "./elasticsearch.service";
 import { CassandraPostRepository } from "./cassandra-post.repository";
 import { CassandraFeedRepository } from "./cassandra-feed.repository";
 import { CassandraEngagementRepository } from "./cassandra-engagement.repository";
-import { PostRepositoryAdapter } from "@/post/infrastructure/post-repository.adapter";
-import { EngagementRepositoryAdapter } from "@/post/infrastructure/engagement-repository.adapter";
-import { CommentRepositoryAdapter } from "@/comments/infrastructure/comment-repository.adapter";
-import { NotificationRepositoryAdapter } from "@/notifications/infrastructure/notification-repository.adapter";
+import { PostRepositoryImpl } from "@/post/infra/post.repository";
+import { EngagementRepositoryImpl } from "@/post/infra/engagement.repository";
+import { CommentRepositoryImpl } from "@/comments/infra/comment.repository";
+import { NotificationRepositoryImpl } from "@/notifications/infra/notification.repository";
 import { MongoCommentRepository } from "./mongo-comment.repository";
 import { MongoNotificationRepository } from "./mongo-notification.repository";
 
@@ -29,19 +29,19 @@ import { MongoNotificationRepository } from "./mongo-notification.repository";
     CassandraPostRepository,
     CassandraFeedRepository,
     CassandraEngagementRepository,
-    PostRepositoryAdapter,
-    EngagementRepositoryAdapter,
-    CommentRepositoryAdapter,
-    NotificationRepositoryAdapter,
-    { provide: "IPostRepository", useExisting: PostRepositoryAdapter },
+    PostRepositoryImpl,
+    EngagementRepositoryImpl,
+    CommentRepositoryImpl,
+    NotificationRepositoryImpl,
+    { provide: "PostRepository", useExisting: PostRepositoryImpl },
     {
-      provide: "IEngagementRepository",
-      useExisting: EngagementRepositoryAdapter,
+      provide: "EngagementRepository",
+      useExisting: EngagementRepositoryImpl,
     },
-    { provide: "ICommentRepository", useExisting: CommentRepositoryAdapter },
+    { provide: "CommentRepository", useExisting: CommentRepositoryImpl },
     {
-      provide: "INotificationRepository",
-      useExisting: NotificationRepositoryAdapter,
+      provide: "NotificationRepository",
+      useExisting: NotificationRepositoryImpl,
     },
     MongoCommentRepository,
     MongoNotificationRepository,
@@ -57,14 +57,14 @@ import { MongoNotificationRepository } from "./mongo-notification.repository";
     CassandraPostRepository,
     CassandraFeedRepository,
     CassandraEngagementRepository,
-    PostRepositoryAdapter,
-    EngagementRepositoryAdapter,
-    CommentRepositoryAdapter,
-    NotificationRepositoryAdapter,
-    "IPostRepository",
-    "IEngagementRepository",
-    "ICommentRepository",
-    "INotificationRepository",
+    PostRepositoryImpl,
+    EngagementRepositoryImpl,
+    CommentRepositoryImpl,
+    NotificationRepositoryImpl,
+    "PostRepository",
+    "EngagementRepository",
+    "CommentRepository",
+    "NotificationRepository",
     MongoCommentRepository,
     MongoNotificationRepository,
   ],

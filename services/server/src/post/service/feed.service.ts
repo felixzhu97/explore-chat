@@ -4,7 +4,7 @@ import keyBy from "lodash/keyBy";
 import orderBy from "lodash/orderBy";
 import uniqBy from "lodash/uniqBy";
 import { FeedCacheService } from "@/core/cache/feed-cache.service";
-import type { IEngagementRepository } from "@/post/domain/engagement.repository.interface";
+import type { EngagementRepository } from "@/post/domain/repository/engagement.repository";
 import { PostService } from "./post.service";
 import { RecommendationService } from "./recommendation.service";
 import { ExperimentService } from "@/analytics/application/experiment.service";
@@ -31,8 +31,8 @@ export class FeedService {
   constructor(
     private readonly feedCache: FeedCacheService,
     private readonly postService: PostService,
-    @Inject("IEngagementRepository")
-    private readonly engagementRepo: IEngagementRepository,
+    @Inject("EngagementRepository")
+    private readonly engagementRepo: EngagementRepository,
     private readonly recommendation: RecommendationService,
     private readonly experiments: ExperimentService,
     private readonly ads: AdService,

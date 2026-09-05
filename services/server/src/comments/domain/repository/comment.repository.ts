@@ -15,7 +15,7 @@ export interface CreateCommentInput {
   parentId?: string;
 }
 
-export interface ICommentRepository {
+export interface CommentRepository {
   insert(doc: CreateCommentInput): Promise<string>;
   findByPostId(
     postId: string,

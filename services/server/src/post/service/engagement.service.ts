@@ -1,16 +1,16 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import type { IEngagementRepository } from "@/post/domain/engagement.repository.interface";
-import type { IPostRepository } from "@/post/domain/post.repository.interface";
-import { NotificationService } from "@/notifications/application/notification.service";
+import type { EngagementRepository } from "@/post/domain/repository/engagement.repository";
+import type { PostRepository } from "@/post/domain/repository/post.repository";
+import { NotificationService } from "@/notifications/service/notification.service";
 import { ChatGateway } from "@/websocket/presentation/chat.gateway";
 
 @Injectable()
 export class EngagementService {
   constructor(
-    @Inject("IEngagementRepository")
-    private readonly engagementRepo: IEngagementRepository,
-    @Inject("IPostRepository")
-    private readonly postRepo: IPostRepository,
+    @Inject("EngagementRepository")
+    private readonly engagementRepo: EngagementRepository,
+    @Inject("PostRepository")
+    private readonly postRepo: PostRepository,
     private readonly notificationService: NotificationService,
     private readonly chatGateway: ChatGateway,
   ) {}

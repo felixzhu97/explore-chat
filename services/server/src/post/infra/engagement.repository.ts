@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import type { IEngagementRepository } from "@/post/domain/engagement.repository.interface";
-import { CassandraEngagementRepository } from "@/core/database/cassandra-engagement.repository";
+import type { EngagementRepository } from "@/post/domain/repository/engagement.repository";
+import { CassandraEngagementRepository as CassandraEngagementStore } from "@/core/database/cassandra-engagement.repository";
 
 @Injectable()
-export class EngagementRepositoryAdapter implements IEngagementRepository {
-  constructor(private readonly impl: CassandraEngagementRepository) {}
+export class EngagementRepositoryImpl implements EngagementRepository {
+  constructor(private readonly impl: CassandraEngagementStore) {}
 
   like(userId: string, postId: string): Promise<boolean> {
     return this.impl.like(userId, postId);

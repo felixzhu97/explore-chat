@@ -2,13 +2,13 @@ import { Injectable } from "@nestjs/common";
 import type {
   PostRow,
   CreatePostInput,
-} from "@/post/domain/post.repository.interface";
+} from "@/post/domain/repository/post.repository";
 import { PrismaService } from "./prisma.service";
 
 export type {
   PostRow,
   CreatePostInput,
-} from "@/post/domain/post.repository.interface";
+} from "@/post/domain/repository/post.repository";
 
 function encodePageState(createdAt: Date, postId: string): string {
   return Buffer.from(

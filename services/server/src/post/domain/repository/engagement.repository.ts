@@ -1,4 +1,4 @@
-export interface IEngagementRepository {
+export interface EngagementRepository {
   like(userId: string, postId: string): Promise<boolean>;
   unlike(userId: string, postId: string): Promise<boolean>;
   save(userId: string, postId: string): Promise<boolean>;

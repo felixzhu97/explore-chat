@@ -2,13 +2,13 @@ import { Injectable } from "@nestjs/common";
 import type {
   CommentDocRow,
   CreateCommentInput,
-  ICommentRepository,
-} from "@/comments/domain/comment.repository.interface";
-import { MongoCommentRepository } from "@/core/database/mongo-comment.repository";
+  CommentRepository,
+} from "@/comments/domain/repository/comment.repository";
+import { MongoCommentRepository as MongoCommentStore } from "@/core/database/mongo-comment.repository";
 
 @Injectable()
-export class CommentRepositoryAdapter implements ICommentRepository {
-  constructor(private readonly impl: MongoCommentRepository) {}
+export class CommentRepositoryImpl implements CommentRepository {
+  constructor(private readonly impl: MongoCommentStore) {}
 
   insert(doc: CreateCommentInput): Promise<string> {
     return this.impl.insert(doc);

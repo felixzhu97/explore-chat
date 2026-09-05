@@ -1,14 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import type {
-  IPostRepository,
+  PostRepository,
   CreatePostInput,
   PostRow,
-} from "@/post/domain/post.repository.interface";
-import { CassandraPostRepository } from "@/core/database/cassandra-post.repository";
+} from "@/post/domain/repository/post.repository";
+import { CassandraPostRepository as CassandraPostStore } from "@/core/database/cassandra-post.repository";
 
 @Injectable()
-export class PostRepositoryAdapter implements IPostRepository {
-  constructor(private readonly impl: CassandraPostRepository) {}
+export class PostRepositoryImpl implements PostRepository {
+  constructor(private readonly impl: CassandraPostStore) {}
 
   insertPost(input: CreatePostInput): Promise<void> {
     return this.impl.insertPost(input);

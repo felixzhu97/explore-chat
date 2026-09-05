@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { CommentRepositoryAdapter } from "@/comments/infrastructure/comment-repository.adapter";
+import { CommentRepositoryImpl } from "@/comments/infra/comment-repository.adapter";
 import { MongoCommentRepository } from "@/core/database/mongo-comment.repository";
 
-describe("CommentRepositoryAdapter", () => {
-  let adapter: CommentRepositoryAdapter;
+describe("CommentRepositoryImpl", () => {
+  let adapter: CommentRepositoryImpl;
   let mockImpl: ReturnType<typeof vi.mocked<MongoCommentRepository>>;
 
   beforeEach(() => {
@@ -14,7 +14,7 @@ describe("CommentRepositoryAdapter", () => {
       findById: vi.fn().mockResolvedValue(null),
       deleteOne: vi.fn().mockResolvedValue(true),
     } as never;
-    adapter = new CommentRepositoryAdapter(mockImpl);
+    adapter = new CommentRepositoryImpl(mockImpl);
   });
 
   describe("insert", () => {

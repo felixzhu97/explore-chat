@@ -2,10 +2,10 @@ import { Module } from "@nestjs/common";
 import {
   CommentsController,
   CommentDeleteController,
-} from "./comments.controller";
-import { CommentService } from "@/comments/application/comment.service";
+} from "./controller/comments.controller";
+import { CommentService } from "@/comments/service/comment.service";
 import { KafkaModule } from "@/core/messaging/kafka.module";
-import { NotificationsModule } from "@/notifications/presentation/notifications.module";
+import { NotificationsModule } from "@/notifications/notifications.module";
 import { WebSocketModule } from "@/websocket/presentation/websocket.module";
 import { AiModule } from "@/ai/presentation/ai.module";
 

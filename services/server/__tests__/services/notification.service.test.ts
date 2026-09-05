@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { NotificationService } from "@/notifications/application/notification.service";
+import { NotificationService } from "@/notifications/service/notification.service";
 import {
   USER_DOMAIN,
   BOUNDARY,
