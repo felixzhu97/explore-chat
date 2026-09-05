@@ -1,0 +1,62 @@
+server:
+  port: 9001
+
+spring:
+  application:
+    name: explore-chat
+  datasource:
+    url: jdbc:h2:file:./data/explore-chat;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+chat:
+  jwt:
+    access-secret: "dev-access-secret-change-me-32bytes!!"
+    refresh-secret: "dev-refresh-secret-change-me-32byte"
+    access-ttl-seconds: 3600
+    refresh-ttl-seconds: 604800
+  kafka:
+    # Empty KAFKA_BROKERS disables Kafka (no-op publisher). Unset defaults to localhost:9092.
+    brokers: ${KAFKA_BROKERS:localhost:9092}
+    topic-offline-messages: ${KAFKA_TOPIC_OFFLINE_MESSAGES:offline-messages}
+    topic-post-created: ${KAFKA_TOPIC_POST_CREATED:post.created}
+    topic-post-deleted: ${KAFKA_TOPIC_POST_DELETED:post.deleted}
+    topic-feed-fanout: ${KAFKA_TOPIC_FEED_FANOUT:feed.fanout}
+    topic-comment-created: ${KAFKA_TOPIC_COMMENT_CREATED:comment.created}
+    topic-analytics-events: ${KAFKA_TOPIC_ANALYTICS_EVENTS:analytics.events}
+    client-id: explore-chat-server
+    consumer-group: explore-chat
+  socketio:
+    host: 0.0.0.0
+    port: 9002
+    context: /socket.io
+  media:
+    upload-dir: uploads
+    public-base-url: http://localhost:9001/uploads
+  upstreams:
+    media-gen: http://localhost:3456
+    vision: http://localhost:8001
+    recommendation: http://localhost:8000
+    ollama: http://localhost:11434
+    explore-ai: ""
