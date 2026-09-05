@@ -8,7 +8,7 @@ import {
 } from "@nestjs/graphql";
 import { UseGuards } from "@nestjs/common";
 import { FeedService } from "@/post/service/feed.service";
-import { AdCreativeService } from "@/ads/application/ad-creative.service";
+import { AdCreativeService } from "@/ads/service/ad-creative.service";
 import { GqlJwtAuthGuard } from "./gql-auth.guard";
 import { CurrentGqlUser } from "./current-gql-user.decorator";
 import { FeedPageType, FeedEntryType, PostType } from "./feed.types";

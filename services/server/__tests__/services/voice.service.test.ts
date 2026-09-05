@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { VoiceService } from "@/ai/application/voice.service";
+import { VoiceService } from "@/ai/service/voice.service";
 
 vi.mock("@/core/config/config.service", () => ({
   ConfigService: {

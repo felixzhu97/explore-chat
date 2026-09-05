@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { AiService } from "@/ai/application/ai.service";
+import { AiService } from "@/ai/service/ai.service";
 
 vi.mock("@/lib/llm", () => ({
   createClient: vi.fn(() => ({
@@ -81,11 +81,9 @@ describe("AiService", () => {
     it("should filter out invalid categories", async () => {
       const { createClient } = await import("@/lib/llm");
       const mockClient = {
-        chat: vi
-          .fn()
-          .mockResolvedValue({
-            content: "UNSAFE:violence,invalid,hate,unknown",
-          }),
+        chat: vi.fn().mockResolvedValue({
+          content: "UNSAFE:violence,invalid,hate,unknown",
+        }),
       };
       (createClient as any).mockReturnValue(mockClient);
 

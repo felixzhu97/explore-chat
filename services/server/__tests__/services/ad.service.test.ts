@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { AdService } from "@/ads/application/ad.service";
+import { AdService } from "@/ads/service/ad.service";
 
 describe("AdService", () => {
   let service: AdService;

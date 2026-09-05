@@ -2,7 +2,7 @@ import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import type { EngagementRepository } from "@/post/domain/repository/engagement.repository";
 import type { PostRepository } from "@/post/domain/repository/post.repository";
 import { NotificationService } from "@/notifications/service/notification.service";
-import { ChatGateway } from "@/websocket/presentation/chat.gateway";
+import { ChatGateway } from "@/websocket/controller/chat.gateway";
 
 @Injectable()
 export class EngagementService {

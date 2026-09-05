@@ -6,8 +6,8 @@ import {
 import { CommentService } from "@/comments/service/comment.service";
 import { KafkaModule } from "@/core/messaging/kafka.module";
 import { NotificationsModule } from "@/notifications/notifications.module";
-import { WebSocketModule } from "@/websocket/presentation/websocket.module";
-import { AiModule } from "@/ai/presentation/ai.module";
+import { WebSocketModule } from "@/websocket/websocket.module";
+import { AiModule } from "@/ai/ai.module";
 
 @Module({
   imports: [KafkaModule, NotificationsModule, WebSocketModule, AiModule],

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   AdTargetingService,
   AdUserProfile,
-} from "@/ads/application/ad-targeting.service";
+} from "@/ads/service/ad-targeting.service";
 
 describe("AdTargetingService", () => {
   let service: AdTargetingService;

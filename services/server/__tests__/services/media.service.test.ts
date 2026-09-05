@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { MediaService } from "@/media/application/media.service";
+import { MediaService } from "@/media/service/media.service";
 
 vi.mock("@/core/config/config.service", () => ({
   ConfigService: {

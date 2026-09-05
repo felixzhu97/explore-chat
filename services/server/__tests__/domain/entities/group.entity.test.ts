@@ -4,7 +4,7 @@ import {
   ParticipantRole,
   GroupParticipant,
   GroupSettings,
-} from "@/groups/domain/group.entity";
+} from "@/groups/domain/model/group";
 import {
   GROUP_DOMAIN,
   USER_DOMAIN,

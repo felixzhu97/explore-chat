@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { EngagementService } from "@/post/service/engagement.service";
 import { NotificationService } from "@/notifications/service/notification.service";
-import { ChatGateway } from "@/websocket/presentation/chat.gateway";
+import { ChatGateway } from "@/websocket/controller/chat.gateway";
 
 describe("EngagementService", () => {
   let service: EngagementService;

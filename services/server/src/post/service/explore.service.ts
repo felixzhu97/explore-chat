@@ -5,8 +5,8 @@ import { RedisService } from "@/core/database/redis.service";
 import { PrismaService } from "@/core/database/prisma.service";
 import type { PostRepository } from "@/post/domain/repository/post.repository";
 import { RecommendationService } from "./recommendation.service";
-import { ExperimentService } from "@/analytics/application/experiment.service";
-import { AdService, AdCandidate } from "@/ads/application/ad.service";
+import { ExperimentService } from "@/analytics/service/experiment.service";
+import { AdService, AdCandidate } from "@/ads/service/ad.service";
 
 const EXPLORE_HOT_KEY = "explore:hot";
 const FALLBACK_USERS_LIMIT = 25;

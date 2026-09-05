@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   AdPacingService,
   AdPacingContext,
-} from "@/ads/application/ad-pacing.service";
+} from "@/ads/service/ad-pacing.service";
 
 describe("AdPacingService", () => {
   let service: AdPacingService;

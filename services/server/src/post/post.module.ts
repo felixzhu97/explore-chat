@@ -5,19 +5,19 @@ import { FeedService } from "@/post/service/feed.service";
 import { EngagementService } from "@/post/service/engagement.service";
 import { ExploreService } from "@/post/service/explore.service";
 import { RecommendationService } from "@/post/service/recommendation.service";
-import { ExperimentService } from "@/analytics/application/experiment.service";
-import { AdService } from "@/ads/application/ad.service";
-import { AdTargetingService } from "@/ads/application/ad-targeting.service";
-import { AdPacingService } from "@/ads/application/ad-pacing.service";
-import { AdCreativeService } from "@/ads/application/ad-creative.service";
+import { ExperimentService } from "@/analytics/service/experiment.service";
+import { AdService } from "@/ads/service/ad.service";
+import { AdTargetingService } from "@/ads/service/ad-targeting.service";
+import { AdPacingService } from "@/ads/service/ad-pacing.service";
+import { AdCreativeService } from "@/ads/service/ad-creative.service";
 import { FeedSeenService } from "@/post/service/feed-seen.service";
 import { KafkaModule } from "@/core/messaging/kafka.module";
 import { UsersModule } from "@/users/users.module";
 import { NotificationsModule } from "@/notifications/notifications.module";
-import { WebSocketModule } from "@/websocket/presentation/websocket.module";
-import { AiModule } from "@/ai/presentation/ai.module";
-import { VisionModule } from "@/ai/presentation/vision.module";
-import { SearchModule } from "@/search/presentation/search.module";
+import { WebSocketModule } from "@/websocket/websocket.module";
+import { AiModule } from "@/ai/ai.module";
+import { VisionModule } from "@/ai/vision.module";
+import { SearchModule } from "@/search/search.module";
 import { FeedFanoutService } from "@/post/service/feed-fanout.service";
 
 @Module({
