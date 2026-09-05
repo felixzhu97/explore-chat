@@ -4,6 +4,7 @@ import com.chat.status.domain.model.StatusView;
 import com.chat.status.domain.model.UserStatus;
 import com.chat.status.domain.repository.StatusViewRepository;
 import com.chat.status.domain.repository.UserStatusRepository;
+import com.chat.users.domain.repository.UserRepository;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -18,10 +19,15 @@ public class StatusService {
 
   private final UserStatusRepository statusRepository;
   private final StatusViewRepository viewRepository;
+  private final UserRepository userRepository;
 
-  public StatusService(UserStatusRepository statusRepository, StatusViewRepository viewRepository) {
+  public StatusService(
+      UserStatusRepository statusRepository,
+      StatusViewRepository viewRepository,
+      UserRepository userRepository) {
     this.statusRepository = statusRepository;
     this.viewRepository = viewRepository;
+    this.userRepository = userRepository;
   }
 
   @Transactional(readOnly = true)
@@ -71,12 +77,22 @@ public class StatusService {
     Map<String, Object> body = new HashMap<>();
     body.put("id", status.getId());
     body.put("authorId", status.getAuthorId());
+    body.put("userId", status.getAuthorId());
     body.put("content", status.getContent());
     body.put("mediaUrl", status.getMediaUrl());
     body.put("statusType", status.getStatusType());
     body.put("expiresAt", status.getExpiresAt().toString());
     body.put("viewCount", viewRepository.countByStatusId(status.getId()));
+    body.put("createdAt", status.getCreatedAt().toString());
     body.put("createTime", status.getCreatedAt().toString());
+    var authorOpt = userRepository.findById(status.getAuthorId());
+    if (authorOpt != null) {
+      authorOpt.ifPresent(
+          author -> {
+            body.put("username", author.getUsername());
+            body.put("avatar", author.getAvatar());
+          });
+    }
     return body;
   }
 }

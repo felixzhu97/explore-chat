@@ -152,4 +152,20 @@ public class SocialPost extends AbstractEntity {
   public boolean isReel() {
     return "VIDEO".equalsIgnoreCase(postType) || "REEL".equalsIgnoreCase(postType);
   }
+
+  /**
+   * Replaces media payload used by demo enrichment and admin repair.
+   *
+   * @param mediaUrlsJson JSON array of media URLs
+   * @param postType post type such as {@code IMAGE} or {@code VIDEO}
+   * @param coverUrl optional cover image URL
+   */
+  public void replaceMedia(String mediaUrlsJson, String postType, String coverUrl) {
+    this.mediaUrls = mediaUrlsJson == null || mediaUrlsJson.isBlank() ? "[]" : mediaUrlsJson;
+    if (postType != null && !postType.isBlank()) {
+      this.postType = postType;
+    }
+    this.coverUrl = coverUrl;
+    touch();
+  }
 }

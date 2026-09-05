@@ -15,6 +15,7 @@ import com.chat.post.domain.repository.PostHashtagRepository;
 import com.chat.post.domain.repository.PostLikeRepository;
 import com.chat.post.domain.repository.PostSaveRepository;
 import com.chat.post.domain.repository.SocialPostRepository;
+import com.chat.users.domain.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ public class PostService {
   private final UserFollowRepository followRepository;
   private final HashtagRepository hashtagRepository;
   private final PostHashtagRepository postHashtagRepository;
+  private final UserRepository userRepository;
   private final ChatEventPublisher chatEventPublisher;
   private final NotificationsService notificationsService;
 
@@ -50,6 +52,7 @@ public class PostService {
       UserFollowRepository followRepository,
       HashtagRepository hashtagRepository,
       PostHashtagRepository postHashtagRepository,
+      UserRepository userRepository,
       ChatEventPublisher chatEventPublisher,
       NotificationsService notificationsService) {
     this.socialPostRepository = socialPostRepository;
@@ -58,6 +61,7 @@ public class PostService {
     this.followRepository = followRepository;
     this.hashtagRepository = hashtagRepository;
     this.postHashtagRepository = postHashtagRepository;
+    this.userRepository = userRepository;
     this.chatEventPublisher = chatEventPublisher;
     this.notificationsService = notificationsService;
   }
@@ -316,6 +320,14 @@ public class PostService {
     body.put("isSaved", saved);
     body.put("createdAt", post.getCreatedAt().toString());
     body.put("createTime", post.getCreatedAt().toString());
+    var authorOpt = userRepository.findById(post.getAuthorId());
+    if (authorOpt != null) {
+      authorOpt.ifPresent(
+          author -> {
+            body.put("username", author.getUsername());
+            body.put("avatar", author.getAvatar());
+          });
+    }
     return body;
   }
 
