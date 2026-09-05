@@ -22,7 +22,8 @@ legend right
 endlegend
 
 note as N_LAYERS
-  presentation → application → domain ← infra
+  controller → service → domain ← infra (+ mapper)
+  Nest modules live at feature root.
   Shared kernels: base/domain, base/infra.
   Clients call Nest /api/v1 only.
   Persist: Prisma SQLite (users, chats, social_posts,
