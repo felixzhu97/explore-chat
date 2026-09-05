@@ -34,7 +34,7 @@ export default defineConfig({
         "src/shared/types/**",
         "emotion-registry.tsx",
         "src/chat/messagesSlice.ts",
-        "src/chat/contactsSlice.ts",
+        "src/chat/services/chats.service.ts",
         "src/calls/calls.service.ts",
         "src/layout/notificationsSlice.ts",
         "src/auth/storage.ts",

@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import type { TypedUseSelectorHook } from "react-redux";
 import { getStorage } from "@/auth/storage";
 import callsReducer from "@/calls/calls.service";
-import contactsReducer from "@/chat/contactsSlice";
+import { contactsReducer } from "@/chat/services/chats.service";
 import messagesReducer from "@/chat/messagesSlice";
 import notificationsReducer from "@/layout/notificationsSlice";
 

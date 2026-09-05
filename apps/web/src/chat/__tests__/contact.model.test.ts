@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mapContact } from "../contact.model";
+import { mapContact } from "../services/chats.service";
 
 describe("mapContact", () => {
   it("should_mapRequiredFields_when_minimalInput", () => {

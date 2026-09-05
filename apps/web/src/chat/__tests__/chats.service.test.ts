@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ChatsService } from "../services/chats.service";
-import { ChatApi } from "@/chat/chat.api";
-import type { ApiChatRow, ApiMessageRow } from "../chats.mapper";
+import { ChatApi } from "@/chat/services/chats.service";
+import type { ApiChatRow, ApiMessageRow } from "../services/chats.service";
 
 const createMockChatApi = (): Partial<ChatApi> => ({
   getChats: vi.fn(),

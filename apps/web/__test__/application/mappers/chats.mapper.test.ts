@@ -6,7 +6,7 @@ import {
   mapUnknownToMessageCreate,
   type ApiChatRow,
   type ApiMessageRow,
-} from "@/chat/chats.mapper";
+} from "@/chat/services/chats.service";
 
 // =============================================================================
 // TEST DOMAIN CONSTANTS
