@@ -120,7 +120,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     message: QueuedMessagePayload,
     chatId: string,
     senderId: string,
-  ): Promise<void> {
+  ): Promise<{ deliveredOnline: boolean }> {
     const participants = await this.prisma.chatParticipant.findMany({
       where: { chatId },
       select: { userId: true },
@@ -129,14 +129,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .map((p: { userId: string }) => p.userId)
       .filter((id: string) => id !== senderId);
 
+    let deliveredOnline = false;
     for (const userId of recipientIds) {
       const socketId = onlineUsers.get(userId);
       if (socketId) {
         this.server.to(socketId).emit("message:received", message);
+        deliveredOnline = true;
       } else {
         this.offlineQueue.enqueue(userId, message);
       }
     }
+    return { deliveredOnline };
+  }
+
+  /** Notify sender that at least one recipient device got the message live. */
+  emitDelivered(
+    senderId: string,
+    payload: { messageId: string; chatId: string; clientMsgId?: string },
+  ): void {
+    this.server.to(`user:${senderId}`).emit("message:delivered", payload);
   }
 
   emitNotification(recipientId: string, payload: unknown): void {
@@ -229,13 +240,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }),
       });
 
-      await this.deliverToParticipants(
+      const { deliveredOnline } = await this.deliverToParticipants(
         message as QueuedMessagePayload,
         data.chatId,
         socket.userId,
       );
 
       socket.emit("message:sent", message);
+      if (deliveredOnline) {
+        socket.emit("message:delivered", {
+          messageId: message.id,
+          chatId: data.chatId,
+          ...(typeof message.clientMsgId === "string" && {
+            clientMsgId: message.clientMsgId,
+          }),
+        });
+      }
 
       logger.info(`Message sent: ${socket.userId} -> ${data.chatId}`);
     } catch (error) {

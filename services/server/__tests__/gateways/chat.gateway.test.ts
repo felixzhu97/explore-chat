@@ -248,9 +248,9 @@ describe("ChatGateway", () => {
       mockMessagesService.createMessage = vi
         .fn()
         .mockResolvedValue(mockMessage);
-      vi.spyOn(chatGateway, "deliverToParticipants" as any).mockResolvedValue(
-        undefined,
-      );
+      vi.spyOn(chatGateway, "deliverToParticipants" as any).mockResolvedValue({
+        deliveredOnline: true,
+      });
 
       await chatGateway.handleMessage(socket as any, messageData);
 
@@ -261,6 +261,10 @@ describe("ChatGateway", () => {
         senderId: "user-1",
       });
       expect(socket.emit).toHaveBeenCalledWith("message:sent", mockMessage);
+      expect(socket.emit).toHaveBeenCalledWith("message:delivered", {
+        messageId: "msg-1",
+        chatId: "chat-1",
+      });
     });
 
     it("should emit error when user is not participant", async () => {
@@ -387,13 +391,25 @@ describe("ChatGateway", () => {
         .fn()
         .mockResolvedValue([{ userId: "user-1" }, { userId: "user-2" }]);
 
-      await chatGateway.deliverToParticipants(
+      const result = await chatGateway.deliverToParticipants(
         message as any,
         "chat-1",
         "user-1",
       );
 
       expect(mockOfflineQueue.enqueue).toHaveBeenCalled();
+      expect(result).toEqual({ deliveredOnline: false });
+    });
+  });
+
+  describe("emitDelivered", () => {
+    it("should emit delivered to sender user room", () => {
+      chatGateway.emitDelivered("user-1", {
+        messageId: "msg-1",
+        chatId: "chat-1",
+      });
+
+      expect(chatGateway.server.to).toHaveBeenCalledWith("user:user-1");
     });
   });
 

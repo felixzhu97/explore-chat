@@ -33,7 +33,10 @@ describe("MessagesController", () => {
     };
 
     mockChatGateway = {
-      deliverToParticipants: vi.fn(),
+      deliverToParticipants: vi
+        .fn()
+        .mockResolvedValue({ deliveredOnline: false }),
+      emitDelivered: vi.fn(),
     };
 
     messagesController = new MessagesController(
@@ -105,7 +108,9 @@ describe("MessagesController", () => {
 
     it("should create a message and deliver to participants", async () => {
       mockMessagesService.createMessage.mockResolvedValue(mockMessage);
-      mockChatGateway.deliverToParticipants.mockResolvedValue(undefined);
+      mockChatGateway.deliverToParticipants.mockResolvedValue({
+        deliveredOnline: true,
+      });
 
       const result = await messagesController.createMessage(
         mockUser,
@@ -128,6 +133,10 @@ describe("MessagesController", () => {
         mockMessage.chatId,
         mockMessage.senderId,
       );
+      expect(mockChatGateway.emitDelivered).toHaveBeenCalledWith("user-1", {
+        messageId: "message-1",
+        chatId: "chat-1",
+      });
     });
 
     it("should include mediaUrl when provided", async () => {
@@ -140,7 +149,9 @@ describe("MessagesController", () => {
         ...mockMessage,
         mediaUrl: "https://example.com/image.jpg",
       });
-      mockChatGateway.deliverToParticipants.mockResolvedValue(undefined);
+      mockChatGateway.deliverToParticipants.mockResolvedValue({
+        deliveredOnline: false,
+      });
 
       await messagesController.createMessage(mockUser, messageWithMedia);
 
@@ -163,7 +174,9 @@ describe("MessagesController", () => {
         ...mockMessage,
         replyToMessageId: "original-message-id",
       });
-      mockChatGateway.deliverToParticipants.mockResolvedValue(undefined);
+      mockChatGateway.deliverToParticipants.mockResolvedValue({
+        deliveredOnline: false,
+      });
 
       await messagesController.createMessage(mockUser, messageWithReply);
 

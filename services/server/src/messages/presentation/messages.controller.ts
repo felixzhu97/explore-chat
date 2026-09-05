@@ -72,11 +72,22 @@ export class MessagesController {
       }),
     });
 
-    await this.chatGateway.deliverToParticipants(
+    const { deliveredOnline } = await this.chatGateway.deliverToParticipants(
       message as QueuedMessagePayload,
       message.chatId,
       message.senderId,
     );
+
+    if (deliveredOnline) {
+      this.chatGateway.emitDelivered(message.senderId, {
+        messageId: message.id,
+        chatId: message.chatId,
+        ...(typeof (message as { clientMsgId?: string }).clientMsgId ===
+          "string" && {
+          clientMsgId: (message as { clientMsgId: string }).clientMsgId,
+        }),
+      });
+    }
 
     return {
       success: true,
