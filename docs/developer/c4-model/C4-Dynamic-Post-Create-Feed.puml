@@ -1,0 +1,42 @@
+@startuml C4-Dynamic-Post-Create-Feed
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+
+title Dynamic — Create post → SQLite → fan-out → get post
+
+actor "用户" as user
+participant "Web / Mobile" as ui <<ui>>
+participant "PostController" as postCtrl <<java>>
+participant "PostService" as postSvc <<java>>
+participant "PostRepository" as postRepo <<java>>
+participant "FeedFanoutService" as fanout <<java>>
+participant "SearchService" as search <<java>>
+database "SQLite\nPrisma" as db <<db>>
+
+== 发帖 ==
+user -> ui : 创建帖子
+ui -> postCtrl : POST /api/v1/posts (+ JWT)
+postCtrl -> postSvc : createPost
+postSvc -> postRepo : insertPost
+postRepo -> db : INSERT social_posts
+postSvc -> search : indexPost (FTS)
+postSvc -> fanout : fanoutPostCreated
+fanout -> db : UPSERT feed_entries\n(author + followers)
+fanout -> fanout : invalidate feed cache (memory)
+postSvc --> postCtrl : postId
+postCtrl --> ui : 201
+
+== 再读 ==
+ui -> postCtrl : GET /api/v1/posts/{postId}
+postCtrl -> postSvc : getPost
+postSvc -> postRepo : getPostById
+postRepo -> db : SELECT social_posts
+db --> ui : 200 Post
+
+note over postSvc, db
+  去掉 Cassandra 空写路径：
+  create 与 get 同一 SQLite 文件。
+end note
+
+@enduml

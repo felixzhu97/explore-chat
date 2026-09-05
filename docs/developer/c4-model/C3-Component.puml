@@ -1,87 +1,118 @@
-@startuml C3-Component
+@startuml
+!ROUNDED_STYLE=1
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+' 样式内联自 style.puml（勿改为 !include）
+UpdateElementStyle("person", "#FFFFFF", "#000000", "#000000")
+UpdateElementStyle("external_person", "#FFFFFF", "#000000", "#000000")
+UpdateElementStyle("system", "#FFFFFF", "#000000", "#000000")
+UpdateElementStyle("external_system", "#FFFFFF", "#000000", "#000000")
+UpdateElementStyle("container", "#FFFFFF", "#000000", "#000000")
+UpdateElementStyle("external_container", "#FFFFFF", "#000000", "#000000")
+UpdateElementStyle("component", "#FFFFFF", "#000000", "#000000")
+UpdateElementStyle("external_component", "#FFFFFF", "#000000", "#000000")
+UpdateElementStyle("node", "#FFFFFF", "#000000", "#000000")
+UpdateBoundaryStyle("", $bgColor="#FFFFFF", $fontColor="#000000", $borderColor="#000000")
+UpdateRelStyle("#000000", "#000000")
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
 
 LAYOUT_WITH_LEGEND()
+title [C4 Level 3] ExploreChat - 组件图（Web + Nest）
 
-title 组件图 (C3) - ExploreChat（Web + API）
-
-Person(user, "Web 用户", "使用应用")
+Person(user, "Web 用户", "浏览器客户端")
 
 System_Boundary(explorechat, "ExploreChat") {
   Container_Boundary(web_app, "Web 应用") {
-    Component(pages, "页面 / App Router", "Next.js", "登录、主站（Feed/Reels/消息）、设置")
-    Component(nav_ui, "导航与抽屉", "React、Emotion", "首页、Reels、消息、搜索、探索、通知、发帖")
-    Component(feed_ui, "信息流 / Reels / 探索", "React、Emotion", "帖子、互动、封面 coverUrl、评论弹窗")
-    Component(chat_ui, "聊天与通话", "React、@whatschat/im", "私信气泡、WebRTC 通话 UI")
-    Component(profile_ui, "个人页与发帖", "React、Emotion", "网格、关注列表、媒体上传 + createPost")
-    Component(state, "状态层", "Redux Toolkit", "消息、通知、通话等切片；认证经 auth-session")
-    Component(api_client, "API 客户端", "Fetch", "REST：auth、posts、search、media、ai/explore")
+    Component(pages, "App Router 页面", "Next.js", "登录、主站、设置")
+    Component(feed_ui, "Feed / Reels / Explore", "React", "帖子、互动、评论")
+    Component(chat_ui, "聊天与通话", "React + im", "私信、WebRTC UI")
+    Component(state, "状态层", "Redux Toolkit", "auth-session、消息、通知")
+    Component(api_client, "API 客户端", "Fetch", "REST /api/v1")
     Component(ws_client, "WebSocket 客户端", "Socket.IO", "实时消息与通知")
   }
 
-  ' Nest packages by business domain (auth/, users/, post/, …) with Clean Architecture layers inside each domain.
-  Container_Boundary(api_server, "API 服务") {
-    Component(controllers, "REST 控制器", "NestJS", "auth、users、posts（含 explore）、search、media、ai/explore、admin、ads、analytics、health 等")
-    Component(graphql_api, "GraphQL", "Apollo", "feed / reels；JWT；路径 /api/v1/graphql")
-    Component(websocket, "WebSocket 网关", "Socket.IO", "消息、在线状态、通话信令、notification:new")
-    Component(app_services, "应用服务", "NestJS", "Auth、User、Post、Feed、Explore、Comment、Follow、Search、Notification、Call、Explore AI BFF")
-    Component(domain_ports, "领域仓储端口", "TypeScript", "IPostRepository、IEngagementRepository、ICommentRepository 等")
-    Component(infra_adapters, "基础设施适配器", "NestJS", "Prisma / Cassandra / Mongo 仓储适配器")
-    ComponentDb(prisma_repo, "Prisma 仓储", "PostgreSQL", "用户、聊天、消息、关注")
-    ComponentDb(post_repo, "帖子仓储", "Cassandra", "可选：帖子、Feed、互动")
-    ComponentDb(doc_repo, "文档仓储", "MongoDB", "可选：评论、通知")
+  Container_Boundary(auth_bc, "auth") {
+    Component(auth_ctrl, "AuthController", "REST", "/api/v1/auth")
+    Component(auth_svc, "AuthService", "Service", "注册 / 登录 / refresh JWT")
+  }
+
+  Container_Boundary(users_bc, "users") {
+    Component(users_ctrl, "UsersController", "REST", "资料与查询")
+    Component(users_svc, "UsersService", "Service", "用户用例")
+  }
+
+  Container_Boundary(post_bc, "post") {
+    Component(post_ctrl, "PostController", "REST", "发帖 / Feed / explore")
+    Component(post_svc, "PostService", "Service", "发帖、读帖、审核钩子")
+    Component(fanout_svc, "FeedFanoutService", "Service", "进程内写 feed_entries")
+    Component(post_repo, "Post / Feed / Engagement repos", "Prisma", "social_posts、feed_entries、likes")
+  }
+
+  Container_Boundary(comments_bc, "comments") {
+    Component(comment_ctrl, "CommentController", "REST", "帖子评论")
+    Component(comment_svc, "CommentService", "Service", "评论用例")
+    Component(comment_repo, "CommentRepository", "Prisma", "post_comments")
+  }
+
+  Container_Boundary(search_bc, "search") {
+    Component(search_ctrl, "SearchController", "REST", "/api/v1/search")
+    Component(search_svc, "SearchService", "Service", "FTS5 + LIKE")
+  }
+
+  Container_Boundary(realtime_bc, "chats / websocket") {
+    Component(graphql_api, "GraphQL", "Apollo", "feed / reels")
+    Component(websocket, "ChatGateway", "Socket.IO", "消息与通话信令")
+    Component(chat_svc, "Chats / Messages services", "Service", "会话与消息")
+  }
+
+  Container_Boundary(shared_infra, "core") {
+    Component(prisma, "PrismaService", "SQLite", "统一持久化")
+    Component(mem_cache, "RedisService (memory)", "In-process", "缓存 / seen / offline buffer")
   }
 }
 
-ContainerDb_Ext(postgres, "PostgreSQL", "必需", "主库")
-Container_Ext(redis, "Redis", "必需", "缓存与会话")
-Container_Ext(kafka, "Kafka", "可选", "事件")
-ContainerDb_Ext(cassandra, "Cassandra", "可选", "宽表")
-ContainerDb_Ext(mongodb, "MongoDB", "可选", "文档")
-Container_Ext(es, "Elasticsearch", "可选", "搜索")
-Container_Ext(explore_ai, "Explore AI", "外部", "BFF 上游")
-Container_Ext(media_gen, "Media Gen", "Python", ":3456")
-Container_Ext(vision, "Vision", "Python", ":8001")
+Container_Ext(media_gen, "Media Gen", "Python", ":3456 可选")
+Container_Ext(vision, "Vision", "Python", ":8001 可选")
+Container_Ext(explore_ai, "Explore AI", "外部", "BFF 可选")
 
-Rel(user, pages, "使用")
-Rel(pages, nav_ui, "渲染")
+Rel(user, pages, "使用", "HTTPS")
 Rel(pages, feed_ui, "渲染")
 Rel(pages, chat_ui, "渲染")
-Rel(pages, profile_ui, "渲染")
-Rel(feed_ui, state, "读取 / 派发")
-Rel(chat_ui, state, "读取 / 派发")
-Rel(profile_ui, api_client, "上传 / 发帖")
-Rel(feed_ui, api_client, "Feed / 互动")
+Rel(feed_ui, state, "读写")
 Rel(chat_ui, ws_client, "实时")
 Rel(state, api_client, "副作用")
-Rel(api_client, controllers, "REST")
+Rel(api_client, auth_ctrl, "REST")
+Rel(api_client, post_ctrl, "REST")
+Rel(api_client, comment_ctrl, "REST")
+Rel(api_client, search_ctrl, "REST")
 Rel(api_client, graphql_api, "GraphQL")
 Rel(ws_client, websocket, "WebSocket")
 
-Rel(controllers, app_services, "调用")
-Rel(graphql_api, app_services, "调用")
-Rel(websocket, app_services, "调用")
-Rel(app_services, domain_ports, "依赖端口")
-Rel(infra_adapters, domain_ports, "实现")
-Rel(infra_adapters, prisma_repo, "委托")
-Rel(infra_adapters, post_repo, "委托")
-Rel(infra_adapters, doc_repo, "委托")
-Rel(prisma_repo, postgres, "Prisma")
-Rel(post_repo, cassandra, "driver")
-Rel(doc_repo, mongodb, "driver")
-Rel(app_services, redis, "缓存 / PubSub")
-Rel(app_services, kafka, "事件")
-Rel(app_services, es, "搜索")
-Rel(app_services, explore_ai, "代理")
-Rel(app_services, media_gen, "HTTP")
-Rel(app_services, vision, "HTTP")
+Rel(auth_ctrl, auth_svc, "调用")
+Rel(auth_svc, users_svc, "用户")
+Rel(users_svc, prisma, "Prisma")
+Rel(post_ctrl, post_svc, "调用")
+Rel(post_svc, post_repo, "持久化")
+Rel(post_svc, fanout_svc, "fan-out")
+Rel(post_svc, search_svc, "indexPost")
+Rel(fanout_svc, post_repo, "写 Feed")
+Rel(fanout_svc, mem_cache, "清 Feed 缓存")
+Rel(comment_ctrl, comment_svc, "调用")
+Rel(comment_svc, comment_repo, "Prisma")
+Rel(search_ctrl, search_svc, "调用")
+Rel(search_svc, prisma, "FTS / LIKE")
+Rel(post_repo, prisma, "委托")
+Rel(comment_repo, prisma, "委托")
+Rel(websocket, chat_svc, "调用")
+Rel(chat_svc, prisma, "Prisma")
+Rel(post_svc, vision, "审核", "可选")
+Rel(post_svc, media_gen, "生成", "可选")
+Rel(auth_svc, explore_ai, "BFF", "可选")
 
 note right of web_app
-  Web 与 Mobile src/ 均按业务域分文件夹：
-  core, layout, auth, feed, chat,
-  explore, reels, profile, calls,
-  secondary, shared（Web 另有 search、ai）。
-  Admin 共享 API；Mobile/Admin 细节见 C2 容器图。
+  Mobile / Admin 与 Web 同调 Nest；
+  业务域目录见 Glossary。
 end note
 
+SHOW_LEGEND()
 @enduml
