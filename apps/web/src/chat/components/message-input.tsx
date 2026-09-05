@@ -3,7 +3,6 @@
 import type React from "react";
 
 import { useState, useRef } from "react";
-import { useFeatureIsOn } from "@growthbook/growthbook-react";
 import { Button } from "@/shared/ui/button";
 import { Textarea } from "@/shared/ui/textarea";
 import { Smile, Send, X, Sparkles, Camera, ImageIcon } from "lucide-react";
@@ -52,16 +51,6 @@ const RoundedBar = styled.div`
   border-radius: 24px;
   background-color: rgb(239 239 239);
   min-height: 44px;
-`;
-
-const DisabledBanner = styled.div`
-  border-radius: 0.75rem;
-  border: 1px solid hsl(var(--border));
-  background-color: rgb(249 250 251);
-  padding: 1.5rem;
-  font-size: 0.875rem;
-  color: rgb(107 114 128);
-  text-align: center;
 `;
 
 const ReplyBox = styled.div`
@@ -194,7 +183,6 @@ export function MessageInput({
     onGenerateVideoClick != null ||
     onGenerateVoiceClick != null;
   const { t } = useTranslation();
-  const sendMessageEnabled = useFeatureIsOn("send_message");
   const placeholder = t("dm.messagePlaceholder");
 
   const handleSend = () => {
@@ -219,14 +207,6 @@ export function MessageInput({
     onFileSelect(file);
     setShowFileUpload(false);
   };
-
-  if (!sendMessageEnabled) {
-    return (
-      <InputShell>
-        <DisabledBanner>Send message is currently disabled</DisabledBanner>
-      </InputShell>
-    );
-  }
 
   return (
     <InputShell>

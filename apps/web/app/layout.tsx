@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { EmotionRegistry } from "./emotion-registry";
 import { I18nProvider } from "@/layout/providers/i18n-provider";
-import { GrowthBookProviderWrapper } from "@/layout/providers/growthbook-provider";
 import { AnalyticsProvider } from "@/layout/providers/analytics-provider";
 import { StoreProvider } from "@/layout/providers/StoreProvider";
 import { Toaster } from "@/shared/ui/toaster";
@@ -24,12 +23,10 @@ export default function RootLayout({
         <EmotionRegistry>
           <StoreProvider>
             <I18nProvider>
-              <GrowthBookProviderWrapper>
-                <AnalyticsProvider>
-                  {children}
-                  <Toaster />
-                </AnalyticsProvider>
-              </GrowthBookProviderWrapper>
+              <AnalyticsProvider>
+                {children}
+                <Toaster />
+              </AnalyticsProvider>
             </I18nProvider>
           </StoreProvider>
         </EmotionRegistry>
