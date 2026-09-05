@@ -1,5 +1,5 @@
 export type { ApiResponse, Pagination } from "@whatschat/shared-types";
-import type { ApiResponse } from "@whatschat/shared-types";
+import type { RpcStatus } from "@whatschat/shared-types";
 
 export const API_CONFIG = {
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1",
@@ -31,49 +31,75 @@ export class ApiClient {
     return this.token;
   }
 
+  private buildHeaders(options: RequestInit): Record<string, string> {
+    const headers: Record<string, string> = {
+      ...(options.headers as Record<string, string>),
+    };
+    if (!(options.body instanceof FormData)) {
+      headers["Content-Type"] = headers["Content-Type"] ?? "application/json";
+    }
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`;
+    }
+    return headers;
+  }
+
+  private async parseResponse<T>(response: Response): Promise<T> {
+    if (response.status === 204) {
+      return undefined as T;
+    }
+
+    const text = await response.text();
+    if (!text) {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return undefined as T;
+    }
+
+    let data: unknown;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return undefined as T;
+    }
+
+    if (!response.ok) {
+      const err = data as RpcStatus;
+      throw new Error(err.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return data as T;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
-  ): Promise<ApiResponse<T>> {
+  ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
 
     const config: RequestInit = {
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
       ...options,
+      headers: this.buildHeaders(options),
     };
-
-    if (this.token) {
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${this.token}`,
-      };
-    }
 
     try {
       const response = await fetch(url, config);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || `HTTP error! status: ${response.status}`,
-        );
-      }
-
-      return data;
+      return this.parseResponse<T>(response);
     } catch (error) {
       console.error("API请求错误:", error);
       throw error;
     }
   }
 
-  async get<T>(endpoint: string): Promise<ApiResponse<T>> {
+  async get<T>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: "GET" });
   }
 
-  async post<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
+  async post<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.request<T>(endpoint, {
       method: "POST",
       body: data ? JSON.stringify(data) : undefined,
@@ -84,64 +110,42 @@ export class ApiClient {
     const url = `${this.baseURL}${endpoint}`;
     const config: RequestInit = {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: this.buildHeaders({}),
       body: data ? JSON.stringify(data) : undefined,
     };
-    if (this.token) {
-      (config.headers as Record<string, string>)["Authorization"] =
-        `Bearer ${this.token}`;
-    }
     return fetch(url, config);
   }
 
-  async put<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
+  async put<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.request<T>(endpoint, {
       method: "PUT",
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async patch<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
+  async patch<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.request<T>(endpoint, {
       method: "PATCH",
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
+  async delete<T>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: "DELETE" });
   }
 
-  async upload<T>(
-    endpoint: string,
-    formData: FormData,
-  ): Promise<ApiResponse<T>> {
+  async upload<T>(endpoint: string, formData: FormData): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
 
     const config: RequestInit = {
       method: "POST",
       body: formData,
-      headers: {},
+      headers: this.buildHeaders({ body: formData }),
     };
-
-    if (this.token) {
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${this.token}`,
-      };
-    }
 
     try {
       const response = await fetch(url, config);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || `HTTP error! status: ${response.status}`,
-        );
-      }
-
-      return data;
+      return this.parseResponse<T>(response);
     } catch (error) {
       console.error("文件上传错误:", error);
       throw error;

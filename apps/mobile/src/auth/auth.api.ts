@@ -15,39 +15,29 @@ export interface AuthRegisterPayload {
   phone?: string;
 }
 
-interface AuthResponse {
-  success: boolean;
-  message: string;
-  data: {
-    user: AuthUser;
-    token: string;
-    refreshToken: string;
-  };
-}
-
 export class AuthApi {
   constructor(private readonly http: HttpClient) {}
 
   async login(email: string, password: string): Promise<AuthSession> {
-    const { data } = await this.http.post<AuthResponse>("/auth/login", {
+    const { data } = await this.http.post<AuthSession>("/auth/login", {
       email,
       password,
     });
-    if (!data.success || !data.data) {
-      throw new Error(data.message || "Login failed");
+    if (!data?.user || !data?.token) {
+      throw new Error("Login failed");
     }
-    return data.data;
+    return data;
   }
 
   async register(payload: AuthRegisterPayload): Promise<AuthSession> {
-    const { data } = await this.http.post<AuthResponse>(
+    const { data } = await this.http.post<AuthSession>(
       "/auth/register",
       payload,
     );
-    if (!data.success || !data.data) {
-      throw new Error(data.message || "Register failed");
+    if (!data?.user || !data?.token) {
+      throw new Error("Register failed");
     }
-    return data.data;
+    return data;
   }
 
   isAuthError(error: unknown): boolean {

@@ -3,7 +3,6 @@ import type {
   VoiceTranslateTargetLanguage,
 } from "@whatschat/shared-types";
 import type { ApiClient } from "@/auth/api-client";
-import type { ApiResponse } from "@/auth/api-client";
 
 export interface VoiceGenerateResponse {
   audioUrl: string;
@@ -23,7 +22,7 @@ export class VoiceApi {
   async generate(
     prompt: string,
     targetLang?: VoiceGenTargetLanguage,
-  ): Promise<ApiResponse<VoiceGenerateResponse>> {
+  ): Promise<VoiceGenerateResponse> {
     return this.apiClient.post<VoiceGenerateResponse>("/voice/generate", {
       prompt,
       ...(targetLang != null && { targetLang }),
@@ -33,7 +32,7 @@ export class VoiceApi {
   async translate(
     text: string,
     targetLang: VoiceTranslateTargetLanguage,
-  ): Promise<ApiResponse<VoiceTranslateResponse>> {
+  ): Promise<VoiceTranslateResponse> {
     return this.apiClient.post<VoiceTranslateResponse>("/voice/translate", {
       text,
       targetLang,

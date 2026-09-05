@@ -81,21 +81,22 @@ export const ExploreScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [exploreNextOffset, setExploreNextOffset] = useState(0);
+  const [exploreNextPageToken, setExploreNextPageToken] = useState<
+    string | undefined
+  >();
   const [exploreHasMore, setExploreHasMore] = useState(true);
   const [searchCursor, setSearchCursor] = useState<string | undefined>();
   const [searchHasMore, setSearchHasMore] = useState(false);
   const loadExplore = useCallback(
-    async (offset: number, append: boolean) => {
+    async (pageToken: string | undefined, append: boolean) => {
       if (!append) setLoading(true);
       else setLoadingMore(true);
       setError(null);
       try {
-        const { posts, total, fetchedEntryCount } =
-          await getFeedApi().getExplore(PAGE_SIZE, offset);
-        const nextOff = offset + fetchedEntryCount;
-        setExploreNextOffset(nextOff);
-        setExploreHasMore(nextOff < total && fetchedEntryCount > 0);
+        const { posts, nextPageToken, fetchedEntryCount } =
+          await getFeedApi().getExplore(PAGE_SIZE, pageToken);
+        setExploreNextPageToken(nextPageToken);
+        setExploreHasMore(Boolean(nextPageToken) && fetchedEntryCount > 0);
         setItems((prev) => (append ? [...prev, ...posts] : posts));
       } catch (e) {
         setError(e instanceof Error ? e.message : t("explore.loadFailed"));
@@ -138,7 +139,7 @@ export const ExploreScreen: React.FC = () => {
   );
 
   useEffect(() => {
-    void loadExplore(0, false);
+    void loadExplore(undefined, false);
   }, [loadExplore]);
 
   const scheduleQuery = useMemo(
@@ -148,8 +149,8 @@ export const ExploreScreen: React.FC = () => {
         if (!trimmed) {
           setSearchCursor(undefined);
           setSearchHasMore(false);
-          setExploreNextOffset(0);
-          void loadExplore(0, false);
+          setExploreNextPageToken(undefined);
+          void loadExplore(undefined, false);
           return;
         }
         void loadSearch(trimmed, undefined, false);
@@ -169,8 +170,8 @@ export const ExploreScreen: React.FC = () => {
     if (query.trim()) {
       void loadSearch(query.trim(), undefined, false);
     } else {
-      setExploreNextOffset(0);
-      void loadExplore(0, false);
+      setExploreNextPageToken(undefined);
+      void loadExplore(undefined, false);
     }
   };
 
@@ -182,7 +183,7 @@ export const ExploreScreen: React.FC = () => {
       return;
     }
     if (!exploreHasMore) return;
-    void loadExplore(exploreNextOffset, true);
+    void loadExplore(exploreNextPageToken, true);
   };
 
   const renderItem = useCallback(

@@ -1,4 +1,4 @@
-import type { ApiClient, ApiResponse } from "@/auth/api-client";
+import type { ApiClient } from "@/auth/api-client";
 import { getApiClient } from "@/auth/api-client";
 import type { User } from "@/auth/user.model";
 import { mapUser, mergeUserProfile } from "@/auth/user.model";
@@ -7,25 +7,30 @@ export class UserApi {
   constructor(private apiClient: ApiClient) {}
 
   async getUsers(params?: {
-    page?: number;
-    limit?: number;
+    page_size?: number;
+    page_token?: string;
     search?: string;
-  }): Promise<ApiResponse> {
+  }): Promise<{ users: unknown[]; next_page_token?: string }> {
     const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append("page", params.page.toString());
-    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.page_size)
+      queryParams.append("page_size", params.page_size.toString());
+    if (params?.page_token) queryParams.append("page_token", params.page_token);
     if (params?.search) queryParams.append("search", params.search);
 
     const endpoint = `/users${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
     return this.apiClient.get(endpoint);
   }
 
-  async getUserById(userId: string): Promise<ApiResponse> {
-    return this.apiClient.get(`/users/${userId}`);
+  async getUserById(userId: string): Promise<User> {
+    return this.apiClient.get<User>(`/users/${userId}`);
   }
 
-  async searchUsers(query: string): Promise<ApiResponse> {
-    return this.apiClient.get(`/users/search?q=${encodeURIComponent(query)}`);
+  async searchUsers(
+    query: string,
+  ): Promise<{ users?: unknown[]; hits?: unknown[] }> {
+    return this.apiClient.get(
+      `/search?q=${encodeURIComponent(query)}&type=users&page_size=20`,
+    );
   }
 }
 
@@ -55,37 +60,31 @@ export class UsersService {
     limit?: number;
     search?: string;
   }): Promise<User[]> {
-    const response = await this.userApi.getUsers(params);
-    if (!response.success) {
-      throw new Error(response.message || "获取用户列表失败");
-    }
-    if (!response.data) {
-      return [];
-    }
-    const rows = response.data as User[];
+    const response = await this.userApi.getUsers({
+      page_size: params?.limit,
+      search: params?.search,
+    });
+    const rows = Array.isArray(response.users) ? response.users : [];
     return rows.map((user) => mapUnknownToUser(user));
   }
 
   async getUserById(userId: string): Promise<User | null> {
-    const response = await this.userApi.getUserById(userId);
-    if (!response.success) {
-      throw new Error(response.message || "获取用户详情失败");
-    }
-    if (!response.data) {
+    try {
+      const response = await this.userApi.getUserById(userId);
+      if (!response) return null;
+      return mapUnknownToUser(response);
+    } catch {
       return null;
     }
-    return mapUnknownToUser(response.data);
   }
 
   async searchUsers(query: string): Promise<User[]> {
     const response = await this.userApi.searchUsers(query);
-    if (!response.success) {
-      throw new Error(response.message || "搜索用户失败");
-    }
-    if (!response.data) {
-      return [];
-    }
-    const rows = response.data as User[];
+    const rows = Array.isArray(response.users)
+      ? response.users
+      : Array.isArray(response.hits)
+        ? response.hits
+        : [];
     return rows.map((user) => mapUnknownToUser(user));
   }
 

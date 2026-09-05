@@ -1,4 +1,4 @@
-import type { ApiClient, ApiResponse } from "@/auth/api-client";
+import type { ApiClient } from "@/auth/api-client";
 import { getApiClient } from "@/auth/api-client";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { ContactGroupMember } from "@whatschat/shared-types";
@@ -43,11 +43,11 @@ export function mapContact(
 export class ChatApi {
   constructor(private apiClient: ApiClient) {}
 
-  async getChats(): Promise<ApiResponse> {
-    return this.apiClient.get("/chats");
+  async getChats(): Promise<{ chats: unknown[] }> {
+    return this.apiClient.get<{ chats: unknown[] }>("/chats");
   }
 
-  async getChatById(chatId: string): Promise<ApiResponse> {
+  async getChatById(chatId: string): Promise<unknown> {
     return this.apiClient.get(`/chats/${chatId}`);
   }
 
@@ -55,19 +55,22 @@ export class ChatApi {
     participantIds: string[];
     type: "private" | "group";
     name?: string;
-  }): Promise<ApiResponse> {
+  }): Promise<unknown> {
     return this.apiClient.post("/chats", chatData);
   }
 
   async getChatMessages(
     chatId: string,
-    params?: { page?: number; limit?: number },
-  ): Promise<ApiResponse> {
+    params?: { page?: number; limit?: number; page_token?: string },
+  ): Promise<{ messages: unknown[]; next_page_token?: string }> {
     const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append("page", params.page.toString());
-    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    const pageSize = params?.limit ?? 50;
+    queryParams.append("page_size", pageSize.toString());
+    if (params?.page_token) {
+      queryParams.append("page_token", params.page_token);
+    }
 
-    const endpoint = `/messages/${chatId}${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+    const endpoint = `/chats/${chatId}/messages?${queryParams.toString()}`;
     return this.apiClient.get(endpoint);
   }
 
@@ -79,15 +82,12 @@ export class ChatApi {
       replyToMessageId?: string;
       mediaUrl?: string;
     },
-  ): Promise<ApiResponse> {
-    return this.apiClient.post("/messages", { ...messageData, chatId });
+  ): Promise<unknown> {
+    return this.apiClient.post(`/chats/${chatId}/messages`, messageData);
   }
 
-  async markMessageAsRead(
-    chatId: string,
-    messageId: string,
-  ): Promise<ApiResponse> {
-    return this.apiClient.post(`/chats/${chatId}/messages/${messageId}/read`);
+  async markMessageAsRead(_chatId: string, _messageId: string): Promise<void> {
+    return Promise.resolve();
   }
 }
 
@@ -277,11 +277,8 @@ export class ChatsService {
   async getChats(): Promise<Contact[]> {
     try {
       const response = await this.chatApi.getChats();
-      if (response.success && response.data) {
-        const rows = response.data as unknown[];
-        return rows.map((chat) => mapApiChatRowToContact(chat as ApiChatRow));
-      }
-      return [];
+      const rows = Array.isArray(response.chats) ? response.chats : [];
+      return rows.map((chat) => mapApiChatRowToContact(chat as ApiChatRow));
     } catch (error) {
       console.error("获取聊天列表失败:", error);
       return [];
@@ -291,10 +288,8 @@ export class ChatsService {
   async getChatById(chatId: string): Promise<Contact | null> {
     try {
       const response = await this.chatApi.getChatById(chatId);
-      if (response.success && response.data) {
-        return mapUnknownToContactCreate(response.data);
-      }
-      return null;
+      if (!response) return null;
+      return mapUnknownToContactCreate(response);
     } catch (error) {
       console.error("获取聊天详情失败:", error);
       return null;
@@ -308,10 +303,8 @@ export class ChatsService {
   }): Promise<Contact> {
     try {
       const response = await this.chatApi.createChat(data);
-      if (response.success && response.data) {
-        return mapUnknownToContactCreate(response.data);
-      }
-      throw new Error("创建聊天失败");
+      if (!response) throw new Error("创建聊天失败");
+      return mapUnknownToContactCreate(response);
     } catch (error) {
       console.error("创建聊天失败:", error);
       throw error;
@@ -320,17 +313,12 @@ export class ChatsService {
 
   async getChatMessages(
     chatId: string,
-    params?: { page?: number; limit?: number },
+    params?: { page?: number; limit?: number; page_token?: string },
   ): Promise<Message[]> {
     try {
       const response = await this.chatApi.getChatMessages(chatId, params);
-      if (response.success && response.data) {
-        const rows = response.data as unknown[];
-        return rows.map((msg) =>
-          mapApiMessageRowToMessage(msg as ApiMessageRow),
-        );
-      }
-      return [];
+      const rows = Array.isArray(response.messages) ? response.messages : [];
+      return rows.map((msg) => mapApiMessageRowToMessage(msg as ApiMessageRow));
     } catch (error) {
       console.error("获取聊天消息失败:", error);
       return [];
@@ -348,10 +336,8 @@ export class ChatsService {
   ): Promise<Message> {
     try {
       const response = await this.chatApi.sendMessage(chatId, messageData);
-      if (response.success && response.data) {
-        return mapUnknownToMessageCreate(response.data);
-      }
-      throw new Error("发送消息失败");
+      if (!response) throw new Error("发送消息失败");
+      return mapUnknownToMessageCreate(response);
     } catch (error) {
       console.error("发送消息失败:", error);
       throw error;
@@ -359,12 +345,7 @@ export class ChatsService {
   }
 
   async markMessageAsRead(chatId: string, messageId: string): Promise<void> {
-    try {
-      await this.chatApi.markMessageAsRead(chatId, messageId);
-    } catch (error) {
-      console.error("标记消息为已读失败:", error);
-      throw error;
-    }
+    await this.chatApi.markMessageAsRead(chatId, messageId);
   }
 }
 

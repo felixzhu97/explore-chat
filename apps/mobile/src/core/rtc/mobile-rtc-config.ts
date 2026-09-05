@@ -167,19 +167,19 @@ function createMediaAdapter(): RTCMediaAdapter {
 function createApiAdapter(): RTCApiAdapter {
   return {
     async createCall(body) {
-      const res = await apiClient.post<{ data: { id: string } }>(
-        "/calls",
-        body,
-      );
-      const data = res.data?.data;
+      const res = await apiClient.post<{
+        id: string;
+        participants?: unknown[];
+      }>("/calls", body);
+      const data = res.data;
       if (!data?.id) throw new Error("Failed to create call");
       return { callId: data.id };
     },
     answerCall(callId) {
-      return apiClient.put(`/calls/${callId}/answer`);
+      return apiClient.post(`/calls/${callId}:answer`);
     },
     async endCall(callId) {
-      await apiClient.put(`/calls/${callId}/end`).catch(() => {});
+      await apiClient.post(`/calls/${callId}:end`).catch(() => {});
     },
   };
 }

@@ -17,24 +17,20 @@ export interface ITextGenerateService {
 }
 
 export interface IImageGenerateService {
-  generate(
-    prompt: string,
-    negativePrompt?: string,
-  ): Promise<{ success: boolean; data?: { jobId: string } }>;
+  generate(prompt: string, negativePrompt?: string): Promise<{ jobId: string }>;
   getResult(jobId: string): Promise<{
-    success: boolean;
-    data?: { status: string; imageUrl?: string; error?: string };
+    status: string;
+    imageUrl?: string;
+    error?: string;
   }>;
 }
 
 export interface IVideoGenerateService {
-  generate(
-    prompt: string,
-    imageUrl?: string,
-  ): Promise<{ success: boolean; data?: { jobId: string } }>;
+  generate(prompt: string, imageUrl?: string): Promise<{ jobId: string }>;
   getResult(jobId: string): Promise<{
-    success: boolean;
-    data?: { status: string; videoUrl?: string; error?: string };
+    status: string;
+    videoUrl?: string;
+    error?: string;
   }>;
 }
 
@@ -42,17 +38,11 @@ export interface IVoiceGenerateService {
   generate(
     prompt: string,
     targetLang?: VoiceGenTargetLanguage,
-  ): Promise<{
-    success: boolean;
-    data?: { audioUrl: string; text?: string };
-  }>;
+  ): Promise<{ audioUrl: string; text?: string }>;
   translate(
     text: string,
     targetLang: VoiceTranslateTargetLanguage,
-  ): Promise<{
-    success: boolean;
-    data?: { translatedText: string };
-  }>;
+  ): Promise<{ translatedText: string }>;
 }
 
 export interface FollowListItem {
@@ -66,11 +56,11 @@ export interface IFollowListService {
   getFollowers(
     userId: string,
     limit: number,
-    pageState?: string,
-  ): Promise<{ list: FollowListItem[]; pageState?: string }>;
+    pageToken?: string,
+  ): Promise<{ list: FollowListItem[]; nextPageToken?: string }>;
   getFollowing(
     userId: string,
     limit: number,
-    pageState?: string,
-  ): Promise<{ list: FollowListItem[]; pageState?: string }>;
+    pageToken?: string,
+  ): Promise<{ list: FollowListItem[]; nextPageToken?: string }>;
 }

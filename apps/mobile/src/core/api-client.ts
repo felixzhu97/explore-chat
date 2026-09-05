@@ -16,6 +16,11 @@ export interface HttpClient {
     body?: unknown,
     config?: unknown,
   ): Promise<HttpResult<T>>;
+  patch<T = unknown>(
+    url: string,
+    body?: unknown,
+    config?: unknown,
+  ): Promise<HttpResult<T>>;
   delete<T = unknown>(url: string, config?: unknown): Promise<HttpResult<T>>;
 }
 
@@ -27,6 +32,10 @@ export function createHttpClientFromAxios(instance: AxiosInstance): HttpClient {
       instance.post(url, body, config as never).then((r) => ({ data: r.data })),
     put: (url, body, config) =>
       instance.put(url, body, config as never).then((r) => ({ data: r.data })),
+    patch: (url, body, config) =>
+      instance
+        .patch(url, body, config as never)
+        .then((r) => ({ data: r.data })),
     delete: (url, config) =>
       instance.delete(url, config as never).then((r) => ({ data: r.data })),
   };

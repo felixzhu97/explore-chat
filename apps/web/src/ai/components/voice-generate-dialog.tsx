@@ -290,12 +290,12 @@ export function VoiceGenerateDialog({
       );
       setStatus("");
       setIsSubmitting(false);
-      if (!res.success || !res.data?.audioUrl) {
+      if (!res?.audioUrl) {
         setError("生成失败");
         return;
       }
-      setAudioUrl(res.data.audioUrl);
-      if (res.data.text) setGeneratedText(res.data.text);
+      setAudioUrl(res.audioUrl);
+      if (res.text) setGeneratedText(res.text);
       onTrackGenerateSuccess?.();
     } catch (e) {
       setStatus("");
@@ -310,7 +310,7 @@ export function VoiceGenerateDialog({
     setTranslatedText("");
     try {
       const res = await service.translate(generatedText.trim(), lang);
-      const raw = res.success ? res.data?.translatedText : undefined;
+      const raw = res?.translatedText;
       const value =
         typeof raw === "string"
           ? raw

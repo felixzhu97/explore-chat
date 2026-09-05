@@ -10,15 +10,11 @@ export class VisionApi {
   async suggestTags(file: File): Promise<SuggestTagsResponse> {
     const formData = new FormData();
     formData.append("file", file, file.name || "image");
-    const res = await this.apiClient.upload<
-      SuggestTagsResponse | { data?: { labels?: string[] } }
-    >("/vision/suggest-tags", formData);
-    const raw = res as { data?: { labels?: string[] }; labels?: string[] };
-    const labels = Array.isArray(raw?.data?.labels)
-      ? raw.data.labels
-      : Array.isArray(raw?.labels)
-        ? raw.labels
-        : [];
+    const res = await this.apiClient.upload<SuggestTagsResponse>(
+      "/vision/suggest-tags",
+      formData,
+    );
+    const labels = Array.isArray(res?.labels) ? res.labels : [];
     return { labels };
   }
 }

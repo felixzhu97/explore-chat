@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { FeedApi } from "@/feed/feed.api";
 import type { ApiClient } from "@/auth/api-client";
-import type { ApiResponse } from "@/auth/api-client";
 
 describe("FeedApi", () => {
   let adapter: FeedApi;
@@ -25,11 +24,9 @@ describe("FeedApi", () => {
   describe("uploadMedia", () => {
     it("should upload media file with posts folder", async () => {
       const mockResponse = {
-        data: {
-          url: "http://example.com/file.jpg",
-          mimeType: "image/jpeg",
-          size: 1024,
-        },
+        url: "http://example.com/file.jpg",
+        mimeType: "image/jpeg",
+        size: 1024,
       };
       (mockApiClient.upload as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
@@ -46,11 +43,9 @@ describe("FeedApi", () => {
 
     it("should upload media file with covers folder", async () => {
       const mockResponse = {
-        data: {
-          url: "http://example.com/cover.jpg",
-          mimeType: "image/jpeg",
-          size: 2048,
-        },
+        url: "http://example.com/cover.jpg",
+        mimeType: "image/jpeg",
+        size: 2048,
       };
       (mockApiClient.upload as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
@@ -142,7 +137,7 @@ describe("FeedApi", () => {
     it("should fetch feed with pagination", async () => {
       const mockResponse = {
         entries: [{ postId: "1" }, { postId: "2" }],
-        pageState: "next-page",
+        next_page_token: "next-page",
       };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
@@ -150,7 +145,9 @@ describe("FeedApi", () => {
 
       const result = await adapter.getFeed(24);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith("/posts/feed?limit=24");
+      expect(mockApiClient.get).toHaveBeenCalledWith(
+        "/posts/feed?page_size=24",
+      );
       expect(result.entries).toBeDefined();
     });
 
@@ -166,7 +163,7 @@ describe("FeedApi", () => {
     });
 
     it("should include pageState param when provided", async () => {
-      const mockResponse = { entries: [], pageState: "cursor" };
+      const mockResponse = { entries: [], next_page_token: "cursor" };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -174,14 +171,14 @@ describe("FeedApi", () => {
       await adapter.getFeed(20, "cursor");
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        "/posts/feed?limit=20&pageState=cursor",
+        "/posts/feed?page_size=20&page_token=cursor",
       );
     });
   });
 
   describe("getExplore", () => {
     it("should fetch explore with default params", async () => {
-      const mockResponse = { entries: [{ postId: "1" }], total: 100 };
+      const mockResponse = { entries: [{ postId: "1" }], total_size: 100 };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -189,7 +186,7 @@ describe("FeedApi", () => {
       const result = await adapter.getExplore();
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        "/posts/explore?limit=20&offset=0",
+        "/posts/explore?page_size=20",
       );
       expect(result.total).toBeDefined();
     });
@@ -203,7 +200,7 @@ describe("FeedApi", () => {
       await adapter.getExplore(10, 20);
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        "/posts/explore?limit=10&offset=20",
+        "/posts/explore?page_size=10&page_token=20",
       );
     });
 
@@ -221,7 +218,7 @@ describe("FeedApi", () => {
 
   describe("getPost", () => {
     it("should fetch single post by id", async () => {
-      const mockResponse = { data: { postId: "123", caption: "Test post" } };
+      const mockResponse = { postId: "123", caption: "Test post" };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -235,7 +232,10 @@ describe("FeedApi", () => {
 
   describe("getPostsByUser", () => {
     it("should fetch user posts with pagination", async () => {
-      const mockResponse = { posts: [{ postId: "1" }], pageState: "next" };
+      const mockResponse = {
+        posts: [{ postId: "1" }],
+        next_page_token: "next",
+      };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -243,7 +243,7 @@ describe("FeedApi", () => {
       const result = await adapter.getPostsByUser("user123", 24);
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        "/posts/user/user123?limit=24",
+        "/posts/user/user123?page_size=24",
       );
       expect(result.posts).toHaveLength(1);
     });
@@ -268,19 +268,19 @@ describe("FeedApi", () => {
 
       await adapter.likePost("post123");
 
-      expect(mockApiClient.post).toHaveBeenCalledWith("/posts/post123/like");
+      expect(mockApiClient.post).toHaveBeenCalledWith("/posts/post123:like");
     });
   });
 
   describe("unlikePost", () => {
-    it("should call delete to unlike a post", async () => {
-      (mockApiClient.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        success: true,
-      });
+    it("should call post to unlike a post", async () => {
+      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+        undefined,
+      );
 
       await adapter.unlikePost("post123");
 
-      expect(mockApiClient.delete).toHaveBeenCalledWith("/posts/post123/like");
+      expect(mockApiClient.post).toHaveBeenCalledWith("/posts/post123:unlike");
     });
   });
 
@@ -292,26 +292,28 @@ describe("FeedApi", () => {
 
       await adapter.savePost("post123");
 
-      expect(mockApiClient.post).toHaveBeenCalledWith("/posts/post123/save");
+      expect(mockApiClient.post).toHaveBeenCalledWith("/posts/post123:save");
     });
   });
 
   describe("unsavePost", () => {
-    it("should call delete to unsave a post", async () => {
-      (mockApiClient.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        success: true,
-      });
+    it("should call post to unsave a post", async () => {
+      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+        undefined,
+      );
 
       await adapter.unsavePost("post123");
 
-      expect(mockApiClient.delete).toHaveBeenCalledWith("/posts/post123/save");
+      expect(mockApiClient.post).toHaveBeenCalledWith("/posts/post123:unsave");
     });
   });
 
   describe("createPost", () => {
     it("should create post with caption and type", async () => {
       const mockResponse = {
-        data: { postId: "new-post", userId: "user1", createdAt: "2024-01-01" },
+        postId: "new-post",
+        userId: "user1",
+        createdAt: "2024-01-01",
       };
       (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
@@ -330,7 +332,7 @@ describe("FeedApi", () => {
     });
 
     it("should include mediaUrls when provided", async () => {
-      const mockResponse = { data: { postId: "new-post" } };
+      const mockResponse = { postId: "new-post" };
       (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -348,7 +350,7 @@ describe("FeedApi", () => {
     });
 
     it("should not include empty mediaUrls", async () => {
-      const mockResponse = { data: { postId: "new-post" } };
+      const mockResponse = { postId: "new-post" };
       (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -364,7 +366,7 @@ describe("FeedApi", () => {
     });
 
     it("should include coverUrl when provided", async () => {
-      const mockResponse = { data: { postId: "new-post" } };
+      const mockResponse = { postId: "new-post" };
       (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -387,15 +389,15 @@ describe("FeedApi", () => {
 
   describe("getComments", () => {
     it("should fetch comments for a post", async () => {
-      const mockResponse = { data: [{ id: "1", content: "Great post!" }] };
+      const mockResponse = { comments: [{ id: "1", content: "Great post!" }] };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
 
-      const result = await adapter.getComments("post123", 1, 20);
+      const result = await adapter.getComments("post123", 20);
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        "/posts/post123/comments?page=1&limit=20",
+        "/posts/post123/comments?page_size=20",
       );
       expect(result).toHaveLength(1);
     });
@@ -406,7 +408,7 @@ describe("FeedApi", () => {
         mockResponse,
       );
 
-      const result = await adapter.getComments("post123", 1, 20);
+      const result = await adapter.getComments("post123", 20);
 
       expect(result).toEqual([]);
     });
@@ -414,7 +416,7 @@ describe("FeedApi", () => {
 
   describe("addComment", () => {
     it("should add a comment to a post", async () => {
-      const mockResponse = { data: { id: "comment123" } };
+      const mockResponse = { id: "comment123" };
       (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -429,7 +431,7 @@ describe("FeedApi", () => {
     });
 
     it("should include parentId for replies", async () => {
-      const mockResponse = { data: { id: "reply123" } };
+      const mockResponse = { id: "reply123" };
       (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -454,20 +456,20 @@ describe("FeedApi", () => {
 
       await adapter.followUser("user123");
 
-      expect(mockApiClient.post).toHaveBeenCalledWith("/users/user123/follow");
+      expect(mockApiClient.post).toHaveBeenCalledWith("/users/user123:follow");
     });
   });
 
   describe("unfollowUser", () => {
-    it("should call delete to unfollow a user", async () => {
-      (mockApiClient.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        success: true,
-      });
+    it("should call post to unfollow a user", async () => {
+      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+        undefined,
+      );
 
       await adapter.unfollowUser("user123");
 
-      expect(mockApiClient.delete).toHaveBeenCalledWith(
-        "/users/user123/follow",
+      expect(mockApiClient.post).toHaveBeenCalledWith(
+        "/users/user123:unfollow",
       );
     });
   });
@@ -475,7 +477,7 @@ describe("FeedApi", () => {
   describe("checkFollowingUsers", () => {
     it("should check following status for multiple users", async () => {
       const mockResponse = {
-        data: { data: [{ userId: "1", isFollowing: true }] },
+        results: [{ userId: "1", isFollowing: true }],
       };
       (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
@@ -484,7 +486,7 @@ describe("FeedApi", () => {
       const result = await adapter.checkFollowingUsers(["1", "2"]);
 
       expect(mockApiClient.post).toHaveBeenCalledWith(
-        "/users/following/check",
+        "/users/following:check",
         { userIds: ["1", "2"] },
       );
       expect(result).toHaveLength(1);
@@ -493,7 +495,7 @@ describe("FeedApi", () => {
 
   describe("search", () => {
     it("should search for users", async () => {
-      const mockResponse = { data: { hits: [{ id: "1" }], total: 10 } };
+      const mockResponse = { hits: [{ id: "1" }], total_size: 10 };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -501,14 +503,14 @@ describe("FeedApi", () => {
       const result = await adapter.search("test", "users", 20);
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        "/search?q=test&type=users&limit=20",
+        "/search?q=test&type=users&page_size=20",
       );
       expect(result.hits).toHaveLength(1);
       expect(result.total).toBe(10);
     });
 
     it("should include cursor for pagination", async () => {
-      const mockResponse = { data: { hits: [], nextCursor: "cursor123" } };
+      const mockResponse = { hits: [], next_page_token: "cursor123" };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -516,7 +518,7 @@ describe("FeedApi", () => {
       const result = await adapter.search("test", "posts", 20, "cursor123");
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        "/search?q=test&type=posts&limit=20&cursor=cursor123",
+        "/search?q=test&type=posts&page_size=20&page_token=cursor123",
       );
       expect(result.nextCursor).toBe("cursor123");
     });
@@ -535,7 +537,9 @@ describe("FeedApi", () => {
 
   describe("getSuggestions", () => {
     it("should fetch user suggestions", async () => {
-      const mockResponse = { data: [{ id: "1", username: "user1" }] };
+      const mockResponse = {
+        users: [{ id: "1", username: "user1" }],
+      };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -543,7 +547,7 @@ describe("FeedApi", () => {
       const result = await adapter.getSuggestions(10);
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        "/users/suggestions?limit=10",
+        "/users/suggestions?page_size=10",
       );
       expect(result).toHaveLength(1);
     });
@@ -563,9 +567,9 @@ describe("FeedApi", () => {
   describe("getFollowers", () => {
     it("should fetch followers with pagination", async () => {
       const mockResponse = {
-        data: [{ id: "1", username: "user1" }],
-        total: 100,
-        pageState: "next",
+        users: [{ id: "1", username: "user1" }],
+        total_size: 100,
+        next_page_token: "next",
       };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
@@ -574,14 +578,14 @@ describe("FeedApi", () => {
       const result = await adapter.getFollowers("user123", 20);
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        "/users/user123/followers?limit=20",
+        "/users/user123/followers?page_size=20",
       );
       expect(result.list).toHaveLength(1);
       expect(result.total).toBe(100);
     });
 
     it("should return empty list for invalid response", async () => {
-      const mockResponse = { data: null };
+      const mockResponse = { users: null };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -596,8 +600,8 @@ describe("FeedApi", () => {
   describe("getFollowing", () => {
     it("should fetch following with pagination", async () => {
       const mockResponse = {
-        data: [{ id: "2", username: "user2" }],
-        total: 50,
+        users: [{ id: "2", username: "user2" }],
+        total_size: 50,
       };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
@@ -606,7 +610,7 @@ describe("FeedApi", () => {
       const result = await adapter.getFollowing("user123", 20);
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        "/users/user123/following?limit=20",
+        "/users/user123/following?page_size=20",
       );
       expect(result.list).toHaveLength(1);
     });
@@ -614,19 +618,26 @@ describe("FeedApi", () => {
 
   describe("getNotifications", () => {
     it("should fetch notifications", async () => {
-      const mockResponse = { data: { items: [{ id: "1", type: "like" }] } };
+      const mockResponse = {
+        notifications: [{ id: "1", type: "like" }],
+      };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
 
       const result = await adapter.getNotifications(20);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith("/notifications?limit=20");
+      expect(mockApiClient.get).toHaveBeenCalledWith(
+        "/notifications?page_size=20",
+      );
       expect(result.items).toHaveLength(1);
     });
 
     it("should include cursor for pagination", async () => {
-      const mockResponse = { data: { items: [], nextCursor: "cursor123" } };
+      const mockResponse = {
+        notifications: [],
+        next_page_token: "cursor123",
+      };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -634,13 +645,13 @@ describe("FeedApi", () => {
       const result = await adapter.getNotifications(20, "cursor123");
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        "/notifications?limit=20&cursor=cursor123",
+        "/notifications?page_size=20&page_token=cursor123",
       );
       expect(result.nextCursor).toBe("cursor123");
     });
 
     it("should not include empty cursor", async () => {
-      const mockResponse = { data: { items: [], nextCursor: "" } };
+      const mockResponse = { notifications: [], next_page_token: "" };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -653,14 +664,14 @@ describe("FeedApi", () => {
 
   describe("markNotificationRead", () => {
     it("should mark notification as read", async () => {
-      (mockApiClient.patch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        success: true,
-      });
+      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+        undefined,
+      );
 
       await adapter.markNotificationRead("notif123");
 
-      expect(mockApiClient.patch).toHaveBeenCalledWith(
-        "/notifications/notif123/read",
+      expect(mockApiClient.post).toHaveBeenCalledWith(
+        "/notifications/notif123:read",
         {},
       );
     });
@@ -674,9 +685,12 @@ describe("FeedApi", () => {
 
       await adapter.markNotificationsRead(["1", "2", "3"]);
 
-      expect(mockApiClient.post).toHaveBeenCalledWith("/notifications/read", {
-        ids: ["1", "2", "3"],
-      });
+      expect(mockApiClient.post).toHaveBeenCalledWith(
+        "/notifications/read:batch",
+        {
+          ids: ["1", "2", "3"],
+        },
+      );
     });
   });
 
@@ -689,7 +703,7 @@ describe("FeedApi", () => {
       await adapter.markAllNotificationsRead();
 
       expect(mockApiClient.post).toHaveBeenCalledWith(
-        "/notifications/read-all",
+        "/notifications/read:all",
         {},
       );
     });
@@ -697,9 +711,7 @@ describe("FeedApi", () => {
 
   describe("getProfileStats", () => {
     it("should fetch profile statistics", async () => {
-      const mockResponse = {
-        data: { followersCount: 100, followingCount: 50 },
-      };
+      const mockResponse = { followersCount: 100, followingCount: 50 };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );

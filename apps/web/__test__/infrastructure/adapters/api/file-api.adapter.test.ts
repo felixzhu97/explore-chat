@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { FileApi } from "@/ai/apis/file.api";
 import type { ApiClient } from "@/auth/api-client";
-import type { ApiResponse } from "@/auth/api-client";
 
 describe("FileApi", () => {
   let adapter: FileApi;
@@ -24,10 +23,7 @@ describe("FileApi", () => {
 
   describe("uploadFile", () => {
     it("should upload avatar file", async () => {
-      const mockResponse: ApiResponse = {
-        success: true,
-        data: { url: "http://example.com/avatar.jpg" },
-      };
+      const mockResponse = { url: "http://example.com/avatar.jpg" };
       (mockApiClient.upload as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -45,10 +41,7 @@ describe("FileApi", () => {
     });
 
     it("should upload message file", async () => {
-      const mockResponse: ApiResponse = {
-        success: true,
-        data: { url: "http://example.com/file.pdf" },
-      };
+      const mockResponse = { url: "http://example.com/file.pdf" };
       (mockApiClient.upload as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -63,10 +56,7 @@ describe("FileApi", () => {
     });
 
     it("should upload status file", async () => {
-      const mockResponse: ApiResponse = {
-        success: true,
-        data: { url: "http://example.com/status.jpg" },
-      };
+      const mockResponse = { url: "http://example.com/status.jpg" };
       (mockApiClient.upload as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -83,30 +73,24 @@ describe("FileApi", () => {
 
   describe("deleteFile", () => {
     it("should delete a file by ID", async () => {
-      const mockResponse: ApiResponse = { success: true };
       (mockApiClient.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        mockResponse,
+        undefined,
       );
 
       const result = await adapter.deleteFile("file-123");
 
       expect(mockApiClient.delete).toHaveBeenCalledWith("/files/file-123");
-      expect(result).toEqual(mockResponse);
+      expect(result).toBeUndefined();
     });
 
-    it("should return error response for non-existent file", async () => {
-      const mockResponse: ApiResponse = {
-        success: false,
-        error: "File not found",
-      };
-      (mockApiClient.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        mockResponse,
+    it("should propagate delete errors", async () => {
+      (mockApiClient.delete as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+        new Error("File not found"),
       );
 
-      const result = await adapter.deleteFile("non-existent");
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe("File not found");
+      await expect(adapter.deleteFile("non-existent")).rejects.toThrow(
+        "File not found",
+      );
     });
   });
 });

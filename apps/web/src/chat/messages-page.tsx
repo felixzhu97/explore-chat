@@ -284,8 +284,7 @@ export function MessagesPage() {
     aiApi
       .postChat(recent)
       .then((res) => {
-        if (res.success && res.data?.content)
-          handleMessageChange(res.data.content);
+        if (res?.content) handleMessageChange(res.content);
       })
       .catch(() => {});
   };

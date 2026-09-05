@@ -552,8 +552,7 @@ export function SettingsPage({ onBack, onProfileClick }: SettingsPageProps) {
     try {
       setUploadingAvatar(true);
       const uploadResponse = await fileApi.current.uploadFile(file, "avatar");
-      const avatarUrl = (uploadResponse.data as { url?: string } | undefined)
-        ?.url;
+      const avatarUrl = uploadResponse?.url;
       if (!avatarUrl) {
         throw new Error("Avatar upload failed");
       }

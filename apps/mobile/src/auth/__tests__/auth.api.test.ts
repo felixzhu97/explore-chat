@@ -36,17 +36,13 @@ describe("AuthApi", () => {
   describe("login", () => {
     const mockSuccessResponse = {
       data: {
-        success: true,
-        message: "Login successful",
-        data: {
-          user: {
-            id: "user-1",
-            email: "test@example.com",
-            username: "testuser",
-          },
-          token: "access-token-123",
-          refreshToken: "refresh-token-456",
+        user: {
+          id: "user-1",
+          email: "test@example.com",
+          username: "testuser",
         },
+        token: "access-token-123",
+        refreshToken: "refresh-token-456",
       },
     };
 
@@ -71,39 +67,21 @@ describe("AuthApi", () => {
       });
     });
 
-    it("should throw error when response success is false", async () => {
+    it("should throw error when user is missing", async () => {
       mockHttpClient.post.mockResolvedValue({
-        data: { success: false, message: "Invalid credentials" },
+        data: { token: "token-only" },
       });
 
       await expect(adapter.login("test@test.com", "wrong")).rejects.toThrow(
-        "Invalid credentials",
-      );
-    });
-
-    it("should throw error with default message when success is true but data is missing", async () => {
-      mockHttpClient.post.mockResolvedValue({
-        data: { success: true, message: "" },
-      });
-
-      await expect(adapter.login("test@test.com", "password")).rejects.toThrow(
         "Login failed",
       );
     });
 
-    it("should throw error when data.data is null", async () => {
+    it("should throw error when token is missing", async () => {
       mockHttpClient.post.mockResolvedValue({
-        data: { success: true, data: null },
-      });
-
-      await expect(adapter.login("test@test.com", "password")).rejects.toThrow(
-        "Login failed",
-      );
-    });
-
-    it("should use default error message when message is empty", async () => {
-      mockHttpClient.post.mockResolvedValue({
-        data: { success: false, message: "" },
+        data: {
+          user: { id: "user-1", email: "test@test.com", username: "test" },
+        },
       });
 
       await expect(adapter.login("test@test.com", "password")).rejects.toThrow(
@@ -127,8 +105,6 @@ describe("AuthApi", () => {
       username: "newuser",
     };
     const mockRegisterResponse = {
-      success: true,
-      message: "Success",
       data: {
         user: { id: "user-2", email: "new@test.com", username: "newuser" },
         token: "new-token",
@@ -137,15 +113,19 @@ describe("AuthApi", () => {
     };
 
     it("should return auth session on successful registration", async () => {
-      mockHttpClient.post.mockResolvedValue({ data: mockRegisterResponse });
+      mockHttpClient.post.mockResolvedValue(mockRegisterResponse);
 
       const result = await adapter.register(registerPayload);
 
-      expect(result).toEqual(mockRegisterResponse.data);
+      expect(result).toEqual({
+        user: mockRegisterResponse.data.user,
+        token: "new-token",
+        refreshToken: "new-refresh",
+      });
     });
 
     it("should call http.post with register payload", async () => {
-      mockHttpClient.post.mockResolvedValue({ data: mockRegisterResponse });
+      mockHttpClient.post.mockResolvedValue(mockRegisterResponse);
 
       await adapter.register(registerPayload);
 
@@ -155,20 +135,8 @@ describe("AuthApi", () => {
       );
     });
 
-    it("should throw error when success is false", async () => {
-      mockHttpClient.post.mockResolvedValue({
-        data: { success: false, message: "Email already exists" },
-      });
-
-      await expect(adapter.register(registerPayload)).rejects.toThrow(
-        "Email already exists",
-      );
-    });
-
-    it("should throw error with default message when success is true but data is missing", async () => {
-      mockHttpClient.post.mockResolvedValue({
-        data: { success: true, message: "" },
-      });
+    it("should throw error when user or token missing", async () => {
+      mockHttpClient.post.mockResolvedValue({ data: { user: null } });
 
       await expect(adapter.register(registerPayload)).rejects.toThrow(
         "Register failed",

@@ -429,7 +429,7 @@ export function useExplore(currentUserId: string | undefined) {
     setLoading(true);
     setError(null);
     try {
-      const { entries } = await api.getExplore(20, 0);
+      const { entries } = await api.getExplore(20);
       const details = await Promise.all(
         entries.map((e: { postId: string }) =>
           api.getPost(e.postId).catch(() => null),
@@ -525,7 +525,7 @@ export function usePostComments(postId: string | null) {
     if (!postId) return;
     setLoading(true);
     try {
-      const list = await api.getComments(postId, 1, 50);
+      const list = await api.getComments(postId, 50);
       setComments(
         list.map(
           (c: {

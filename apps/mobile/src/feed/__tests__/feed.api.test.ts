@@ -167,7 +167,7 @@ describe("FeedApi", () => {
     it("returns suggestions with required fields", async () => {
       mockHttpClient.get.mockResolvedValue({
         data: {
-          data: [
+          users: [
             {
               id: "u1",
               username: "user1",
@@ -190,7 +190,7 @@ describe("FeedApi", () => {
     it("filters out entries without id", async () => {
       mockHttpClient.get.mockResolvedValue({
         data: {
-          data: [
+          users: [
             { id: "u1", username: "user1", avatar: "a.jpg" },
             { username: "no-id", avatar: "b.jpg" },
           ],
@@ -214,7 +214,7 @@ describe("FeedApi", () => {
 
     it("returns null when postId is missing", async () => {
       mockHttpClient.get.mockResolvedValue({
-        data: { data: { caption: "No ID" } },
+        data: { caption: "No ID" },
       });
 
       const result = await adapter.getPostById("post-1");
@@ -225,12 +225,10 @@ describe("FeedApi", () => {
     it("returns mapped post when found", async () => {
       mockHttpClient.get.mockResolvedValue({
         data: {
-          data: {
-            postId: "post-1",
-            userId: "u1",
-            caption: "Test",
-            createdAt: "2024-01-01",
-          },
+          postId: "post-1",
+          userId: "u1",
+          caption: "Test",
+          createdAt: "2024-01-01",
         },
       });
 
@@ -243,11 +241,9 @@ describe("FeedApi", () => {
     it("handles numeric createdAt", async () => {
       mockHttpClient.get.mockResolvedValue({
         data: {
-          data: {
-            postId: "post-1",
-            userId: "u1",
-            createdAt: 1704067200,
-          },
+          postId: "post-1",
+          userId: "u1",
+          createdAt: 1704067200,
         },
       });
 
@@ -269,7 +265,7 @@ describe("FeedApi", () => {
     it("returns empty when no entries", async () => {
       mockHttpClient.get.mockResolvedValue({ data: {} });
 
-      const result = await adapter.getExplore(20, 0);
+      const result = await adapter.getExplore(20);
 
       expect(result.posts).toEqual([]);
       expect(result.total).toBe(0);
@@ -282,11 +278,11 @@ describe("FeedApi", () => {
             { postId: "post-1", isSponsored: true },
             { postId: "post-2", isSponsored: false },
           ],
-          total: 10,
+          total_size: 10,
         },
       });
 
-      const result = await adapter.getExplore(20, 0);
+      const result = await adapter.getExplore(20);
 
       expect(result.fetchedEntryCount).toBe(2);
     });
@@ -300,7 +296,7 @@ describe("FeedApi", () => {
     });
 
     it("returns empty when no hits", async () => {
-      mockHttpClient.get.mockResolvedValue({ data: { data: {} } });
+      mockHttpClient.get.mockResolvedValue({ data: { hits: [] } });
 
       const result = await adapter.searchPosts("query", 10);
 
@@ -319,9 +315,7 @@ describe("FeedApi", () => {
 
     it("returns profile when found", async () => {
       mockHttpClient.get.mockResolvedValue({
-        data: {
-          data: { id: "user-1", username: "testuser", bio: "Test bio" },
-        },
+        data: { id: "user-1", username: "testuser", bio: "Test bio" },
       });
 
       const result = await adapter.getUserProfile("user-1");
@@ -354,7 +348,7 @@ describe("FeedApi", () => {
           posts: [
             { postId: "post-1", userId: "user-1", createdAt: "2024-01-01" },
           ],
-          pageState: "userCursor",
+          next_page_token: "userCursor",
         },
       });
 
@@ -364,13 +358,11 @@ describe("FeedApi", () => {
       expect(result.nextPageState).toBe("userCursor");
     });
 
-    it("handles numeric pageState", async () => {
+    it("handles numeric pageState token", async () => {
       mockHttpClient.get.mockResolvedValue({
         data: {
-          data: {
-            posts: [],
-            pageState: 123,
-          },
+          posts: [],
+          next_page_token: "123",
         },
       });
 

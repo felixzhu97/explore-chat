@@ -9,12 +9,14 @@ export class MessageApi {
   constructor(private readonly http: HttpClient) {}
 
   async getMessages(chatId: string): Promise<Message[]> {
-    const { data } = await this.http.get<{ success: boolean; data: unknown[] }>(
-      `/messages/${chatId}`,
-      { params: { page: 1, limit: 50 } },
-    );
-    if (!data.success || !Array.isArray(data.data)) return [];
-    return data.data.map((m) =>
+    const { data } = await this.http.get<{
+      messages?: unknown[];
+      next_page_token?: string;
+    }>(`/chats/${chatId}/messages`, {
+      params: { page_size: 50 },
+    });
+    const rows = Array.isArray(data?.messages) ? data.messages : [];
+    return rows.map((m) =>
       mapServerMessagePayloadToMessage(
         m as Parameters<typeof mapServerMessagePayloadToMessage>[0],
       ),
@@ -27,16 +29,15 @@ export class MessageApi {
     type: string = "TEXT",
     clientMsgId?: string,
   ): Promise<Message> {
-    const { data } = await this.http.post<{ success: boolean; data: unknown }>(
-      "/messages",
+    const { data } = await this.http.post<unknown>(
+      `/chats/${chatId}/messages`,
       {
-        chatId,
         content,
         type,
         ...(clientMsgId != null && { clientMsgId }),
       },
     );
-    if (!data.success || !data.data) throw new Error("Send failed");
-    return mapServerMessagePayload(data.data as Record<string, unknown>);
+    if (!data) throw new Error("Send failed");
+    return mapServerMessagePayload(data as Record<string, unknown>);
   }
 }
