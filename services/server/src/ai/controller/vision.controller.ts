@@ -43,7 +43,7 @@ export class VisionController {
         new Blob([file.buffer], { type: file.mimetype }),
         file.originalname || "image",
       );
-      const url = `${config.vision.serviceUrl}/predict`;
+      const url = `${config.vision.serviceUrl}/api/v1/images:predict`;
       const controller = new AbortController();
       const timeout = setTimeout(
         () => controller.abort(),

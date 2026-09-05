@@ -18,7 +18,7 @@ export class VisionClientService {
     if (!this.config.vision.enabled || !this.config.vision.serviceUrl) {
       return [];
     }
-    const url = `${this.config.vision.serviceUrl}/predict`;
+    const url = `${this.config.vision.serviceUrl}/api/v1/images:predict`;
     const controller = new AbortController();
     const timeout = setTimeout(
       () => controller.abort(),
@@ -54,7 +54,7 @@ export class VisionClientService {
     ) {
       return [];
     }
-    const endpoint = `${this.config.vision.serviceUrl}/predict`;
+    const endpoint = `${this.config.vision.serviceUrl}/api/v1/images:predict`;
     const controller = new AbortController();
     const timeout = setTimeout(
       () => controller.abort(),
@@ -92,7 +92,7 @@ export class VisionClientService {
     ) {
       return { safe: true, categories: [] };
     }
-    const url = `${this.config.vision.serviceUrl}/moderate`;
+    const url = `${this.config.vision.serviceUrl}/api/v1/images:moderate`;
     const controller = new AbortController();
     const timeout = setTimeout(
       () => controller.abort(),
@@ -133,7 +133,7 @@ export class VisionClientService {
     ) {
       return { safe: true, categories: [] };
     }
-    const endpoint = `${this.config.vision.serviceUrl}/moderate`;
+    const endpoint = `${this.config.vision.serviceUrl}/api/v1/images:moderate`;
     const controller = new AbortController();
     const timeout = setTimeout(
       () => controller.abort(),
@@ -175,7 +175,7 @@ export class VisionClientService {
     ) {
       return { safe: true, categories: [] };
     }
-    const endpoint = `${this.config.vision.serviceUrl}/moderate-video`;
+    const endpoint = `${this.config.vision.serviceUrl}/api/v1/videos:moderate`;
     const controller = new AbortController();
     const timeoutMs = this.config.vision.timeoutMs * 3;
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
