@@ -4,7 +4,7 @@ import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { AiService } from "@/ai/service/ai.service";
 import type { Response } from "express";
 
-@ApiTags("AI")
+@ApiTags("ai")
 @Controller("ai")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
@@ -12,7 +12,7 @@ export class AiController {
   constructor(private readonly aiService: AiService) {}
 
   @Post("chat")
-  @ApiOperation({ summary: "AI 对话" })
+  @ApiOperation({ summary: "AI chat" })
   async chat(
     @Body()
     body: {
@@ -20,18 +20,17 @@ export class AiController {
       model?: string;
     },
   ) {
-    const result = await this.aiService.chat({
+    return this.aiService.chat({
       messages: body.messages.map((m) => ({
         role: m.role as "user" | "assistant" | "system",
         content: m.content,
       })),
       ...(body.model != null && { model: body.model }),
     });
-    return { success: true, data: result };
   }
 
   @Post("chat/stream")
-  @ApiOperation({ summary: "AI 对话流式" })
+  @ApiOperation({ summary: "AI chat stream" })
   async chatStream(
     @Body()
     body: { messages: { role: string; content: string }[]; model?: string },

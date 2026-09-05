@@ -4,8 +4,13 @@ import { Throttle, ThrottlerGuard } from "@nestjs/throttler";
 import { SearchScopes, type SearchScope } from "@whatschat/shared-types";
 import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { SearchService } from "@/search/service/search.service";
+import {
+  clampPageSize,
+  cursorFromPageToken,
+  nextCursorPageToken,
+} from "@/core/aip/page-token";
 
-@ApiTags("搜索")
+@ApiTags("search")
 @Controller("search")
 @UseGuards(JwtAuthGuard, ThrottlerGuard)
 @ApiBearerAuth()
@@ -14,28 +19,33 @@ export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 
   @Get()
-  @ApiOperation({ summary: "搜索用户/帖子/话题" })
+  @ApiOperation({ summary: "Search users, posts, or hashtags" })
   async search(
     @Query("q") q: string,
     @Query("type") type: SearchScope = SearchScopes.Posts,
-    @Query("limit") limit = "20",
-    @Query("cursor") cursor?: string,
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
   ) {
-    const limitNum = Math.min(parseInt(String(limit), 10) || 20, 100);
-    if (!q?.trim()) return { success: true, data: { hits: [] } };
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
+    if (!q?.trim()) return { hits: [] as unknown[] };
+
+    const cursor = cursorFromPageToken(pageToken);
     const data =
       type === SearchScopes.Users
-        ? await this.searchService.searchUsers(q.trim(), limitNum, cursor)
+        ? await this.searchService.searchUsers(q.trim(), pageSize, cursor)
         : type === SearchScopes.Hashtags
-          ? await this.searchService.searchHashtags(q.trim(), limitNum, cursor)
-          : await this.searchService.searchPosts(q.trim(), limitNum, cursor);
-    const payload: { hits: unknown[]; nextCursor?: string; total?: number } = {
-      hits: data.hits,
-    };
-    if (data.nextCursor != null) payload.nextCursor = data.nextCursor;
+          ? await this.searchService.searchHashtags(q.trim(), pageSize, cursor)
+          : await this.searchService.searchPosts(q.trim(), pageSize, cursor);
+
     const total =
       "total" in data ? (data as { total?: number }).total : undefined;
-    if (typeof total === "number") payload.total = total;
-    return { success: true, data: payload };
+
+    return {
+      hits: data.hits,
+      next_page_token: nextCursorPageToken(data.nextCursor),
+      ...(typeof total === "number" && { total_size: total }),
+    };
   }
 }

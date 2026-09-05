@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpException,
   HttpStatus,
   Param,
@@ -36,7 +37,6 @@ function checkChatRateLimit(userId: string): boolean {
 }
 
 function writeNormalizedSseLine(line: string, res: Response): void {
-  // explore-ai may emit `data:{...}` (no space) or `data: {...}`
   if (!line.startsWith("data:")) return;
   const payload = line.slice(5).trimStart().trimEnd();
   if (!payload) return;
@@ -106,7 +106,7 @@ async function pipeNormalizedSse(
   }
 }
 
-@ApiTags("AI")
+@ApiTags("ai")
 @Controller("ai/explore")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
@@ -114,7 +114,7 @@ export class ExploreAiController {
   constructor(private readonly exploreAiClient: ExploreAiClientService) {}
 
   @Post("chat/stream")
-  @ApiOperation({ summary: "Explore AI 流式对话（BFF 代理）" })
+  @ApiOperation({ summary: "Explore AI streaming chat (BFF proxy)" })
   async chatStream(
     @CurrentUser() user: { id: string },
     @Body()
@@ -151,66 +151,65 @@ export class ExploreAiController {
   }
 
   @Get("providers")
-  @ApiOperation({ summary: "Explore AI 提供商列表" })
+  @ApiOperation({ summary: "List Explore AI providers" })
   async listProviders(@CurrentUser() user: { id: string }) {
-    const data = await this.exploreAiClient.listProviders(user.id);
-    return { success: true, data };
+    const providers = await this.exploreAiClient.listProviders(user.id);
+    return Array.isArray(providers) ? { providers } : providers;
   }
 
   @Get("models")
-  @ApiOperation({ summary: "Explore AI 模型列表" })
+  @ApiOperation({ summary: "List Explore AI models" })
   async listModels(
     @CurrentUser() user: { id: string },
     @Query("provider") provider?: string,
   ) {
-    const data = await this.exploreAiClient.listModels(user.id, provider);
-    return { success: true, data };
+    const models = await this.exploreAiClient.listModels(user.id, provider);
+    return Array.isArray(models) ? { models } : models;
   }
 
   @Post("sessions")
-  @ApiOperation({ summary: "创建 Explore AI 会话" })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Create Explore AI session" })
   async createSession(
     @CurrentUser() user: { id: string },
     @Body() body: { title?: string },
   ) {
-    const data = await this.exploreAiClient.createSession(user.id, body);
-    return { success: true, data };
+    return this.exploreAiClient.createSession(user.id, body);
   }
 
   @Get("sessions")
-  @ApiOperation({ summary: "Explore AI 会话列表" })
+  @ApiOperation({ summary: "List Explore AI sessions" })
   async listSessions(@CurrentUser() user: { id: string }) {
-    const data = await this.exploreAiClient.listSessions(user.id);
-    return { success: true, data };
+    const sessions = await this.exploreAiClient.listSessions(user.id);
+    return Array.isArray(sessions) ? { sessions } : sessions;
   }
 
   @Get("sessions/:id")
-  @ApiOperation({ summary: "Explore AI 会话详情" })
+  @ApiOperation({ summary: "Get Explore AI session" })
   async getSession(
     @CurrentUser() user: { id: string },
     @Param("id") sessionId: string,
   ) {
-    const data = await this.exploreAiClient.getSession(user.id, sessionId);
-    return { success: true, data };
+    return this.exploreAiClient.getSession(user.id, sessionId);
   }
 
   @Get("sessions/:id/messages")
-  @ApiOperation({ summary: "Explore AI 会话消息" })
+  @ApiOperation({ summary: "List Explore AI session messages" })
   async getMessages(
     @CurrentUser() user: { id: string },
     @Param("id") sessionId: string,
   ) {
-    const data = await this.exploreAiClient.getMessages(user.id, sessionId);
-    return { success: true, data };
+    const messages = await this.exploreAiClient.getMessages(user.id, sessionId);
+    return Array.isArray(messages) ? { messages } : messages;
   }
 
   @Delete("sessions/:id")
-  @ApiOperation({ summary: "删除 Explore AI 会话" })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Delete Explore AI session" })
   async deleteSession(
     @CurrentUser() user: { id: string },
     @Param("id") sessionId: string,
   ) {
     await this.exploreAiClient.deleteSession(user.id, sessionId);
-    return { success: true };
   }
 }
