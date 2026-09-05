@@ -166,7 +166,7 @@ def run_image_job(job_id: str, prompt: str, negative_prompt: str):
         with jobs_lock:
             if job_id in image_jobs:
                 image_jobs[job_id]["status"] = "succeeded"
-                image_jobs[job_id]["imageUrl"] = f"{config.BASE_URL}/output/image/{job_id}.png"
+                image_jobs[job_id]["image_url"] = f"{config.BASE_URL}/output/image/{job_id}.png"
     except Exception as e:
         with jobs_lock:
             if job_id in image_jobs:
@@ -198,7 +198,7 @@ def run_video_job(job_id: str, prompt: str):
         with jobs_lock:
             if job_id in video_jobs:
                 video_jobs[job_id]["status"] = "succeeded"
-                video_jobs[job_id]["videoUrl"] = f"{config.BASE_URL}/output/video/{job_id}.mp4"
+                video_jobs[job_id]["video_url"] = f"{config.BASE_URL}/output/video/{job_id}.mp4"
     except Exception as e:
         with jobs_lock:
             if job_id in video_jobs:
