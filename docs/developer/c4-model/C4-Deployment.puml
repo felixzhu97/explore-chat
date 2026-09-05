@@ -25,12 +25,12 @@ Deployment_Node(dev_machine, "开发机", "macOS / Linux") {
   }
 
   Deployment_Node(node_procs, "Node 进程", "pnpm / turbo") {
-    Container(api, "API 服务", "NestJS", "HOST=0.0.0.0 PORT=3001")
+    Container(api, "API 服务", "Spring Boot", "HOST=0.0.0.0 PORT=9001")
     Container(metro, "Expo Metro（可选）", "Expo Go", ":8081")
   }
 
   Deployment_Node(data, "数据", "文件") {
-    ContainerDb(sqlite, "SQLite", "Prisma", "services/server/prisma/dev.db")
+    ContainerDb(sqlite, "SQLite", "Liquibase/JPA", "data/explore-chat (H2)")
     Container(uploads, "uploads/", "本地目录", "媒体文件")
     Container(qdrant_dir, "Qdrant path（可选）", "本地目录", "RAG services/rag/data/qdrant")
   }
@@ -43,8 +43,8 @@ Deployment_Node(dev_machine, "开发机", "macOS / Linux") {
   }
 }
 
-Rel(web, api, "REST / GraphQL / WS", "localhost:3001")
-Rel(metro, api, "REST / WS", "localhost:3001")
+Rel(web, api, "REST / Socket.IO", "localhost:9001")
+Rel(metro, api, "REST / WS", "localhost:9001")
 Rel(api, sqlite, "DATABASE_URL", "file:./dev.db")
 Rel(api, uploads, "UPLOAD_DIR")
 Rel(api, rec, "HTTP", "可选")

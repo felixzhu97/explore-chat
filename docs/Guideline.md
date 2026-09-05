@@ -4,13 +4,13 @@
 
 ExploreChat brings social connection into everyday life. Use it so people can share Posts, browse Feed and Reels, discover others in Explore, message in Chat, and place Calls—simply and beautifully.
 
-A social messaging product defines how people publish content, discover others, stay in conversation, and stay safe. Prefer one Nest API boundary, durable Preferred Terms, and real-time delivery that complements persisted history. This guideline describes how to design those experiences so people stay in control and integrations stay interoperable.
+A social messaging product defines how people publish content, discover others, stay in conversation, and stay safe. Prefer one API boundary (Spring Boot at the repo root), durable Preferred Terms, and real-time delivery that complements persisted history. This guideline describes how to design those experiences so people stay in control and integrations stay interoperable.
 
 ## Best practices
 
-**Keep Nest as the only client-facing API.**
+**Keep one client-facing API boundary.**
 
-Web, Mobile, and Admin obtain Feed, Chat, Call, Media, and AI capabilities through Nest `/api/v1` (REST, GraphQL, Socket.IO). Never call media-gen, vision, recommendation, RAG, or Explore AI from the client. Upstream credentials stay on the server.
+Web, Mobile, and Admin obtain Feed, Chat, Call, Media, and AI capabilities through Spring `/api/v1` (REST and Socket.IO). Never call media-gen, vision, recommendation, RAG, or Explore AI from the client. Upstream credentials stay on the server.
 
 **Keep people in control of conversation and publishing state.**
 
@@ -22,11 +22,11 @@ Message history, Call state, and personal Media stay inside authorized sessions.
 
 **Persist history; treat live delivery as complementary.**
 
-Socket.IO improves presence and latency. Nest Chat and Message storage remain the source of truth after reconnect—reconcile streamed events with durable reads so gaps do not look like silent data loss.
+Socket.IO improves presence and latency. Chat and Message storage on the API remain the source of truth after reconnect—reconcile streamed events with durable reads so gaps do not look like silent data loss.
 
 **Separate Call signaling from media.**
 
-Nest handles invite, ring, accept, and hangup. WebRTC carries audio and video. Give distinct feedback when signaling succeeds but media fails.
+The API handles invite, ring, accept, and hangup. WebRTC carries audio and video. Give distinct feedback when signaling succeeds but media fails.
 
 **Offer generative features only where they provide clear value.**
 
@@ -48,7 +48,7 @@ Feed, Post, Chat, Message, Call, Notification, and related terms come from the G
 
 ### Follow
 
-**Model Follow as an explicit social edge.** Follower and following lists reconcile with Nest. They are authorization-relevant relationships, not cosmetic UI state. Graph embedding work such as [DeepWalk](https://arxiv.org/abs/1403.6652) frames how social edges support discovery beyond hand-tuned rules. Large products often serve the social graph from a dedicated store (for example Meta’s [TAO](https://www.usenix.org/conference/atc13/technical-sessions/presentation/bronson)).
+**Model Follow as an explicit social edge.** Follower and following lists reconcile with the API. They are authorization-relevant relationships, not cosmetic UI state. Graph embedding work such as [DeepWalk](https://arxiv.org/abs/1403.6652) frames how social edges support discovery beyond hand-tuned rules. Large products often serve the social graph from a dedicated store (for example Meta’s [TAO](https://www.usenix.org/conference/atc13/technical-sessions/presentation/bronson)).
 
 ## Feed and discovery
 
@@ -58,7 +58,7 @@ Feed, Post, Chat, Message, Call, Notification, and related terms come from the G
 
 ### Feed
 
-**Present Feed as the home timeline.** People encounter Posts through GraphQL `feed` or REST feed. Ranking and caching may change order; the timeline must remain coherent and refreshable. Classical collaborative filtering and factorization ([Item-based Collaborative Filtering](https://dl.acm.org/doi/10.1145/371920.372071), [Matrix Factorization Techniques for Recommender Systems](https://dl.acm.org/doi/10.1109/MC.2009.263)) underpin later deep models. Industrial ranking lineages include [Deep Neural Networks for YouTube Recommendations](https://research.google/pubs/pub45530/) and [Wide & Deep Learning for Recommender Systems](https://arxiv.org/abs/1606.07792). See also [GraphQL](https://graphql.org/learn/).
+**Present Feed as the home timeline.** People encounter Posts through REST `GET /api/v1/posts/feed` (and Reels via `GET /api/v1/posts/reels`). Ranking and caching may change order; the timeline must remain coherent and refreshable. Classical collaborative filtering and factorization ([Item-based Collaborative Filtering](https://dl.acm.org/doi/10.1145/371920.372071), [Matrix Factorization Techniques for Recommender Systems](https://dl.acm.org/doi/10.1109/MC.2009.263)) underpin later deep models. Industrial ranking lineages include [Deep Neural Networks for YouTube Recommendations](https://research.google/pubs/pub45530/) and [Wide & Deep Learning for Recommender Systems](https://arxiv.org/abs/1606.07792).
 
 ### Reels
 
@@ -74,15 +74,15 @@ Feed, Post, Chat, Message, Call, Notification, and related terms come from the G
 
 ### Engagement
 
-**Make Engagement explicit.** Likes, saves, Comments, and Follow reconcile with Nest. Optimistic UI is presentation, not source of truth. Engagement labels are the supervision signal behind industrial recommenders ([YouTube DNN](https://research.google/pubs/pub45530/), [Wide & Deep](https://arxiv.org/abs/1606.07792), [DLRM](https://arxiv.org/abs/1906.00091)).
+**Make Engagement explicit.** Likes, saves, Comments, and Follow reconcile with the API. Optimistic UI is presentation, not source of truth. Engagement labels are the supervision signal behind industrial recommenders ([YouTube DNN](https://research.google/pubs/pub45530/), [Wide & Deep](https://arxiv.org/abs/1606.07792), [DLRM](https://arxiv.org/abs/1906.00091)).
 
 ### Media
 
-**Upload Media through Nest before attach.** Create-post and Chat attachments use Nest Media. Show progress and failure for large files. Vision runs through Nest—fail closed on unsafe uploads; recommendation may degrade, safety must not. Multimodal encoders such as [CLIP](https://arxiv.org/abs/2103.00020) illustrate how vision models ground moderation and tagging pipelines.
+**Upload Media through the API before attach.** Create-post and Chat attachments use Media endpoints. Show progress and failure for large files. Vision runs through the API—fail closed on unsafe uploads; recommendation may degrade, safety must not. Multimodal encoders such as [CLIP](https://arxiv.org/abs/2103.00020) illustrate how vision models ground moderation and tagging pipelines.
 
 ### Search
 
-**Search with documented scopes.** Nest Search `type` values are `posts`, `users`, and `hashtags`. UI “all” is client aggregation only—do not send it as an API type. Learned retrieval models such as [DSSM](https://www.microsoft.com/en-us/research/publication/learning-deep-structured-semantic-models-for-web-search-using-clickthrough-data/) show how queries and documents share an embedding space.
+**Search with documented scopes.** Search `type` values are `posts`, `users`, and `hashtags`. UI “all” is client aggregation only—do not send it as an API type. Learned retrieval models such as [DSSM](https://www.microsoft.com/en-us/research/publication/learning-deep-structured-semantic-models-for-web-search-using-clickthrough-data/) show how queries and documents share an embedding space.
 
 ### Primary Destination
 
@@ -96,7 +96,7 @@ Feed, Post, Chat, Message, Call, Notification, and related terms come from the G
 
 ### Message
 
-**Persist Messages; deliver live updates on Socket.IO.** Empty bodies do not render as bubbles. After reconnect, reconcile streamed events with Nest Message history. Transport sits on [WebSocket (RFC 6455)](https://datatracker.ietf.org/doc/html/rfc6455); ExploreChat uses [Socket.IO](https://socket.io/docs/v4/) for Message, presence, and Notification signals.
+**Persist Messages; deliver live updates on Socket.IO.** Empty bodies do not render as bubbles. After reconnect, reconcile streamed events with Message history on the API. Transport sits on [WebSocket (RFC 6455)](https://datatracker.ietf.org/doc/html/rfc6455); ExploreChat uses [Socket.IO](https://socket.io/docs/v4/) for Message, presence, and Notification signals.
 
 ### Group
 
@@ -114,7 +114,7 @@ Feed, Post, Chat, Message, Call, Notification, and related terms come from the G
 
 ### Signaling
 
-**Signal Calls on Nest.** Invite, ring, accept, reject, and hangup use Call APIs and the gateway. A Call that rings but never establishes media is different from a declined invite.
+**Signal Calls on the API.** Invite, ring, accept, reject, and hangup use Call APIs and the Socket.IO gateway. A Call that rings but never establishes media is different from a declined invite.
 
 ### WebRTC
 
@@ -122,7 +122,7 @@ Feed, Post, Chat, Message, Call, Notification, and related terms come from the G
 
 ## Generative assistance
 
-**Keep generative features and Explore AI behind Nest.** Image, video, voice, and AI Chat may assist creation; they remain optional. Disclose assisted content, and keep Feed, Chat, and Calls usable when those services are down. Shared foundations include Transformers ([Attention Is All You Need](https://arxiv.org/abs/1706.03762)), [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401), and [Latent Diffusion Models](https://arxiv.org/abs/2112.10752).
+**Keep generative features and Explore AI behind the API.** Image, video, voice, and AI Chat may assist creation; they remain optional. Disclose assisted content, and keep Feed, Chat, and Calls usable when those services are down. Shared foundations include Transformers ([Attention Is All You Need](https://arxiv.org/abs/1706.03762)), [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401), and [Latent Diffusion Models](https://arxiv.org/abs/2112.10752).
 
 ## Related
 
@@ -202,7 +202,7 @@ Feed, Post, Chat, Message, Call, Notification, and related terms come from the G
 
 [Glossary](Glossary.md)
 
-[NestJS](https://docs.nestjs.com/)
+[Spring Boot](https://docs.spring.io/spring-boot/documentation.html)
 
 [Next.js](https://nextjs.org/docs)
 

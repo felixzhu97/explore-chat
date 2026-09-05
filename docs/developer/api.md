@@ -2,14 +2,16 @@
 
 ## Base URL
 
+**Spring（切流目标）**
+
 ```bash
-BASE_URL="http://localhost:3001"
+BASE_URL="http://localhost:9001"
 API_PREFIX="${BASE_URL}/api/v1"
 ```
 
-全局前缀：`/api/v1`。认证：Bearer JWT（除 health / 公开认证端点外）。
+全局前缀：`/api/v1`。认证：Bearer JWT（除 health / 公开认证端点外）。Socket.IO 在 Spring 上为 `:9002`。
 
-Postman：[postman_collection.json](./postman_collection.json)
+Postman：[postman_collection.json](./postman_collection.json)（将 host 设为 `http://localhost:9001`）。
 
 ---
 
@@ -79,10 +81,10 @@ curl -X GET "${API_PREFIX}/health"
 
 ---
 
-## GraphQL Feed / Reels
+## Feed / Reels (REST)
 
 ```
-POST ${API_PREFIX}/graphql
+GET ${API_PREFIX}/posts/feed  ·  GET ${API_PREFIX}/posts/reels
 ```
 
 主要 Query：`feed(limit, pageState)`、`reels(limit, pageState)`。需 JWT。
