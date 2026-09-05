@@ -1,5 +1,14 @@
 export type { User } from "./user";
-export type { ApiResponse, Pagination } from "./transport";
+export type {
+  ApiResponse,
+  Pagination,
+  RpcCode,
+  RpcStatus,
+  RpcStatusDetail,
+  ListQuery,
+  ListResponse,
+  ListResponseMeta,
+} from "./transport";
 export type { StoryItem, FeedPost, SuggestedUser } from "./feed";
 export type { AuthTokens, AuthState } from "./auth";
 export type {
