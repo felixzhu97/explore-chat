@@ -1,0 +1,34 @@
+@startuml C4-Dynamic-Search-FTS
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+
+title Dynamic — Search users / posts (FTS5)
+
+actor "用户" as user
+participant "Web / Mobile" as ui <<ui>>
+participant "SearchController" as searchCtrl <<java>>
+participant "SearchService" as searchSvc <<java>>
+database "SQLite\nFTS + tables" as db <<db>>
+
+== 搜索用户 ==
+user -> ui : 输入关键词
+ui -> searchCtrl : GET /api/v1/search?type=users&q=
+searchCtrl -> searchSvc : searchUsers
+searchSvc -> db : MATCH users_fts\n或 LIKE users.username
+db --> searchSvc : hits
+searchSvc --> ui : 200 hits
+
+== 搜索帖子 ==
+ui -> searchCtrl : GET /api/v1/search?type=posts&q=
+searchCtrl -> searchSvc : searchPosts
+searchSvc -> db : MATCH posts_fts\n或 LIKE social_posts.caption
+db --> ui : 200 hits
+
+note over searchSvc, db
+  Preferred Term: Search Scope
+  (posts / users / hashtags)。
+  无 Elasticsearch 依赖。
+end note
+
+@enduml

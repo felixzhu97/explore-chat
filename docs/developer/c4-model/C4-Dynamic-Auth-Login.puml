@@ -1,0 +1,32 @@
+@startuml C4-Dynamic-Auth-Login
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+
+title Dynamic — Auth login → JWT
+
+actor "用户" as user
+participant "Web / Mobile" as ui <<ui>>
+participant "AuthController" as authCtrl <<java>>
+participant "AuthService" as authSvc <<java>>
+participant "UsersService" as usersSvc <<java>>
+database "SQLite\nPrisma" as db <<db>>
+
+== 登录 ==
+user -> ui : 提交 email / password
+ui -> authCtrl : POST /api/v1/auth/login
+authCtrl -> authSvc : login(credentials)
+authSvc -> usersSvc : findByEmail
+usersSvc -> db : SELECT users
+db --> usersSvc : User
+authSvc -> authSvc : verify password + issue JWT
+authSvc --> authCtrl : accessToken / refreshToken
+authCtrl --> ui : 200 + tokens
+ui --> user : 进入主站 / Feed
+
+note over ui, db
+  Preferred Term: Auth。
+  本地无需外部 IdP。
+end note
+
+@enduml
