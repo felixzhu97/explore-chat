@@ -8,7 +8,7 @@ import {
 import { PrismaService } from "@/core/database/prisma.service";
 import { CacheService } from "@/core/cache/cache.service";
 import { Chat } from "@/chats/domain/model/chat";
-import { User } from "@/users/domain/user.entity";
+import { User } from "@/users/domain/model/user";
 import { Message } from "@/messages/domain/model/message";
 import type { ChatRepository } from "@/chats/domain/repository/chat.repository";
 import type { MessageRepository } from "@/messages/domain/repository/message.repository";

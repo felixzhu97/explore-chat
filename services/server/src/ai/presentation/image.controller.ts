@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Get, Param, UseGuards } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
-import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
+import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { ImageService } from "@/ai/application/image.service";
 
 @ApiTags("图片生成")

@@ -12,8 +12,8 @@ import {
   LoginData,
   AuthTokens,
 } from "@/auth/domain/auth.service.interface";
-import { IUserRepository } from "@/users/domain/user.repository.interface";
-import { User } from "@/users/domain/user.entity";
+import { UserRepository } from "@/users/domain/repository/user.repository";
+import { User } from "@/users/domain/model/user";
 import { ConfigService } from "@/core/config/config.service";
 import { PrismaService } from "@/core/database/prisma.service";
 import { ElasticsearchService } from "@/core/database/elasticsearch.service";
@@ -21,8 +21,8 @@ import { ElasticsearchService } from "@/core/database/elasticsearch.service";
 @Injectable()
 export class AuthService implements IAuthService {
   constructor(
-    @Inject("IUserRepository")
-    private readonly userRepository: IUserRepository,
+    @Inject("UserRepository")
+    private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly elasticsearch: ElasticsearchService,

@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ConflictException, UnauthorizedException } from "@nestjs/common";
-import { AuthService } from "@/auth/application/auth.service";
-import { IUserRepository } from "@/users/domain/user.repository.interface";
+import { AuthService } from "@/auth/service/auth.service";
+import { UserRepository } from "@/users/domain/repository/user.repository";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "@/core/database/prisma.service";
 import { ElasticsearchService } from "@/core/database/elasticsearch.service";
 import { ConfigService } from "@/core/config/config.service";
-import { User } from "@/users/domain/user.entity";
+import { User } from "@/users/domain/model/user";
 
 vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
@@ -28,7 +28,7 @@ vi.mock("@/core/config/config.service", () => ({
 
 describe("AuthService", () => {
   let authService: AuthService;
-  let mockUserRepository: Partial<IUserRepository>;
+  let mockUserRepository: Partial<UserRepository>;
   let mockJwtService: Partial<JwtService>;
   let mockPrisma: Partial<PrismaService>;
   let mockElasticsearch: Partial<ElasticsearchService>;
@@ -76,7 +76,7 @@ describe("AuthService", () => {
     };
 
     authService = new AuthService(
-      mockUserRepository as IUserRepository,
+      mockUserRepository as UserRepository,
       mockJwtService as JwtService,
       mockPrisma as PrismaService,
       mockElasticsearch as ElasticsearchService,

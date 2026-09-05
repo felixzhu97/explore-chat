@@ -1,4 +1,4 @@
-import { User } from "@/users/domain/user.entity";
+import { User } from "@/users/domain/model/user";
 import type { AuthTokens } from "@whatschat/shared-types";
 export type { AuthTokens } from "@whatschat/shared-types";
 

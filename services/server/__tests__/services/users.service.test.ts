@@ -4,7 +4,7 @@ import {
   UsersService,
   GetUsersOptions,
   UpdateUserData,
-} from "@/users/application/users.service";
+} from "@/users/service/users.service";
 import { PrismaService } from "@/core/database/prisma.service";
 import { ElasticsearchService } from "@/core/database/elasticsearch.service";
 

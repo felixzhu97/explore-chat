@@ -1,7 +1,7 @@
 import { Body, Controller, Post, UseGuards } from "@nestjs/common";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
-import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
-import { CurrentUser } from "@/auth/presentation/current-user.decorator";
+import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
+import { CurrentUser } from "@/auth/controller/current-user.decorator";
 import { AnalyticsService } from "@/analytics/application/analytics.service";
 import { IngestAnalyticsEventsDto } from "@/analytics/application/analytics.dto";
 

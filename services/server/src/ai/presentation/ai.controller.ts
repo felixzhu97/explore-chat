@@ -1,6 +1,6 @@
 import { Controller, Post, Body, UseGuards, Res } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
-import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
+import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { AiService } from "@/ai/application/ai.service";
 import type { Response } from "express";
 

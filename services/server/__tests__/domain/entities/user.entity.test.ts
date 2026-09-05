@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { User } from "@/users/domain/user.entity";
+import { User } from "@/users/domain/model/user";
 
 describe("User Entity", () => {
   describe("constructor", () => {

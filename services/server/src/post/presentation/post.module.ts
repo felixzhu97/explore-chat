@@ -12,7 +12,7 @@ import { AdPacingService } from "@/ads/application/ad-pacing.service";
 import { AdCreativeService } from "@/ads/application/ad-creative.service";
 import { FeedSeenService } from "@/post/application/feed-seen.service";
 import { KafkaModule } from "@/core/messaging/kafka.module";
-import { UsersModule } from "@/users/presentation/users.module";
+import { UsersModule } from "@/users/users.module";
 import { NotificationsModule } from "@/notifications/presentation/notifications.module";
 import { WebSocketModule } from "@/websocket/presentation/websocket.module";
 import { AiModule } from "@/ai/presentation/ai.module";
