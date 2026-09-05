@@ -16,6 +16,7 @@ Chat 的架构视图。源文件为 `.puml`；PNG 可选。术语见 [Glossary](
 | `C2-Container.puml`                | C2         | 容器（Web / Admin / Mobile / Spring :9001 / 旁路） |
 | `C3-Component.puml`                | C3         | 组件（Web UI + 限界上下文）                     |
 | `C3-Component-Backend.puml`        | C3         | Spring 后端组件（controller → service → domain） |
+| `C3-Component-Frontend.puml`       | C3         | Web 前端组件                                    |
 | `C4-Code-Domain-Model.puml`        | Code       | 领域模型（对齐当前代码）                            |
 | `C4-Code-Domain-Model-Plan.puml`   | Code       | 领域模型规划差分（绿增 / 红删）                     |
 | `C4-Deployment.puml`               | Deployment | 本地开发部署（含生产简述）                          |
@@ -112,13 +113,13 @@ cd docs/developer/c4-model && plantuml -tpng -o png C4-Code-Domain-Model-Plan.pu
 | 层           | 要点                                                                                   |
 | ------------ | -------------------------------------------------------------------------------------- |
 | Web / Admin  | Next.js、React、TypeScript；`:4000` / `:4001`                                          |
-| Mobile       | Expo / React Native                                                                    |
+| Mobile       | Expo / React Native (`src/main/mobile`)                                                        |
 | API          | Spring Boot；REST / Socket.IO；`:9001`                                         |
-| 持久化       | SQLite（Prisma）；进程内 Memory 缓存；FTS5 搜索                                        |
+| 持久化       | H2 / Postgres（JPA + Liquibase）                                                       |
 | 旁路（可选） | recommendation `:8000`、vision `:8001`、rag `:8002`（本地向量目录）、media-gen `:3456` |
-| AI           | 本地 Ollama；Explore AI 经 Nest BFF                                                    |
+| AI           | 本地 Ollama；Explore AI 经 Spring BFF                                                  |
 
-限界上下文（Nest）：`auth` / `users` / `post` / `comments` / `chats` / `search` / `notifications` / …
+限界上下文（Java）：`auth` / `users` / `post` / `comments` / `chats` / `search` / `notifications` / …
 
 ---
 

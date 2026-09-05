@@ -5,7 +5,7 @@
 | Software | Version | Notes |
 | -------- | ------- | ----- |
 | JDK | 25 | Spring Boot API |
-| Node.js | >= 22 | Clients |
+| Node.js | >= 22 | Web / Admin / Expo |
 | pnpm | >= 10 | Package manager |
 | Git | — | |
 
@@ -30,7 +30,13 @@ In another terminal:
 pnpm start:web
 ```
 
-Or both via `pnpm dev` ([`scripts/app/start.sh`](../../scripts/app/start.sh)).
+Mobile (Expo):
+
+```bash
+pnpm start:mobile
+```
+
+Or both web + API via `pnpm dev` ([`scripts/app/start.sh`](../../scripts/app/start.sh)).
 
 | Surface | URL |
 | ------- | --- |
@@ -40,8 +46,9 @@ Or both via `pnpm dev` ([`scripts/app/start.sh`](../../scripts/app/start.sh)).
 | Socket.IO | http://localhost:9002 |
 | AIP REST | [`aip-rest.md`](./aip-rest.md) |
 | Admin | http://localhost:4001 (`pnpm start:admin`) |
+| Mobile | Expo (`pnpm start:mobile`) |
 
-Demo login (seeded on boot): `cristiano@whatschat.com` / `123456`.
+Demo login (seeded on boot): `alice@example.com` / `123456`.
 
 ### Kafka (optional)
 
@@ -56,6 +63,7 @@ Client env:
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:9001/api/v1
 NEXT_PUBLIC_SOCKET_IO_URL=http://localhost:9002
+# Expo mobile:
 EXPO_PUBLIC_API_URL=http://localhost:9001
 EXPO_PUBLIC_SOCKET_IO_URL=http://localhost:9002
 ```

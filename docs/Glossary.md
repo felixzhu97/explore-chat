@@ -18,7 +18,7 @@ This document defines the project **Ubiquitous Language**. English terms are the
 
 ## 2. Business Domains | 业务域总览
 
-| Preferred Term | 中文            | Code / Package (Java)            | Web (`apps/web/src`) | Mobile (Expo) (`apps/mobile/src`)  | Frontend Surface | API Prefix                      | Notes                                            |
+| Preferred Term | 中文            | Code / Package (Java)            | Web (`src/main/web/src`) | Mobile (Expo) (`src/main/mobile/src`)  | Frontend Surface | API Prefix                      | Notes                                            |
 | -------------- | --------------- | -------------------------------- | -------------------- | ---------------------------------- | ---------------- | ------------------------------- | ------------------------------------------------ |
 | Auth           | 认证            | `com.chat.auth`                  | `auth/`              | `auth/`                            | 登录 / 注册      | `/api/v1/auth`                  | JWT                 |
 | User           | 用户            | `com.chat.users` / `ChatUser`                 | `profile/`           | `profile/`                         | 个人页           | `/api/v1/users`                 | 资料、搜索                                       |
@@ -27,7 +27,7 @@ This document defines the project **Ubiquitous Language**. English terms are the
 | Call           | 通话            | `com.chat.calls`                 | `calls/`             | `calls/` + `core/call`             | WebRTC UI        | `/api/v1/calls`                 | 信令 stub；媒体仍走 WebRTC                       |
 | Group          | 群组            | `com.chat.groups`           | `chat/group.model`   | `chat/`                            | 群组             | `/api/v1/groups`                | Java stub                                   |
 | Post           | 帖子            | `com.chat.post`                  | `feed/`              | `feed/`                            | 发帖 / 网格      | `/api/v1/posts`                 | mediaUrls、coverUrl                              |
-| Feed           | 信息流          | ``com.chat.post`   | `feed/`              | `feed/`                            | 首页 Feed        | REST `GET /posts/feed`     | Query `feed` 在切流完成前仍可走 Nest             |
+| Feed           | 信息流          | `com.chat.post`   | `feed/`              | `feed/`                            | 首页 Feed        | REST `GET /posts/feed`     | Query `feed` 在切流完成前仍可走 Spring API             |
 | Reels          | 短视频          | `com.chat.post`          | `reels/`             | `reels/`                           | Reels Tab        | `/api/v1/posts/reels`               | REST reels                                    |
 | Explore        | 探索            | `com.chat.post`      | `explore/`           | `explore/`                         | 探索网格         | `/api/v1/posts/explore`         |                                                  |
 | Comment        | 评论            | `com.chat.comments`              | `feed/components/`   | `feed/` / `app/post-comments`      | 评论弹窗         | `/api/v1/posts/{post}/comments` | 子资源                                           |
@@ -51,7 +51,7 @@ This document defines the project **Ubiquitous Language**. English terms are the
 flowchart TB
   subgraph clients [Clients]
     Web[Web]
-    Mobile[Mobile]
+    Mobile[Mobile_Expo]
     AdminApp[Admin]
   end
   subgraph api [Spring API]
@@ -71,7 +71,7 @@ flowchart TB
 
 | Preferred Term                  | 中文             | Definition                                                                                                       |
 | ------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Chat                     | Chat      | 社交 + 即时通讯产品；npm scope `@whatschat/*`、部署主机名 `whatschat-*` 为历史名                                 |
+| Chat                     | Chat      | 社交 + 即时通讯产品；npm scope `@chat/*`；`whatschat-*` / `explorechat-*` 为历史名                                 |
 | Cover URL                       | 封面 URL         | 视频帖封面图地址；与 mediaUrls 分离                                                                              |
 | Feed Entry                      | 信息流条目       | Feed 中的一条 Post 引用                                                                                          |
 | Engagement                      | 互动             | 点赞、收藏及计数                                                                                                 |

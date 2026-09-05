@@ -20,16 +20,16 @@ LAYOUT_WITH_LEGEND()
 title [C4 Level 1] Chat - 系统上下文
 
 Person(user_web, "Web 用户", "浏览器：信息流、聊天、通话、探索")
-Person(user_mobile, "移动端用户", "Expo 应用：信息流、Reels、聊天、通话")
+Person(user_mobile, "移动端用户", "Expo：信息流、Reels、聊天、通话")
 Person(admin_user, "管理员", "运营后台：用户、内容与配置")
 
-System(chat, "Chat", "社交 + 即时通讯：Feed、帖子、评论、关注、聊天、音视频、搜索、通知；Nest API 边界")
+System(chat, "Chat", "社交 + 即时通讯：Feed、帖子、评论、关注、聊天、音视频、搜索、通知；Spring API 边界")
 
 System_Ext(email, "邮件服务", "事务邮件（SMTP / SES）")
 System_Ext(push, "推送服务", "FCM / APNs")
 System_Ext(storage, "文件存储", "本地盘或对象存储媒体")
 System_Ext(webrtc, "STUN / TURN", "WebRTC NAT 穿透")
-System_Ext(explore_ai, "Explore AI", "可选：经 Nest BFF 代理")
+System_Ext(explore_ai, "Explore AI", "可选：经 Spring BFF 代理")
 
 Rel(user_web, chat, "使用", "HTTPS / WebSocket / WebRTC")
 Rel(user_mobile, chat, "使用", "HTTPS / WebSocket / WebRTC")
