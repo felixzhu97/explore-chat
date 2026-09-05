@@ -18,8 +18,9 @@ export class CreateMessageRequest {
   })
   type!: MessageType;
 
+  @IsOptional()
   @IsString({ message: "聊天ID必须是字符串" })
-  chatId!: string;
+  chatId?: string;
 
   @IsOptional()
   @IsObject({ message: "元数据必须是对象" })

@@ -2,7 +2,7 @@ import {
   Controller,
   Get,
   Post,
-  Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -18,9 +18,14 @@ import { MessagesService } from "@/messages/service/messages.service";
 import { CreateMessageRequest } from "@/messages/controller/message-request";
 import { ChatGateway } from "@/websocket/controller/chat.gateway";
 import type { QueuedMessagePayload } from "@/messages/service/offline-message-queue.service";
+import {
+  clampPageSize,
+  offsetFromPageToken,
+  nextOffsetPageToken,
+} from "@/core/aip/page-token";
 
-@ApiTags("消息")
-@Controller("messages")
+@ApiTags("messages")
+@Controller("chats/:chat/messages")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class MessagesController {
@@ -29,37 +34,45 @@ export class MessagesController {
     private readonly chatGateway: ChatGateway,
   ) {}
 
-  @Get(":chatId")
-  @ApiOperation({ summary: "获取聊天消息" })
+  @Get()
+  @ApiOperation({ summary: "List messages in a chat" })
   async getMessages(
-    @Param("chatId") chatId: string,
-    @Query("page") page: string = "1",
-    @Query("limit") limit: string = "20",
+    @Param("chat") chatId: string,
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
     @Query("search") search?: string,
   ) {
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
+    const offset = offsetFromPageToken(pageToken, pageSize);
+    const page = Math.floor(offset / pageSize) + 1;
     const messages = await this.messagesService.getMessages(chatId, {
-      page: parseInt(page, 10),
-      limit: parseInt(limit, 10),
+      page,
+      limit: pageSize,
       ...(search && { search }),
     });
 
+    const hasMore = messages.length >= pageSize;
+
     return {
-      success: true,
-      data: messages,
+      messages,
+      next_page_token: nextOffsetPageToken(offset, pageSize, hasMore),
     };
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: "发送消息" })
+  @ApiOperation({ summary: "Create message in a chat" })
   async createMessage(
-    @CurrentUser() user: any,
+    @CurrentUser() user: { id: string },
+    @Param("chat") chatId: string,
     @Body() createMessageDto: CreateMessageRequest,
   ) {
     const message = await this.messagesService.createMessage({
       content: createMessageDto.content,
       type: createMessageDto.type,
-      chatId: createMessageDto.chatId,
+      chatId,
       senderId: user.id,
       ...(createMessageDto.clientMsgId != null && {
         clientMsgId: createMessageDto.clientMsgId,
@@ -89,17 +102,13 @@ export class MessagesController {
       });
     }
 
-    return {
-      success: true,
-      message: "消息发送成功",
-      data: message,
-    };
+    return message;
   }
 
-  @Put(":messageId")
-  @ApiOperation({ summary: "更新消息" })
+  @Patch(":message")
+  @ApiOperation({ summary: "Update message" })
   async updateMessage(
-    @Param("messageId") messageId: string,
+    @Param("message") messageId: string,
     @Body() updateData: { content?: string; type?: string },
   ) {
     const updatePayload: Partial<{
@@ -117,26 +126,13 @@ export class MessagesController {
         | "AUDIO"
         | "FILE";
     }
-    const message = await this.messagesService.updateMessage(
-      messageId,
-      updatePayload,
-    );
-
-    return {
-      success: true,
-      message: "消息更新成功",
-      data: message,
-    };
+    return this.messagesService.updateMessage(messageId, updatePayload);
   }
 
-  @Delete(":messageId")
-  @ApiOperation({ summary: "删除消息" })
-  async deleteMessage(@Param("messageId") messageId: string) {
+  @Delete(":message")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Delete message" })
+  async deleteMessage(@Param("message") messageId: string) {
     await this.messagesService.deleteMessage(messageId);
-
-    return {
-      success: true,
-      message: "消息删除成功",
-    };
   }
 }

@@ -12,10 +12,10 @@ import {
   HttpStatus,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
-import { JwtAuthGuard } from "@/auth/presentation/jwt-auth.guard";
-import { CurrentUser } from "@/auth/presentation/current-user.decorator";
-import { UsersService } from "@/users/application/users.service";
-import { FollowService } from "@/follow/application/follow.service";
+import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
+import { CurrentUser } from "@/auth/controller/current-user.decorator";
+import { UsersService } from "@/users/service/users.service";
+import { FollowService } from "@/follow/service/follow.service";
 import {
   clampPageSize,
   offsetFromPageToken,
@@ -156,7 +156,7 @@ export class UsersController {
     await this.usersService.deleteUser(id);
   }
 
-  @Post("following:check")
+  @Post("following\\:check")
   @ApiOperation({ summary: "Batch check following state" })
   async checkFollowing(
     @CurrentUser() user: { id: string },
