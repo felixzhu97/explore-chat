@@ -47,7 +47,9 @@ ExploreChat 的架构视图。源文件为 `.puml`；PNG 可选。术语见 [Glo
 
 ![C4-Code-Domain-Model](png/C4-Code-Domain-Model.png)
 
-对齐 `services/server/src/*/domain` 与 Prisma SQLite（含 social 表）。
+对齐 `services/server/src/*/domain`、`base/domain`、`base/infra` 与 Prisma SQLite（含 social 表）。
+
+Message 写路径：`Chat.ensureParticipant` → `Message.assertSendableBy` → `MessageRepository.save`；删消息为 soft delete（`isDeleted`）。`PrismaMessageRepository` / `PrismaChatRepository` 继承 `AbstractPrismaRepository`。
 
 ### Plan
 

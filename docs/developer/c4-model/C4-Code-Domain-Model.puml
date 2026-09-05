@@ -22,12 +22,43 @@ legend right
 endlegend
 
 note as N_LAYERS
-  presentation → application → domain ← infrastructure
+  presentation → application → domain ← infra
+  Shared kernels: base/domain, base/infra.
   Clients call Nest /api/v1 only.
   Persist: Prisma SQLite (users, chats, social_posts,
   feed_entries, post_comments, activity_notifications).
   Packages under services/server/src.
 end note
+
+package "base/domain" as pkg_base {
+  abstract class AbstractImmutable <<Abstract>> {
+    + id: String
+    + createdAt: Date
+  }
+  abstract class AbstractEntity <<Abstract>> {
+    + updatedAt: Date
+    + version: int
+  }
+  abstract class AbstractAggregateRoot <<Abstract>> {
+  }
+  abstract class AbstractParticipant <<Abstract>> {
+    + userId: String
+    + role: ParticipantRole
+    + joinedAt: Date
+  }
+  abstract class AbstractEmbeddable <<Abstract>> {
+  }
+}
+
+AbstractImmutable <|-- AbstractEntity
+AbstractEntity <|-- AbstractAggregateRoot
+AbstractEntity <|-- AbstractParticipant
+
+package "base/infra" as pkg_base_infra {
+  abstract class AbstractPrismaRepository <<Abstract>> {
+    + prisma: PrismaService
+  }
+}
 
 package "users/domain" as pkg_users {
   class User <<AggregateRoot>> {
@@ -76,6 +107,7 @@ package "chats/domain" as pkg_chats {
     updateLastMessage(message)
     incrementUnreadCount()
     resetUnreadCount()
+    ensureParticipant(userId)
   }
   enum ChatType <<ValueObject>> {
     PRIVATE
@@ -86,6 +118,10 @@ package "chats/domain" as pkg_chats {
     ParticipantRole role
     boolean isArchived
     boolean isMuted
+  }
+  interface ChatRepository <<Repository>> {
+    findById(id)
+    touchUpdatedAt(chatId)
   }
 }
 
@@ -104,8 +140,10 @@ package "messages/domain" as pkg_messages {
     String mediaUrl
     boolean isEdited
     boolean isDeleted
+    String clientMsgId
     --
     {static} create(data)
+    assertSendableBy(senderId)
     edit(content)
     delete()
     addReaction(userId, emoji)
@@ -122,18 +160,46 @@ package "messages/domain" as pkg_messages {
     String userId
     String emoji
   }
+  interface MessageRepository <<Repository>> {
+    save(message)
+    findById(id)
+    findByChatId(chatId, options)
+  }
   note right of Message
-    Runtime write path:
-    MessagesService.createMessage
-    (REST + WS). clientMsgId
-    echoed on ack only.
+    Write path: load Chat → ensureParticipant
+    → Message.create/assertSendableBy
+    → MessageRepository.save.
+    Soft delete via delete() → isDeleted.
+    clientMsgId echoed on ack only.
   end note
 }
+
+package "messages/infra" as pkg_messages_infra {
+  class PrismaMessageRepository {
+    save(message)
+    findById(id)
+    findByChatId(chatId, options)
+  }
+}
+
+package "chats/infra" as pkg_chats_infra {
+  class PrismaChatRepository {
+    findById(id)
+    touchUpdatedAt(chatId)
+  }
+}
+
+AbstractPrismaRepository <|-- PrismaMessageRepository
+AbstractPrismaRepository <|-- PrismaChatRepository
+PrismaMessageRepository ..|> MessageRepository
+PrismaChatRepository ..|> ChatRepository
 
 Chat "1" *-- "0..*" Message
 Message --> MessageType
 Message "1" *-- "0..*" MessageReaction
 Message --> User : senderId
+Message ..> MessageRepository
+Chat ..> ChatRepository
 
 package "groups/domain" as pkg_groups {
   class Group <<AggregateRoot>> {
