@@ -17,11 +17,11 @@ skinparam backgroundColor #FFFFFF
 skinparam shadowing false
 
 LAYOUT_WITH_LEGEND()
-title [C4 Level 3] ExploreChat - 组件图（Web + Nest）
+title [C4 Level 3] Chat - 组件图（Web + Nest）
 
 Person(user, "Web 用户", "浏览器客户端")
 
-System_Boundary(explorechat, "ExploreChat") {
+System_Boundary(chat, "Chat") {
   Container_Boundary(web_app, "Web 应用") {
     Component(pages, "App Router 页面", "Next.js", "登录、主站、设置")
     Component(feed_ui, "Feed / Reels / Explore", "React", "帖子、互动、评论")

@@ -491,10 +491,10 @@ describe("Contact Types", () => {
           id: "contact-19",
           name: "John Contact",
           avatar: "https://example.com/avatar.jpg",
-          status: "Hey there! I'm using WhatsChat",
+          status: "Hey there! I'm using Chat",
         };
 
-        expect(contact.status).toContain("WhatsChat");
+        expect(contact.status).toContain("Chat");
       });
 
       it("should support lastSeen field", () => {

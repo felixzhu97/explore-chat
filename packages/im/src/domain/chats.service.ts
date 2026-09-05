@@ -1,4 +1,4 @@
-import type { Message } from "@whatschat/shared-types";
+import type { Message } from "@chat/shared-types";
 
 export interface ChatListItem {
   id: string;

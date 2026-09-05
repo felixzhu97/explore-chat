@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>WhatsChat</string>
+	<string>Chat</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -27,8 +27,8 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>whatschat</string>
-				<string>com.whatschat.mobile</string>
+				<string>chat</string>
+				<string>com.chat.mobile</string>
 			</array>
 		</dict>
 	</array>
@@ -39,13 +39,13 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>WhatsChat needs camera access for video calls.</string>
+	<string>Chat needs camera access for video calls.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>WhatsChat needs microphone access for voice and video calls.</string>
+	<string>Chat needs microphone access for voice and video calls.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Allow WhatsChat to access your photos to update profile avatar and post media.</string>
+	<string>Allow Chat to access your photos to update profile avatar and post media.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Allow WhatsChat to save generated media to your photo library when needed.</string>
+	<string>Allow Chat to save generated media to your photo library when needed.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

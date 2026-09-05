@@ -165,7 +165,7 @@ export default function RegisterScreen() {
       <Page>
         <Keyboard behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <Header>
-            <HeaderTitle>WhatsChat</HeaderTitle>
+            <HeaderTitle>Chat</HeaderTitle>
             <HeaderSubtitle>{t("register.subtitle")}</HeaderSubtitle>
           </Header>
           <FormScroll

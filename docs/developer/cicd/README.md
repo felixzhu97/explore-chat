@@ -1,6 +1,6 @@
 # CI/CD
 
-ExploreChat 使用 GitHub Actions。
+Chat 使用 GitHub Actions。
 
 ## 现状
 

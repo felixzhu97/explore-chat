@@ -1,4 +1,4 @@
-# ExploreChat Quick Start Guide
+# Chat Quick Start Guide
 
 ## 1. Prerequisites
 

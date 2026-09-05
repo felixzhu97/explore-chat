@@ -1,6 +1,6 @@
-export type { ApiMessageLike, SocketMessagePayload } from "@whatschat/im";
+export type { ApiMessageLike, SocketMessagePayload } from "@chat/im";
 export {
   mapApiMessageToMessage,
   mapSocketPayloadToMessage,
   mergeAndSortMessages,
-} from "@whatschat/im";
+} from "@chat/im";

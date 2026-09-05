@@ -16,13 +16,13 @@ skinparam backgroundColor #FFFFFF
 skinparam shadowing false
 
 LAYOUT_WITH_LEGEND()
-title [C4 Level 2] ExploreChat - 容器图
+title [C4 Level 2] Chat - 容器图
 
 Person(user_web, "Web 用户", "浏览器")
 Person(user_mobile, "移动端用户", "手机 / 模拟器")
 Person(admin_user, "管理员", "运营后台")
 
-System_Boundary(explorechat, "ExploreChat") {
+System_Boundary(chat, "Chat") {
   Container(web_app, "Web 应用", "Next.js / React", "Feed、Reels、探索、聊天；:4000")
   Container(admin_app, "管理端", "Next.js", "用户与内容运营；:4001")
   Container(mobile_app, "移动端", "Expo / React Native", "Feed、聊天、探索")

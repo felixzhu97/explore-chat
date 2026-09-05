@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import {
   AnalyticsProvider as AnalyticsProviderBase,
   HttpTransport,
-} from "@whatschat/analytics";
+} from "@chat/analytics";
 
 const baseURL =
   typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL

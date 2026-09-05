@@ -1,7 +1,7 @@
 export class AppStorage {
   private static readonly PREFIX = "instagram_";
   private static db: IDBDatabase | null = null;
-  private static dbName = "InstagramDB";
+  private static dbName = "ChatDB";
   private static dbVersion = 1;
 
   static async initDB(): Promise<void> {

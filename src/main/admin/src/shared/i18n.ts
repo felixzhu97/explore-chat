@@ -5,7 +5,7 @@ import { en } from "@/src/locales/en";
 
 export type AppLocale = "zh" | "en";
 
-const LANG_STORAGE_KEY = "whatschat_admin_lang";
+const LANG_STORAGE_KEY = "chat_admin_lang";
 
 function getStoredLocale(): AppLocale | null {
   if (typeof window === "undefined") return null;

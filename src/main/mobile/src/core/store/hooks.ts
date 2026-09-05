@@ -41,7 +41,7 @@ export {
   updateMessage,
   deleteMessage,
   setMessages,
-} from "@whatschat/im";
+} from "@chat/im";
 export { setThemeMode } from "@/core/store/slices/themeSlice";
 
 export { feedApi } from "@/feed/feedApi";

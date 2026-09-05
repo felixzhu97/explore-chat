@@ -1,5 +1,5 @@
-export type { ApiResponse, Pagination } from "@whatschat/shared-types";
-import type { RpcStatus } from "@whatschat/shared-types";
+export type { ApiResponse, Pagination } from "@chat/shared-types";
+import type { RpcStatus } from "@chat/shared-types";
 
 export const API_CONFIG = {
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:9001/api/v1",

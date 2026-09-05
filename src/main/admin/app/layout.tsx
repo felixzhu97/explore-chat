@@ -6,8 +6,8 @@ import { Providers } from "./providers";
 import { ThemeInitScript } from "./theme-init";
 
 export const metadata: Metadata = {
-  title: "WhatsChat Admin",
-  description: "WhatsChat admin dashboard",
+  title: "Chat Admin",
+  description: "Chat admin dashboard",
 };
 
 export default function RootLayout({

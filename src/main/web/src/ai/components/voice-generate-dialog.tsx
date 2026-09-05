@@ -22,7 +22,7 @@ import ReactMarkdown from "react-markdown";
 import {
   VoiceGenTargetLanguages,
   type VoiceGenTargetLanguage,
-} from "@whatschat/shared-types";
+} from "@chat/shared-types";
 import type { IVoiceGenerateService } from "./dialog-services.types";
 import { Play, Pause } from "lucide-react";
 import { styled } from "@/src/shared/utils/emotion";

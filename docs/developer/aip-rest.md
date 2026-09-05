@@ -1,10 +1,10 @@
-# AIP REST contract (ExploreChat)
+# AIP REST contract (Chat)
 
 Breaking cutover under prefix `/api/v1` (no `api/v2`, no dual envelope).
 
 ## Normative AIPs
 
-| Topic                    | AIP                                                                   | ExploreChat shape                                     |
+| Topic                    | AIP                                                                   | Chat shape                                     |
 | ------------------------ | --------------------------------------------------------------------- | ----------------------------------------------------- |
 | Resource-oriented design | [121](https://google.aip.dev/121) / [122](https://google.aip.dev/122) | Noun collections; child resources under parents       |
 | Standard methods         | [131](https://google.aip.dev/131)–[135](https://google.aip.dev/135)   | Get/List/Create/Update/Delete; Update prefers `PATCH` |

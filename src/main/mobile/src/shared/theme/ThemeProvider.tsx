@@ -16,7 +16,7 @@ import {
   typography,
 } from "./AppTheme";
 
-const THEME_STORAGE_KEY = "@whatschat_theme_mode";
+const THEME_STORAGE_KEY = "@chat_theme_mode";
 
 interface ThemeContextType {
   colors: ThemeColors;

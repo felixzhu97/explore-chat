@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$ROOT_DIR"
 
-echo "ExploreChat ($ENV) — Spring Boot + Next.js"
+echo "Chat ($ENV) — Spring Boot + Next.js"
 
 if [[ "$ENV" == "prod" ]]; then
   export NODE_ENV=production
@@ -17,7 +17,7 @@ if [[ "$ENV" == "prod" ]]; then
   exec java -jar build/libs/explore-chat-*.jar
 fi
 
-pnpm --filter @whatschat/shared-types build
+pnpm --filter @chat/shared-types build
 
 # Start Java API in background
 ./gradlew bootRun --quiet &
@@ -34,4 +34,4 @@ for _ in $(seq 1 60); do
 done
 
 echo "Web http://localhost:4000  ·  API http://localhost:9001  ·  Socket.IO http://localhost:9002"
-exec pnpm exec turbo run dev --filter=whatschat-web --concurrency=23
+exec pnpm exec turbo run dev --filter=chat-web --concurrency=23

@@ -1,6 +1,6 @@
 # C4 模型
 
-ExploreChat 的架构视图。源文件为 `.puml`；PNG 可选。术语见 [Glossary](../../Glossary.md)；产品状态见 [User Story Map](../../product-owner/User-Story-Map.md)。
+Chat 的架构视图。源文件为 `.puml`；PNG 可选。术语见 [Glossary](../../Glossary.md)；产品状态见 [User Story Map](../../product-owner/User-Story-Map.md)。
 
 命名对齐 C4：`C1-Context` / `C2-Container` / `C3-Component` / `C4-Code-*` / `C4-Deployment` / `C4-Dynamic-*`。
 

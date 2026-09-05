@@ -1,3 +1,3 @@
-ALTER DATABASE whatschat OWNER TO whatschat;
-GRANT USAGE, CREATE ON SCHEMA public TO whatschat;
-ALTER SCHEMA public OWNER TO whatschat;
+ALTER DATABASE chat OWNER TO chat;
+GRANT USAGE, CREATE ON SCHEMA public TO chat;
+ALTER SCHEMA public OWNER TO chat;

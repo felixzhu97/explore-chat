@@ -1,8 +1,8 @@
 module.exports = {
   expo: {
-    name: 'WhatsChat',
-    slug: 'whatschat',
-    scheme: 'whatschat',
+    name: 'Chat',
+    slug: 'chat',
+    scheme: 'chat',
     version: '1.0.0',
     plugins: [
       [
@@ -14,16 +14,16 @@ module.exports = {
       [
         'expo-image-picker',
         {
-          photosPermission: 'Allow WhatsChat to access your photos to update profile avatar and post media.',
+          photosPermission: 'Allow Chat to access your photos to update profile avatar and post media.',
         },
       ],
     ],
     ios: {
       infoPlist: {
         NSPhotoLibraryUsageDescription:
-          'Allow WhatsChat to access your photos to update profile avatar and post media.',
+          'Allow Chat to access your photos to update profile avatar and post media.',
         NSPhotoLibraryAddUsageDescription:
-          'Allow WhatsChat to save generated media to your photo library when needed.',
+          'Allow Chat to save generated media to your photo library when needed.',
       },
     },
   },

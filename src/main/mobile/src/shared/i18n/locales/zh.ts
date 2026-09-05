@@ -82,7 +82,7 @@ export const zh = {
     loadFailed: "加载失败",
   },
   chats: {
-    title: "WhatsChat",
+    title: "Chat",
     searchPlaceholder: "搜索",
     noChats: "暂无聊天",
     chat: "聊天",

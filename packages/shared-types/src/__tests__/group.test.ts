@@ -635,7 +635,7 @@ describe("Group Types", () => {
         const group: Group = {
           id: "group-16",
           name: "Open Group",
-          inviteLink: "https://whatschat.com/join/abc123",
+          inviteLink: "https://chat.example/join/abc123",
         };
 
         expect(group.inviteLink).toBeDefined();
@@ -646,7 +646,7 @@ describe("Group Types", () => {
         const group: Group = {
           id: "group-17",
           name: "Special Group",
-          inviteLink: "https://whatschat.com/join/abc-123_xyz",
+          inviteLink: "https://chat.example/join/abc-123_xyz",
         };
 
         expect(group.inviteLink).toContain("abc-123_xyz");

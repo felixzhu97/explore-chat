@@ -16,7 +16,7 @@ import { useAuthStore, useAppDispatch, setAuth } from "@/core/store/hooks";
 import { getAuthApi } from "@/core/composition-root";
 
 const DEFAULT_DEV_USER = {
-  email: "ladygaga@whatschat.com",
+  email: "alice@example.com",
   password: "123456",
 };
 

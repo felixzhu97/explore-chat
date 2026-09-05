@@ -1,6 +1,6 @@
-# Testing Setup for WhatsChat Web App
+# Testing Setup for Chat Web App
 
-This directory contains the test suite for the WhatsChat web application built with Next.js, React, and TypeScript.
+This directory contains the test suite for the Chat web application built with Next.js, React, and TypeScript.
 
 ## Testing Stack
 

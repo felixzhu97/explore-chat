@@ -34,7 +34,7 @@ export class AiApi {
     await this.consumeTextSse(res, onChunk);
   }
 
-  async postExploreChatStream(
+  async postChatStream(
     messages: AiChatMessage[],
     onChunk: (text: string) => void,
     opts?: { model?: string; provider?: string; sessionId?: string },

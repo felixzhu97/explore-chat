@@ -35,7 +35,7 @@ export const zh = {
     platformControl: "平台控制",
   },
   login: {
-    title: "WhatsChat Admin",
+    title: "Chat Admin",
     subtitle: "管理员登录",
     email: "邮箱",
     password: "密码",

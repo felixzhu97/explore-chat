@@ -352,7 +352,7 @@ function FacebookIcon() {
 }
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("cristiano@whatschat.com");
+  const [email, setEmail] = useState("alice@example.com");
   const [password, setPassword] = useState("123456");
   const [mounted, setMounted] = useState(false);
 

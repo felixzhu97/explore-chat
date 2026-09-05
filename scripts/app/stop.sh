@@ -8,7 +8,7 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-echo -e "${GREEN}Stopping ExploreChat${NC}"
+echo -e "${GREEN}Stopping Chat${NC}"
 
 lsof -ti:9001 2>/dev/null | xargs kill -9 2>/dev/null || true
 lsof -ti:9002 2>/dev/null | xargs kill -9 2>/dev/null || true
@@ -17,8 +17,8 @@ lsof -ti:3456 2>/dev/null | xargs kill -9 2>/dev/null || true
 pkill -f "src/main/ml/media-gen/main.py" 2>/dev/null || true
 pkill -f "celery.*celery_app" 2>/dev/null || true
 pkill -f "uvicorn main:app" 2>/dev/null || true
-pkill -f "ExploreChatApplication\|ChatSpringApplication\|bootRun\|whatschat-web\|turbo run dev" 2>/dev/null || true
-SERVER_PIDS=$(ps aux | grep -E "(gradle.*bootRun|ChatSpringApplication|turbo run dev|whatschat-web)" | grep -v grep | awk '{print $2}' || true)
+pkill -f "ChatApplication\|ChatSpringApplication\|bootRun\|chat-web\|turbo run dev" 2>/dev/null || true
+SERVER_PIDS=$(ps aux | grep -E "(gradle.*bootRun|ChatSpringApplication|turbo run dev|chat-web)" | grep -v grep | awk '{print $2}' || true)
 for PID in $SERVER_PIDS; do kill $PID 2>/dev/null || true; done
 sleep 1
 for PID in $SERVER_PIDS; do kill -9 $PID 2>/dev/null || true; done

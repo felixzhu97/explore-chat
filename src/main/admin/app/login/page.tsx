@@ -54,7 +54,7 @@ const TopRight = styled.div`
   gap: 0.5rem;
 `;
 
-const DEFAULT_EMAIL = "admin@whatschat.com";
+const DEFAULT_EMAIL = "admin@example.com";
 const DEFAULT_PASSWORD = "123456";
 
 export default function LoginPage() {

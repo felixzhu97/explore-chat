@@ -10,7 +10,7 @@ skinparam class {
   FontColor #000000
 }
 
-title Code diagram (C4) - ExploreChat domain model (as-built)
+title Code diagram (C4) - Chat domain model (as-built)
 
 legend right
   |= Stereotype |= Meaning |

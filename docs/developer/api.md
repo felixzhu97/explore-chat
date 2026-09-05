@@ -1,4 +1,4 @@
-# ExploreChat API Documentation
+# Chat API Documentation
 
 ## Base URL
 

@@ -35,7 +35,7 @@ export const en = {
     platformControl: "Platform control",
   },
   login: {
-    title: "WhatsChat Admin",
+    title: "Chat Admin",
     subtitle: "Admin login",
     email: "Email",
     password: "Password",

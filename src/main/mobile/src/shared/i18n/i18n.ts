@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { en } from "@/shared/i18n/locales/en";
 import { zh } from "@/shared/i18n/locales/zh";
 
-export const LANG_STORAGE_KEY = "@whatschat_language";
+export const LANG_STORAGE_KEY = "@chat_language";
 export type AppLanguage = "en" | "zh";
 
 const deviceLocale = Localization.getLocales()[0]?.languageCode ?? "en";

@@ -1,7 +1,7 @@
 import type { ApiClient } from "@/auth/api-client";
 import { getApiClient } from "@/auth/api-client";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { ContactGroupMember } from "@whatschat/shared-types";
+import type { ContactGroupMember } from "@chat/shared-types";
 
 export type { ContactGroupMember };
 

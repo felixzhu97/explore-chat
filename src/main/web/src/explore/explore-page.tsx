@@ -7,7 +7,7 @@ import { InstagramExploreGrid } from "@/explore/components/instagram-explore-gri
 import { FeedCommentsDialog } from "@/feed/components/feed-comments-dialog";
 import { useAuth } from "@/auth/use-auth";
 import { useExplore } from "@/feed/use-feed";
-import { useAnalytics, POST_VIEW } from "@whatschat/analytics";
+import { useAnalytics, POST_VIEW } from "@chat/analytics";
 import { useTranslation } from "@/src/shared/i18n";
 import type { FeedPost } from "@/shared/types";
 import { CenterColumn, FloatingMessagesBtn } from "@/layout/shell-styles";

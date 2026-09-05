@@ -282,11 +282,11 @@ describe("User Types", () => {
       it("should support status field", () => {
         const user: User = {
           id: "user-1",
-          status: "Hey there! I'm using WhatsChat",
+          status: "Hey there! I'm using Chat",
           isOnline: true,
         };
 
-        expect(user.status).toContain("WhatsChat");
+        expect(user.status).toContain("Chat");
       });
 
       it("should support about field", () => {

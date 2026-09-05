@@ -1,4 +1,4 @@
-import type { CallType } from "@whatschat/shared-types";
+import type { CallType } from "@chat/shared-types";
 
 export interface FileUpload {
   id: string;

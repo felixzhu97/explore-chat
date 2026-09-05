@@ -1,4 +1,4 @@
-import type { User as DomainUser } from "@whatschat/shared-types";
+import type { User as DomainUser } from "@chat/shared-types";
 import { toOptionalDate, toRequiredDate } from "@/shared/value-coercion";
 
 export interface User extends DomainUser {
@@ -24,7 +24,7 @@ export class UserEntity implements User {
     this.name = data.name;
     this.phoneNumber = data.phoneNumber;
     this.profilePicture = data.profilePicture;
-    this.about = data.about ?? "嗨，我正在使用 WhatsChat！";
+    this.about = data.about ?? "嗨，我正在使用 Chat！";
     this.lastSeen = toOptionalDate(data.lastSeen);
     this.isOnline = data.isOnline ?? false;
     this.isTyping = data.isTyping ?? false;

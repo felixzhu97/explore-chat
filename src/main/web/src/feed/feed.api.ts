@@ -1,4 +1,4 @@
-import type { SearchScope } from "@whatschat/shared-types";
+import type { SearchScope } from "@chat/shared-types";
 import type { ApiClient } from "@/auth/api-client";
 
 export interface FeedEntryRes {

@@ -1,4 +1,4 @@
-import type { ImWsEvent, Message } from "@whatschat/shared-types";
+import type { ImWsEvent, Message } from "@chat/shared-types";
 
 export interface WebSocketMessage {
   type:

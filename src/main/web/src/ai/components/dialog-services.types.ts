@@ -1,7 +1,7 @@
 import type {
   VoiceGenTargetLanguage,
   VoiceTranslateTargetLanguage,
-} from "@whatschat/shared-types";
+} from "@chat/shared-types";
 
 export interface ITextGenerateService {
   postChatStream(
@@ -9,7 +9,7 @@ export interface ITextGenerateService {
     onChunk: (text: string) => void,
     model?: string,
   ): Promise<void>;
-  postExploreChatStream?(
+  postChatStream?(
     messages: Array<{ role: string; content: string }>,
     onChunk: (text: string) => void,
     opts?: { model?: string; provider?: string; sessionId?: string },
