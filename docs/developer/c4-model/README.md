@@ -16,6 +16,7 @@ ExploreChat 的架构视图。源文件为 `.puml`；PNG 可选。术语见 [Glo
 | `C2-Container.puml`                | C2         | 容器（Web / Admin / Mobile / Nest / SQLite / 旁路） |
 | `C3-Component.puml`                | C3         | 组件（Web UI + Nest 限界上下文）                    |
 | `C4-Code-Domain-Model.puml`        | Code       | 领域模型（对齐当前代码）                            |
+| `C4-Code-Domain-Model-Plan.puml`   | Code       | 领域模型规划差分（绿增 / 红删）                     |
 | `C4-Deployment.puml`               | Deployment | 本地开发部署（含生产简述）                          |
 | `C4-Dynamic-Auth-Login.puml`       | Dynamic    | 登录 → JWT                                          |
 | `C4-Dynamic-Post-Create-Feed.puml` | Dynamic    | 发帖 → SQLite → fan-out → 读帖                      |
@@ -47,6 +48,27 @@ ExploreChat 的架构视图。源文件为 `.puml`；PNG 可选。术语见 [Glo
 ![C4-Code-Domain-Model](png/C4-Code-Domain-Model.png)
 
 对齐 `services/server/src/*/domain` 与 Prisma SQLite（含 social 表）。
+
+### Plan
+
+![C4-Code-Domain-Model-Plan](png/C4-Code-Domain-Model-Plan.png)
+
+相对 as-built 的规划差分：绿 = 待实现新增，红 = 待实现删除。
+
+DDD 内核（对齐 Nest + Prisma cuid / `createdAt` / `updatedAt`）：
+
+- `AbstractImmutable` → `AbstractEntity`（含计划中的 `version`）
+- `AbstractAggregateRoot`：User / Chat / Message / Group / Post
+- `AbstractParticipant`：ChatParticipant / GroupParticipant 共用成员字段
+- `AbstractEmbeddable`：无独立聚合身份的值对象
+
+Chat / Message 行为收敛：`ensureParticipant`、`assertSendableBy`、`MessageRepository`、Message Soft Delete（`delete()` → `isDeleted`）。
+
+infra：`AbstractPrismaRepository`（持有 PrismaClient）；`PrismaMessageRepository` 继承它并实现 `MessageRepository`。domain 端口保留，仅减实现样板。类框与 stereotype 为黑白灰。
+
+```bash
+cd docs/developer/c4-model && plantuml -tpng -o png C4-Code-Domain-Model-Plan.puml
+```
 
 ---
 

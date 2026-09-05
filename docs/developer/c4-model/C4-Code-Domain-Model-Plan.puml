@@ -1,0 +1,353 @@
+@startuml C4-Code-Domain-Model-Plan
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+  FontColor #000000
+}
+
+title Code diagram (C4) — Domain model plan (converge behavior into domain)
+
+legend right
+  |= Stereotype |= Meaning |
+  | <<Abstract>> | Domain kernel base |
+  | <<AggregateRoot>> | Consistency boundary |
+  | <<Entity>> | Identity + lifecycle |
+  | <<ValueObject>> | Immutable by value |
+  | <<Enum>> | Enumeration |
+  | <<DomainService>> | Stateless domain / port |
+  | <<Repository>> | Outbound port in domain/ |
+  | <color:#16A34A>绿色</color> | 新增（待实现） |
+  | <color:#DC2626>红色</color> | 删除（待实现） |
+endlegend
+
+note as N_KERNEL
+  Nest + Prisma (SQLite): id = cuid String;
+  createdAt / updatedAt match schema;
+  version is planned optimistic concurrency
+  (not on every Prisma model today).
+  Identity / version only on kernel bases.
+  Aggregates: no class-level setter;
+  Soft Delete on Message via delete() → isDeleted.
+  Persistence adapters map domain ↔ Prisma later.
+end note
+
+package "ddd kernel" as pkg_kernel {
+  abstract class AbstractImmutable <<Abstract>> {
+    + <color:#16A34A>id: String</color>
+    + <color:#16A34A>createdAt: Date</color>
+  }
+  abstract class AbstractEntity <<Abstract>> {
+    + <color:#16A34A>updatedAt: Date</color>
+    + <color:#16A34A>version: int</color>
+  }
+  abstract class AbstractAggregateRoot <<Abstract>> {
+  }
+  abstract class AbstractParticipant <<Abstract>> {
+    + <color:#16A34A>userId: String</color>
+    + <color:#16A34A>role: ParticipantRole</color>
+    + <color:#16A34A>joinedAt: Date</color>
+    + <color:#16A34A>addedBy: String?</color>
+  }
+  abstract class AbstractEmbeddable <<Abstract>> {
+  }
+}
+
+AbstractImmutable <|-- AbstractEntity
+AbstractEntity <|-- AbstractAggregateRoot
+AbstractEntity <|-- AbstractParticipant
+
+note right of AbstractAggregateRoot
+  <color:#16A34A>Consistency boundary marker
+  for User, Chat, Message, Group, Post.</color>
+end note
+
+note right of AbstractParticipant
+  <color:#16A34A>Shared membership shape
+  for ChatParticipant / GroupParticipant
+  (Prisma chat_participants / group_participants).</color>
+end note
+
+package "users/domain" as pkg_users {
+  class User <<AggregateRoot>> {
+    + username: String
+    + email: String
+    + phone: String
+    + avatar: String
+    + status: String
+    + isOnline: boolean
+    + lastSeen: Date
+    --
+    + {static} create(data)
+    + updateStatus(status)
+    + setOnline(isOnline)
+  }
+  interface UserRepository <<Repository>> {
+    + findById(id)
+    + findByEmail(email)
+    + findByUsername(username)
+    + save(user)
+  }
+}
+
+package "follow (UserFollow)" as pkg_follow {
+  class UserFollow <<Entity>> {
+    + followerId: String
+    + followingId: String
+  }
+}
+
+User "1" o-- "0..*" UserFollow : follower
+User "1" o-- "0..*" UserFollow : following
+
+package "chats/domain" as pkg_chats {
+  class Chat <<AggregateRoot>> {
+    + type: ChatType
+    + name: String
+    + avatar: String
+    + unreadCount: int
+    --
+    + {static} create(data)
+    + updateLastMessage(message)
+    + incrementUnreadCount()
+    + resetUnreadCount()
+    + <color:#16A34A>ensureParticipant(userId)</color>
+  }
+  enum ChatType <<Enum>> {
+    PRIVATE
+    GROUP
+  }
+  class ChatParticipant <<Entity>> {
+    + isArchived: boolean
+    + isMuted: boolean
+    + muteUntil: Date?
+  }
+}
+
+Chat "1" *-- "1..*" ChatParticipant
+Chat --> ChatType
+Chat "1" o-- "0..1" Message : lastMessage
+ChatParticipant --> User
+
+package "messages/domain" as pkg_messages {
+  class Message <<AggregateRoot>> {
+    + chatId: String
+    + senderId: String
+    + type: MessageType
+    + content: String
+    + mediaUrl: String
+    + isEdited: boolean
+    + <color:#16A34A>isDeleted: boolean</color>
+    + <color:#16A34A>clientMsgId: String?</color>
+    --
+    + {static} create(data)
+    + edit(content)
+    + <color:#16A34A>delete()</color>
+    + addReaction(userId, emoji)
+    + markAsRead(userId)
+    + <color:#16A34A>assertSendableBy(senderId)</color>
+  }
+  enum MessageType <<Enum>> {
+    TEXT
+    IMAGE
+    VIDEO
+    AUDIO
+    FILE
+  }
+  class MessageReaction <<ValueObject>> {
+    + userId: String
+    + emoji: String
+  }
+  interface MessageRepository <<Repository>> {
+    + <color:#16A34A>save(message)</color>
+    + <color:#16A34A>findById(id)</color>
+    + <color:#16A34A>findByChatId(chatId)</color>
+  }
+  note right of Message
+    <color:#DC2626>Remove as-built note:
+    Runtime write in MessagesService.</color>
+    Target: application loads Chat/Message,
+    calls domain API, MessageRepository.save.
+    clientMsgId for ack reconcile
+    (persist optional).
+  end note
+}
+
+Chat "1" *-- "0..*" Message
+Message --> MessageType
+Message "1" *-- "0..*" MessageReaction
+Message --> User : senderId
+Message ..> MessageRepository
+
+package "infra/persistence" as pkg_infra {
+  abstract class AbstractPrismaRepository <<Abstract>> {
+    + <color:#16A34A>prisma: PrismaClient</color>
+    --
+    + <color:#16A34A>save(entity)</color>
+    + <color:#16A34A>findById(id)</color>
+  }
+  class PrismaMessageRepository {
+    --
+    + <color:#16A34A>save(message)</color>
+    + <color:#16A34A>findById(id)</color>
+    + <color:#16A34A>findByChatId(chatId)</color>
+  }
+  note bottom of AbstractPrismaRepository
+    <color:#16A34A>Infra only — domain must not
+    depend on PrismaClient.
+    Other *RepositoryImpl follow
+    the same extend pattern.</color>
+  end note
+}
+
+AbstractPrismaRepository <|-- PrismaMessageRepository
+PrismaMessageRepository ..|> MessageRepository
+
+package "groups/domain" as pkg_groups {
+  class Group <<AggregateRoot>> {
+    + name: String
+    + creatorId: String
+    --
+    + {static} create(data)
+    + addParticipant(userId, addedBy, role)
+    + removeParticipant(userId)
+  }
+  class GroupParticipant <<Entity>> {
+  }
+  enum ParticipantRole <<Enum>> {
+    ADMIN
+    MEMBER
+  }
+}
+
+Group "1" *-- "0..*" GroupParticipant
+GroupParticipant --> ParticipantRole
+ChatParticipant --> ParticipantRole
+
+package "post/domain" as pkg_post {
+  class Post <<AggregateRoot>> {
+    + userId: String
+    + caption: String
+    + type: String
+    + mediaUrls: String[]
+    + coverUrl: String
+    + location: String
+    --
+    + {static} create(input)
+  }
+  class FeedEntry <<ValueObject>> {
+    + postId: String
+    + authorId: String
+    + createdAt: Date
+  }
+  class EngagementCounts <<ValueObject>> {
+    + likeCount: int
+    + commentCount: int
+    + saveCount: int
+  }
+  interface PostRepository <<Repository>> {
+    + insertPost(input)
+    + getPostById(postId)
+    + getPostsByUserId(userId, limit)
+    + deletePost(postId, userId)
+  }
+  interface EngagementRepository <<Repository>> {
+    + like(userId, postId)
+    + unlike(userId, postId)
+    + save(userId, postId)
+    + unsave(userId, postId)
+    + getEngagementCounts(postId)
+  }
+}
+
+Post --> User : author
+Post --> FeedEntry
+Post --> EngagementCounts
+Post "1" o-- "0..*" Comment
+
+package "comments/domain" as pkg_comments {
+  class Comment <<Entity>> {
+    + postId: String
+    + userId: String
+    + content: String
+    + parentId: String
+  }
+  interface CommentRepository <<Repository>> {
+    + insert(doc)
+    + findByPostId(postId, limit, skip)
+    + findById(id)
+    + deleteOne(id, userId)
+  }
+}
+
+Comment --> User : author
+
+package "notifications/domain" as pkg_notifications {
+  class NotificationItem <<Entity>> {
+    + recipientId: String
+    + actorId: String
+    + type: NotificationType
+    + postId: String
+    + commentId: String
+    + readAt: Date
+  }
+  enum NotificationType <<Enum>> {
+    like
+    comment
+  }
+  interface NotificationRepository <<Repository>> {
+    + upsertLike(...)
+    + insertComment(...)
+    + findByRecipient(...)
+    + markRead(...)
+  }
+}
+
+NotificationItem --> NotificationType
+NotificationItem --> Post
+
+package "auth/domain" as pkg_auth {
+  interface AuthService <<DomainService>> {
+    + register(data)
+    + login(data)
+    + refresh(token)
+  }
+  class AuthTokens <<ValueObject>> {
+    + accessToken: String
+    + refreshToken: String
+  }
+}
+
+AuthService ..> User
+AuthService ..> AuthTokens
+
+' Aggregates → AbstractAggregateRoot (Nest BC roots)
+AbstractAggregateRoot <|-- User
+AbstractAggregateRoot <|-- Chat
+AbstractAggregateRoot <|-- Message
+AbstractAggregateRoot <|-- Group
+AbstractAggregateRoot <|-- Post
+
+' Child entities with own cuid rows
+AbstractEntity <|-- UserFollow
+AbstractEntity <|-- Comment
+AbstractEntity <|-- NotificationItem
+
+' Shared participant base (Prisma membership tables)
+AbstractParticipant <|-- ChatParticipant
+AbstractParticipant <|-- GroupParticipant
+AbstractParticipant ..> ParticipantRole
+
+' Embeddable / value objects (no separate aggregate)
+AbstractEmbeddable <|-- MessageReaction
+AbstractEmbeddable <|-- FeedEntry
+AbstractEmbeddable <|-- EngagementCounts
+AbstractEmbeddable <|-- AuthTokens
+
+N_KERNEL .. pkg_kernel
+
+@enduml
