@@ -22,7 +22,7 @@ import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { MediaService } from "@/media/service/media.service";
 import { ConfigService } from "@/core/config/config.service";
 
-@ApiTags("Media")
+@ApiTags("media")
 @Controller("media")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
@@ -60,7 +60,6 @@ export class MediaController {
     }
     const targetFolder =
       folder && /^[a-zA-Z0-9/_-]{1,64}$/.test(folder) ? folder : "posts";
-    const data = await this.mediaService.uploadMedia(file, targetFolder);
-    return { success: true, data };
+    return this.mediaService.uploadMedia(file, targetFolder);
   }
 }

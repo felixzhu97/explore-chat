@@ -1,9 +1,18 @@
-import { Controller, Post, Get, Body, Param, UseGuards } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Param,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { VideoService } from "@/ai/service/video.service";
 
-@ApiTags("视频生成")
+@ApiTags("video")
 @Controller("video")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
@@ -11,19 +20,18 @@ export class VideoController {
   constructor(private readonly videoService: VideoService) {}
 
   @Post("generate")
-  @ApiOperation({ summary: "提交视频生成任务" })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Submit video generation job" })
   async generate(@Body() body: { prompt: string; imageUrl?: string }) {
-    const result = await this.videoService.generate({
+    return this.videoService.generate({
       prompt: body.prompt,
       ...(body.imageUrl != null && { imageUrl: body.imageUrl }),
     });
-    return { success: true, data: result };
   }
 
   @Get("generate/:jobId")
-  @ApiOperation({ summary: "查询视频生成结果" })
+  @ApiOperation({ summary: "Get video generation result" })
   async getResult(@Param("jobId") jobId: string) {
-    const result = await this.videoService.getResult(jobId);
-    return { success: true, data: result };
+    return this.videoService.getResult(jobId);
   }
 }

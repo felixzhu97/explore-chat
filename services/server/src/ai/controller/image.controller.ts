@@ -1,9 +1,18 @@
-import { Controller, Post, Body, Get, Param, UseGuards } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { ImageService } from "@/ai/service/image.service";
 
-@ApiTags("图片生成")
+@ApiTags("image")
 @Controller("image")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
@@ -11,21 +20,20 @@ export class ImageController {
   constructor(private readonly imageService: ImageService) {}
 
   @Post("generate")
-  @ApiOperation({ summary: "提交图片生成任务" })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Submit image generation job" })
   async generate(@Body() body: { prompt: string; negativePrompt?: string }) {
-    const result = await this.imageService.generate({
+    return this.imageService.generate({
       prompt: body.prompt,
       ...(body.negativePrompt != null && {
         negativePrompt: body.negativePrompt,
       }),
     });
-    return { success: true, data: result };
   }
 
   @Get("generate/:jobId")
-  @ApiOperation({ summary: "查询图片生成结果" })
+  @ApiOperation({ summary: "Get image generation result" })
   async getResult(@Param("jobId") jobId: string) {
-    const result = await this.imageService.getResult(jobId);
-    return { success: true, data: result };
+    return this.imageService.getResult(jobId);
   }
 }

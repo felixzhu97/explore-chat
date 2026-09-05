@@ -137,10 +137,10 @@ describe("NotificationService", () => {
         TEST_RECIPIENT_ID,
         "notif-1",
       );
-      expect(result).toEqual({ success: true });
+      expect(result).toBe(true);
     });
 
-    it("should return success false when markRead fails", async () => {
+    it("should return false when markRead fails", async () => {
       const mockRepo = createMockNotificationRepo({
         markRead: vi.fn().mockResolvedValue(false),
       });
@@ -148,7 +148,7 @@ describe("NotificationService", () => {
 
       const result = await service.markRead(TEST_RECIPIENT_ID, "notif-1");
 
-      expect(result).toEqual({ success: false });
+      expect(result).toBe(false);
     });
   });
 
@@ -166,7 +166,7 @@ describe("NotificationService", () => {
         TEST_RECIPIENT_ID,
         ids,
       );
-      expect(result).toEqual({ success: true, modified: 3 });
+      expect(result).toBe(3);
     });
 
     it("should handle empty ids array", async () => {
@@ -177,7 +177,7 @@ describe("NotificationService", () => {
 
       const result = await service.markReadMany(TEST_RECIPIENT_ID, []);
 
-      expect(result).toEqual({ success: true, modified: 0 });
+      expect(result).toBe(0);
     });
   });
 
@@ -191,7 +191,7 @@ describe("NotificationService", () => {
       const result = await service.markAllRead(TEST_RECIPIENT_ID);
 
       expect(mockRepo.markAllRead).toHaveBeenCalledWith(TEST_RECIPIENT_ID);
-      expect(result).toEqual({ success: true, modified: 25 });
+      expect(result).toBe(25);
     });
 
     it("should return zero modified when no notifications exist", async () => {
@@ -202,7 +202,7 @@ describe("NotificationService", () => {
 
       const result = await service.markAllRead(TEST_RECIPIENT_ID);
 
-      expect(result).toEqual({ success: true, modified: 0 });
+      expect(result).toBe(0);
     });
   });
 

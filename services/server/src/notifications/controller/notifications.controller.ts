@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Patch,
   Param,
   Body,
   Query,
@@ -14,6 +13,11 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { CurrentUser } from "@/auth/controller/current-user.decorator";
 import { NotificationService } from "@/notifications/service/notification.service";
+import {
+  clampPageSize,
+  cursorFromPageToken,
+  nextCursorPageToken,
+} from "@/core/aip/page-token";
 
 @ApiTags("notifications")
 @Controller("notifications")
@@ -26,25 +30,33 @@ export class NotificationsController {
   @ApiOperation({ summary: "List notifications" })
   async list(
     @CurrentUser() user: { id: string },
-    @Query("limit") limit = "20",
-    @Query("cursor") cursor?: string,
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
   ) {
-    const data = await this.notificationService.list(
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
+    const cursor = cursorFromPageToken(pageToken);
+    const { items, nextCursor } = await this.notificationService.list(
       user.id,
-      parseInt(limit, 10),
+      pageSize,
       cursor,
     );
-    return { success: true, data };
+    return {
+      notifications: items,
+      next_page_token: nextCursorPageToken(nextCursor),
+    };
   }
 
-  @Patch(":id/read")
+  @Post(":id\\:read")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Mark notification read" })
   async markRead(@CurrentUser() user: { id: string }, @Param("id") id: string) {
-    return this.notificationService.markRead(user.id, id);
+    await this.notificationService.markRead(user.id, id);
+    return {};
   }
 
-  @Post("read")
+  @Post("read\\:batch")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Mark notifications read by ids" })
   async markReadMany(
@@ -52,13 +64,18 @@ export class NotificationsController {
     @Body() body: { ids: string[] },
   ) {
     const ids = Array.isArray(body?.ids) ? body.ids : [];
-    return this.notificationService.markReadMany(user.id, ids);
+    const modifiedCount = await this.notificationService.markReadMany(
+      user.id,
+      ids,
+    );
+    return { modified_count: modifiedCount };
   }
 
-  @Post("read-all")
+  @Post("read\\:all")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Mark all notifications read" })
   async markAllRead(@CurrentUser() user: { id: string }) {
-    return this.notificationService.markAllRead(user.id);
+    const modifiedCount = await this.notificationService.markAllRead(user.id);
+    return { modified_count: modifiedCount };
   }
 }

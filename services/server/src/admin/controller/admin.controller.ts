@@ -1,13 +1,15 @@
 import {
   Controller,
   Get,
-  Put,
+  Patch,
   Delete,
   Post,
   Param,
   Query,
   Body,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
@@ -15,8 +17,13 @@ import { AdminGuard } from "./admin.guard";
 import { AdminService } from "@/admin/service/admin.service";
 import { UsersService } from "@/users/service/users.service";
 import { AnalyticsService } from "@/analytics/service/analytics.service";
+import {
+  clampPageSize,
+  offsetFromPageToken,
+  nextOffsetPageToken,
+} from "@/core/aip/page-token";
 
-@ApiTags("管理员")
+@ApiTags("admin")
 @Controller("admin")
 @UseGuards(JwtAuthGuard, AdminGuard)
 @ApiBearerAuth()
@@ -28,24 +35,19 @@ export class AdminController {
   ) {}
 
   @Get("stats")
-  @ApiOperation({ summary: "获取仪表盘统计" })
+  @ApiOperation({ summary: "Get dashboard stats" })
   async getStats() {
-    const stats = await this.adminService.getStats();
-    return {
-      success: true,
-      data: stats,
-    };
+    return this.adminService.getStats();
   }
 
   @Get("users/:id")
-  @ApiOperation({ summary: "获取用户详情" })
+  @ApiOperation({ summary: "Get user" })
   async getUser(@Param("id") id: string) {
-    const user = await this.usersService.getUserById(id);
-    return { success: true, data: user };
+    return this.usersService.getUserById(id);
   }
 
-  @Put("users/:id")
-  @ApiOperation({ summary: "更新用户" })
+  @Patch("users/:id")
+  @ApiOperation({ summary: "Update user" })
   async updateUser(
     @Param("id") id: string,
     @Body()
@@ -57,211 +59,235 @@ export class AdminController {
       status?: string;
     },
   ) {
-    const user = await this.usersService.updateUser(id, data);
-    return { success: true, data: user };
+    return this.usersService.updateUser(id, data);
   }
 
   @Delete("users/:id")
-  @ApiOperation({ summary: "删除用户" })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Delete user" })
   async deleteUser(@Param("id") id: string) {
     await this.usersService.deleteUser(id);
-    return { success: true, message: "用户已删除" };
   }
 
   @Get("users")
-  @ApiOperation({ summary: "获取所有用户" })
+  @ApiOperation({ summary: "List users" })
   async getUsers(
-    @Query("page") page: string = "1",
-    @Query("limit") limit: string = "20",
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
     @Query("search") search?: string,
   ) {
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
+    const offset = offsetFromPageToken(pageToken, pageSize);
+    const page = Math.floor(offset / pageSize) + 1;
     const result = await this.usersService.getUsers({
-      page: parseInt(page, 10),
-      limit: parseInt(limit, 10),
+      page,
+      limit: pageSize,
       ...(search && { search }),
     });
+    const hasMore = offset + result.data.length < result.pagination.total;
     return {
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
+      users: result.data,
+      total_size: result.pagination.total,
+      next_page_token: nextOffsetPageToken(offset, pageSize, hasMore),
     };
   }
 
   @Get("chats")
-  @ApiOperation({ summary: "获取所有聊天" })
+  @ApiOperation({ summary: "List chats" })
   async getChats(
-    @Query("page") page: string = "1",
-    @Query("limit") limit: string = "20",
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
     @Query("search") search?: string,
   ) {
-    const result = await this.adminService.getAllChats(
-      parseInt(page, 10),
-      parseInt(limit, 10),
-      search,
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
     );
+    const offset = offsetFromPageToken(pageToken, pageSize);
+    const page = Math.floor(offset / pageSize) + 1;
+    const result = await this.adminService.getAllChats(page, pageSize, search);
+    const hasMore = offset + result.data.length < result.pagination.total;
     return {
-      success: true,
-      ...result,
+      chats: result.data,
+      total_size: result.pagination.total,
+      next_page_token: nextOffsetPageToken(offset, pageSize, hasMore),
     };
   }
 
   @Get("groups")
-  @ApiOperation({ summary: "获取所有群组" })
+  @ApiOperation({ summary: "List groups" })
   async getGroups(
-    @Query("page") page: string = "1",
-    @Query("limit") limit: string = "20",
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
     @Query("search") search?: string,
   ) {
-    const result = await this.adminService.getAllGroups(
-      parseInt(page, 10),
-      parseInt(limit, 10),
-      search,
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
     );
+    const offset = offsetFromPageToken(pageToken, pageSize);
+    const page = Math.floor(offset / pageSize) + 1;
+    const result = await this.adminService.getAllGroups(page, pageSize, search);
+    const hasMore = offset + result.data.length < result.pagination.total;
     return {
-      success: true,
-      ...result,
+      groups: result.data,
+      total_size: result.pagination.total,
+      next_page_token: nextOffsetPageToken(offset, pageSize, hasMore),
     };
   }
 
   @Get("chats/:chatId/messages")
-  @ApiOperation({ summary: "获取聊天消息" })
+  @ApiOperation({ summary: "List chat messages" })
   async getChatMessages(
     @Param("chatId") chatId: string,
-    @Query("page") page: string = "1",
-    @Query("limit") limit: string = "50",
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
   ) {
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+      50,
+    );
+    const offset = offsetFromPageToken(pageToken, pageSize);
+    const page = Math.floor(offset / pageSize) + 1;
     const result = await this.adminService.getChatMessages(
       chatId,
-      parseInt(page, 10),
-      parseInt(limit, 10),
+      page,
+      pageSize,
     );
+    const hasMore = offset + result.data.length < result.pagination.total;
     return {
-      success: true,
-      ...result,
+      messages: result.data,
+      total_size: result.pagination.total,
+      next_page_token: nextOffsetPageToken(offset, pageSize, hasMore),
     };
   }
 
   @Delete("messages/:messageId")
-  @ApiOperation({ summary: "删除消息(内容审核)" })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Delete message (moderation)" })
   async deleteMessage(@Param("messageId") messageId: string) {
     await this.adminService.deleteMessageAsAdmin(messageId);
-    return {
-      success: true,
-      message: "消息已删除",
-    };
   }
 
   @Get("analytics/overview")
-  @ApiOperation({ summary: "行为分析概览" })
+  @ApiOperation({ summary: "Analytics overview" })
   async getAnalyticsOverview(
     @Query("start") startStr: string,
     @Query("end") endStr: string,
   ) {
     const start = new Date(startStr);
     const end = new Date(endStr);
-    const data = await this.analyticsService.getOverview(start, end);
-    return { success: true, data };
+    return this.analyticsService.getOverview(start, end);
   }
 
   @Get("list/posts")
-  @ApiOperation({ summary: "获取帖子列表（含识别标签）" })
+  @ApiOperation({ summary: "List posts with moderation labels" })
   async getPosts(
-    @Query("page") page: string = "1",
-    @Query("limit") limit: string = "20",
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
     @Query("search") search?: string,
     @Query("moderationStatus") moderationStatus?: string,
   ) {
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
+    const offset = offsetFromPageToken(pageToken, pageSize);
+    const page = Math.floor(offset / pageSize) + 1;
     const result = await this.adminService.getPosts(
-      parseInt(page, 10),
-      parseInt(limit, 10),
+      page,
+      pageSize,
       search,
       moderationStatus,
     );
+    const hasMore = offset + result.data.length < result.pagination.total;
     return {
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
+      posts: result.data,
+      total_size: result.pagination.total,
+      next_page_token: nextOffsetPageToken(offset, pageSize, hasMore),
     };
   }
 
   @Get("posts/:postId/detail")
-  @ApiOperation({ summary: "帖子详情（含互动数与评论）" })
+  @ApiOperation({ summary: "Post detail with engagement and comments" })
   async getPostDetail(@Param("postId") postId: string) {
-    const result = await this.adminService.getPostDetail(postId);
-    return { success: true, data: result };
+    return this.adminService.getPostDetail(postId);
   }
 
   @Delete("posts/:postId")
-  @ApiOperation({ summary: "物理删除帖子" })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Delete post" })
   async deletePost(@Param("postId") postId: string) {
     await this.adminService.deletePostAdmin(postId);
-    return { success: true, message: "Post deleted" };
   }
 
-  @Put("posts/:postId/hide")
-  @ApiOperation({ summary: "隐藏帖子" })
+  @Post("posts/:postId\\:hide")
+  @ApiOperation({ summary: "Hide post" })
   async hidePost(@Param("postId") postId: string) {
     await this.adminService.hidePost(postId);
-    return { success: true, message: "Post hidden" };
+    return {};
   }
 
-  @Put("posts/:postId/unhide")
-  @ApiOperation({ summary: "取消隐藏帖子" })
+  @Post("posts/:postId\\:unhide")
+  @ApiOperation({ summary: "Unhide post" })
   async unhidePost(@Param("postId") postId: string) {
     await this.adminService.unhidePost(postId);
-    return { success: true, message: "Post unhidden" };
+    return {};
   }
 
-  @Post("posts/:postId/recheck-moderation")
-  @ApiOperation({ summary: "重新识别违规内容" })
+  @Post("posts/:postId\\:recheckModeration")
+  @ApiOperation({ summary: "Recheck post moderation" })
   async recheckModeration(@Param("postId") postId: string) {
-    const result = await this.adminService.recheckModeration(postId);
-    return { success: true, data: result };
+    return this.adminService.recheckModeration(postId);
   }
 
-  @Post("posts/batch-delete")
-  @ApiOperation({ summary: "批量物理删除帖子" })
+  @Post("posts\\:batchDelete")
+  @ApiOperation({ summary: "Batch delete posts" })
   async batchDeletePosts(@Body() body: { postIds: string[] }) {
     const postIds = Array.isArray(body?.postIds) ? body.postIds : [];
-    const result = await this.adminService.batchDeletePosts(postIds);
-    return { success: true, data: result };
+    return this.adminService.batchDeletePosts(postIds);
   }
 
-  @Post("posts/batch-hide")
-  @ApiOperation({ summary: "批量隐藏帖子" })
+  @Post("posts\\:batchHide")
+  @ApiOperation({ summary: "Batch hide posts" })
   async batchHidePosts(@Body() body: { postIds: string[] }) {
     const postIds = Array.isArray(body?.postIds) ? body.postIds : [];
-    const result = await this.adminService.batchHidePosts(postIds);
-    return { success: true, data: result };
+    return this.adminService.batchHidePosts(postIds);
   }
 
   @Get("content-safety/stats")
-  @ApiOperation({ summary: "内容安全审核统计" })
+  @ApiOperation({ summary: "Content safety moderation stats" })
   async getContentSafetyStats() {
-    const stats = await this.adminService.getModerationStats();
-    return { success: true, data: stats };
+    return this.adminService.getModerationStats();
   }
 
   @Get("analytics/events")
-  @ApiOperation({ summary: "行为分析事件列表" })
+  @ApiOperation({ summary: "List analytics events" })
   async getAnalyticsEvents(
     @Query("start") startStr: string,
     @Query("end") endStr: string,
-    @Query("page") pageStr?: string,
-    @Query("limit") limitStr?: string,
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
     @Query("eventName") eventName?: string,
   ) {
     const start = new Date(startStr);
     const end = new Date(endStr);
-    const page = pageStr ? parseInt(pageStr, 10) : 1;
-    const limit = limitStr ? parseInt(limitStr, 10) : 20;
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
+    const offset = offsetFromPageToken(pageToken, pageSize);
+    const page = Math.floor(offset / pageSize) + 1;
     const result = await this.analyticsService.getEvents({
       start,
       end,
       page,
-      limit,
+      limit: pageSize,
       ...(eventName && { eventName }),
     });
-    return { success: true, ...result };
+    const hasMore = offset + result.data.length < result.total;
+    return {
+      events: result.data,
+      total_size: result.total,
+      next_page_token: nextOffsetPageToken(offset, pageSize, hasMore),
+    };
   }
 }

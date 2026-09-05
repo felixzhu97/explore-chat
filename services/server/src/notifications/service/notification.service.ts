@@ -16,19 +16,16 @@ export class NotificationService {
     return this.repo.findByRecipient(recipientId, safeLimit, cursor);
   }
 
-  async markRead(recipientId: string, id: string) {
-    const ok = await this.repo.markRead(recipientId, id);
-    return { success: ok };
+  async markRead(recipientId: string, id: string): Promise<boolean> {
+    return this.repo.markRead(recipientId, id);
   }
 
-  async markReadMany(recipientId: string, ids: string[]) {
-    const n = await this.repo.markReadMany(recipientId, ids);
-    return { success: true, modified: n };
+  async markReadMany(recipientId: string, ids: string[]): Promise<number> {
+    return this.repo.markReadMany(recipientId, ids);
   }
 
-  async markAllRead(recipientId: string) {
-    const n = await this.repo.markAllRead(recipientId);
-    return { success: true, modified: n };
+  async markAllRead(recipientId: string): Promise<number> {
+    return this.repo.markAllRead(recipientId);
   }
 
   async upsertLike(

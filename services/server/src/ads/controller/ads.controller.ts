@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -22,8 +24,13 @@ import {
   CreateAdCreativeDto,
   UpdateAdCreativeDto,
 } from "@/ads/controller/ads-request";
+import {
+  clampPageSize,
+  offsetFromPageToken,
+  nextOffsetPageToken,
+} from "@/core/aip/page-token";
 
-@ApiTags("Ads")
+@ApiTags("ads")
 @Controller("ads")
 @UseGuards(JwtAuthGuard, AdminGuard)
 @ApiBearerAuth()
@@ -31,14 +38,16 @@ export class AdsController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get("accounts")
-  @ApiOperation({ summary: "列表广告账户" })
+  @ApiOperation({ summary: "List ad accounts" })
   async listAccounts(
     @Query("status") status?: string,
-    @Query("page") page: string = "1",
-    @Query("limit") limit: string = "20",
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
   ) {
-    const pageNum = parseInt(page, 10) || 1;
-    const limitNum = parseInt(limit, 10) || 20;
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
+    const offset = offsetFromPageToken(pageToken, pageSize);
     const where: Record<string, unknown> = {};
     if (status) where["status"] = status;
     const client = this.prisma as unknown as {
@@ -48,42 +57,30 @@ export class AdsController {
       };
     };
     if (!client.adAccount) {
-      return {
-        success: true,
-        data: [],
-        pagination: {
-          page: pageNum,
-          limit: limitNum,
-          total: 0,
-          hasMore: false,
-        },
-      };
+      return { accounts: [] as unknown[] };
     }
     const [items, total] = await Promise.all([
       client.adAccount.findMany({
         where,
         orderBy: { createdAt: "desc" },
-        skip: (pageNum - 1) * limitNum,
-        take: limitNum,
+        skip: offset,
+        take: pageSize,
       }),
       client.adAccount.count({ where }),
     ]);
+    const hasMore = offset + items.length < total;
     return {
-      success: true,
-      data: items,
-      pagination: {
-        page: pageNum,
-        limit: limitNum,
-        total,
-        hasMore: pageNum * limitNum < total,
-      },
+      accounts: items,
+      total_size: total,
+      next_page_token: nextOffsetPageToken(offset, pageSize, hasMore),
     };
   }
 
   @Post("accounts")
-  @ApiOperation({ summary: "创建广告账户" })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Create ad account" })
   async createAccount(@Body() body: CreateAdAccountDto) {
-    const data = await (this.prisma as any).adAccount.create({
+    return (this.prisma as any).adAccount.create({
       data: {
         name: body.name,
         timezone: body.timezone ?? "UTC",
@@ -93,16 +90,15 @@ export class AdsController {
         totalBudgetCents: body.totalBudgetCents ?? null,
       },
     });
-    return { success: true, data };
   }
 
   @Patch("accounts/:id")
-  @ApiOperation({ summary: "更新广告账户" })
+  @ApiOperation({ summary: "Update ad account" })
   async updateAccount(
     @Param("id") id: string,
     @Body() body: UpdateAdAccountDto,
   ) {
-    const data = await (this.prisma as any).adAccount.update({
+    return (this.prisma as any).adAccount.update({
       where: { id },
       data: {
         ...(body.name !== undefined && { name: body.name }),
@@ -117,19 +113,20 @@ export class AdsController {
         }),
       },
     });
-    return { success: true, data };
   }
 
   @Get("campaigns")
-  @ApiOperation({ summary: "列表广告活动" })
+  @ApiOperation({ summary: "List ad campaigns" })
   async listCampaigns(
     @Query("accountId") accountId?: string,
     @Query("status") status?: string,
-    @Query("page") page: string = "1",
-    @Query("limit") limit: string = "20",
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
   ) {
-    const pageNum = parseInt(page, 10) || 1;
-    const limitNum = parseInt(limit, 10) || 20;
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
+    const offset = offsetFromPageToken(pageToken, pageSize);
     const where: Record<string, unknown> = {};
     if (accountId) where["accountId"] = accountId;
     if (status) where["status"] = status;
@@ -140,42 +137,30 @@ export class AdsController {
       };
     };
     if (!client.adCampaign) {
-      return {
-        success: true,
-        data: [],
-        pagination: {
-          page: pageNum,
-          limit: limitNum,
-          total: 0,
-          hasMore: false,
-        },
-      };
+      return { campaigns: [] as unknown[] };
     }
     const [items, total] = await Promise.all([
       client.adCampaign.findMany({
         where,
         orderBy: { createdAt: "desc" },
-        skip: (pageNum - 1) * limitNum,
-        take: limitNum,
+        skip: offset,
+        take: pageSize,
       }),
       client.adCampaign.count({ where }),
     ]);
+    const hasMore = offset + items.length < total;
     return {
-      success: true,
-      data: items,
-      pagination: {
-        page: pageNum,
-        limit: limitNum,
-        total,
-        hasMore: pageNum * limitNum < total,
-      },
+      campaigns: items,
+      total_size: total,
+      next_page_token: nextOffsetPageToken(offset, pageSize, hasMore),
     };
   }
 
   @Post("campaigns")
-  @ApiOperation({ summary: "创建广告活动" })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Create ad campaign" })
   async createCampaign(@Body() body: CreateAdCampaignDto) {
-    const data = await (this.prisma as any).adCampaign.create({
+    return (this.prisma as any).adCampaign.create({
       data: {
         accountId: body.accountId,
         name: body.name,
@@ -187,16 +172,15 @@ export class AdsController {
         endAt: body.endAt ? new Date(body.endAt) : null,
       },
     });
-    return { success: true, data };
   }
 
   @Patch("campaigns/:id")
-  @ApiOperation({ summary: "更新广告活动" })
+  @ApiOperation({ summary: "Update ad campaign" })
   async updateCampaign(
     @Param("id") id: string,
     @Body() body: UpdateAdCampaignDto,
   ) {
-    const data = await (this.prisma as any).adCampaign.update({
+    return (this.prisma as any).adCampaign.update({
       where: { id },
       data: {
         ...(body.name !== undefined && { name: body.name }),
@@ -216,19 +200,20 @@ export class AdsController {
         }),
       },
     });
-    return { success: true, data };
   }
 
   @Get("groups")
-  @ApiOperation({ summary: "列表广告组" })
+  @ApiOperation({ summary: "List ad groups" })
   async listGroups(
     @Query("campaignId") campaignId?: string,
     @Query("placement") placement?: string,
-    @Query("page") page: string = "1",
-    @Query("limit") limit: string = "20",
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
   ) {
-    const pageNum = parseInt(page, 10) || 1;
-    const limitNum = parseInt(limit, 10) || 20;
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
+    const offset = offsetFromPageToken(pageToken, pageSize);
     const where: Record<string, unknown> = {};
     if (campaignId) where["campaignId"] = campaignId;
     if (placement) where["placement"] = placement;
@@ -236,27 +221,24 @@ export class AdsController {
       (this.prisma as any).adGroup.findMany({
         where,
         orderBy: { createdAt: "desc" },
-        skip: (pageNum - 1) * limitNum,
-        take: limitNum,
+        skip: offset,
+        take: pageSize,
       }),
       (this.prisma as any).adGroup.count({ where }),
     ]);
+    const hasMore = offset + items.length < total;
     return {
-      success: true,
-      data: items,
-      pagination: {
-        page: pageNum,
-        limit: limitNum,
-        total,
-        hasMore: pageNum * limitNum < total,
-      },
+      groups: items,
+      total_size: total,
+      next_page_token: nextOffsetPageToken(offset, pageSize, hasMore),
     };
   }
 
   @Post("groups")
-  @ApiOperation({ summary: "创建广告组" })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Create ad group" })
   async createGroup(@Body() body: CreateAdGroupDto) {
-    const data = await (this.prisma as any).adGroup.create({
+    return (this.prisma as any).adGroup.create({
       data: {
         campaignId: body.campaignId,
         name: body.name,
@@ -269,13 +251,12 @@ export class AdsController {
         maxImpressionsPerUserPerDay: body.maxImpressionsPerUserPerDay ?? null,
       },
     });
-    return { success: true, data };
   }
 
   @Patch("groups/:id")
-  @ApiOperation({ summary: "更新广告组" })
+  @ApiOperation({ summary: "Update ad group" })
   async updateGroup(@Param("id") id: string, @Body() body: UpdateAdGroupDto) {
-    const data = await (this.prisma as any).adGroup.update({
+    return (this.prisma as any).adGroup.update({
       where: { id },
       data: {
         ...(body.name !== undefined && { name: body.name }),
@@ -294,19 +275,20 @@ export class AdsController {
         }),
       },
     });
-    return { success: true, data };
   }
 
   @Get("creatives")
-  @ApiOperation({ summary: "列表广告创意" })
+  @ApiOperation({ summary: "List ad creatives" })
   async listCreatives(
     @Query("campaignId") campaignId?: string,
     @Query("groupId") groupId?: string,
-    @Query("page") page: string = "1",
-    @Query("limit") limit: string = "20",
+    @Query("page_size") pageSizeRaw?: string,
+    @Query("page_token") pageToken?: string,
   ) {
-    const pageNum = parseInt(page, 10) || 1;
-    const limitNum = parseInt(limit, 10) || 20;
+    const pageSize = clampPageSize(
+      pageSizeRaw ? parseInt(pageSizeRaw, 10) : undefined,
+    );
+    const offset = offsetFromPageToken(pageToken, pageSize);
     const where: Record<string, unknown> = {};
     if (campaignId) where["campaignId"] = campaignId;
     if (groupId) where["groupId"] = groupId;
@@ -314,27 +296,24 @@ export class AdsController {
       (this.prisma as any).adCreative.findMany({
         where,
         orderBy: { createdAt: "desc" },
-        skip: (pageNum - 1) * limitNum,
-        take: limitNum,
+        skip: offset,
+        take: pageSize,
       }),
       (this.prisma as any).adCreative.count({ where }),
     ]);
+    const hasMore = offset + items.length < total;
     return {
-      success: true,
-      data: items,
-      pagination: {
-        page: pageNum,
-        limit: limitNum,
-        total,
-        hasMore: pageNum * limitNum < total,
-      },
+      creatives: items,
+      total_size: total,
+      next_page_token: nextOffsetPageToken(offset, pageSize, hasMore),
     };
   }
 
   @Post("creatives")
-  @ApiOperation({ summary: "创建广告创意" })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Create ad creative" })
   async createCreative(@Body() body: CreateAdCreativeDto) {
-    const data = await (this.prisma as any).adCreative.create({
+    return (this.prisma as any).adCreative.create({
       data: {
         campaignId: body.campaignId,
         groupId: body.groupId ?? null,
@@ -347,16 +326,15 @@ export class AdsController {
         language: body.language ?? null,
       },
     });
-    return { success: true, data };
   }
 
   @Patch("creatives/:id")
-  @ApiOperation({ summary: "更新广告创意" })
+  @ApiOperation({ summary: "Update ad creative" })
   async updateCreative(
     @Param("id") id: string,
     @Body() body: UpdateAdCreativeDto,
   ) {
-    const data = await (this.prisma as any).adCreative.update({
+    return (this.prisma as any).adCreative.update({
       where: { id },
       data: {
         ...(body.groupId !== undefined && { groupId: body.groupId }),
@@ -371,6 +349,5 @@ export class AdsController {
         ...(body.language !== undefined && { language: body.language }),
       },
     });
-    return { success: true, data };
   }
 }
