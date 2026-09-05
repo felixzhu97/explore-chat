@@ -10,7 +10,7 @@ import {
   type WebSocketMessage,
 } from "@whatschat/im";
 import { getWebSocketManager } from "@/chat/websocket";
-import { API_CONFIG } from "@/auth/api.config";
+import { API_CONFIG } from "@/auth/api-client";
 
 function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;

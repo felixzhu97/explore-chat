@@ -1,5 +1,5 @@
 import type { ApiClient } from "@/auth/api-client";
-import type { ApiResponse } from "@/auth/api-response.model";
+import type { ApiResponse } from "@/auth/api-client";
 
 export class UserApi {
   constructor(private apiClient: ApiClient) {}

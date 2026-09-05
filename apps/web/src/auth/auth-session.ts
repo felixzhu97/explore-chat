@@ -1,9 +1,88 @@
-import type { AuthState, LoginData, RegisterData } from "./auth.model";
-import { mapUser, mergeUserProfile, type User } from "./user.model";
-import type { ApiClient } from "@/auth/api-client";
-import { AuthApi } from "./auth.api";
+import type { AuthTokens } from "@whatschat/shared-types";
+import type { User } from "./user.model";
+import type { ApiClient, ApiResponse } from "@/auth/api-client";
 import { getAppComposition } from "@/layout/composition-root";
 import { getStorage, type AppStorage } from "@/auth/storage";
+import { mapUser, mergeUserProfile } from "./user.model";
+
+export type { AuthTokens };
+
+export interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+}
+
+export interface RegisterData {
+  username: string;
+  email: string;
+  password: string;
+  phone?: string;
+}
+
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
+export class AuthApi {
+  constructor(private apiClient: ApiClient) {}
+
+  async register(userData: {
+    username: string;
+    email: string;
+    password: string;
+    phone?: string;
+  }): Promise<ApiResponse> {
+    return this.apiClient.post("/auth/register", userData);
+  }
+
+  async login(credentials: {
+    email: string;
+    password: string;
+  }): Promise<ApiResponse> {
+    return this.apiClient.post("/auth/login", credentials);
+  }
+
+  async refreshToken(refreshToken: string): Promise<ApiResponse> {
+    return this.apiClient.post("/auth/refresh-token", { refreshToken });
+  }
+
+  async logout(): Promise<ApiResponse> {
+    return this.apiClient.post("/auth/logout");
+  }
+
+  async getCurrentUser(): Promise<ApiResponse> {
+    return this.apiClient.get("/auth/me");
+  }
+
+  async updateProfile(profileData: {
+    username?: string;
+    status?: string;
+    avatar?: string;
+  }): Promise<ApiResponse> {
+    return this.apiClient.put("/auth/profile", profileData);
+  }
+
+  async changePassword(passwordData: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<ApiResponse> {
+    return this.apiClient.put("/auth/change-password", passwordData);
+  }
+
+  async forgotPassword(email: string): Promise<ApiResponse> {
+    return this.apiClient.post("/auth/forgot-password", { email });
+  }
+
+  async resetPassword(resetData: {
+    token: string;
+    newPassword: string;
+  }): Promise<ApiResponse> {
+    return this.apiClient.post("/auth/reset-password", resetData);
+  }
+}
 
 const STORAGE_KEYS = {
   USER: "instagram_user",

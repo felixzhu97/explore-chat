@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { getAuthSession } from "./auth-session";
-import type { AuthState } from "./auth.model";
+import type { AuthState } from "./auth-session";
 
 export function useAuth() {
   const authSession = getAuthSession();

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { VoiceApi } from "@/ai/apis/voice.api";
 import type { ApiClient } from "@/auth/api-client";
-import type { ApiResponse } from "@/auth/api-response.model";
+import type { ApiResponse } from "@/auth/api-client";
 
 describe("VoiceApi", () => {
   let adapter: VoiceApi;

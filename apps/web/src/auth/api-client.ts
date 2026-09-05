@@ -1,5 +1,9 @@
-import type { ApiResponse } from "@/auth/api-response.model";
-import { API_CONFIG } from "@/auth/api.config";
+export type { ApiResponse, Pagination } from "@whatschat/shared-types";
+import type { ApiResponse } from "@whatschat/shared-types";
+
+export const API_CONFIG = {
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1",
+};
 
 export class ApiClient {
   private baseURL: string;
