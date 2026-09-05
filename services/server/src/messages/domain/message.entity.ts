@@ -28,6 +28,8 @@ export class Message {
     public readonly readBy: string[] = [],
     public readonly createdAt: Date = new Date(),
     public readonly updatedAt: Date = new Date(),
+    /** Client idempotency key; not persisted. */
+    public readonly clientMsgId?: string,
   ) {}
 
   static create(data: {
@@ -52,6 +54,7 @@ export class Message {
     readBy?: string[];
     createdAt?: Date;
     updatedAt?: Date;
+    clientMsgId?: string;
   }): Message {
     return new Message(
       data.id,
@@ -75,7 +78,15 @@ export class Message {
       data.readBy ?? [],
       data.createdAt ?? new Date(),
       data.updatedAt ?? new Date(),
+      data.clientMsgId,
     );
+  }
+
+  /** Sender must match this message's senderId. */
+  assertSendableBy(senderId: string): void {
+    if (this.senderId !== senderId) {
+      throw new Error("No permission to send messages to this chat");
+    }
   }
 
   edit(content: string): Message {
@@ -101,6 +112,7 @@ export class Message {
       this.readBy,
       this.createdAt,
       new Date(),
+      this.clientMsgId,
     );
   }
 
@@ -127,6 +139,7 @@ export class Message {
       this.readBy,
       this.createdAt,
       new Date(),
+      this.clientMsgId,
     );
   }
 
@@ -160,6 +173,7 @@ export class Message {
       this.readBy,
       this.createdAt,
       new Date(),
+      this.clientMsgId,
     );
   }
 
@@ -190,6 +204,7 @@ export class Message {
       [...this.readBy, userId],
       this.createdAt,
       new Date(),
+      this.clientMsgId,
     );
   }
 }

@@ -330,6 +330,37 @@ describe("Message Entity", () => {
   });
 
   // ==========================================================================
+  // ASSERTSENDABLEBY TESTS
+  // ==========================================================================
+  describe("assertSendableBy", () => {
+    it("should allow when senderId matches message sender", () => {
+      const message = createMessage({
+        senderId: MESSAGE_DOMAIN.VALID.senderId,
+      });
+
+      expect(() =>
+        message.assertSendableBy(MESSAGE_DOMAIN.VALID.senderId),
+      ).not.toThrow();
+    });
+
+    it("should throw when senderId does not match", () => {
+      const message = createMessage({
+        senderId: MESSAGE_DOMAIN.VALID.senderId,
+      });
+
+      expect(() => message.assertSendableBy("other-user")).toThrow(
+        "No permission to send messages to this chat",
+      );
+    });
+
+    it("should keep clientMsgId when provided on create", () => {
+      const message = createMessage({ clientMsgId: "client-1" });
+
+      expect(message.clientMsgId).toBe("client-1");
+    });
+  });
+
+  // ==========================================================================
   // EDIT TESTS
   // ==========================================================================
   describe("edit", () => {

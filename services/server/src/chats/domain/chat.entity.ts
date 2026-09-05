@@ -81,4 +81,12 @@ export class Chat {
       new Date(),
     );
   }
+
+  /** User must already be a chat participant. */
+  ensureParticipant(userId: string): void {
+    const isParticipant = this.participants.some((p) => p.id === userId);
+    if (!isParticipant) {
+      throw new Error("No permission to send messages to this chat");
+    }
+  }
 }

@@ -555,6 +555,27 @@ describe("Chat Entity", () => {
   });
 
   // ==========================================================================
+  // ENSUREPARTICIPANT TESTS
+  // ==========================================================================
+  describe("ensureParticipant", () => {
+    it("should allow when userId is a participant", () => {
+      const participants = createParticipants(2);
+      const chat = createChat({ participants });
+
+      expect(() => chat.ensureParticipant(participants[0]!.id)).not.toThrow();
+    });
+
+    it("should throw when userId is not a participant", () => {
+      const participants = createParticipants(2);
+      const chat = createChat({ participants });
+
+      expect(() => chat.ensureParticipant("stranger-id")).toThrow(
+        "No permission to send messages to this chat",
+      );
+    });
+  });
+
+  // ==========================================================================
   // CHATTYPE TYPE TESTS
   // ==========================================================================
   describe("ChatType", () => {
