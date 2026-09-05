@@ -33,7 +33,7 @@ import { VideoApi } from "@/ai/apis/video.api";
 import { VoiceApi } from "@/ai/apis/voice.api";
 import { getApiClient } from "@/auth/api-client";
 import { mockContacts, mockMessages } from "@/chat/mock-data";
-import { mockUser } from "@/profile/mock-user";
+import { mockUser } from "@/profile/users.service";
 import { getMessagesForContact } from "@/shared/utils/message-utils";
 import type { Contact } from "@/shared/types";
 import { CenterColumn, MainContent, MessagesRow } from "@/layout/shell-styles";

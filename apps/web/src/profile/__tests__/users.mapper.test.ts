@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mapUnknownToUser } from "../users.mapper";
+import { mapUnknownToUser } from "../users.service";
 
 describe("users.mapper", () => {
   describe("mapUnknownToUser", () => {

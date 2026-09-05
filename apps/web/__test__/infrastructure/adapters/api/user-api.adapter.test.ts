@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { UserApi } from "@/profile/user.api";
+import { UserApi } from "@/profile/users.service";
 import type { ApiClient } from "@/auth/api-client";
 import type { ApiResponse } from "@/auth/api-client";
 
