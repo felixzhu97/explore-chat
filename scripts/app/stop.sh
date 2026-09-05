@@ -14,7 +14,7 @@ lsof -ti:9001 2>/dev/null | xargs kill -9 2>/dev/null || true
 lsof -ti:9002 2>/dev/null | xargs kill -9 2>/dev/null || true
 lsof -ti:4000 2>/dev/null | xargs kill -9 2>/dev/null || true
 lsof -ti:3456 2>/dev/null | xargs kill -9 2>/dev/null || true
-pkill -f "services/media-gen/main.py" 2>/dev/null || true
+pkill -f "src/main/ml/media-gen/main.py" 2>/dev/null || true
 pkill -f "celery.*celery_app" 2>/dev/null || true
 pkill -f "uvicorn main:app" 2>/dev/null || true
 pkill -f "ExploreChatApplication\|ChatSpringApplication\|bootRun\|whatschat-web\|turbo run dev" 2>/dev/null || true

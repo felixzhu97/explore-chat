@@ -55,7 +55,7 @@ docker run -d -p 6379:6379 redis:alpine
 ### Using Docker Compose
 
 ```bash
-cd services/rag
+cd src/main/ml/rag
 docker-compose up -d
 ```
 
@@ -64,7 +64,7 @@ docker-compose up -d
 1. **Install dependencies**:
 
 ```bash
-cd services/rag
+cd src/main/ml/rag
 pip install -r requirements.txt
 ```
 
@@ -78,7 +78,7 @@ cp .env.example .env
 3. **Start the service**:
 
 ```bash
-cd services/rag
+cd src/main/ml/rag
 uvicorn main:app --host 0.0.0.0 --port 8002
 ```
 

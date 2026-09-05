@@ -27,7 +27,7 @@
     "setup": "bash scripts/setup/dev.sh",
     "setup:inline": "./gradlew classes",
     "start:server": "./gradlew bootRun",
-    "start:recommendation": "cd services/recommendation && (test -d .venv && . .venv/bin/activate; celery -A celery_app worker -l info -B)",
+    "start:recommendation": "cd src/main/ml/recommendation && (test -d .venv && . .venv/bin/activate; celery -A celery_app worker -l info -B)",
     "start:mobile": "pnpm --filter react-native-app start",
     "start:mobile:ios": "pnpm --filter react-native-app ios",
     "start:mobile:android": "pnpm --filter react-native-app android",

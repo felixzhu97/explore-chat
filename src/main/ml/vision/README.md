@@ -7,7 +7,7 @@ Port **8001**. Endpoints: `/health`, `POST /api/v1/images:predict`, `POST /api/v
 ## Setup
 
 ```bash
-cd services/vision
+cd src/main/ml/vision
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt

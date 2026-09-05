@@ -8,7 +8,7 @@ cd "$ROOT"
 failed=0
 
 if rg -n '["'\'']success["'\'']\s*:\s*(False|false|True|true)' \
-  services/recommendation services/vision services/rag services/media-gen \
+  src/main/ml/recommendation src/main/ml/vision src/main/ml/rag src/main/ml/media-gen \
   --glob '*.py' >/tmp/aip-rest-py-hits.txt; then
   echo "AIP REST check failed: legacy success envelope in Python helpers:" >&2
   cat /tmp/aip-rest-py-hits.txt >&2

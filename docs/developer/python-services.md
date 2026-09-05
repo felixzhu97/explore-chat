@@ -9,7 +9,7 @@ HTTP surface follows the shared [AIP REST contract](./aip-rest.md): `/api/v1`, r
 ## Forced layout
 
 ```
-services/<name>/
+src/main/ml/<name>/
 ├── README.md
 ├── .env.example
 ├── requirements.txt      # sole dependency list
@@ -29,7 +29,7 @@ Optional: `Dockerfile`, runtime dirs (`output/`, `uploads/` — gitignored).
 ## Start
 
 ```bash
-cd services/<name>
+cd src/main/ml/<name>
 uvicorn main:app --host 0.0.0.0 --port $PORT
 ```
 

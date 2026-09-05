@@ -12,7 +12,7 @@ Offline and online recommendation stack for WhatsChat:
 ## Setup
 
 ```bash
-cd services/recommendation
+cd src/main/ml/recommendation
 python -m venv .venv
 source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 pip install -r requirements.txt
