@@ -5,7 +5,7 @@ import {
   toggleStarMessage,
   type MessageType,
   type MessageStatus,
-} from "../message.model";
+} from "../services/messages.service";
 
 const baseMessageInput = {
   id: "msg-1",
