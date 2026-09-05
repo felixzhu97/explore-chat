@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { AuthApi } from "@/auth/auth-session";
 import type { ApiClient } from "@/auth/api-client";
-import type { ApiResponse } from "@/auth/api-client";
 
 describe("AuthApi", () => {
   let adapter: AuthApi;
@@ -24,7 +23,10 @@ describe("AuthApi", () => {
 
   describe("register", () => {
     it("should call post with register endpoint and user data", async () => {
-      const mockResponse: ApiResponse = { success: true, data: { id: "1" } };
+      const mockResponse = {
+        user: { id: "1", username: "test", email: "test@example.com" },
+        token: "jwt",
+      };
       (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -46,7 +48,10 @@ describe("AuthApi", () => {
     });
 
     it("should register without optional phone field", async () => {
-      const mockResponse: ApiResponse = { success: true, data: { id: "2" } };
+      const mockResponse = {
+        user: { id: "2", username: "test", email: "test@example.com" },
+        token: "jwt",
+      };
       (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -68,9 +73,9 @@ describe("AuthApi", () => {
 
   describe("login", () => {
     it("should call post with login endpoint and credentials", async () => {
-      const mockResponse: ApiResponse = {
-        success: true,
-        data: { token: "jwt-token" },
+      const mockResponse = {
+        user: { id: "1", username: "test", email: "test@example.com" },
+        token: "jwt-token",
       };
       (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
@@ -93,17 +98,14 @@ describe("AuthApi", () => {
 
   describe("refreshToken", () => {
     it("should call post with refresh token endpoint", async () => {
-      const mockResponse: ApiResponse = {
-        success: true,
-        data: { token: "new-token" },
-      };
+      const mockResponse = { token: "new-token" };
       (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
 
       const result = await adapter.refreshToken("refresh-token-value");
 
-      expect(mockApiClient.post).toHaveBeenCalledWith("/auth/refresh-token", {
+      expect(mockApiClient.post).toHaveBeenCalledWith("/auth/refreshToken", {
         refreshToken: "refresh-token-value",
       });
       expect(result).toEqual(mockResponse);
@@ -112,23 +114,21 @@ describe("AuthApi", () => {
 
   describe("logout", () => {
     it("should call post with logout endpoint", async () => {
-      const mockResponse: ApiResponse = { success: true };
       (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        mockResponse,
+        undefined,
       );
 
       const result = await adapter.logout();
 
       expect(mockApiClient.post).toHaveBeenCalledWith("/auth/logout");
-      expect(result).toEqual(mockResponse);
+      expect(result).toBeUndefined();
     });
   });
 
   describe("getCurrentUser", () => {
     it("should call get with current user endpoint", async () => {
-      const mockResponse: ApiResponse = {
-        success: true,
-        data: { id: "1", name: "Test User" },
+      const mockResponse = {
+        user: { id: "1", username: "Test User", email: "test@example.com" },
       };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
@@ -142,9 +142,9 @@ describe("AuthApi", () => {
   });
 
   describe("updateProfile", () => {
-    it("should call put with profile update endpoint", async () => {
-      const mockResponse: ApiResponse = { success: true };
-      (mockApiClient.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+    it("should call patch with profile update endpoint", async () => {
+      const mockResponse = { user: { id: "1", username: "newname" } };
+      (mockApiClient.patch as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
 
@@ -156,7 +156,7 @@ describe("AuthApi", () => {
 
       const result = await adapter.updateProfile(profileData);
 
-      expect(mockApiClient.put).toHaveBeenCalledWith(
+      expect(mockApiClient.patch).toHaveBeenCalledWith(
         "/auth/profile",
         profileData,
       );
@@ -164,14 +164,14 @@ describe("AuthApi", () => {
     });
 
     it("should update profile with partial data", async () => {
-      const mockResponse: ApiResponse = { success: true };
-      (mockApiClient.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+      const mockResponse = { user: { id: "1", username: "newusername" } };
+      (mockApiClient.patch as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
 
       const result = await adapter.updateProfile({ username: "newusername" });
 
-      expect(mockApiClient.put).toHaveBeenCalledWith("/auth/profile", {
+      expect(mockApiClient.patch).toHaveBeenCalledWith("/auth/profile", {
         username: "newusername",
       });
       expect(result).toEqual(mockResponse);
@@ -180,9 +180,8 @@ describe("AuthApi", () => {
 
   describe("changePassword", () => {
     it("should call put with change password endpoint", async () => {
-      const mockResponse: ApiResponse = { success: true };
       (mockApiClient.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        mockResponse,
+        undefined,
       );
 
       const passwordData = {
@@ -196,15 +195,14 @@ describe("AuthApi", () => {
         "/auth/change-password",
         passwordData,
       );
-      expect(result).toEqual(mockResponse);
+      expect(result).toBeUndefined();
     });
   });
 
   describe("forgotPassword", () => {
     it("should call post with forgot password endpoint", async () => {
-      const mockResponse: ApiResponse = { success: true };
       (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        mockResponse,
+        undefined,
       );
 
       const result = await adapter.forgotPassword("test@example.com");
@@ -212,15 +210,14 @@ describe("AuthApi", () => {
       expect(mockApiClient.post).toHaveBeenCalledWith("/auth/forgot-password", {
         email: "test@example.com",
       });
-      expect(result).toEqual(mockResponse);
+      expect(result).toBeUndefined();
     });
   });
 
   describe("resetPassword", () => {
     it("should call post with reset password endpoint", async () => {
-      const mockResponse: ApiResponse = { success: true };
       (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        mockResponse,
+        undefined,
       );
 
       const resetData = {
@@ -234,7 +231,7 @@ describe("AuthApi", () => {
         "/auth/reset-password",
         resetData,
       );
-      expect(result).toEqual(mockResponse);
+      expect(result).toBeUndefined();
     });
   });
 });

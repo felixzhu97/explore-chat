@@ -483,13 +483,13 @@ export const ProfileScreen: React.FC = () => {
         fileName,
         folder: "avatars",
       }).unwrap();
-      const updateRes = await apiClient.put<{ data?: { avatar?: string } }>(
+      const updateRes = await apiClient.patch<{ avatar?: string }>(
         `/users/${user.id}`,
         {
           avatar: uploaded.url,
         },
       );
-      const nextAvatar = updateRes.data?.data?.avatar ?? uploaded.url;
+      const nextAvatar = updateRes.data?.avatar ?? uploaded.url;
       dispatch(
         setAuth({
           token,

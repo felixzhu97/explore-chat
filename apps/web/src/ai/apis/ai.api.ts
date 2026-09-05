@@ -1,5 +1,4 @@
 import type { ApiClient } from "@/auth/api-client";
-import type { ApiResponse } from "@/auth/api-client";
 
 export interface AiChatMessage {
   role: string;
@@ -16,7 +15,7 @@ export class AiApi {
   async postChat(
     messages: AiChatMessage[],
     model?: string,
-  ): Promise<ApiResponse<AiChatResponse>> {
+  ): Promise<AiChatResponse> {
     return this.apiClient.post<AiChatResponse>("/ai/chat", {
       messages,
       ...(model != null && { model }),

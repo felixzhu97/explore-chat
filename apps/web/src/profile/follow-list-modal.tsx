@@ -184,7 +184,7 @@ export function FollowListModal({
           } else {
             setList(res.list);
           }
-          setPageState(res.pageState);
+          setPageState(res.nextPageToken);
         })
         .finally(() => {
           setLoading(false);

@@ -54,12 +54,11 @@ export class FeedApi {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("folder", folder);
-    const res = await this.api.upload<{
+    return this.api.upload<{
       url: string;
       mimeType: string;
       size: number;
     }>("/media/upload", formData);
-    return (res as { data?: { url?: string } }).data;
   }
 
   async getFeedGraphql(limit: number, pageState?: string) {
@@ -118,67 +117,65 @@ export class FeedApi {
     };
   }
 
-  async getFeed(limit: number, pageState?: string) {
-    const q = new URLSearchParams({ limit: String(limit) });
-    if (pageState) q.set("pageState", pageState);
+  async getFeed(limit: number, pageToken?: string) {
+    const q = new URLSearchParams({ page_size: String(limit) });
+    if (pageToken) q.set("page_token", pageToken);
     const res = await this.api.get<{
       entries?: FeedEntryRes[];
-      pageState?: string;
+      next_page_token?: string;
     }>(`/posts/feed?${q}`);
     return {
-      entries: Array.isArray((res as any).entries) ? (res as any).entries : [],
-      pageState: (res as any).pageState,
+      entries: Array.isArray(res.entries) ? res.entries : [],
+      pageState: res.next_page_token,
     };
   }
 
-  async getExplore(limit: number = 20, offset: number = 0) {
-    const q = new URLSearchParams({
-      limit: String(limit),
-      offset: String(offset),
-    });
+  async getExplore(limit: number = 20, pageToken?: string) {
+    const q = new URLSearchParams({ page_size: String(limit) });
+    if (pageToken) q.set("page_token", pageToken);
     const res = await this.api.get<{
       entries?: FeedEntryRes[];
-      total?: number;
+      total_size?: number;
+      next_page_token?: string;
     }>(`/posts/explore?${q}`);
     return {
-      entries: Array.isArray((res as any).entries) ? (res as any).entries : [],
-      total: (res as any).total ?? 0,
+      entries: Array.isArray(res.entries) ? res.entries : [],
+      total: res.total_size ?? 0,
+      pageState: res.next_page_token,
     };
   }
 
   async getPost(postId: string) {
-    const res = await this.api.get<PostDetailRes>(`/posts/${postId}`);
-    return (res as { data?: PostDetailRes }).data;
+    return this.api.get<PostDetailRes>(`/posts/${postId}`);
   }
 
-  async getPostsByUser(userId: string, limit: number = 24, pageState?: string) {
-    const q = new URLSearchParams({ limit: String(limit) });
-    if (pageState) q.set("pageState", pageState);
-    const res = await this.api.get<unknown>(
-      `/posts/user/${userId}?${q.toString()}`,
-    );
-    const r = res as unknown as { posts?: unknown[]; pageState?: string };
-    const posts = Array.isArray(r.posts) ? r.posts : [];
+  async getPostsByUser(userId: string, limit: number = 24, pageToken?: string) {
+    const q = new URLSearchParams({ page_size: String(limit) });
+    if (pageToken) q.set("page_token", pageToken);
+    const res = await this.api.get<{
+      posts?: unknown[];
+      next_page_token?: string;
+    }>(`/posts/user/${userId}?${q.toString()}`);
     return {
-      posts,
-      pageState: r.pageState,
+      posts: Array.isArray(res.posts) ? res.posts : [],
+      pageState: res.next_page_token,
     };
   }
 
   async likePost(postId: string) {
-    await this.api.post(`/posts/${postId}/like`);
+    await this.api.post(`/posts/${postId}:like`);
   }
 
   async unlikePost(postId: string) {
-    await this.api.delete(`/posts/${postId}/like`);
+    await this.api.post(`/posts/${postId}:unlike`);
   }
 
   async savePost(postId: string) {
-    await this.api.post(`/posts/${postId}/save`);
+    await this.api.post(`/posts/${postId}:save`);
   }
 
   async unsavePost(postId: string) {
-    await this.api.delete(`/posts/${postId}/save`);
+    await this.api.post(`/posts/${postId}:unsave`);
   }
 
   async createPost(
@@ -187,7 +184,7 @@ export class FeedApi {
     mediaUrls?: string[],
     coverUrl?: string,
   ) {
-    const res = await this.api.post<{
+    return this.api.post<{
       postId: string;
       userId: string;
       createdAt: string;
@@ -197,153 +194,142 @@ export class FeedApi {
       ...(mediaUrls?.length && { mediaUrls }),
       ...(coverUrl != null && coverUrl !== "" && { coverUrl }),
     });
-    return res.data;
   }
 
-  async getComments(postId: string, page: number, limit: number) {
-    const res = await this.api.get<CommentRes[]>(
-      `/posts/${postId}/comments?page=${page}&limit=${limit}`,
-    );
-    return Array.isArray((res as any).data) ? (res as any).data : [];
+  async getComments(postId: string, pageSize: number, pageToken?: string) {
+    const q = new URLSearchParams({ page_size: String(pageSize) });
+    if (pageToken) q.set("page_token", pageToken);
+    const res = await this.api.get<{
+      comments?: CommentRes[];
+      next_page_token?: string;
+    }>(`/posts/${postId}/comments?${q}`);
+    return Array.isArray(res.comments) ? res.comments : [];
   }
 
   async addComment(postId: string, content: string, parentId?: string) {
-    const res = await this.api.post<{ id: string }>(
-      `/posts/${postId}/comments`,
-      {
-        content,
-        ...(parentId && { parentId }),
-      },
-    );
-    return res.data;
+    return this.api.post<{ id: string }>(`/posts/${postId}/comments`, {
+      content,
+      ...(parentId && { parentId }),
+    });
   }
 
   async followUser(userId: string) {
-    await this.api.post(`/users/${userId}/follow`);
+    await this.api.post(`/users/${userId}:follow`);
   }
 
   async unfollowUser(userId: string) {
-    await this.api.delete(`/users/${userId}/follow`);
+    await this.api.post(`/users/${userId}:unfollow`);
   }
 
   async checkFollowingUsers(userIds: string[]) {
     const res = await this.api.post<{
-      data: Array<{ userId: string; isFollowing: boolean }>;
-    }>(`/users/following/check`, {
+      results: Array<{ userId: string; isFollowing: boolean }>;
+    }>(`/users/following:check`, {
       userIds,
     });
-    return res.data?.data ?? [];
+    return Array.isArray(res.results) ? res.results : [];
   }
 
   async search(
     q: string,
     type: SearchScope,
     limit: number,
-    cursor?: string,
+    pageToken?: string,
   ): Promise<{ hits: unknown[]; nextCursor?: string; total?: number }> {
     const params = new URLSearchParams({
       q,
       type,
-      limit: String(limit),
+      page_size: String(limit),
     });
-    if (cursor) params.set("cursor", cursor);
+    if (pageToken) params.set("page_token", pageToken);
     const res = await this.api.get<{
-      hits: unknown[];
-      nextCursor?: string;
-      total?: number;
+      hits?: unknown[];
+      next_page_token?: string;
+      total_size?: number;
     }>(`/search?${params.toString()}`);
-    const data = (
-      res as { data?: { hits: unknown[]; nextCursor?: string; total?: number } }
-    ).data;
     return {
-      hits: Array.isArray(data?.hits) ? data.hits : [],
-      ...(data?.nextCursor != null && { nextCursor: data.nextCursor }),
-      ...(data?.total != null && { total: data.total }),
+      hits: Array.isArray(res.hits) ? res.hits : [],
+      ...(res.next_page_token != null && { nextCursor: res.next_page_token }),
+      ...(res.total_size != null && { total: res.total_size }),
     };
   }
 
   async getSuggestions(limit: number = 10) {
-    const res = await this.api.get<
-      Array<{
+    const res = await this.api.get<{
+      users?: Array<{
         id: string;
         username: string;
         avatar: string | null;
         description: string;
-      }>
-    >(`/users/suggestions?limit=${limit}`);
-    return Array.isArray((res as { data?: unknown }).data)
-      ? (res as { data: unknown[] }).data
-      : [];
+      }>;
+    }>(`/users/suggestions?page_size=${limit}`);
+    return Array.isArray(res.users) ? res.users : [];
   }
 
-  async getFollowers(userId: string, limit: number = 20, pageState?: string) {
-    const q = new URLSearchParams({ limit: String(limit) });
-    if (pageState) q.set("pageState", pageState);
+  async getFollowers(userId: string, limit: number = 20, pageToken?: string) {
+    const q = new URLSearchParams({ page_size: String(limit) });
+    if (pageToken) q.set("page_token", pageToken);
     const res = await this.api.get<{
-      data?: Array<{
+      users?: Array<{
         id: string;
         username: string;
         avatar: string | null;
         isFollowing?: boolean;
       }>;
-      total?: number;
-      pageState?: string;
+      total_size?: number;
+      next_page_token?: string;
     }>(`/users/${userId}/followers?${q}`);
-    const r = res as { data?: unknown[]; total?: number; pageState?: string };
     return {
-      list: Array.isArray(r.data) ? r.data : [],
-      total: r.total ?? 0,
-      pageState: r.pageState,
+      list: Array.isArray(res.users) ? res.users : [],
+      total: res.total_size ?? 0,
+      pageState: res.next_page_token,
     };
   }
 
-  async getFollowing(userId: string, limit: number = 20, pageState?: string) {
-    const q = new URLSearchParams({ limit: String(limit) });
-    if (pageState) q.set("pageState", pageState);
+  async getFollowing(userId: string, limit: number = 20, pageToken?: string) {
+    const q = new URLSearchParams({ page_size: String(limit) });
+    if (pageToken) q.set("page_token", pageToken);
     const res = await this.api.get<{
-      data?: Array<{
+      users?: Array<{
         id: string;
         username: string;
         avatar: string | null;
         isFollowing?: boolean;
       }>;
-      total?: number;
-      pageState?: string;
+      total_size?: number;
+      next_page_token?: string;
     }>(`/users/${userId}/following?${q}`);
-    const r = res as { data?: unknown[]; total?: number; pageState?: string };
     return {
-      list: Array.isArray(r.data) ? r.data : [],
-      total: r.total ?? 0,
-      pageState: r.pageState,
+      list: Array.isArray(res.users) ? res.users : [],
+      total: res.total_size ?? 0,
+      pageState: res.next_page_token,
     };
   }
 
-  async getNotifications(limit: number = 20, cursor?: string) {
-    const q = new URLSearchParams({ limit: String(limit) });
-    if (cursor) q.set("cursor", cursor);
+  async getNotifications(limit: number = 20, pageToken?: string) {
+    const q = new URLSearchParams({ page_size: String(limit) });
+    if (pageToken) q.set("page_token", pageToken);
     const res = await this.api.get<{
-      data?: { items?: NotificationItemRes[]; nextCursor?: string };
+      notifications?: NotificationItemRes[];
+      next_page_token?: string;
     }>(`/notifications?${q}`);
-    const d = (
-      res as { data?: { items?: NotificationItemRes[]; nextCursor?: string } }
-    ).data;
     return {
-      items: Array.isArray(d?.items) ? d.items : [],
-      ...(d?.nextCursor != null &&
-        d.nextCursor !== "" && { nextCursor: d.nextCursor }),
+      items: Array.isArray(res.notifications) ? res.notifications : [],
+      ...(res.next_page_token != null &&
+        res.next_page_token !== "" && { nextCursor: res.next_page_token }),
     };
   }
 
   async markNotificationRead(id: string) {
-    await this.api.patch(`/notifications/${id}/read`, {});
+    await this.api.post(`/notifications/${id}:read`, {});
   }
 
   async markNotificationsRead(ids: string[]) {
-    await this.api.post("/notifications/read", { ids });
+    await this.api.post("/notifications/read:batch", { ids });
   }
 
   async markAllNotificationsRead() {
-    await this.api.post("/notifications/read-all", {});
+    await this.api.post("/notifications/read:all", {});
   }
 
   async getProfileStats(
@@ -353,12 +339,9 @@ export class FeedApi {
       followersCount?: number;
       followingCount?: number;
     }>(`/users/${userId}`);
-    const d = (
-      res as { data?: { followersCount?: number; followingCount?: number } }
-    ).data;
     return {
-      followersCount: d?.followersCount ?? 0,
-      followingCount: d?.followingCount ?? 0,
+      followersCount: res.followersCount ?? 0,
+      followingCount: res.followingCount ?? 0,
     };
   }
 }

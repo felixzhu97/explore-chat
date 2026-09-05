@@ -140,15 +140,15 @@ export class FeedApi {
 
   async getSuggestions(limit: number): Promise<StoryUser[]> {
     const suggestionsRes = await this.http.get<{
-      data?: Array<{
+      users?: Array<{
         id: string;
         username: string;
         avatar: string | null;
         description: string;
       }>;
-    }>(`/users/suggestions?limit=${limit}`);
-    const list = Array.isArray(suggestionsRes.data?.data)
-      ? (suggestionsRes.data?.data ?? [])
+    }>(`/users/suggestions?page_size=${limit}`);
+    const list = Array.isArray(suggestionsRes.data?.users)
+      ? suggestionsRes.data.users
       : [];
     return uniqBy(
       list.filter((u) => Boolean(u.id)),
@@ -162,10 +162,8 @@ export class FeedApi {
 
   async getPostById(postId: string): Promise<FeedPost | null> {
     try {
-      const postRes = await this.http.get<{ data?: FeedPostRes }>(
-        `/posts/${postId}`,
-      );
-      const raw = postRes.data?.data;
+      const postRes = await this.http.get<FeedPostRes>(`/posts/${postId}`);
+      const raw = postRes.data;
       if (!raw?.postId) return null;
       const createdAt =
         typeof raw.createdAt === "string"
@@ -181,65 +179,60 @@ export class FeedApi {
 
   async getExplore(
     limit: number,
-    offset: number,
-  ): Promise<{ posts: FeedPost[]; total: number; fetchedEntryCount: number }> {
+    pageToken?: string,
+  ): Promise<{
+    posts: FeedPost[];
+    total: number;
+    fetchedEntryCount: number;
+    nextPageToken?: string;
+  }> {
+    const params = new URLSearchParams({ page_size: String(limit) });
+    if (pageToken) params.set("page_token", pageToken);
     const exploreRes = await this.http.get<{
       entries?: Array<{ postId: string; isSponsored?: boolean }>;
-      total?: number;
-      data?: {
-        entries?: Array<{ postId: string; isSponsored?: boolean }>;
-        total?: number;
-      };
-    }>(`/posts/explore?limit=${limit}&offset=${offset}`);
-    const top = exploreRes.data as {
-      entries?: Array<{ postId: string; isSponsored?: boolean }>;
-      total?: number;
-      data?: {
-        entries?: Array<{ postId: string; isSponsored?: boolean }>;
-        total?: number;
-      };
-    };
-    const rawEntries = Array.isArray(top.entries)
-      ? top.entries
-      : Array.isArray(top.data?.entries)
-        ? top.data.entries
-        : [];
+      total_size?: number;
+      next_page_token?: string;
+    }>(`/posts/explore?${params.toString()}`);
+    const top = exploreRes.data;
+    const rawEntries = Array.isArray(top.entries) ? top.entries : [];
     const filtered = rawEntries.filter((e) => !e.isSponsored);
     const entries = filtered.length > 0 ? filtered : rawEntries;
-    const total =
-      typeof top.total === "number"
-        ? top.total
-        : typeof top.data?.total === "number"
-          ? top.data.total
-          : 0;
+    const total = typeof top.total_size === "number" ? top.total_size : 0;
     const postIds = entries.map((e) => e.postId).filter(Boolean);
     const details = await Promise.all(
       postIds.map((id) => this.getPostById(id)),
     );
     const posts = details.filter((p): p is FeedPost => p != null);
-    return { posts, total, fetchedEntryCount: rawEntries.length };
+    return {
+      posts,
+      total,
+      fetchedEntryCount: rawEntries.length,
+      nextPageToken: top.next_page_token,
+    };
   }
 
   async searchPosts(
     q: string,
     limit: number,
-    cursor?: string,
+    pageToken?: string,
   ): Promise<{ posts: FeedPost[]; nextCursor?: string; total?: number }> {
     const trimmed = q.trim();
     if (!trimmed) return { posts: [] };
     const params = new URLSearchParams({
       q: trimmed,
       type: SearchScopes.Posts,
-      limit: String(limit),
+      page_size: String(limit),
     });
-    if (cursor) params.set("cursor", cursor);
+    if (pageToken) params.set("page_token", pageToken);
     const searchRes = await this.http.get<{
-      data?: { hits: unknown[]; nextCursor?: string; total?: number };
+      hits?: unknown[];
+      next_page_token?: string;
+      total_size?: number;
     }>(`/search?${params.toString()}`);
-    const payload = searchRes.data?.data;
+    const payload = searchRes.data;
     const hits = Array.isArray(payload?.hits) ? payload.hits : [];
-    const nextCursor = payload?.nextCursor;
-    const total = payload?.total;
+    const nextCursor = payload?.next_page_token;
+    const total = payload?.total_size;
     const orderedIds = hits
       .map((h) => {
         const o = h as Record<string, unknown>;
@@ -255,10 +248,8 @@ export class FeedApi {
 
   async getUserProfile(userId: string): Promise<UserProfile | null> {
     try {
-      const profileRes = await this.http.get<{ data?: UserProfile }>(
-        `/users/${userId}`,
-      );
-      const u = profileRes.data?.data;
+      const profileRes = await this.http.get<UserProfile>(`/users/${userId}`);
+      const u = profileRes.data;
       if (!u || typeof u !== "object") return null;
       return u as UserProfile;
     } catch {
@@ -269,26 +260,17 @@ export class FeedApi {
   async getUserPosts(
     userId: string,
     limit: number,
-    pageState?: string,
+    pageToken?: string,
   ): Promise<{ posts: FeedPost[]; nextPageState?: string }> {
-    const params = new URLSearchParams({ limit: String(limit) });
-    if (pageState) params.set("pageState", pageState);
+    const params = new URLSearchParams({ page_size: String(limit) });
+    if (pageToken) params.set("page_token", pageToken);
     const userPostsRes = await this.http.get<{
       posts?: FeedPostRes[];
-      pageState?: string | null;
-      data?: { posts?: FeedPostRes[]; pageState?: string | null };
+      next_page_token?: string | null;
     }>(`/posts/user/${userId}?${params.toString()}`);
-    const body = userPostsRes.data as {
-      posts?: FeedPostRes[];
-      pageState?: string | null;
-      data?: { posts?: FeedPostRes[]; pageState?: string | null };
-    };
-    const rawPosts = Array.isArray(body.posts)
-      ? body.posts
-      : Array.isArray(body.data?.posts)
-        ? body.data.posts
-        : [];
-    const next = body.pageState ?? body.data?.pageState;
+    const body = userPostsRes.data;
+    const rawPosts = Array.isArray(body.posts) ? body.posts : [];
+    const next = body.next_page_token;
     const posts = rawPosts.map((r) => {
       const createdAt =
         typeof r.createdAt === "string"

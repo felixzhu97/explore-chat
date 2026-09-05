@@ -18,6 +18,7 @@ const createMockApiClient = (): ApiClient => ({
   get: vi.fn(),
   post: vi.fn(),
   put: vi.fn(),
+  patch: vi.fn(),
   delete: vi.fn(),
   setToken: vi.fn(),
 });
@@ -77,8 +78,8 @@ describe("AuthSession", () => {
         email: "test@example.com",
       };
       const mockResponse = {
-        success: true,
-        data: { user: mockUser, token: "jwt-token" },
+        user: mockUser,
+        token: "jwt-token",
       };
       mockAuthApi.login = vi.fn().mockResolvedValue(mockResponse);
       mockStorage.load = vi.fn().mockReturnValue(null);
@@ -102,10 +103,9 @@ describe("AuthSession", () => {
     });
 
     it("should return error when login fails", async () => {
-      mockAuthApi.login = vi.fn().mockResolvedValue({
-        success: false,
-        message: "Invalid credentials",
-      });
+      mockAuthApi.login = vi
+        .fn()
+        .mockRejectedValue(new Error("Invalid credentials"));
       mockStorage.load = vi.fn().mockReturnValue(null);
 
       authService = createAuthService();
@@ -161,8 +161,8 @@ describe("AuthSession", () => {
         email: "new@example.com",
       };
       const mockResponse = {
-        success: true,
-        data: { user: mockUser, token: "new-jwt-token" },
+        user: mockUser,
+        token: "new-jwt-token",
       };
       mockAuthApi.register = vi.fn().mockResolvedValue(mockResponse);
       mockStorage.load = vi.fn().mockReturnValue(null);
@@ -186,10 +186,9 @@ describe("AuthSession", () => {
     });
 
     it("should return error when registration fails", async () => {
-      mockAuthApi.register = vi.fn().mockResolvedValue({
-        success: false,
-        message: "Email already exists",
-      });
+      mockAuthApi.register = vi
+        .fn()
+        .mockRejectedValue(new Error("Email already exists"));
       mockStorage.load = vi.fn().mockReturnValue(null);
 
       authService = createAuthService();
@@ -258,8 +257,7 @@ describe("AuthSession", () => {
         email: "test@example.com",
       };
       mockAuthApi.getCurrentUser = vi.fn().mockResolvedValue({
-        success: true,
-        data: { user: mockUser },
+        user: mockUser,
       });
       mockStorage.load = vi.fn().mockReturnValue(null);
 
@@ -283,9 +281,9 @@ describe("AuthSession", () => {
     });
 
     it("should return null when response is not successful", async () => {
-      mockAuthApi.getCurrentUser = vi.fn().mockResolvedValue({
-        success: false,
-      });
+      mockAuthApi.getCurrentUser = vi
+        .fn()
+        .mockRejectedValue(new Error("Unauthorized"));
       mockStorage.load = vi.fn().mockReturnValue(null);
 
       authService = createAuthService();
@@ -298,8 +296,7 @@ describe("AuthSession", () => {
   describe("refreshToken", () => {
     it("should refresh token successfully", async () => {
       mockAuthApi.refreshToken = vi.fn().mockResolvedValue({
-        success: true,
-        data: { token: "new-refreshed-token" },
+        token: "new-refreshed-token",
       });
       mockStorage.load = vi.fn().mockReturnValue(null);
 
@@ -338,8 +335,8 @@ describe("AuthSession", () => {
       };
       mockStorage.load = vi.fn().mockReturnValue(null);
       mockApiClient.put = vi.fn().mockResolvedValue({
-        success: true,
-        data: { user: { ...mockUser, name: "New Name" } },
+        ...mockUser,
+        name: "New Name",
       });
 
       authService = createAuthService();
@@ -380,17 +377,11 @@ describe("AuthSession", () => {
     });
 
     it("should change password successfully when authenticated", async () => {
-      mockAuthApi.changePassword = vi.fn().mockResolvedValue({
-        success: true,
-        message: "Password changed",
-      });
+      mockAuthApi.changePassword = vi.fn().mockResolvedValue(undefined);
       mockStorage.load = vi.fn().mockReturnValue(null);
       mockAuthApi.login = vi.fn().mockResolvedValue({
-        success: true,
-        data: {
-          user: { id: "user-1", username: "test", email: "test@test.com" },
-          token: "token",
-        },
+        user: { id: "user-1", username: "test", email: "test@test.com" },
+        token: "token",
       });
 
       authService = createAuthService();
@@ -406,10 +397,7 @@ describe("AuthSession", () => {
 
   describe("forgotPassword", () => {
     it("should send reset link successfully", async () => {
-      mockAuthApi.forgotPassword = vi.fn().mockResolvedValue({
-        success: true,
-        message: "Reset link sent",
-      });
+      mockAuthApi.forgotPassword = vi.fn().mockResolvedValue(undefined);
       mockStorage.load = vi.fn().mockReturnValue(null);
 
       authService = createAuthService();
@@ -419,10 +407,9 @@ describe("AuthSession", () => {
     });
 
     it("should return error when forgotPassword fails", async () => {
-      mockAuthApi.forgotPassword = vi.fn().mockResolvedValue({
-        success: false,
-        message: "Email not found",
-      });
+      mockAuthApi.forgotPassword = vi
+        .fn()
+        .mockRejectedValue(new Error("Email not found"));
       mockStorage.load = vi.fn().mockReturnValue(null);
 
       authService = createAuthService();
@@ -437,10 +424,7 @@ describe("AuthSession", () => {
 
   describe("resetPassword", () => {
     it("should reset password successfully", async () => {
-      mockAuthApi.resetPassword = vi.fn().mockResolvedValue({
-        success: true,
-        message: "Password reset successful",
-      });
+      mockAuthApi.resetPassword = vi.fn().mockResolvedValue(undefined);
       mockStorage.load = vi.fn().mockReturnValue(null);
 
       authService = createAuthService();
@@ -453,10 +437,9 @@ describe("AuthSession", () => {
     });
 
     it("should return error when resetPassword fails", async () => {
-      mockAuthApi.resetPassword = vi.fn().mockResolvedValue({
-        success: false,
-        message: "Invalid or expired token",
-      });
+      mockAuthApi.resetPassword = vi
+        .fn()
+        .mockRejectedValue(new Error("Invalid or expired token"));
       mockStorage.load = vi.fn().mockReturnValue(null);
 
       authService = createAuthService();

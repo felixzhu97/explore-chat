@@ -176,8 +176,10 @@ export const feedApi = createApi({
     getStatuses: build.query<any[], void>({
       queryFn: async () => {
         try {
-          const res = await apiClient.get<{ data: any[] }>("/status");
-          return { data: Array.isArray(res.data?.data) ? res.data.data : [] };
+          const res = await apiClient.get<{ statuses?: any[] }>("/status");
+          return {
+            data: Array.isArray(res.data?.statuses) ? res.data.statuses : [],
+          };
         } catch (e) {
           return {
             error: {
@@ -192,10 +194,10 @@ export const feedApi = createApi({
     likePost: build.mutation<EngagementResult, { postId: string }>({
       queryFn: async ({ postId }) => {
         try {
-          const res = await apiClient.post<{ data: EngagementResult }>(
-            `/posts/${postId}/like`,
+          const res = await apiClient.post<EngagementResult>(
+            `/posts/${postId}:like`,
           );
-          return { data: res.data.data };
+          return { data: res.data };
         } catch (e) {
           return {
             error: {
@@ -244,10 +246,10 @@ export const feedApi = createApi({
     unlikePost: build.mutation<EngagementResult, { postId: string }>({
       queryFn: async ({ postId }) => {
         try {
-          const res = await apiClient.delete<{ data: EngagementResult }>(
-            `/posts/${postId}/like`,
+          const res = await apiClient.post<EngagementResult>(
+            `/posts/${postId}:unlike`,
           );
-          return { data: res.data.data };
+          return { data: res.data };
         } catch (e) {
           return {
             error: {
@@ -295,10 +297,10 @@ export const feedApi = createApi({
     savePost: build.mutation<EngagementResult, { postId: string }>({
       queryFn: async ({ postId }) => {
         try {
-          const res = await apiClient.post<{ data: EngagementResult }>(
-            `/posts/${postId}/save`,
+          const res = await apiClient.post<EngagementResult>(
+            `/posts/${postId}:save`,
           );
-          return { data: res.data.data };
+          return { data: res.data };
         } catch (e) {
           return {
             error: {
@@ -343,10 +345,10 @@ export const feedApi = createApi({
     unsavePost: build.mutation<EngagementResult, { postId: string }>({
       queryFn: async ({ postId }) => {
         try {
-          const res = await apiClient.delete<{ data: EngagementResult }>(
-            `/posts/${postId}/save`,
+          const res = await apiClient.post<EngagementResult>(
+            `/posts/${postId}:unsave`,
           );
-          return { data: res.data.data };
+          return { data: res.data };
         } catch (e) {
           return {
             error: {
@@ -391,10 +393,10 @@ export const feedApi = createApi({
     followUser: build.mutation<FollowResult, { userId: string }>({
       queryFn: async ({ userId }) => {
         try {
-          const res = await apiClient.post<{ data: FollowResult }>(
-            `/users/${userId}/follow`,
+          const res = await apiClient.post<FollowResult>(
+            `/users/${userId}:follow`,
           );
-          return { data: res.data.data };
+          return { data: res.data };
         } catch (e) {
           return {
             error: {
@@ -408,10 +410,10 @@ export const feedApi = createApi({
     unfollowUser: build.mutation<FollowResult, { userId: string }>({
       queryFn: async ({ userId }) => {
         try {
-          const res = await apiClient.delete<{ data: FollowResult }>(
-            `/users/${userId}/follow`,
+          const res = await apiClient.post<FollowResult>(
+            `/users/${userId}:unfollow`,
           );
-          return { data: res.data.data };
+          return { data: res.data };
         } catch (e) {
           return {
             error: {
@@ -428,11 +430,12 @@ export const feedApi = createApi({
     >({
       queryFn: async ({ userIds }) => {
         try {
-          const res = await apiClient.post<{ data: FollowingCheckResult[] }>(
-            `/users/following/check`,
-            { userIds },
-          );
-          return { data: res.data.data };
+          const res = await apiClient.post<{
+            results?: FollowingCheckResult[];
+          }>(`/users/following:check`, { userIds });
+          return {
+            data: Array.isArray(res.data?.results) ? res.data.results : [],
+          };
         } catch (e) {
           return {
             error: {
@@ -446,10 +449,10 @@ export const feedApi = createApi({
     viewStatus: build.mutation<StatusViewResult, { statusId: string }>({
       queryFn: async ({ statusId }) => {
         try {
-          const res = await apiClient.post<{ data: StatusViewResult }>(
-            `/status/${statusId}/view`,
+          const res = await apiClient.post<StatusViewResult>(
+            `/status/${statusId}:view`,
           );
-          return { data: res.data.data };
+          return { data: res.data };
         } catch (e) {
           return {
             error: {
@@ -489,14 +492,14 @@ export const feedApi = createApi({
             name: fileName ?? `upload-${Date.now()}`,
           } as any);
           if (folder) formData.append("folder", folder);
-          const res = await apiClient.post<{ data: UploadMediaResult }>(
+          const res = await apiClient.post<UploadMediaResult>(
             `/media/upload`,
             formData,
             {
               headers: { "Content-Type": "multipart/form-data" },
             },
           );
-          return { data: res.data.data };
+          return { data: res.data };
         } catch (e) {
           return {
             error: {
@@ -510,11 +513,8 @@ export const feedApi = createApi({
     createPost: build.mutation<CreatePostResult, CreatePostInput>({
       queryFn: async (body) => {
         try {
-          const res = await apiClient.post<{ data: CreatePostResult }>(
-            `/posts`,
-            body,
-          );
-          return { data: res.data.data };
+          const res = await apiClient.post<CreatePostResult>(`/posts`, body);
+          return { data: res.data };
         } catch (e) {
           return {
             error: {
@@ -529,13 +529,15 @@ export const feedApi = createApi({
     getPostComments: build.query<PostComment[], PostCommentListQuery>({
       queryFn: async ({ postId, page = 1, limit = 20 }) => {
         try {
-          const res = await apiClient.get<{ data: PostComment[] }>(
+          const res = await apiClient.get<{ comments?: PostComment[] }>(
             `/posts/${postId}/comments`,
             {
-              params: { page, limit },
+              params: { page_size: limit },
             },
           );
-          return { data: Array.isArray(res.data?.data) ? res.data.data : [] };
+          return {
+            data: Array.isArray(res.data?.comments) ? res.data.comments : [],
+          };
         } catch (e) {
           return {
             error: {
@@ -552,14 +554,14 @@ export const feedApi = createApi({
     createPostComment: build.mutation<PostComment, PostCommentCreateInput>({
       queryFn: async ({ postId, content, parentId }) => {
         try {
-          const res = await apiClient.post<{ data: PostComment }>(
+          const res = await apiClient.post<PostComment>(
             `/posts/${postId}/comments`,
             {
               content,
               parentId,
             },
           );
-          return { data: res.data.data };
+          return { data: res.data };
         } catch (e) {
           return {
             error: {
@@ -580,10 +582,8 @@ export const feedApi = createApi({
     >({
       queryFn: async ({ commentId }) => {
         try {
-          const res = await apiClient.delete<{ data?: { deleted: boolean } }>(
-            `/comments/${commentId}`,
-          );
-          return { data: res.data?.data ?? { deleted: true } };
+          await apiClient.delete(`/comments/${commentId}`);
+          return { data: { deleted: true } };
         } catch (e) {
           return {
             error: {

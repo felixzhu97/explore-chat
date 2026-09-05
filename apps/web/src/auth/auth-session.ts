@@ -1,6 +1,6 @@
 import type { AuthTokens } from "@whatschat/shared-types";
 import type { User } from "./user.model";
-import type { ApiClient, ApiResponse } from "@/auth/api-client";
+import type { ApiClient } from "@/auth/api-client";
 import { getAppComposition } from "@/layout/composition-root";
 import { getStorage, type AppStorage } from "@/auth/storage";
 import { mapUser, mergeUserProfile } from "./user.model";
@@ -26,6 +26,12 @@ export interface LoginData {
   password: string;
 }
 
+export interface AuthSessionResponse {
+  user: User;
+  token: string;
+  refreshToken?: string;
+}
+
 export class AuthApi {
   constructor(private apiClient: ApiClient) {}
 
@@ -34,53 +40,55 @@ export class AuthApi {
     email: string;
     password: string;
     phone?: string;
-  }): Promise<ApiResponse> {
-    return this.apiClient.post("/auth/register", userData);
+  }): Promise<AuthSessionResponse> {
+    return this.apiClient.post<AuthSessionResponse>("/auth/register", userData);
   }
 
   async login(credentials: {
     email: string;
     password: string;
-  }): Promise<ApiResponse> {
-    return this.apiClient.post("/auth/login", credentials);
+  }): Promise<AuthSessionResponse> {
+    return this.apiClient.post<AuthSessionResponse>("/auth/login", credentials);
   }
 
-  async refreshToken(refreshToken: string): Promise<ApiResponse> {
-    return this.apiClient.post("/auth/refresh-token", { refreshToken });
+  async refreshToken(
+    refreshToken: string,
+  ): Promise<{ token: string; refreshToken?: string }> {
+    return this.apiClient.post("/auth/refreshToken", { refreshToken });
   }
 
-  async logout(): Promise<ApiResponse> {
-    return this.apiClient.post("/auth/logout");
+  async logout(): Promise<void> {
+    return this.apiClient.post<void>("/auth/logout");
   }
 
-  async getCurrentUser(): Promise<ApiResponse> {
-    return this.apiClient.get("/auth/me");
+  async getCurrentUser(): Promise<{ user: User }> {
+    return this.apiClient.get<{ user: User }>("/auth/me");
   }
 
   async updateProfile(profileData: {
     username?: string;
     status?: string;
     avatar?: string;
-  }): Promise<ApiResponse> {
-    return this.apiClient.put("/auth/profile", profileData);
+  }): Promise<{ user: User }> {
+    return this.apiClient.patch<{ user: User }>("/auth/profile", profileData);
   }
 
   async changePassword(passwordData: {
     currentPassword: string;
     newPassword: string;
-  }): Promise<ApiResponse> {
-    return this.apiClient.put("/auth/change-password", passwordData);
+  }): Promise<void> {
+    return this.apiClient.put<void>("/auth/change-password", passwordData);
   }
 
-  async forgotPassword(email: string): Promise<ApiResponse> {
-    return this.apiClient.post("/auth/forgot-password", { email });
+  async forgotPassword(email: string): Promise<void> {
+    return this.apiClient.post<void>("/auth/forgot-password", { email });
   }
 
   async resetPassword(resetData: {
     token: string;
     newPassword: string;
-  }): Promise<ApiResponse> {
-    return this.apiClient.post("/auth/reset-password", resetData);
+  }): Promise<void> {
+    return this.apiClient.post<void>("/auth/reset-password", resetData);
   }
 }
 
@@ -125,13 +133,10 @@ export class AuthSession {
         this.apiClient.setToken(accessToken);
 
         try {
-          const response = (await this.authApi.getCurrentUser()) as {
-            success?: boolean;
-            data?: { user: User };
-          };
-          if (response.success && response.data) {
+          const response = await this.authApi.getCurrentUser();
+          if (response.user) {
             this.authState = {
-              user: mapUser(response.data.user),
+              user: mapUser(response.user),
               isAuthenticated: true,
               isLoading: false,
               error: null,
@@ -141,12 +146,17 @@ export class AuthSession {
         } catch {
           if (refreshToken) {
             try {
-              const refreshResponse = (await this.authApi.refreshToken(
-                refreshToken,
-              )) as { success?: boolean; data?: { token: string } };
-              if (refreshResponse.success && refreshResponse.data) {
-                const { token } = refreshResponse.data;
+              const refreshResponse =
+                await this.authApi.refreshToken(refreshToken);
+              if (refreshResponse.token) {
+                const { token } = refreshResponse;
                 this.storage.save(STORAGE_KEYS.ACCESS_TOKEN, token);
+                if (refreshResponse.refreshToken) {
+                  this.storage.save(
+                    STORAGE_KEYS.REFRESH_TOKEN,
+                    refreshResponse.refreshToken,
+                  );
+                }
                 this.apiClient.setToken(token);
 
                 this.authState = {
@@ -187,33 +197,31 @@ export class AuthSession {
     this.authState = { ...this.authState, isLoading: true, error: null };
 
     try {
-      const response = (await this.authApi.login(data)) as {
-        success?: boolean;
-        data?: { user: User; token: string };
-        message?: string;
-      };
+      const response = await this.authApi.login(data);
+      const { user, token } = response;
 
-      if (response.success && response.data) {
-        const { user, token } = response.data;
-
-        this.storage.save(STORAGE_KEYS.USER, JSON.stringify(user));
-        this.storage.save(STORAGE_KEYS.ACCESS_TOKEN, token);
-        this.apiClient.setToken(token);
-        if (typeof window !== "undefined") {
-          localStorage.setItem("auth_token", token);
-        }
-
-        this.authState = {
-          user: mapUser(user),
-          isAuthenticated: true,
-          isLoading: false,
-          error: null,
-        };
-
-        return { success: true };
+      if (!user || !token) {
+        throw new Error("登录失败");
       }
 
-      throw new Error(response.message || "登录失败");
+      this.storage.save(STORAGE_KEYS.USER, JSON.stringify(user));
+      this.storage.save(STORAGE_KEYS.ACCESS_TOKEN, token);
+      if (response.refreshToken) {
+        this.storage.save(STORAGE_KEYS.REFRESH_TOKEN, response.refreshToken);
+      }
+      this.apiClient.setToken(token);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("auth_token", token);
+      }
+
+      this.authState = {
+        user: mapUser(user),
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      };
+
+      return { success: true };
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "登录失败，请检查邮箱和密码";
@@ -232,33 +240,31 @@ export class AuthSession {
     this.authState = { ...this.authState, isLoading: true, error: null };
 
     try {
-      const response = (await this.authApi.register(data)) as {
-        success?: boolean;
-        data?: { user: User; token: string };
-        message?: string;
-      };
+      const response = await this.authApi.register(data);
+      const { user, token } = response;
 
-      if (response.success && response.data) {
-        const { user, token } = response.data;
-
-        this.storage.save(STORAGE_KEYS.USER, JSON.stringify(user));
-        this.storage.save(STORAGE_KEYS.ACCESS_TOKEN, token);
-        this.apiClient.setToken(token);
-        if (typeof window !== "undefined") {
-          localStorage.setItem("auth_token", token);
-        }
-
-        this.authState = {
-          user: mapUser(user),
-          isAuthenticated: true,
-          isLoading: false,
-          error: null,
-        };
-
-        return { success: true };
+      if (!user || !token) {
+        throw new Error("注册失败");
       }
 
-      throw new Error(response.message || "注册失败");
+      this.storage.save(STORAGE_KEYS.USER, JSON.stringify(user));
+      this.storage.save(STORAGE_KEYS.ACCESS_TOKEN, token);
+      if (response.refreshToken) {
+        this.storage.save(STORAGE_KEYS.REFRESH_TOKEN, response.refreshToken);
+      }
+      this.apiClient.setToken(token);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("auth_token", token);
+      }
+
+      this.authState = {
+        user: mapUser(user),
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      };
+
+      return { success: true };
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "注册失败，请稍后重试";
@@ -289,12 +295,9 @@ export class AuthSession {
 
   async getCurrentUser(): Promise<User | null> {
     try {
-      const response = (await this.authApi.getCurrentUser()) as {
-        success?: boolean;
-        data?: { user: User };
-      };
-      if (response.success && response.data) {
-        const user = mapUser(response.data.user);
+      const response = await this.authApi.getCurrentUser();
+      if (response.user) {
+        const user = mapUser(response.user);
         this.authState = { ...this.authState, user };
         return user;
       }
@@ -307,15 +310,12 @@ export class AuthSession {
 
   async refreshToken(refreshToken: string): Promise<{ token: string } | null> {
     try {
-      const response = (await this.authApi.refreshToken(refreshToken)) as {
-        success?: boolean;
-        data?: { token: string };
-      };
-      if (response.success && response.data) {
-        const { token } = response.data;
+      const response = await this.authApi.refreshToken(refreshToken);
+      if (response.token) {
+        const { token } = response;
         this.storage.save(STORAGE_KEYS.ACCESS_TOKEN, token);
         this.apiClient.setToken(token);
-        return response.data;
+        return { token };
       }
       return null;
     } catch (error) {
@@ -336,26 +336,18 @@ export class AuthSession {
     }
 
     try {
-      const response = (await this.apiClient.put(
+      const updated = await this.apiClient.put<User>(
         `/users/${this.authState.user.id}`,
         updates,
-      )) as {
-        success?: boolean;
-        data?: { user?: Partial<User> };
-        message?: string;
-      };
+      );
 
-      if (response.success && response.data) {
-        const updatedUser = mergeUserProfile(this.authState.user, {
-          ...(response.data.user ?? {}),
-          ...updates,
-        });
-        this.storage.save(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
-        this.authState = { ...this.authState, user: updatedUser };
-        return { success: true };
-      }
-
-      throw new Error(response.message || "更新失败");
+      const updatedUser = mergeUserProfile(this.authState.user, {
+        ...updated,
+        ...updates,
+      });
+      this.storage.save(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+      this.authState = { ...this.authState, user: updatedUser };
+      return { success: true };
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "更新用户信息失败";
@@ -373,23 +365,19 @@ export class AuthSession {
     }
 
     try {
-      const response = await this.authApi.changePassword({
+      await this.authApi.changePassword({
         currentPassword,
         newPassword,
       });
 
-      if (response.success) {
-        this.clearAuthStorage();
-        this.authState = {
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-          error: null,
-        };
-        return { success: true, message: "密码修改成功，请重新登录" };
-      }
-
-      throw new Error(response.message || "密码修改失败");
+      this.clearAuthStorage();
+      this.authState = {
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: null,
+      };
+      return { success: true, message: "密码修改成功，请重新登录" };
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "密码修改失败";
@@ -403,15 +391,11 @@ export class AuthSession {
     message?: string;
   }> {
     try {
-      const response = await this.authApi.forgotPassword(email);
-      if (response.success) {
-        return {
-          success: true,
-          message: response.message || "重置链接已发送到邮箱",
-        };
-      }
-
-      throw new Error(response.message || "发送重置链接失败");
+      await this.authApi.forgotPassword(email);
+      return {
+        success: true,
+        message: "重置链接已发送到邮箱",
+      };
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "发送重置链接失败";
@@ -424,12 +408,8 @@ export class AuthSession {
     newPassword: string,
   ): Promise<{ success: boolean; error?: string; message?: string }> {
     try {
-      const response = await this.authApi.resetPassword({ token, newPassword });
-      if (response.success) {
-        return { success: true, message: response.message || "密码重置成功" };
-      }
-
-      throw new Error(response.message || "密码重置失败");
+      await this.authApi.resetPassword({ token, newPassword });
+      return { success: true, message: "密码重置成功" };
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "密码重置失败";

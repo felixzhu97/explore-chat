@@ -72,8 +72,8 @@ export function VideoGenerateDialog({
     const timer = setInterval(async () => {
       try {
         const res = await service.getResult(jobId);
-        if (!res.success || !res.data) return;
-        const data = res.data;
+        if (!res) return;
+        const data = res;
         if (data.status === "succeeded" && data.videoUrl) {
           setJobId(null);
           setStatus("");
@@ -106,14 +106,14 @@ export function VideoGenerateDialog({
     setIsSubmitting(true);
     try {
       const res = await service.generate(prompt.trim());
-      if (!res.success || !res.data?.jobId) {
+      if (!res?.jobId) {
         setStatus("");
         setError("提交失败");
         setIsSubmitting(false);
         return;
       }
       setStatus("生成中...");
-      setJobId(res.data.jobId);
+      setJobId(res.jobId);
     } catch (e) {
       setStatus("");
       setError(e instanceof Error ? e.message : "请求失败");

@@ -6,10 +6,9 @@ describe("ChatApi", () => {
     get: jest.fn(),
     post: jest.fn(),
     put: jest.fn(),
+    patch: jest.fn(),
     delete: jest.fn(),
-  } as unknown as jest.Mocked<
-    Pick<HttpClient, "get" | "post" | "put" | "delete">
-  >;
+  } as unknown as jest.Mocked<HttpClient>;
 
   const adapter = new ChatApi(mockHttpClient);
 
@@ -18,27 +17,17 @@ describe("ChatApi", () => {
   });
 
   describe("getChats", () => {
-    it("returns empty array when response is not successful", async () => {
-      mockHttpClient.get.mockResolvedValue({ data: { success: false } });
+    it("returns empty array when chats is missing", async () => {
+      mockHttpClient.get.mockResolvedValue({ data: {} });
 
       const result = await adapter.getChats();
 
       expect(result).toEqual([]);
     });
 
-    it("returns empty array when data is not an array", async () => {
+    it("returns empty array when chats is not an array", async () => {
       mockHttpClient.get.mockResolvedValue({
-        data: { success: true, data: "not-an-array" },
-      });
-
-      const result = await adapter.getChats();
-
-      expect(result).toEqual([]);
-    });
-
-    it("returns empty array when data is null", async () => {
-      mockHttpClient.get.mockResolvedValue({
-        data: { success: true, data: null },
+        data: { chats: "not-an-array" },
       });
 
       const result = await adapter.getChats();
@@ -49,8 +38,7 @@ describe("ChatApi", () => {
     it("maps chat data correctly", async () => {
       mockHttpClient.get.mockResolvedValue({
         data: {
-          success: true,
-          data: [
+          chats: [
             {
               id: "chat-1",
               name: "Test Chat",
@@ -71,8 +59,7 @@ describe("ChatApi", () => {
     it("maps multiple chats", async () => {
       mockHttpClient.get.mockResolvedValue({
         data: {
-          success: true,
-          data: [
+          chats: [
             { id: "chat-1", name: "Chat 1", updatedAt: "2024-06-15T12:00:00Z" },
             { id: "chat-2", name: "Chat 2", updatedAt: "2024-06-14T12:00:00Z" },
           ],
@@ -86,28 +73,8 @@ describe("ChatApi", () => {
   });
 
   describe("getChatById", () => {
-    it("returns null when response is not successful", async () => {
-      mockHttpClient.get.mockResolvedValue({ data: { success: false } });
-
-      const result = await adapter.getChatById("chat-1");
-
-      expect(result).toBeNull();
-    });
-
     it("returns null when data is null", async () => {
-      mockHttpClient.get.mockResolvedValue({
-        data: { success: true, data: null },
-      });
-
-      const result = await adapter.getChatById("chat-1");
-
-      expect(result).toBeNull();
-    });
-
-    it("returns null when data is undefined", async () => {
-      mockHttpClient.get.mockResolvedValue({
-        data: { success: true, data: undefined },
-      });
+      mockHttpClient.get.mockResolvedValue({ data: null });
 
       const result = await adapter.getChatById("chat-1");
 
@@ -117,13 +84,10 @@ describe("ChatApi", () => {
     it("returns mapped chat when successful", async () => {
       mockHttpClient.get.mockResolvedValue({
         data: {
-          success: true,
-          data: {
-            id: "chat-1",
-            name: "Test Chat",
-            type: "GROUP",
-            updatedAt: "2024-06-15T12:00:00Z",
-          },
+          id: "chat-1",
+          name: "Test Chat",
+          type: "GROUP",
+          updatedAt: "2024-06-15T12:00:00Z",
         },
       });
 

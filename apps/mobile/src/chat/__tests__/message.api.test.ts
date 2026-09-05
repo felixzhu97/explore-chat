@@ -4,6 +4,7 @@ const createMockHttpClient = () => ({
   get: jest.fn(),
   post: jest.fn(),
   put: jest.fn(),
+  patch: jest.fn(),
   delete: jest.fn(),
 });
 
@@ -18,7 +19,7 @@ describe("MessageApi", () => {
   });
 
   describe("getMessages", () => {
-    it("should return array of messages when API returns success", async () => {
+    it("should return array of messages when API returns messages", async () => {
       const mockMessages = [
         {
           id: "msg-1",
@@ -40,30 +41,20 @@ describe("MessageApi", () => {
         },
       ];
       mockHttp.get.mockResolvedValue({
-        data: { success: true, data: mockMessages },
+        data: { messages: mockMessages },
       });
 
       const result = await adapter.getMessages("chat-1");
 
       expect(result).toHaveLength(2);
-      expect(mockHttp.get).toHaveBeenCalledWith("/messages/chat-1", {
-        params: { page: 1, limit: 50 },
+      expect(mockHttp.get).toHaveBeenCalledWith("/chats/chat-1/messages", {
+        params: { page_size: 50 },
       });
     });
 
-    it("should return empty array when API returns null data", async () => {
+    it("should return empty array when API returns null messages", async () => {
       mockHttp.get.mockResolvedValue({
-        data: { success: true, data: null },
-      });
-
-      const result = await adapter.getMessages("chat-1");
-
-      expect(result).toEqual([]);
-    });
-
-    it("should return empty array when API returns non-array data", async () => {
-      mockHttp.get.mockResolvedValue({
-        data: { success: true, data: "not an array" },
+        data: { messages: null },
       });
 
       const result = await adapter.getMessages("chat-1");
@@ -71,9 +62,9 @@ describe("MessageApi", () => {
       expect(result).toEqual([]);
     });
 
-    it("should return empty array when API returns failure", async () => {
+    it("should return empty array when API returns non-array messages", async () => {
       mockHttp.get.mockResolvedValue({
-        data: { success: false },
+        data: { messages: "not an array" },
       });
 
       const result = await adapter.getMessages("chat-1");
@@ -88,33 +79,18 @@ describe("MessageApi", () => {
         "Network error",
       );
     });
-
-    it("should pass correct pagination params", async () => {
-      mockHttp.get.mockResolvedValue({
-        data: { success: true, data: [] },
-      });
-
-      await adapter.getMessages("chat-1");
-
-      expect(mockHttp.get).toHaveBeenCalledWith("/messages/chat-1", {
-        params: { page: 1, limit: 50 },
-      });
-    });
   });
 
   describe("sendMessage", () => {
     it("should send message successfully with TEXT type", async () => {
       const mockResponse = {
         data: {
-          success: true,
-          data: {
-            id: "new-msg",
-            chatId: "chat-1",
-            senderId: "user-1",
-            type: "TEXT",
-            content: "New message",
-            createdAt: "2024-01-01T00:00:00Z",
-          },
+          id: "new-msg",
+          chatId: "chat-1",
+          senderId: "user-1",
+          type: "TEXT",
+          content: "New message",
+          createdAt: "2024-01-01T00:00:00Z",
         },
       };
       mockHttp.post.mockResolvedValue(mockResponse);
@@ -123,8 +99,7 @@ describe("MessageApi", () => {
 
       expect(result.id).toBe("new-msg");
       expect(result.content).toBe("New message");
-      expect(mockHttp.post).toHaveBeenCalledWith("/messages", {
-        chatId: "chat-1",
+      expect(mockHttp.post).toHaveBeenCalledWith("/chats/chat-1/messages", {
         content: "New message",
         type: "TEXT",
       });
@@ -133,23 +108,19 @@ describe("MessageApi", () => {
     it("should send message with IMAGE type", async () => {
       const mockResponse = {
         data: {
-          success: true,
-          data: {
-            id: "img-msg",
-            chatId: "chat-1",
-            senderId: "user-1",
-            type: "IMAGE",
-            content: "",
-            createdAt: "2024-01-01T00:00:00Z",
-          },
+          id: "img-msg",
+          chatId: "chat-1",
+          senderId: "user-1",
+          type: "IMAGE",
+          content: "",
+          createdAt: "2024-01-01T00:00:00Z",
         },
       };
       mockHttp.post.mockResolvedValue(mockResponse);
 
       await adapter.sendMessage("chat-1", "Check this", "IMAGE");
 
-      expect(mockHttp.post).toHaveBeenCalledWith("/messages", {
-        chatId: "chat-1",
+      expect(mockHttp.post).toHaveBeenCalledWith("/chats/chat-1/messages", {
         content: "Check this",
         type: "IMAGE",
       });
@@ -158,42 +129,26 @@ describe("MessageApi", () => {
     it("should use TEXT as default type", async () => {
       const mockResponse = {
         data: {
-          success: true,
-          data: {
-            id: "default-msg",
-            chatId: "chat-1",
-            senderId: "user-1",
-            type: "TEXT",
-            content: "Test",
-            createdAt: "2024-01-01T00:00:00Z",
-          },
+          id: "default-msg",
+          chatId: "chat-1",
+          senderId: "user-1",
+          type: "TEXT",
+          content: "Test",
+          createdAt: "2024-01-01T00:00:00Z",
         },
       };
       mockHttp.post.mockResolvedValue(mockResponse);
 
       await adapter.sendMessage("chat-1", "Test");
 
-      expect(mockHttp.post).toHaveBeenCalledWith("/messages", {
-        chatId: "chat-1",
+      expect(mockHttp.post).toHaveBeenCalledWith("/chats/chat-1/messages", {
         content: "Test",
         type: "TEXT",
       });
     });
 
-    it("should throw error when API returns failure", async () => {
-      mockHttp.post.mockResolvedValue({
-        data: { success: false },
-      });
-
-      await expect(adapter.sendMessage("chat-1", "Test")).rejects.toThrow(
-        "Send failed",
-      );
-    });
-
-    it("should throw error when API returns success but no data", async () => {
-      mockHttp.post.mockResolvedValue({
-        data: { success: true, data: null },
-      });
+    it("should throw error when API returns no data", async () => {
+      mockHttp.post.mockResolvedValue({ data: null });
 
       await expect(adapter.sendMessage("chat-1", "Test")).rejects.toThrow(
         "Send failed",

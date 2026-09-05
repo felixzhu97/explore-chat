@@ -147,9 +147,8 @@ function createApiAdapter(): RTCApiAdapter {
         method: "POST",
         body: JSON.stringify(body),
       });
-      const data = res?.data;
-      if (!data?.id) throw new Error("Failed to create call");
-      return { callId: data.id, participants: data.participants };
+      if (!res?.id) throw new Error("Failed to create call");
+      return { callId: res.id, participants: res.participants };
     },
     answerCall(callId) {
       return apiFetch(`/calls/${callId}/answer`, { method: "PUT" });

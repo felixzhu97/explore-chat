@@ -55,15 +55,15 @@ export function ProfilePageContainer({
   const feedApi = useMemo(() => new FeedApi(apiClient), [apiClient]);
   const followListService = useMemo(
     (): IFollowListService => ({
-      getFollowers: (userId, limit, pageState) =>
-        feedApi.getFollowers(userId, limit, pageState).then((r) => ({
+      getFollowers: (userId, limit, pageToken) =>
+        feedApi.getFollowers(userId, limit, pageToken).then((r) => ({
           list: r.list as FollowListItem[],
-          pageState: r.pageState,
+          nextPageToken: r.pageState,
         })),
-      getFollowing: (userId, limit, pageState) =>
-        feedApi.getFollowing(userId, limit, pageState).then((r) => ({
+      getFollowing: (userId, limit, pageToken) =>
+        feedApi.getFollowing(userId, limit, pageToken).then((r) => ({
           list: r.list as FollowListItem[],
-          pageState: r.pageState,
+          nextPageToken: r.pageState,
         })),
     }),
     [feedApi],
