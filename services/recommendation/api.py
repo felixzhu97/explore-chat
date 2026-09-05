@@ -1,4 +1,4 @@
-"""HTTP routes for recommendation ranking/recall."""
+"""HTTP routes for recommendation ranking/recall (AIP REST)."""
 
 from typing import List, Optional
 
@@ -11,13 +11,13 @@ router = APIRouter()
 
 
 class RankRequest(BaseModel):
-    userId: str
-    candidateIds: List[str]
+    user_id: str
+    candidate_ids: List[str]
     limit: Optional[int] = 50
     region: Optional[str] = None
     language: Optional[str] = None
-    experimentId: Optional[str] = None
-    variantId: Optional[str] = None
+    experiment_id: Optional[str] = None
+    variant_id: Optional[str] = None
 
 
 class RankedItem(BaseModel):
@@ -30,7 +30,7 @@ class RankResponse(BaseModel):
 
 
 class RecallRequest(BaseModel):
-    userId: str
+    user_id: str
     limit: Optional[int] = 100
 
 
@@ -43,31 +43,35 @@ def health():
     return {"status": "ok", "service": "recommendation"}
 
 
-@router.post("/v1/feed/rank", response_model=RankResponse)
-async def rank_feed(body: RankRequest) -> RankResponse:
+def _rank(body: RankRequest) -> RankResponse:
     ranked = rec_service.rank_candidates(
-        body.userId,
-        body.candidateIds,
+        body.user_id,
+        body.candidate_ids,
         limit=body.limit or 50,
         region=body.region,
         language=body.language,
-        experiment_id=body.experimentId,
-        variant_id=body.variantId,
+        experiment_id=body.experiment_id,
+        variant_id=body.variant_id,
     )
     return RankResponse(items=[RankedItem(id=i, score=s) for i, s in ranked])
 
 
-@router.post("/v1/explore/rank", response_model=RankResponse)
+@router.post("/api/v1/feeds:rank", response_model=RankResponse)
+async def rank_feed(body: RankRequest) -> RankResponse:
+    return _rank(body)
+
+
+@router.post("/api/v1/explores:rank", response_model=RankResponse)
 async def rank_explore(body: RankRequest) -> RankResponse:
-    return await rank_feed(body)
+    return _rank(body)
 
 
-@router.post("/v1/reels/rank", response_model=RankResponse)
+@router.post("/api/v1/reels:rank", response_model=RankResponse)
 async def rank_reels(body: RankRequest) -> RankResponse:
-    return await rank_feed(body)
+    return _rank(body)
 
 
-@router.post("/v1/feed/recall", response_model=RecallResponse)
+@router.post("/api/v1/feeds:recall", response_model=RecallResponse)
 async def recall_feed(body: RecallRequest) -> RecallResponse:
-    items = rec_service.recall_from_store(body.userId, body.limit or 100)
+    items = rec_service.recall_from_store(body.user_id, body.limit or 100)
     return RecallResponse(items=[RankedItem(id=i, score=s) for i, s in items])

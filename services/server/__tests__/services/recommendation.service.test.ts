@@ -43,13 +43,13 @@ describe("RecommendationService", () => {
       });
 
       expect(global.fetch).toHaveBeenCalledWith(
-        "https://api.example.com/v1/feed/rank",
+        "https://api.example.com/api/v1/feeds:rank",
         expect.objectContaining({
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            userId: "user-1",
-            candidateIds: ["post-1", "post-2"],
+            user_id: "user-1",
+            candidate_ids: ["post-1", "post-2"],
             limit: 10,
           }),
         }),
@@ -75,12 +75,17 @@ describe("RecommendationService", () => {
       });
 
       expect(global.fetch).toHaveBeenCalledWith(
-        "https://api.example.com/v1/feed/rank",
+        "https://api.example.com/api/v1/feeds:rank",
         expect.objectContaining({
-          body: expect.stringContaining('"region":"US"'),
-          body: expect.stringContaining('"language":"en"'),
-          body: expect.stringContaining('"experimentId":"exp-1"'),
-          body: expect.stringContaining('"variantId":"var-1"'),
+          body: JSON.stringify({
+            user_id: "user-1",
+            candidate_ids: ["post-1"],
+            limit: 10,
+            region: "US",
+            language: "en",
+            experiment_id: "exp-1",
+            variant_id: "var-1",
+          }),
         }),
       );
     });
@@ -144,7 +149,7 @@ describe("RecommendationService", () => {
       });
 
       expect(global.fetch).toHaveBeenCalledWith(
-        "https://api.example.com/v1/explore/rank",
+        "https://api.example.com/api/v1/explores:rank",
         expect.any(Object),
       );
       expect(result.items).toHaveLength(1);
@@ -168,7 +173,7 @@ describe("RecommendationService", () => {
       });
 
       expect(global.fetch).toHaveBeenCalledWith(
-        "https://api.example.com/v1/reels/rank",
+        "https://api.example.com/api/v1/reels:rank",
         expect.any(Object),
       );
       expect(result.items).toHaveLength(1);
