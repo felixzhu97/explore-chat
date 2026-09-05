@@ -1,7 +1,7 @@
 "use client";
 
 import { useRealChat as useRealChatBase } from "@whatschat/im";
-import { getWebSocketAdapter } from "@/core/websocket";
+import { getWebSocketAdapter } from "@/chat/websocket";
 
 const storageAdapter =
   typeof window !== "undefined"

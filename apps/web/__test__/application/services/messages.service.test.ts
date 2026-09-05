@@ -14,7 +14,7 @@ const mockMessage = {
   edit: vi.fn(() => ({ ...mockMessage, content: "Edited" })),
 };
 
-vi.mock("@/core/store/store", () => ({
+vi.mock("@/layout/store", () => ({
   store: {
     getState: vi.fn(() => ({
       messages: {
@@ -29,7 +29,7 @@ vi.mock("@/core/store/store", () => ({
   },
 }));
 
-vi.mock("@/core/store/slices/messagesSlice", () => ({
+vi.mock("@/chat/messagesSlice", () => ({
   addMessage: vi.fn(),
   updateMessage: vi.fn(),
   deleteMessage: vi.fn(),

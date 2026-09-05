@@ -23,7 +23,6 @@
       "@/*": ["./*"],
       "@/src/*": ["./src/*"],
       "@/shared/*": ["./src/shared/*"],
-      "@/core/*": ["./src/core/*"],
       "@/layout/*": ["./src/layout/*"],
       "@/auth/*": ["./src/auth/*"],
       "@/feed/*": ["./src/feed/*"],

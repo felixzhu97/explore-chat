@@ -13,7 +13,7 @@ import { useAuth } from "@/auth/use-auth";
 import { useFeed } from "@/feed/use-feed";
 import { useNavigation } from "@/layout/use-navigation";
 import { useAnalytics, PAGE_VIEW, CALL_END } from "@whatschat/analytics";
-import { mockUser } from "@/core/mock-data";
+import { mockUser } from "@/profile/mock-user";
 import { AppShell, FullscreenOverlay, ErrorToast } from "./shell-styles";
 import { useActiveTab } from "./use-active-tab";
 

@@ -2,8 +2,8 @@
  * Contacts state - Redux slice.
  * Use useContactsStore(selector) in components, or store.getState().contacts in services.
  */
-import { useAppSelector } from "./hooks";
-import { store, type RootState } from "./store";
+import { useAppSelector } from "@/layout/store-hooks";
+import { store, type RootState } from "@/layout/store";
 
 export const useContactsStore = <T>(
   selector: (state: RootState["contacts"]) => T,

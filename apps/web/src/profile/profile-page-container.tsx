@@ -15,7 +15,7 @@ import { useFeed, useProfileStats } from "@/feed/use-feed";
 import { useUserProfileView } from "@/profile/use-user-profile-view";
 import { useNavigation } from "@/layout/use-navigation";
 import { FeedApi } from "@/feed/feed.api";
-import { getApiClient } from "@/core/api-client";
+import { getApiClient } from "@/auth/api-client";
 import type { FeedPost } from "@/shared/types";
 import { CenterColumn } from "@/layout/shell-styles";
 

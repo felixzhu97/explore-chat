@@ -33,11 +33,15 @@ export default defineConfig({
         "src/layout/providers/**",
         "src/shared/types/**",
         "emotion-registry.tsx",
-        "src/core/store/slices/**",
-        "src/core/storage/**",
-        "src/core/websocket/**",
-        "src/core/rtc/**",
-        "src/core/mock-data.ts",
+        "src/chat/messagesSlice.ts",
+        "src/chat/contactsSlice.ts",
+        "src/calls/callsSlice.ts",
+        "src/layout/notificationsSlice.ts",
+        "src/auth/storage.ts",
+        "src/chat/websocket.ts",
+        "src/calls/web-rtc-config.ts",
+        "src/chat/mock-data.ts",
+        "src/profile/mock-user.ts",
       ],
       thresholds: {
         global: {
@@ -51,10 +55,6 @@ export default defineConfig({
   },
   resolve: {
     alias: [
-      {
-        find: /^@\/core\/(.*)/,
-        replacement: path.resolve(__dirname, "./src/core/$1"),
-      },
       {
         find: /^@\/layout\/(.*)/,
         replacement: path.resolve(__dirname, "./src/layout/$1"),

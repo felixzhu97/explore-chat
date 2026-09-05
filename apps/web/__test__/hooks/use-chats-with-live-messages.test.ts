@@ -18,7 +18,7 @@ vi.mock("@/chat/services/chats.service", () => ({
   })),
 }));
 
-vi.mock("@/core/websocket", () => ({
+vi.mock("@/chat/websocket", () => ({
   getWebSocketAdapter: vi.fn(() => ({
     connect: vi.fn(),
     disconnect: vi.fn(),

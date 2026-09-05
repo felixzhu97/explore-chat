@@ -1,10 +1,10 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistStore, persistReducer, PersistConfig } from "redux-persist";
-import { createPersistStorage } from "./createPersistStorage";
-import callsReducer from "./slices/callsSlice";
-import contactsReducer from "./slices/contactsSlice";
-import messagesReducer from "./slices/messagesSlice";
-import notificationsReducer from "./slices/notificationsSlice";
+import { createPersistStorage } from "@/layout/create-persist-storage";
+import callsReducer from "@/calls/callsSlice";
+import contactsReducer from "@/chat/contactsSlice";
+import messagesReducer from "@/chat/messagesSlice";
+import notificationsReducer from "@/layout/notificationsSlice";
 
 const rootReducer = combineReducers({
   calls: callsReducer,

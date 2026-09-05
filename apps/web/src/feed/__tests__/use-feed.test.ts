@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { useFeed, mapDetailToFeedPost } from "../use-feed";
 
-vi.mock("@/core/api-client", () => ({
+vi.mock("@/auth/api-client", () => ({
   getApiClient: vi.fn(() => ({
     get: vi.fn(),
     post: vi.fn(),

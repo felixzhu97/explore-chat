@@ -1,5 +1,5 @@
-import type { ApiResponse } from "@/core/api-response.model";
-import { API_CONFIG } from "@/core/config/api.config";
+import type { ApiResponse } from "@/auth/api-response.model";
+import { API_CONFIG } from "@/auth/api.config";
 
 export class ApiClient {
   private baseURL: string;

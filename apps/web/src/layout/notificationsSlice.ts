@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { FeedApi, type NotificationItemRes } from "@/feed/feed.api";
-import { getApiClient } from "@/core/api-client";
+import { getApiClient } from "@/auth/api-client";
 
 const api = new FeedApi(getApiClient());
 

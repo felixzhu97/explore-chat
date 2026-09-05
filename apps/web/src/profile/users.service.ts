@@ -1,6 +1,6 @@
 import type { User } from "@/auth/user.model";
 import { UserApi } from "./user.api";
-import { getAppComposition } from "@/core/composition-root";
+import { getAppComposition } from "@/layout/composition-root";
 import { mapUnknownToUser } from "./users.mapper";
 import { mergeUserProfile } from "@/auth/user.model";
 

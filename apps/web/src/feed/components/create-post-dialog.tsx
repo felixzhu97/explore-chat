@@ -14,7 +14,7 @@ import { Dialog, DialogContent } from "@/shared/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { styled } from "@/src/shared/utils/emotion";
 import { useTranslation } from "@/src/shared/i18n";
-import { getApiClient } from "@/core/api-client";
+import { getApiClient } from "@/auth/api-client";
 import { VisionApi } from "@/ai/apis/vision.api";
 
 const BORDER = "1px solid rgb(219 219 219)";

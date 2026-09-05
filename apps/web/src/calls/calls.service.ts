@@ -5,7 +5,7 @@ import {
   mapCall,
   markCallMissed,
 } from "./call.model";
-import { store } from "@/core/store/store";
+import { store } from "@/layout/store";
 import {
   addCall,
   updateCall,
@@ -13,7 +13,7 @@ import {
   setIncomingCall,
   setActiveCallNull,
   setIncomingCallNull,
-} from "@/core/store/slices/callsSlice";
+} from "@/calls/callsSlice";
 
 export class CallsService {
   private getState() {

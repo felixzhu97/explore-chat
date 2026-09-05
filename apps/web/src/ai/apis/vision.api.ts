@@ -1,4 +1,4 @@
-import type { ApiClient } from "@/core/api-client";
+import type { ApiClient } from "@/auth/api-client";
 
 export interface SuggestTagsResponse {
   labels: string[];

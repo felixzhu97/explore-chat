@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { FeedApi } from "@/feed/feed.api";
-import { getApiClient } from "@/core/api-client";
+import { getApiClient } from "@/auth/api-client";
 import type { FeedPost } from "@/src/shared/types";
 import { mapDetailToFeedPost } from "@/feed/use-feed";
 import { getUsersService } from "@/profile/users.service";

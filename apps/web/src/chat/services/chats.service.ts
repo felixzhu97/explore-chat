@@ -1,7 +1,7 @@
 import type { Contact } from "../contact.model";
 import type { Message } from "../message.model";
 import { ChatApi } from "../chat.api";
-import { getAppComposition } from "@/core/composition-root";
+import { getAppComposition } from "@/layout/composition-root";
 import {
   type ApiChatRow,
   type ApiMessageRow,

@@ -1,5 +1,5 @@
 import type { SearchScope } from "@whatschat/shared-types";
-import type { ApiClient } from "@/core/api-client";
+import type { ApiClient } from "@/auth/api-client";
 
 export interface FeedEntryRes {
   postId: string;

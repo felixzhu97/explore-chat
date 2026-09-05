@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { AuthSession } from "../auth-session";
-import type { ApiClient } from "@/core/api-client";
-import type { AppStorage } from "@/core/storage/storage";
+import type { ApiClient } from "@/auth/api-client";
+import type { AppStorage } from "@/auth/storage";
 import { AuthApi } from "@/auth/auth.api";
 
 Object.defineProperty(globalThis, "localStorage", {

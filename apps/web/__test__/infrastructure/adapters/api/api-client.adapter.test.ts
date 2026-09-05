@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { ApiClient } from "@/core/api-client";
-import type { ApiClient } from "@/core/api-client";
+import { ApiClient } from "@/auth/api-client";
+import type { ApiClient } from "@/auth/api-client";
 
 describe("ApiClient", () => {
   let adapter: ApiClient;

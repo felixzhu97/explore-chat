@@ -15,7 +15,7 @@ const mockWebSocketManager = {
   isConnected: vi.fn(() => true),
 };
 
-vi.mock("@/core/websocket", () => ({
+vi.mock("@/chat/websocket", () => ({
   getWebSocketAdapter: () => mockWebSocketManager,
   getWebSocketManager: () => mockWebSocketManager,
 }));

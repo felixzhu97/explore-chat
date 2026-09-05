@@ -1,6 +1,6 @@
 import type { Message } from "../message.model";
 import { editMessage, mapMessage, toggleStarMessage } from "../message.model";
-import { store } from "@/core/store/store";
+import { store } from "@/layout/store";
 import {
   addMessage,
   updateMessage,
@@ -20,7 +20,7 @@ import {
   isUserTyping as selectIsUserTyping,
   getStarredMessages as selectStarredMessages,
   searchMessages as selectSearchMessages,
-} from "@/core/store/slices/messagesSlice";
+} from "@/chat/messagesSlice";
 
 export class MessagesService {
   private getState() {

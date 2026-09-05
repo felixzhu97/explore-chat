@@ -9,8 +9,8 @@ import {
   type RTCApiAdapter,
   type WebSocketMessage,
 } from "@whatschat/im";
-import { getWebSocketManager } from "@/core/websocket";
-import { API_CONFIG } from "@/core/config/api.config";
+import { getWebSocketManager } from "@/chat/websocket";
+import { API_CONFIG } from "@/auth/api.config";
 
 function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;

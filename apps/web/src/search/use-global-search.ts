@@ -8,7 +8,7 @@ import {
   type SearchUiScope,
 } from "@whatschat/shared-types";
 import { FeedApi } from "@/feed/feed.api";
-import { getApiClient } from "@/core/api-client";
+import { getApiClient } from "@/auth/api-client";
 
 const api = new FeedApi(getApiClient());
 const LIMIT = 20;
