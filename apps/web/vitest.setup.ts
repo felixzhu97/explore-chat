@@ -50,7 +50,7 @@ class MockIntersectionObserver implements IntersectionObserver {
   readonly thresholds: ReadonlyArray<number> = [];
   constructor(
     _callback: IntersectionObserverCallback,
-    _options?: IntersectionObserverInit
+    _options?: IntersectionObserverInit,
   ) {}
   observe(_target: Element): void {}
   unobserve(_target: Element): void {}
@@ -90,23 +90,23 @@ Object.defineProperty(window, "matchMedia", {
 // Mock scrollIntoView
 Element.prototype.scrollIntoView = vi.fn();
 
-// Mock GrowthBook
-vi.mock("@growthbook/growthbook-react", () => ({
-  GrowthBookProvider: ({ children }: { children: React.ReactNode }) => children,
-  useFeatureIsOn: vi.fn(() => false),
-  useFeatureValue: vi.fn(() => undefined),
-  useGrowthBook: vi.fn(),
-}));
-
 // Mock localStorage with proper implementation
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: (key: string) => store[key] ?? null,
-    setItem: (key: string, value: string) => { store[key] = value; },
-    removeItem: (key: string) => { delete store[key]; },
-    clear: () => { store = {}; },
-    get length() { return Object.keys(store).length; },
+    setItem: (key: string, value: string) => {
+      store[key] = value;
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+    get length() {
+      return Object.keys(store).length;
+    },
     key: (i: number) => Object.keys(store)[i] ?? null,
   };
 })();
