@@ -2,11 +2,12 @@ import {
   Controller,
   Post,
   Get,
-  Put,
+  Patch,
   Body,
   UseGuards,
   HttpCode,
   HttpStatus,
+  NotImplementedException,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { AuthService } from "@/auth/service/auth.service";
@@ -24,7 +25,7 @@ import { JwtAuthGuard } from "./jwt-auth.guard";
 import { CurrentUser } from "./current-user.decorator";
 import { Public } from "./public.decorator";
 
-@ApiTags("认证")
+@ApiTags("auth")
 @Controller("auth")
 export class AuthController {
   constructor(
@@ -35,99 +36,87 @@ export class AuthController {
   @Public()
   @Post("register")
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: "用户注册" })
+  @ApiOperation({ summary: "Register" })
   async register(@Body() registerDto: RegisterRequest) {
     const result = await this.authService.register(registerDto);
     return {
-      success: true,
-      message: "用户注册成功",
-      data: {
-        user: {
-          id: result.user.id,
-          email: result.user.email,
-          username: result.user.username,
-          phone: result.user.phone,
-          avatar: result.user.avatar,
-          status: result.user.status,
-        },
-        token: result.tokens.accessToken,
-        refreshToken: result.tokens.refreshToken,
+      user: {
+        id: result.user.id,
+        email: result.user.email,
+        username: result.user.username,
+        phone: result.user.phone,
+        avatar: result.user.avatar,
+        status: result.user.status,
       },
+      token: result.tokens.accessToken,
+      refreshToken: result.tokens.refreshToken,
     };
   }
 
   @Public()
   @Post("login")
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "用户登录" })
+  @ApiOperation({ summary: "Login" })
   async login(@Body() loginDto: LoginRequest) {
     const result = await this.authService.login(loginDto);
     return {
-      success: true,
-      message: "登录成功",
-      data: {
-        user: {
-          id: result.user.id,
-          email: result.user.email,
-          username: result.user.username,
-          phone: result.user.phone,
-          avatar: result.user.avatar,
-          status: result.user.status,
-        },
-        token: result.tokens.accessToken,
-        refreshToken: result.tokens.refreshToken,
+      user: {
+        id: result.user.id,
+        email: result.user.email,
+        username: result.user.username,
+        phone: result.user.phone,
+        avatar: result.user.avatar,
+        status: result.user.status,
       },
+      token: result.tokens.accessToken,
+      refreshToken: result.tokens.refreshToken,
     };
   }
 
   @Public()
-  @Post("refresh-token")
+  @Post("refreshToken")
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "刷新令牌" })
+  @ApiOperation({ summary: "Refresh tokens" })
   async refreshToken(@Body() refreshTokenDto: RefreshTokenRequest) {
     const tokens = await this.authService.refreshToken(
       refreshTokenDto.refreshToken,
     );
     return {
-      success: true,
-      message: "Token刷新成功",
-      data: {
-        token: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-      },
+      token: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     };
+  }
+
+  /** @deprecated Prefer POST /auth/refreshToken */
+  @Public()
+  @Post("refresh-token")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Refresh tokens (legacy path)" })
+  async refreshTokenLegacy(@Body() refreshTokenDto: RefreshTokenRequest) {
+    return this.refreshToken(refreshTokenDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post("logout")
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "用户登出" })
+  @ApiOperation({ summary: "Logout" })
   async logout() {
-    return {
-      success: true,
-      message: "退出登录成功",
-    };
+    return;
   }
 
   @UseGuards(JwtAuthGuard)
   @Get("me")
   @ApiBearerAuth()
-  @ApiOperation({ summary: "获取当前用户信息" })
-  async getCurrentUser(@CurrentUser() user: any) {
-    return {
-      success: true,
-      message: "获取用户信息成功",
-      data: {
-        user,
-      },
-    };
+  @ApiOperation({ summary: "Get current user" })
+  async getCurrentUser(@CurrentUser() user: unknown) {
+    return { user };
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put("profile")
+  @Patch("profile")
   @ApiBearerAuth()
-  @ApiOperation({ summary: "更新用户资料" })
+  @ApiOperation({ summary: "Update profile" })
   async updateProfile(
     @CurrentUser() user: { id: string },
     @Body() updateProfileDto: UpdateProfileRequest,
@@ -143,52 +132,31 @@ export class AuthController {
       data.avatar = updateProfileDto.avatar;
 
     const updatedUser = await this.usersService.updateUser(user.id, data);
-    return {
-      success: true,
-      message: "更新用户资料成功",
-      data: {
-        user: updatedUser,
-      },
-    };
+    return { user: updatedUser };
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put("change-password")
+  @Post("changePassword")
   @ApiBearerAuth()
-  @ApiOperation({ summary: "修改密码" })
+  @ApiOperation({ summary: "Change password" })
   async changePassword(
-    @CurrentUser() _user: any,
+    @CurrentUser() _user: unknown,
     @Body() _changePasswordDto: ChangePasswordRequest,
   ) {
-    // TODO: 实现修改密码逻辑
-    return {
-      success: false,
-      message: "未实现",
-      code: "NOT_IMPLEMENTED",
-    };
+    throw new NotImplementedException("Change password is not implemented");
   }
 
   @Public()
-  @Post("forgot-password")
-  @ApiOperation({ summary: "忘记密码" })
+  @Post("forgotPassword")
+  @ApiOperation({ summary: "Forgot password" })
   async forgotPassword(@Body() _forgotPasswordDto: ForgotPasswordRequest) {
-    // TODO: 实现忘记密码逻辑
-    return {
-      success: false,
-      message: "未实现",
-      code: "NOT_IMPLEMENTED",
-    };
+    throw new NotImplementedException("Forgot password is not implemented");
   }
 
   @Public()
-  @Post("reset-password")
-  @ApiOperation({ summary: "重置密码" })
+  @Post("resetPassword")
+  @ApiOperation({ summary: "Reset password" })
   async resetPassword(@Body() _resetPasswordDto: ResetPasswordRequest) {
-    // TODO: 实现重置密码逻辑
-    return {
-      success: false,
-      message: "未实现",
-      code: "NOT_IMPLEMENTED",
-    };
+    throw new NotImplementedException("Reset password is not implemented");
   }
 }
