@@ -31,6 +31,7 @@
     "paths": {
       "@/*": ["*"],
       "@/shared/*": ["shared/*"],
+      "@/base/*": ["base/*"],
       "@/types/*": ["types/*"],
       "@/core/*": ["core/*"],
       "@/auth/*": ["auth/*"],
