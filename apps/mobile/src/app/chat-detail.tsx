@@ -153,8 +153,21 @@ export default function ChatDetailScreen() {
     (message: Message) => {
       if (message.chatId !== params.chatId) return;
       setMessages((prev) => {
-        const exists = prev.find((m) => m.id === message.id);
-        if (exists) return prev;
+        const byClient =
+          message.clientMsgId != null
+            ? prev.find((m) => m.clientMsgId === message.clientMsgId)
+            : undefined;
+        if (byClient) {
+          return prev.map((m) =>
+            m.clientMsgId === message.clientMsgId
+              ? new MessageEntity({
+                  ...message,
+                  status: MessageStatus.Sent,
+                })
+              : m,
+          );
+        }
+        if (prev.some((m) => m.id === message.id)) return prev;
         return sortBy([...prev, message], (m) =>
           new Date(m.timestamp).getTime(),
         );
@@ -167,9 +180,25 @@ export default function ChatDetailScreen() {
     [params.chatId],
   );
 
-  const { sendMessage, connected } = useSocket(
+  const onMessageDelivered = useCallback(
+    (payload: { messageId: string; chatId: string; clientMsgId?: string }) => {
+      if (payload.chatId !== params.chatId) return;
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === payload.messageId ||
+          (payload.clientMsgId != null && m.clientMsgId === payload.clientMsgId)
+            ? new MessageEntity({ ...m, status: MessageStatus.Delivered })
+            : m,
+        ),
+      );
+    },
+    [params.chatId],
+  );
+
+  const { sendMessage, joinChat, leaveChat, connected } = useSocket(
     onMessageReceived,
     onMessageSent,
+    onMessageDelivered,
   );
   const { startCall } = useCall();
   const analytics = useAnalytics();
@@ -208,42 +237,59 @@ export default function ChatDetailScreen() {
     };
   }, [params.chatId]);
 
+  useEffect(() => {
+    const chatId = params.chatId;
+    if (!chatId || !connected) return;
+    joinChat(chatId);
+    return () => leaveChat(chatId);
+  }, [params.chatId, connected, joinChat, leaveChat]);
+
   const handleSend = useCallback(
     (text: string) => {
       const chatId = params.chatId;
       if (!chatId || !text.trim()) return;
+      const clientMsgId = `cmsg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+      const optimistic = new MessageEntity({
+        id: clientMsgId,
+        clientMsgId,
+        chatId,
+        senderId: userId ?? "",
+        senderName: "我",
+        content: text.trim(),
+        type: MessageType.Text,
+        status: MessageStatus.Sending,
+        timestamp: new Date(),
+        isForwarded: false,
+        forwardedFrom: [],
+      });
+      setMessages((prev) =>
+        sortBy([...prev, optimistic], (m) => new Date(m.timestamp).getTime()),
+      );
+      setInputText("");
+      analytics.track(SEND_MESSAGE, { chatId, type: "text" });
+
       if (connected) {
-        sendMessage(chatId, text.trim(), "TEXT");
-        setInputText("");
-        analytics.track(SEND_MESSAGE, { chatId, type: "text" });
+        sendMessage(chatId, text.trim(), "TEXT", clientMsgId);
       } else {
-        const tempId = `temp-${Date.now()}`;
-        const temp = new MessageEntity({
-          id: tempId,
-          chatId,
-          senderId: userId ?? "",
-          senderName: "我",
-          content: text.trim(),
-          type: MessageType.Text,
-          status: MessageStatus.Sent,
-          timestamp: new Date(),
-          isForwarded: false,
-          forwardedFrom: [],
-        });
-        setMessages((prev) =>
-          sortBy([...prev, temp], (m) => new Date(m.timestamp).getTime()),
-        );
-        setInputText("");
-        analytics.track(SEND_MESSAGE, { chatId, type: "text" });
         getMessageApi()
-          .sendMessage(chatId, text.trim())
+          .sendMessage(chatId, text.trim(), "TEXT", clientMsgId)
           .then((msg) => {
-            setMessages((prev) => prev.map((m) => (m.id === tempId ? msg : m)));
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.clientMsgId === clientMsgId
+                  ? new MessageEntity({
+                      ...msg,
+                      clientMsgId,
+                      status: MessageStatus.Sent,
+                    })
+                  : m,
+              ),
+            );
           })
           .catch(() => {
             setMessages((prev) =>
               prev.map((m) =>
-                m.id === tempId
+                m.clientMsgId === clientMsgId
                   ? new MessageEntity({ ...m, status: MessageStatus.Failed })
                   : m,
               ),
@@ -251,7 +297,7 @@ export default function ChatDetailScreen() {
           });
       }
     },
-    [params.chatId, userId, connected, sendMessage],
+    [params.chatId, userId, connected, sendMessage, analytics],
   );
 
   if (loading && !chat) {

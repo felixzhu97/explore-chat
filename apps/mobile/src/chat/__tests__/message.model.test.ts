@@ -241,6 +241,10 @@ describe("MessageEntity", () => {
   // MessageStatus Tests
   // ==========================================================================
   describe("MessageStatus enum", () => {
+    it('should have Sending status with value "sending"', () => {
+      expect(MessageStatus.Sending).toBe("sending");
+    });
+
     it('should have Sent status with value "sent"', () => {
       expect(MessageStatus.Sent).toBe("sent");
     });
@@ -257,9 +261,9 @@ describe("MessageEntity", () => {
       expect(MessageStatus.Failed).toBe("failed");
     });
 
-    it("should have all 4 message statuses", () => {
+    it("should have all 5 message statuses", () => {
       const enumValues = Object.values(MessageStatus);
-      expect(enumValues).toHaveLength(4);
+      expect(enumValues).toHaveLength(5);
     });
   });
 
