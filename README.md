@@ -74,7 +74,8 @@ pnpm test
 pnpm build
 ```
 
-Pre-commit hooks run via Husky (`lint-staged` + typecheck).
+Checks run in GitHub Actions CI on pull requests; locally use
+`pnpm check-types`, `pnpm lint`, and `pnpm test` as needed.
 
 ## Screenshots
 

@@ -87,7 +87,8 @@ pnpm lint
 pnpm test
 ```
 
-Pre-commit：`lint-staged` + `pnpm check-types`（Husky）。
+Checks run in GitHub Actions CI on pull requests; locally use
+`pnpm check-types` / `pnpm lint` as needed.
 
 ---
 
