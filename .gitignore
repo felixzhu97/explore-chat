@@ -108,3 +108,16 @@ __pycache__/
 .ruff_cache
 
 TODO.md
+# Java / Gradle
+build/
+out/
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local runtime artifacts
+uploads/
+data/
+*.mv.db
+*.trace.db
+.gradle/

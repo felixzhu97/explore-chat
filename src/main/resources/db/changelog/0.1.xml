@@ -1,0 +1,693 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="0.1-chat-user" author="felix.zhu">
+        <createTable tableName="chat_user">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="varchar(128)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="email" type="varchar(320)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="phone" type="varchar(64)"/>
+            <column name="password_hash" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="avatar" type="varchar(1024)"/>
+            <column name="status" type="varchar(512)"/>
+            <column name="online" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_seen" type="timestamp"/>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="0.1-chat" author="felix.zhu">
+        <createTable tableName="chat">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(256)"/>
+            <column name="avatar" type="varchar(1024)"/>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="0.1-chat-participant" author="felix.zhu">
+        <createTable tableName="chat_participant">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="chat_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="archived" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="muted" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="chat_participant" indexName="idx_chat_participant_user">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="chat_participant" indexName="idx_chat_participant_chat">
+            <column name="chat_id"/>
+        </createIndex>
+        <addUniqueConstraint
+            tableName="chat_participant"
+            columnNames="chat_id, user_id"
+            constraintName="uk_chat_participant_chat_user"/>
+    </changeSet>
+
+    <changeSet id="0.1-message" author="felix.zhu">
+        <createTable tableName="message">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="chat_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sender_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="varchar(255)"/>
+            <column name="media_url" type="varchar(1024)"/>
+            <column name="deleted" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="message" indexName="idx_message_chat_created">
+            <column name="chat_id"/>
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="0.1-social-post" author="felix.zhu">
+        <createTable tableName="social_post">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="author_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="caption" type="varchar(255)"/>
+            <column name="media_urls" type="varchar(255)"/>
+            <column name="like_count" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="comment_count" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="social_post" indexName="idx_social_post_created">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="0.1-post-comment" author="felix.zhu">
+        <createTable tableName="post_comment">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="post_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="post_comment" indexName="idx_post_comment_post">
+            <column name="post_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="0.1-user-follow" author="felix.zhu">
+        <createTable tableName="user_follow">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="follower_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="following_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint
+            tableName="user_follow"
+            columnNames="follower_id, following_id"
+            constraintName="uk_user_follow_pair"/>
+    </changeSet>
+
+    <changeSet id="0.1-activity-notification" author="felix.zhu">
+        <createTable tableName="activity_notification">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payload" type="varchar(255)"/>
+            <column name="read" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="activity_notification" indexName="idx_activity_notification_user">
+            <column name="user_id"/>
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="0.1-social-post-columns" author="felix.zhu">
+        <addColumn tableName="social_post">
+            <column name="post_type" type="varchar(32)" defaultValue="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cover_url" type="varchar(1024)"/>
+            <column name="hidden" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="location" type="varchar(256)"/>
+        </addColumn>
+        <modifyDataType tableName="social_post" columnName="caption" newDataType="varchar(2048)"/>
+        <modifyDataType tableName="social_post" columnName="media_urls" newDataType="varchar(4096)"/>
+    </changeSet>
+
+    <changeSet id="0.1-post-like" author="felix.zhu">
+        <createTable tableName="post_like">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="post_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint
+            tableName="post_like"
+            columnNames="post_id, user_id"
+            constraintName="uk_post_like_post_user"/>
+    </changeSet>
+
+    <changeSet id="0.1-post-save" author="felix.zhu">
+        <createTable tableName="post_save">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="post_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint
+            tableName="post_save"
+            columnNames="post_id, user_id"
+            constraintName="uk_post_save_post_user"/>
+    </changeSet>
+
+    <changeSet id="0.1-message-reaction" author="felix.zhu">
+        <createTable tableName="message_reaction">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="message_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="emoji" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint
+            tableName="message_reaction"
+            columnNames="message_id, user_id, emoji"
+            constraintName="uk_message_reaction"/>
+    </changeSet>
+
+    <changeSet id="0.1-message-read" author="felix.zhu">
+        <createTable tableName="message_read">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="message_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint
+            tableName="message_read"
+            columnNames="message_id, user_id"
+            constraintName="uk_message_read"/>
+    </changeSet>
+
+    <changeSet id="0.1-voice-call" author="felix.zhu">
+        <createTable tableName="voice_call">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="caller_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="callee_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="call_type" type="varchar(32)" defaultValue="audio">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="0.1-user-status" author="felix.zhu">
+        <createTable tableName="user_status">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="author_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="varchar(1024)"/>
+            <column name="media_url" type="varchar(1024)"/>
+            <column name="status_type" type="varchar(32)" defaultValue="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="0.1-status-view" author="felix.zhu">
+        <createTable tableName="status_view">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="status_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="viewer_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint
+            tableName="status_view"
+            columnNames="status_id, viewer_id"
+            constraintName="uk_status_view"/>
+    </changeSet>
+
+    <changeSet id="0.1-social-group" author="felix.zhu">
+        <createTable tableName="social_group">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(1024)"/>
+            <column name="avatar" type="varchar(1024)"/>
+            <column name="owner_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="0.1-group-participant" author="felix.zhu">
+        <createTable tableName="group_participant">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="group_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="varchar(32)" defaultValue="member">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint
+            tableName="group_participant"
+            columnNames="group_id, user_id"
+            constraintName="uk_group_participant"/>
+    </changeSet>
+
+    <changeSet id="0.1-blocked-user" author="felix.zhu">
+        <createTable tableName="blocked_user">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="blocker_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="blocked_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint
+            tableName="blocked_user"
+            columnNames="blocker_id, blocked_id"
+            constraintName="uk_blocked_user"/>
+    </changeSet>
+
+    <changeSet id="0.1-chat-user-flags" author="felix.zhu">
+        <addColumn tableName="chat_user">
+            <column name="disabled" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="0.1-password-reset-token" author="felix.zhu">
+        <createTable tableName="password_reset_token">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="varchar(128)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="expires_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="used" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="0.1-revoked-token" author="felix.zhu">
+        <createTable tableName="revoked_token">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="jti" type="varchar(128)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="expires_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="0.1-hashtag" author="felix.zhu">
+        <createTable tableName="hashtag">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="tag" type="varchar(128)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="post_count" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="0.1-post-hashtag" author="felix.zhu">
+        <createTable tableName="post_hashtag">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="post_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hashtag_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint
+            tableName="post_hashtag"
+            columnNames="post_id, hashtag_id"
+            constraintName="uk_post_hashtag"/>
+    </changeSet>
+
+    <changeSet id="0.1-analytics-event" author="felix.zhu">
+        <createTable tableName="analytics_event">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(36)"/>
+            <column name="event_name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payload" type="varchar(2048)"/>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="analytics_event" indexName="idx_analytics_event_created">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="0.1-ad-account" author="felix.zhu">
+        <createTable tableName="ad_account">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="owner_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)" defaultValue="active">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="0.1-ad-campaign" author="felix.zhu">
+        <createTable tableName="ad_campaign">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="account_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)" defaultValue="draft">
+                <constraints nullable="false"/>
+            </column>
+            <column name="budget" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="0.1-ad-creative" author="felix.zhu">
+        <createTable tableName="ad_creative">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="campaign_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="headline" type="varchar(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="body" type="varchar(1024)"/>
+            <column name="media_url" type="varchar(1024)"/>
+            <column name="status" type="varchar(32)" defaultValue="draft">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="0.1-chat-deleted" author="felix.zhu">
+        <addColumn tableName="chat">
+            <column name="deleted" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="0.1-message-content-widen" author="felix.zhu">
+        <modifyDataType tableName="message" columnName="content" newDataType="varchar(4096)"/>
+    </changeSet>
+</databaseChangeLog>
+
