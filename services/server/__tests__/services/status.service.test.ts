@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   StatusService,
   CreateStatusData,
-} from "@/status/application/status.service";
+} from "@/status/service/status.service";
 
 describe("StatusService", () => {
   let service: StatusService;

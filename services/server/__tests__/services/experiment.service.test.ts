@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ExperimentService } from "@/analytics/application/experiment.service";
+import { ExperimentService } from "@/analytics/service/experiment.service";
 
 describe("ExperimentService", () => {
   let service: ExperimentService;

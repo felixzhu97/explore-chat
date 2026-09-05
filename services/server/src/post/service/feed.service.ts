@@ -7,8 +7,8 @@ import { FeedCacheService } from "@/core/cache/feed-cache.service";
 import type { EngagementRepository } from "@/post/domain/repository/engagement.repository";
 import { PostService } from "./post.service";
 import { RecommendationService } from "./recommendation.service";
-import { ExperimentService } from "@/analytics/application/experiment.service";
-import { AdService, AdCandidate } from "@/ads/application/ad.service";
+import { ExperimentService } from "@/analytics/service/experiment.service";
+import { AdService, AdCandidate } from "@/ads/service/ad.service";
 
 const RECENCY_HALFLIFE_HOURS = 24;
 const ENGAGEMENT_WEIGHT = 2;

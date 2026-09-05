@@ -12,7 +12,7 @@ import { CassandraFeedRepository } from "../database/cassandra-feed.repository";
 import { CacheService } from "../cache/cache.service";
 import { ElasticsearchService } from "../database/elasticsearch.service";
 import type { PostRepository } from "@/post/domain/repository/post.repository";
-import { VisionClientService } from "@/ai/application/vision-client.service";
+import { VisionClientService } from "@/ai/service/vision-client.service";
 import logger from "@/shared/utils/logger";
 import { HTTP_URL_PREFIX, parseDataUrl } from "@/shared/utils/media-url";
 

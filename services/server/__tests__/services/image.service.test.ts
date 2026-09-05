@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { ImageService } from "@/ai/application/image.service";
+import { ImageService } from "@/ai/service/image.service";
 
 vi.mock("@/core/config/config.service", () => ({
   ConfigService: {
@@ -15,12 +15,10 @@ vi.mock("@/core/config/config.service", () => ({
 vi.mock("@/lib/image-generation", () => ({
   createClient: vi.fn(() => ({
     generate: vi.fn().mockResolvedValue({ jobId: "job-1" }),
-    getResult: vi
-      .fn()
-      .mockResolvedValue({
-        status: "succeeded",
-        imageUrl: "http://example.com/image.png",
-      }),
+    getResult: vi.fn().mockResolvedValue({
+      status: "succeeded",
+      imageUrl: "http://example.com/image.png",
+    }),
   })),
 }));
 

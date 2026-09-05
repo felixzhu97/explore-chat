@@ -3,7 +3,7 @@ import {
   GroupsService,
   CreateGroupData,
   UpdateGroupData,
-} from "@/groups/application/groups.service";
+} from "@/groups/service/groups.service";
 
 describe("GroupsService", () => {
   let service: GroupsService;

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ExploreService } from "@/post/service/explore.service";
 import { RecommendationService } from "@/post/service/recommendation.service";
-import { ExperimentService } from "@/analytics/application/experiment.service";
-import { AdService } from "@/ads/application/ad.service";
+import { ExperimentService } from "@/analytics/service/experiment.service";
+import { AdService } from "@/ads/service/ad.service";
 
 describe("ExploreService", () => {
   let service: ExploreService;

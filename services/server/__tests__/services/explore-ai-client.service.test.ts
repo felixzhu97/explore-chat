@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   ExploreAiClientService,
   userIdToClientId,
-} from "@/ai/application/explore-ai-client.service";
+} from "@/ai/service/explore-ai-client.service";
 import { ServiceUnavailableException } from "@nestjs/common";
 
 const mockConfigResult = {

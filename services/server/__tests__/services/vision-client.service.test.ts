@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { VisionClientService } from "@/ai/application/vision-client.service";
+import { VisionClientService } from "@/ai/service/vision-client.service";
 
 const mockConfigResult = {
   vision: {

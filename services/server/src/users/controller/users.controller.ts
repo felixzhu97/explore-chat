@@ -13,7 +13,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { CurrentUser } from "@/auth/controller/current-user.decorator";
 import { UsersService } from "@/users/service/users.service";
-import { FollowService } from "@/follow/application/follow.service";
+import { FollowService } from "@/follow/service/follow.service";
 
 @ApiTags("用户")
 @Controller("users")

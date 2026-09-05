@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ChatGateway } from "@/websocket/presentation/chat.gateway";
+import { ChatGateway } from "@/websocket/controller/chat.gateway";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "@/core/database/prisma.service";
 import { CacheService } from "@/core/cache/cache.service";

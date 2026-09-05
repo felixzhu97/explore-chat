@@ -16,7 +16,7 @@ import { JwtAuthGuard } from "@/auth/controller/jwt-auth.guard";
 import { CurrentUser } from "@/auth/controller/current-user.decorator";
 import { MessagesService } from "@/messages/service/messages.service";
 import { CreateMessageRequest } from "@/messages/controller/message-request";
-import { ChatGateway } from "@/websocket/presentation/chat.gateway";
+import { ChatGateway } from "@/websocket/controller/chat.gateway";
 import type { QueuedMessagePayload } from "@/messages/service/offline-message-queue.service";
 
 @ApiTags("消息")
