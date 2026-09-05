@@ -36,6 +36,8 @@
     "stop:prod": "./scripts/app/stop.sh prod",
     "test": "turbo run test",
     "test:watch": "turbo run test:watch --concurrency=23",
+    "check:aip-rest": "bash scripts/check-aip-rest.sh",
+    "lint:openapi": "pnpm dlx @stoplight/spectral-cli@6.15.0 lint docs/developer/openapi-aip-contract.yaml -r .spectral.yml",
     "prepare": "husky"
   },
   "devDependencies": {

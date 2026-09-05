@@ -1,0 +1,19 @@
+extends: [["spectral:oas", "recommended"]]
+rules:
+  operation-operationId: error
+  oas3-schema: error
+  # Prefer AIP-158 query names in this contract fragment
+  aip-page-size-param:
+    description: List operations should document page_size query parameter
+    given: $.paths.*.get.parameters[?(@.name=='page_size')]
+    severity: warn
+    then:
+      field: name
+      function: truthy
+  aip-rpc-status-on-errors:
+    description: Error responses should reference RpcStatus schema
+    given: $.paths.*.*.responses[?(@property.match(/^[45]/))]
+    severity: warn
+    then:
+      field: content.application/json.schema
+      function: truthy

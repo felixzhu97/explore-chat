@@ -37,13 +37,14 @@ pnpm dev
 3. 构建 `@whatschat/shared-types`
 4. 启动 Web + API
 
-| 服务                     | 默认地址                                    |
-| ------------------------ | ------------------------------------------- |
-| Web                      | http://localhost:4000                       |
-| API                      | http://localhost:3001                       |
-| API 健康检查             | http://localhost:3001/api/v1/health         |
-| Swagger（非 production） | http://localhost:3001/api/docs              |
-| Admin                    | http://localhost:4001（`pnpm start:admin`） |
+| 服务                     | 默认地址                                      |
+| ------------------------ | --------------------------------------------- |
+| Web                      | http://localhost:4000                         |
+| API                      | http://localhost:3001                         |
+| API 健康检查             | http://localhost:3001/api/v1/health           |
+| Swagger（非 production） | http://localhost:3001/api/docs                |
+| AIP REST 约定            | [`docs/developer/aip-rest.md`](./aip-rest.md) |
+| Admin                    | http://localhost:4001（`pnpm start:admin`）   |
 
 种子数据：
 
