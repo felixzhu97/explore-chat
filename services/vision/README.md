@@ -2,7 +2,7 @@
 
 Layout (same as other Python helpers): `main.py` / `config.py` / `api.py` / `service.py` / `domain/` / `tests/`.
 
-Port **8001**. Endpoints: `/health`, `/predict`, `/moderate`, `/moderate-video`.
+Port **8001**. Endpoints: `/health`, `POST /api/v1/images:predict`, `POST /api/v1/images:moderate`, `POST /api/v1/videos:moderate`.
 
 ## Setup
 

@@ -60,10 +60,10 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 By default it listens on `http://localhost:8000` and exposes:
 
-- `POST /v1/feed/rank` – rank feed candidates for a user
-- `POST /v1/explore/rank` – rank explore candidates (on top of `explore:hot`)
-- `POST /v1/reels/rank` – rank Reels candidates
-- `POST /v1/feed/recall` – vector-based recall using `RedisVectorStore` or `FaissVectorStore`
+- `POST /api/v1/feeds:rank` – rank feed candidates for a user
+- `POST /api/v1/explores:rank` – rank explore candidates (on top of `explore:hot`)
+- `POST /api/v1/reels:rank` – rank Reels candidates
+- `POST /api/v1/feeds:recall` – vector-based recall using `RedisVectorStore` or `FaissVectorStore`
 
 Environment variables:
 
