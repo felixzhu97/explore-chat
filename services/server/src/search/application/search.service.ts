@@ -164,7 +164,7 @@ export class SearchService {
   private async searchUsersFallback(q: string, limit: number) {
     const users = await this.prisma.user.findMany({
       where: {
-        OR: [{ username: { contains: q, mode: "insensitive" } }, { id: q }],
+        OR: [{ username: { contains: q } }, { id: q }],
       },
       select: { id: true, username: true, avatar: true, createdAt: true },
       take: limit,

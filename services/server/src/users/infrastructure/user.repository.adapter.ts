@@ -165,8 +165,8 @@ export class UserRepositoryAdapter implements IUserRepository {
     const users = await this.prisma.user.findMany({
       where: {
         OR: [
-          { username: { contains: query, mode: "insensitive" } },
-          { email: { contains: query, mode: "insensitive" } },
+          { username: { contains: query } },
+          { email: { contains: query } },
           { phone: { contains: query } },
         ],
       },

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Local boot: .env → compose up (no down) → migrate → packages → apps.
+# Local boot (docker-free): .env → migrate → packages → Web + API.
 set -euo pipefail
 
 ENV=${1:-dev}
@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SERVER_DIR="$ROOT_DIR/services/server"
 
-echo "ExploreChat ($ENV)"
+echo "ExploreChat ($ENV) — Node + SQLite (no Docker)"
 
 # .env
 if [ ! -f "$SERVER_DIR/.env" ]; then
@@ -17,9 +17,6 @@ if [ ! -f "$SERVER_DIR/.env" ]; then
   echo "Created services/server/.env"
 fi
 
-# Docker (never compose down — keep volumes)
-cd "$SERVER_DIR"
-docker compose up -d --remove-orphans --wait --wait-timeout 300
 cd "$ROOT_DIR"
 
 # DB + shared types

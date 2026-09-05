@@ -85,7 +85,6 @@ export class MessagesService {
     if (search) {
       where.content = {
         contains: search,
-        mode: "insensitive",
       };
     }
 

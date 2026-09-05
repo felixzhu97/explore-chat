@@ -86,14 +86,14 @@ export class AdminService {
 
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
+        { name: { contains: search } },
         {
           participants: {
             some: {
               user: {
                 OR: [
-                  { username: { contains: search, mode: "insensitive" } },
-                  { email: { contains: search, mode: "insensitive" } },
+                  { username: { contains: search } },
+                  { email: { contains: search } },
                 ],
               },
             },
@@ -169,13 +169,13 @@ export class AdminService {
 
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
+        { name: { contains: search } },
+        { description: { contains: search } },
         {
           creator: {
             OR: [
-              { username: { contains: search, mode: "insensitive" } },
-              { email: { contains: search, mode: "insensitive" } },
+              { username: { contains: search } },
+              { email: { contains: search } },
             ],
           },
         },
@@ -560,9 +560,7 @@ export class AdminService {
     });
   }
 
-  async recheckModeration(
-    postId: string,
-  ): Promise<{
+  async recheckModeration(postId: string): Promise<{
     moderationStatus: string;
     moderationCategories: string[];
     moderationAt: string;

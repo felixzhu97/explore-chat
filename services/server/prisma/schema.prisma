@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -362,9 +362,9 @@ model UserSettings {
   userId    String   @unique
   theme     String   @default("light")
   language  String   @default("zh-CN")
-  notifications Json @default("{\"messages\": true, \"calls\": true, \"groups\": true, \"status\": true}")
-  privacy   Json     @default("{\"lastSeen\": \"everyone\", \"profilePhoto\": \"everyone\", \"status\": \"everyone\", \"readReceipts\": true}")
-  chat      Json     @default("{\"enterToSend\": true, \"mediaAutoDownload\": true, \"fontSize\": \"medium\"}")
+  notifications Json
+  privacy   Json
+  chat      Json
   updatedAt DateTime @updatedAt
 
   // 关系
@@ -602,4 +602,92 @@ enum NotificationType {
   CALL
   GROUP
   STATUS
-} 
+}
+
+// Social feed / posts (formerly Cassandra)
+model SocialPost {
+  id            String   @id
+  userId        String
+  createdAt     DateTime @default(now())
+  caption       String?
+  type          String
+  mediaUrls     Json
+  location      String?
+  coverUrl      String?
+  likeCount     Int      @default(0)
+  commentCount  Int      @default(0)
+  saveCount     Int      @default(0)
+
+  @@index([userId, createdAt])
+  @@map("social_posts")
+}
+
+model FeedEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  authorId  String
+  postId    String
+  createdAt DateTime
+
+  @@unique([userId, postId])
+  @@index([userId, createdAt])
+  @@map("feed_entries")
+}
+
+model PostLike {
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+  @@index([postId])
+  @@map("post_likes")
+}
+
+model PostSave {
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+  @@index([postId])
+  @@map("post_saves")
+}
+
+// Comments (formerly MongoDB)
+model PostComment {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  content   String
+  parentId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId, createdAt])
+  @@map("post_comments")
+}
+
+// Social activity notifications (formerly MongoDB)
+model ActivityNotification {
+  id             String    @id @default(cuid())
+  recipientId    String
+  actorId        String
+  type           String
+  postId         String
+  commentId      String?
+  contentPreview String?
+  createdAt      DateTime  @default(now())
+  readAt         DateTime?
+
+  @@index([recipientId, createdAt])
+  @@index([actorId, postId, type])
+  @@map("activity_notifications")
+}
+
+model Hashtag {
+  tag       String   @id
+  createdAt DateTime @default(now())
+
+  @@map("hashtags")
+}

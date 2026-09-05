@@ -265,7 +265,6 @@ describe("MessagesService", () => {
             chatId: "chat-1",
             content: {
               contains: "Hello",
-              mode: "insensitive",
             },
           },
         }),
