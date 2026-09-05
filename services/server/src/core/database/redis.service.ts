@@ -1,205 +1,195 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
-import Redis from "ioredis";
 import { ConfigService } from "../config/config.service";
 import logger from "@/shared/utils/logger";
 
+type Entry = {
+  value: string;
+  expiresAt?: number;
+};
+
+type ListEntry = {
+  values: string[];
+  expiresAt?: number;
+};
+
+type SetEntry = {
+  members: Set<string>;
+  expiresAt?: number;
+};
+
+/**
+ * In-process cache compatible with the former RedisService API.
+ * Uses memory by default (REDIS_URL empty / memory://). Optional ioredis
+ * path is omitted for the docker-free local stack.
+ */
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
-  private client: Redis;
+  private readonly strings = new Map<string, Entry>();
+  private readonly lists = new Map<string, ListEntry>();
+  private readonly sets = new Map<string, SetEntry>();
   private readonly config: ReturnType<typeof ConfigService.loadConfig>;
 
   constructor() {
     this.config = ConfigService.loadConfig();
-    this.client = this.createClient();
-    this.setupEventHandlers();
-  }
-
-  private createClient(): Redis {
-    const url = this.config.redis.url;
-    const password = this.config.redis.password;
-
-    if (url && (url.startsWith("redis://") || url.startsWith("rediss://"))) {
-      return new Redis(url, password ? { password } : {});
-    }
-
-    // 兼容 host:port 形式
-    const [hostRaw, portStr] = (url || "127.0.0.1:6379").split(":");
-    const host = hostRaw || "127.0.0.1";
-    const port = parseInt(portStr || "6379", 10);
-    return new Redis(port, host, password ? { password } : {});
-  }
-
-  private setupEventHandlers(): void {
-    this.client.on("connect", () => {
-      logger.info("Redis连接已建立");
-    });
-
-    this.client.on("ready", () => {
-      logger.info("Redis客户端已准备就绪");
-    });
-
-    this.client.on("error", (error) => {
-      logger.error(`Redis错误: ${error.message}`);
-    });
-
-    this.client.on("close", () => {
-      logger.warn("Redis连接已关闭");
-    });
-
-    this.client.on("reconnecting", () => {
-      logger.info("正在重新连接Redis...");
-    });
   }
 
   async onModuleInit() {
-    // Redis连接在构造函数中已建立
-    logger.info("Redis服务初始化完成");
+    const url = this.config.redis.url || "";
+    if (url && !url.startsWith("memory://") && url !== "memory") {
+      logger.warn(
+        `REDIS_URL=${url} ignored; using in-memory cache (docker-free stack)`,
+      );
+    }
+    logger.info("Memory cache (RedisService) initialized");
   }
 
   async onModuleDestroy() {
-    try {
-      await this.client.quit();
-      logger.info("Redis连接已关闭");
-    } catch (error) {
-      logger.error("Redis关闭失败:", error);
-    }
+    this.strings.clear();
+    this.lists.clear();
+    this.sets.clear();
   }
 
-  getClient(): Redis {
-    return this.client;
+  /** @deprecated No external client in memory mode */
+  getClient(): null {
+    return null;
   }
 
-  // Redis工具方法
+  private isExpired(expiresAt?: number): boolean {
+    return expiresAt != null && Date.now() >= expiresAt;
+  }
+
+  private touchExpire(
+    map: Map<string, { expiresAt?: number }>,
+    key: string,
+  ): void {
+    const e = map.get(key);
+    if (e && this.isExpired(e.expiresAt)) map.delete(key);
+  }
+
   async set(key: string, value: any, ttl?: number): Promise<void> {
-    try {
-      const serializedValue =
-        typeof value === "string" ? value : JSON.stringify(value);
-      if (ttl) {
-        await this.client.setex(key, ttl, serializedValue);
-      } else {
-        await this.client.set(key, serializedValue);
-      }
-    } catch (error) {
-      logger.error(`Redis SET错误: ${error}`);
-      throw error;
-    }
+    const serializedValue =
+      typeof value === "string" ? value : JSON.stringify(value);
+    const entry: Entry = { value: serializedValue };
+    if (ttl) entry.expiresAt = Date.now() + ttl * 1000;
+    this.strings.set(key, entry);
   }
 
   async get<T = any>(key: string): Promise<T | null> {
+    this.touchExpire(this.strings, key);
+    const entry = this.strings.get(key);
+    if (!entry) return null;
     try {
-      const value = await this.client.get(key);
-      if (!value) return null;
-
-      try {
-        return JSON.parse(value);
-      } catch {
-        return value as T;
-      }
-    } catch (error) {
-      logger.error(`Redis GET错误: ${error}`);
-      throw error;
+      return JSON.parse(entry.value) as T;
+    } catch {
+      return entry.value as T;
     }
   }
 
   async del(key: string): Promise<void> {
-    try {
-      await this.client.del(key);
-    } catch (error) {
-      logger.error(`Redis DEL错误: ${error}`);
-      throw error;
-    }
+    this.strings.delete(key);
+    this.lists.delete(key);
+    this.sets.delete(key);
   }
 
   async exists(key: string): Promise<boolean> {
-    try {
-      const result = await this.client.exists(key);
-      return result === 1;
-    } catch (error) {
-      logger.error(`Redis EXISTS错误: ${error}`);
-      throw error;
-    }
+    this.touchExpire(this.strings, key);
+    this.touchExpire(this.lists, key);
+    this.touchExpire(this.sets, key);
+    return this.strings.has(key) || this.lists.has(key) || this.sets.has(key);
   }
 
   async expire(key: string, ttl: number): Promise<void> {
-    try {
-      await this.client.expire(key, ttl);
-    } catch (error) {
-      logger.error(`Redis EXPIRE错误: ${error}`);
-      throw error;
-    }
+    const expiresAt = Date.now() + ttl * 1000;
+    const s = this.strings.get(key);
+    if (s) s.expiresAt = expiresAt;
+    const l = this.lists.get(key);
+    if (l) l.expiresAt = expiresAt;
+    const set = this.sets.get(key);
+    if (set) set.expiresAt = expiresAt;
   }
 
   async ttl(key: string): Promise<number> {
-    try {
-      return await this.client.ttl(key);
-    } catch (error) {
-      logger.error(`Redis TTL错误: ${error}`);
-      throw error;
-    }
+    const entry =
+      this.strings.get(key) || this.lists.get(key) || this.sets.get(key);
+    if (!entry?.expiresAt) return -1;
+    const remaining = Math.ceil((entry.expiresAt - Date.now()) / 1000);
+    return remaining > 0 ? remaining : -2;
   }
 
-  // Redis Set 操作方法
   async sadd(key: string, ...members: string[]): Promise<number> {
-    try {
-      return await this.client.sadd(key, ...members);
-    } catch (error) {
-      logger.error(`Redis SADD错误: ${error}`);
-      throw error;
+    this.touchExpire(this.sets, key);
+    let entry = this.sets.get(key);
+    if (!entry) {
+      entry = { members: new Set() };
+      this.sets.set(key, entry);
     }
+    let added = 0;
+    for (const m of members) {
+      if (!entry.members.has(m)) {
+        entry.members.add(m);
+        added++;
+      }
+    }
+    return added;
   }
 
   async smembers(key: string): Promise<string[]> {
-    try {
-      return await this.client.smembers(key);
-    } catch (error) {
-      logger.error(`Redis SMEMBERS错误: ${error}`);
-      throw error;
-    }
+    this.touchExpire(this.sets, key);
+    const entry = this.sets.get(key);
+    return entry ? [...entry.members] : [];
   }
 
   async srem(key: string, ...members: string[]): Promise<number> {
-    try {
-      return await this.client.srem(key, ...members);
-    } catch (error) {
-      logger.error(`Redis SREM错误: ${error}`);
-      throw error;
+    this.touchExpire(this.sets, key);
+    const entry = this.sets.get(key);
+    if (!entry) return 0;
+    let removed = 0;
+    for (const m of members) {
+      if (entry.members.delete(m)) removed++;
     }
+    return removed;
   }
 
   async rpush(key: string, ...values: string[]): Promise<number> {
-    try {
-      return await this.client.rpush(key, ...values);
-    } catch (error) {
-      logger.error(`Redis RPUSH错误: ${error}`);
-      throw error;
+    this.touchExpire(this.lists, key);
+    let entry = this.lists.get(key);
+    if (!entry) {
+      entry = { values: [] };
+      this.lists.set(key, entry);
     }
+    entry.values.push(...values);
+    return entry.values.length;
   }
 
   async lpush(key: string, ...values: string[]): Promise<number> {
-    try {
-      return await this.client.lpush(key, ...values);
-    } catch (error) {
-      logger.error(`Redis LPUSH错误: ${error}`);
-      throw error;
+    this.touchExpire(this.lists, key);
+    let entry = this.lists.get(key);
+    if (!entry) {
+      entry = { values: [] };
+      this.lists.set(key, entry);
     }
+    entry.values.unshift(...values);
+    return entry.values.length;
   }
 
   async lrange(key: string, start: number, stop: number): Promise<string[]> {
-    try {
-      return await this.client.lrange(key, start, stop);
-    } catch (error) {
-      logger.error(`Redis LRANGE错误: ${error}`);
-      throw error;
-    }
+    this.touchExpire(this.lists, key);
+    const entry = this.lists.get(key);
+    if (!entry) return [];
+    const len = entry.values.length;
+    const from = start < 0 ? Math.max(0, len + start) : start;
+    const to = stop < 0 ? len + stop + 1 : Math.min(len, stop + 1);
+    return entry.values.slice(from, Math.max(from, to));
   }
 
   async ltrim(key: string, start: number, stop: number): Promise<void> {
-    try {
-      await this.client.ltrim(key, start, stop);
-    } catch (error) {
-      logger.error(`Redis LTRIM错误: ${error}`);
-      throw error;
-    }
+    this.touchExpire(this.lists, key);
+    const entry = this.lists.get(key);
+    if (!entry) return;
+    const len = entry.values.length;
+    const from = start < 0 ? Math.max(0, len + start) : start;
+    const to = stop < 0 ? len + stop + 1 : Math.min(len, stop + 1);
+    entry.values = entry.values.slice(from, Math.max(from, to));
   }
 
   async setIfNotExists(
@@ -207,12 +197,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     value: string,
     ttlSeconds: number,
   ): Promise<boolean> {
-    try {
-      const res = await this.client.set(key, value, "EX", ttlSeconds, "NX");
-      return res === "OK";
-    } catch (error) {
-      logger.error(`Redis SETNX错误: ${error}`);
-      throw error;
-    }
+    this.touchExpire(this.strings, key);
+    if (this.strings.has(key)) return false;
+    await this.set(key, value, ttlSeconds);
+    return true;
   }
 }

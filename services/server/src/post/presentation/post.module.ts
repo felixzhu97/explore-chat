@@ -17,6 +17,8 @@ import { NotificationsModule } from "@/notifications/presentation/notifications.
 import { WebSocketModule } from "@/websocket/presentation/websocket.module";
 import { AiModule } from "@/ai/presentation/ai.module";
 import { VisionModule } from "@/ai/presentation/vision.module";
+import { SearchModule } from "@/search/presentation/search.module";
+import { FeedFanoutService } from "@/post/application/feed-fanout.service";
 
 @Module({
   imports: [
@@ -26,12 +28,14 @@ import { VisionModule } from "@/ai/presentation/vision.module";
     WebSocketModule,
     AiModule,
     VisionModule,
+    SearchModule,
   ],
   controllers: [PostController],
   providers: [
     PostService,
     FeedService,
     FeedSeenService,
+    FeedFanoutService,
     EngagementService,
     ExploreService,
     RecommendationService,
@@ -45,6 +49,7 @@ import { VisionModule } from "@/ai/presentation/vision.module";
     PostService,
     FeedService,
     FeedSeenService,
+    FeedFanoutService,
     EngagementService,
     ExploreService,
     RecommendationService,

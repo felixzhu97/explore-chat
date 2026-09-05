@@ -1,8 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { ElasticsearchService } from "@/core/database/elasticsearch.service";
 import { PrismaService } from "@/core/database/prisma.service";
-
-const TRACK_TOTAL_HITS_LIMIT = 10000;
 
 function encodeCursor(values: unknown[]): string {
   return Buffer.from(JSON.stringify(values), "utf8").toString("base64url");
@@ -18,164 +15,266 @@ function decodeCursor(cursor: string): unknown[] | null {
   }
 }
 
+/**
+ * Search via SQLite (LIKE / FTS5 when available). Replaces Elasticsearch.
+ */
 @Injectable()
 export class SearchService {
-  constructor(
-    private readonly es: ElasticsearchService,
-    private readonly prisma: PrismaService,
-  ) {}
+  private ftsReady = false;
+
+  constructor(private readonly prisma: PrismaService) {
+    void this.ensureFts();
+  }
+
+  private async ensureFts(): Promise<void> {
+    try {
+      await this.prisma.$executeRawUnsafe(`
+        CREATE VIRTUAL TABLE IF NOT EXISTS posts_fts USING fts5(
+          post_id UNINDEXED,
+          caption,
+          tokenize = 'unicode61'
+        )
+      `);
+      await this.prisma.$executeRawUnsafe(`
+        CREATE VIRTUAL TABLE IF NOT EXISTS users_fts USING fts5(
+          user_id UNINDEXED,
+          username,
+          tokenize = 'unicode61'
+        )
+      `);
+      this.ftsReady = true;
+    } catch {
+      this.ftsReady = false;
+    }
+  }
+
+  async indexUser(userId: string, username: string): Promise<void> {
+    if (!this.ftsReady) await this.ensureFts();
+    if (!this.ftsReady) return;
+    try {
+      await this.prisma.$executeRawUnsafe(
+        `DELETE FROM users_fts WHERE user_id = ?`,
+        userId,
+      );
+      await this.prisma.$executeRawUnsafe(
+        `INSERT INTO users_fts(user_id, username) VALUES (?, ?)`,
+        userId,
+        username,
+      );
+    } catch {
+      // soft-fail
+    }
+  }
+
+  async indexPost(postId: string, caption: string): Promise<void> {
+    if (!this.ftsReady) await this.ensureFts();
+    if (!this.ftsReady) return;
+    try {
+      await this.prisma.$executeRawUnsafe(
+        `DELETE FROM posts_fts WHERE post_id = ?`,
+        postId,
+      );
+      await this.prisma.$executeRawUnsafe(
+        `INSERT INTO posts_fts(post_id, caption) VALUES (?, ?)`,
+        postId,
+        caption || "",
+      );
+    } catch {
+      // soft-fail
+    }
+  }
 
   async searchUsers(q: string, limit: number, cursor?: string) {
-    const client = this.es.getClient();
-    if (!client) {
-      return this.searchUsersFallback(q, limit);
-    }
     const normalized = q.trim().toLowerCase();
     if (!normalized) {
       return { hits: [], nextCursor: undefined };
     }
-    const body: Record<string, unknown> = {
-      index: "users",
-      query: {
-        bool: {
-          should: [
-            {
-              multi_match: {
-                query: normalized,
-                fields: ["username", "id"],
-                fuzziness: "AUTO",
-              },
-            },
-            { prefix: { username: normalized } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      size: limit + 1,
-      sort: [{ createdAt: { order: "desc" } }, { id: { order: "asc" } }],
-      highlight: {
-        fields: { username: {} },
-        pre_tags: ["<em>"],
-        post_tags: ["</em>"],
-      },
-    };
-    const after = cursor ? decodeCursor(cursor) : null;
-    if (after && Array.isArray(after)) (body as any).search_after = after;
-    const result = await client.search(body as any);
-    const hits = (result.hits.hits || []) as Array<{
-      _source: Record<string, unknown>;
-      sort?: unknown[];
-      highlight?: Record<string, string[]>;
-    }>;
-    const page = hits.slice(0, limit);
-    const lastSort = page.length > 0 ? page[page.length - 1]?.sort : undefined;
-    const nextCursor =
-      hits.length > limit && Array.isArray(lastSort)
-        ? encodeCursor(lastSort)
-        : undefined;
-    return {
-      hits: page.map((h) => ({
-        id: (h as any)._id,
-        ...(h as any)._source,
-        ...(h.highlight && { highlight: h.highlight }),
-      })),
-      nextCursor,
-    };
+
+    if (this.ftsReady) {
+      try {
+        const rows = (await this.prisma.$queryRawUnsafe(
+          `SELECT user_id AS id, username FROM users_fts
+           WHERE users_fts MATCH ?
+           LIMIT ?`,
+          `"${normalized}"*`,
+          limit + 1,
+        )) as Array<{ id: string; username: string }>;
+        if (rows.length > 0) {
+          const ids = rows.slice(0, limit).map((r) => r.id);
+          const users = await this.prisma.user.findMany({
+            where: { id: { in: ids } },
+            select: { id: true, username: true, avatar: true, createdAt: true },
+          });
+          const byId = new Map(users.map((u) => [u.id, u]));
+          const page = ids
+            .map((id) => byId.get(id))
+            .filter((u): u is NonNullable<typeof u> => u != null);
+          return {
+            hits: page.map((u) => ({
+              id: u.id,
+              username: u.username,
+              ...(u.avatar != null && { avatar: u.avatar }),
+              createdAt: u.createdAt.toISOString(),
+            })),
+            nextCursor: undefined,
+          };
+        }
+      } catch {
+        // fall through to LIKE
+      }
+    }
+
+    return this.searchUsersLike(normalized, limit, cursor);
   }
 
-  async searchPosts(q: string, limit: number, cursor?: string) {
-    const client = this.es.getClient();
-    if (!client) return { hits: [], nextCursor: undefined, total: undefined };
-    const body: Record<string, unknown> = {
-      index: "posts",
-      query: {
-        multi_match: {
-          query: q,
-          fields: ["caption", "hashtags", "autoTags"],
-          fuzziness: "AUTO",
-        },
-      },
-      size: limit + 1,
-      sort: [{ createdAt: { order: "desc" } }, { postId: { order: "asc" } }],
-      track_total_hits: TRACK_TOTAL_HITS_LIMIT,
-      highlight: {
-        fields: { caption: {} },
-        pre_tags: ["<em>"],
-        post_tags: ["</em>"],
-      },
-    };
+  private async searchUsersLike(q: string, limit: number, cursor?: string) {
     const after = cursor ? decodeCursor(cursor) : null;
-    if (after && Array.isArray(after)) (body as any).search_after = after;
-    const result = await client.search(body as any);
-    const hits = (result.hits.hits || []) as Array<{
-      _source: Record<string, unknown>;
-      sort?: unknown[];
-      highlight?: Record<string, string[]>;
-    }>;
-    const total =
-      typeof result.hits.total === "object"
-        ? (result.hits.total as { value: number }).value
-        : result.hits.total;
-    const page = hits.slice(0, limit);
-    const lastSort = page.length > 0 ? page[page.length - 1]?.sort : undefined;
-    const nextCursor =
-      hits.length > limit && Array.isArray(lastSort)
-        ? encodeCursor(lastSort)
-        : undefined;
-    return {
-      hits: page.map((h) => ({
-        id: (h as any)._id,
-        ...(h as any)._source,
-        ...(h.highlight && { highlight: h.highlight }),
-      })),
-      nextCursor,
-      total: typeof total === "number" ? total : undefined,
-    };
-  }
+    const createdAfter =
+      after && typeof after[0] === "string" ? new Date(after[0]) : null;
+    const idAfter = after && typeof after[1] === "string" ? after[1] : null;
 
-  async searchHashtags(q: string, limit: number, cursor?: string) {
-    const client = this.es.getClient();
-    if (!client) return { hits: [], nextCursor: undefined };
-    const body: Record<string, unknown> = {
-      index: "hashtags",
-      query: { prefix: { tag: q.replace(/^#/, "").toLowerCase() } },
-      size: limit + 1,
-      sort: [{ tag: { order: "asc" } }],
-    };
-    const after = cursor ? decodeCursor(cursor) : null;
-    if (after && Array.isArray(after)) (body as any).search_after = after;
-    const result = await client.search(body as any);
-    const hits = (result.hits.hits || []) as Array<{
-      _source: Record<string, unknown>;
-      sort?: unknown[];
-    }>;
-    const page = hits.slice(0, limit);
-    const lastSort = page.length > 0 ? page[page.length - 1]?.sort : undefined;
-    const nextCursor =
-      hits.length > limit && Array.isArray(lastSort)
-        ? encodeCursor(lastSort)
-        : undefined;
-    return {
-      hits: page.map((h) => (h as any)._source),
-      nextCursor,
-    };
-  }
-
-  private async searchUsersFallback(q: string, limit: number) {
     const users = await this.prisma.user.findMany({
       where: {
-        OR: [{ username: { contains: q } }, { id: q }],
+        AND: [
+          {
+            OR: [{ username: { contains: q } }, { id: q }],
+          },
+          ...(createdAfter && idAfter
+            ? [
+                {
+                  OR: [
+                    { createdAt: { lt: createdAfter } },
+                    { createdAt: createdAfter, id: { gt: idAfter } },
+                  ],
+                },
+              ]
+            : []),
+        ],
       },
       select: { id: true, username: true, avatar: true, createdAt: true },
-      take: limit,
-      orderBy: { createdAt: "desc" },
+      take: limit + 1,
+      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
     });
+    const page = users.slice(0, limit);
+    const next =
+      users.length > limit && page.length > 0
+        ? encodeCursor([
+            page[page.length - 1]!.createdAt.toISOString(),
+            page[page.length - 1]!.id,
+          ])
+        : undefined;
     return {
-      hits: users.map((u) => ({
+      hits: page.map((u) => ({
         id: u.id,
         username: u.username,
         ...(u.avatar != null && { avatar: u.avatar }),
         createdAt: u.createdAt.toISOString(),
+      })),
+      nextCursor: next,
+    };
+  }
+
+  async searchPosts(q: string, limit: number, cursor?: string) {
+    const normalized = q.trim();
+    if (!normalized) {
+      return { hits: [], nextCursor: undefined, total: 0 };
+    }
+
+    if (this.ftsReady) {
+      try {
+        const ftsRows = (await this.prisma.$queryRawUnsafe(
+          `SELECT post_id FROM posts_fts WHERE posts_fts MATCH ? LIMIT ?`,
+          `"${normalized.replace(/"/g, "")}"*`,
+          limit + 50,
+        )) as Array<{ post_id: string }>;
+        if (ftsRows.length > 0) {
+          const ids = ftsRows.map((r) => r.post_id);
+          const posts = await this.prisma.socialPost.findMany({
+            where: { id: { in: ids } },
+            orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+            take: limit + 1,
+          });
+          return this.mapPostHits(posts, limit);
+        }
+      } catch {
+        // fall through
+      }
+    }
+
+    const after = cursor ? decodeCursor(cursor) : null;
+    const createdAfter =
+      after && typeof after[0] === "string" ? new Date(after[0]) : null;
+    const idAfter = after && typeof after[1] === "string" ? after[1] : null;
+
+    const posts = await this.prisma.socialPost.findMany({
+      where: {
+        AND: [
+          { caption: { contains: normalized } },
+          ...(createdAfter && idAfter
+            ? [
+                {
+                  OR: [
+                    { createdAt: { lt: createdAfter } },
+                    { createdAt: createdAfter, id: { gt: idAfter } },
+                  ],
+                },
+              ]
+            : []),
+        ],
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+      take: limit + 1,
+    });
+    return this.mapPostHits(posts, limit);
+  }
+
+  private mapPostHits(
+    posts: Array<{
+      id: string;
+      userId: string;
+      caption: string | null;
+      type: string;
+      mediaUrls: unknown;
+      createdAt: Date;
+    }>,
+    limit: number,
+  ) {
+    const page = posts.slice(0, limit);
+    const nextCursor =
+      posts.length > limit && page.length > 0
+        ? encodeCursor([
+            page[page.length - 1]!.createdAt.toISOString(),
+            page[page.length - 1]!.id,
+          ])
+        : undefined;
+    return {
+      hits: page.map((p) => ({
+        id: p.id,
+        postId: p.id,
+        userId: p.userId,
+        caption: p.caption,
+        type: p.type,
+        mediaUrls: Array.isArray(p.mediaUrls) ? p.mediaUrls : [],
+        createdAt: p.createdAt.toISOString(),
+      })),
+      nextCursor,
+      total: page.length,
+    };
+  }
+
+  async searchHashtags(q: string, limit: number, _cursor?: string) {
+    const tag = q.replace(/^#/, "").toLowerCase().trim();
+    if (!tag) return { hits: [], nextCursor: undefined };
+    const rows = await this.prisma.hashtag.findMany({
+      where: { tag: { startsWith: tag } },
+      orderBy: { tag: "asc" },
+      take: limit + 1,
+    });
+    const page = rows.slice(0, limit);
+    return {
+      hits: page.map((r) => ({
+        tag: r.tag,
+        createdAt: r.createdAt.toISOString(),
       })),
       nextCursor: undefined,
     };
