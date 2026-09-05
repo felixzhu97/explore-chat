@@ -26,9 +26,9 @@ note as N_LAYERS
   Nest modules live at feature root.
   Shared kernels: base/domain, base/infra.
   Clients call Nest /api/v1 only.
-  Persist: Prisma SQLite (users, chats, social_posts,
+  Persist: Liquibase/JPA SQLite (users, chats, social_posts,
   feed_entries, post_comments, activity_notifications).
-  Packages under services/server/src.
+  Packages under src/main/java/com.chat.
 end note
 
 package "base/domain" as pkg_base {
@@ -56,8 +56,8 @@ AbstractEntity <|-- AbstractAggregateRoot
 AbstractEntity <|-- AbstractParticipant
 
 package "base/infra" as pkg_base_infra {
-  abstract class AbstractPrismaRepository <<Abstract>> {
-    + prisma: PrismaService
+  abstract class AbstractLiquibase/JPARepository <<Abstract>> {
+    + prisma: Liquibase/JPAService
   }
 }
 
@@ -176,7 +176,7 @@ package "messages/domain" as pkg_messages {
 }
 
 package "messages/infra" as pkg_messages_infra {
-  class PrismaMessageRepository {
+  class Liquibase/JPAMessageRepository {
     save(message)
     findById(id)
     findByChatId(chatId, options)
@@ -184,16 +184,16 @@ package "messages/infra" as pkg_messages_infra {
 }
 
 package "chats/infra" as pkg_chats_infra {
-  class PrismaChatRepository {
+  class Liquibase/JPAChatRepository {
     findById(id)
     touchUpdatedAt(chatId)
   }
 }
 
-AbstractPrismaRepository <|-- PrismaMessageRepository
-AbstractPrismaRepository <|-- PrismaChatRepository
-PrismaMessageRepository ..|> MessageRepository
-PrismaChatRepository ..|> ChatRepository
+AbstractLiquibase/JPARepository <|-- Liquibase/JPAMessageRepository
+AbstractLiquibase/JPARepository <|-- Liquibase/JPAChatRepository
+Liquibase/JPAMessageRepository ..|> MessageRepository
+Liquibase/JPAChatRepository ..|> ChatRepository
 
 Chat "1" *-- "0..*" Message
 Message --> MessageType
