@@ -1,6 +1,6 @@
 # ExploreChat Mobile (`apps/mobile`)
 
-React Native + Expo（SDK 55+）客户端，与 `services/server` API 对接；UI 对齐 Instagram（信息流、Reels、私信、探索/搜索、个人主页与「Settings and activity」设置栈）。
+React Native + Expo（SDK 55+）客户端，与 Spring Boot API (`:9001`) 对接；UI 对齐 Instagram（信息流、Reels、私信、探索/搜索、个人主页与「Settings and activity」设置栈）。
 
 ## 技术栈
 
@@ -39,7 +39,7 @@ pnpm start:mobile:ios
 pnpm exec expo start
 ```
 
-环境：与 Web 相同 API 基址（见根目录 `README.md` 与 `services/server/.env`）。
+环境：与 Web 相同 API 基址（见根目录 `README.md` 与 `src/main/resources/application.yml`）。
 
 ## 文档
 

@@ -9,20 +9,6 @@ import uniq from "lodash/uniq";
 import uniqBy from "lodash/uniqBy";
 import { mapFeedPostResToFeedPost, type FeedPostRes } from "@/feed/feed.mapper";
 
-interface FeedGraphqlBody {
-  errors?: Array<{ message?: string }>;
-  data?: {
-    feed?: {
-      pageState?: string | null;
-      entries?: Array<{ postId: string; post?: FeedPostRes | null }>;
-    };
-    reels?: {
-      pageState?: string | null;
-      entries?: Array<{ postId: string; post?: FeedPostRes | null }>;
-    };
-  };
-}
-
 export class FeedApi {
   constructor(private readonly http: HttpClient) {}
 
@@ -33,49 +19,18 @@ export class FeedApi {
     posts: FeedPost[];
     nextPageState?: string;
   }> {
-    const query = `query Feed($limit: Int, $pageState: String) {
-      feed(limit: $limit, pageState: $pageState) {
-        pageState
-        entries {
-          postId
-          post {
-            postId
-            userId
-            caption
-            type
-            mediaUrls
-            coverUrl
-            location
-            createdAt
-            username
-            avatar
-            likeCount
-            commentCount
-            saveCount
-            isLiked
-            isSaved
-            autoTags
-          }
-        }
-      }
-    }`;
-    const variables: { limit: number; pageState?: string } = { limit };
-    if (pageState) variables.pageState = pageState;
-    const feedGraphRes = await this.http.post<FeedGraphqlBody>("/graphql", {
-      query,
-      variables,
-    });
-    const body = feedGraphRes.data;
-    if (body.errors?.length) {
-      throw new Error(body.errors[0]?.message ?? "GraphQL error");
-    }
-    const feed = body.data?.feed;
-    const entries = Array.isArray(feed?.entries) ? feed?.entries : [];
+    const q = new URLSearchParams({ page_size: String(limit) });
+    if (pageState) q.set("page_token", pageState);
+    const feedRes = await this.http.get<{
+      entries?: Array<{ postId: string; post?: FeedPostRes | null }>;
+      next_page_token?: string;
+    }>(`/posts/feed?${q}`);
+    const entries = Array.isArray(feedRes.data?.entries) ? feedRes.data.entries : [];
     const posts = entries
       .map((e) => e.post)
-      .filter((p): p is FeedPostRes => p != null)
+      .filter((post): post is FeedPostRes => post != null)
       .map(mapFeedPostResToFeedPost);
-    const next = feed?.pageState ?? undefined;
+    const next = feedRes.data?.next_page_token ?? undefined;
     return {
       posts,
       nextPageState: next && next !== "" ? next : undefined,
@@ -89,49 +44,18 @@ export class FeedApi {
     posts: FeedPost[];
     nextPageState?: string;
   }> {
-    const query = `query Reels($limit: Int, $pageState: String) {
-      reels(limit: $limit, pageState: $pageState) {
-        pageState
-        entries {
-          postId
-          post {
-            postId
-            userId
-            caption
-            type
-            mediaUrls
-            coverUrl
-            location
-            createdAt
-            username
-            avatar
-            likeCount
-            commentCount
-            saveCount
-            isLiked
-            isSaved
-            autoTags
-          }
-        }
-      }
-    }`;
-    const variables: { limit: number; pageState?: string } = { limit };
-    if (pageState) variables.pageState = pageState;
-    const reelsGraphRes = await this.http.post<FeedGraphqlBody>("/graphql", {
-      query,
-      variables,
-    });
-    const body = reelsGraphRes.data;
-    if (body.errors?.length) {
-      throw new Error(body.errors[0]?.message ?? "GraphQL error");
-    }
-    const reels = body.data?.reels;
-    const entries = Array.isArray(reels?.entries) ? reels?.entries : [];
+    const q = new URLSearchParams({ page_size: String(limit) });
+    if (pageState) q.set("page_token", pageState);
+    const reelsRes = await this.http.get<{
+      entries?: Array<{ postId: string; post?: FeedPostRes | null }>;
+      next_page_token?: string;
+    }>(`/posts/reels?${q}`);
+    const entries = Array.isArray(reelsRes.data?.entries) ? reelsRes.data.entries : [];
     const posts = entries
       .map((e) => e.post)
-      .filter((p): p is FeedPostRes => p != null)
+      .filter((post): post is FeedPostRes => post != null)
       .map(mapFeedPostResToFeedPost);
-    const next = reels?.pageState ?? undefined;
+    const next = reelsRes.data?.next_page_token ?? undefined;
     return {
       posts,
       nextPageState: next && next !== "" ? next : undefined,

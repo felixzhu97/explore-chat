@@ -83,7 +83,7 @@ describe("FeedApi", () => {
       const result = await adapter.getFeedGraphql(20);
 
       expect(mockApiClient.post).toHaveBeenCalledWith(
-        "/graphql",
+        "/posts/feed?page_size=20",
         expect.objectContaining({
           query: expect.stringContaining("query Feed"),
           variables: { limit: 20 },
@@ -125,7 +125,7 @@ describe("FeedApi", () => {
       await adapter.getFeedGraphql(20, "cursor123");
 
       expect(mockApiClient.post).toHaveBeenCalledWith(
-        "/graphql",
+        "/posts/feed?page_size=20",
         expect.objectContaining({
           variables: { limit: 20, pageState: "cursor123" },
         }),

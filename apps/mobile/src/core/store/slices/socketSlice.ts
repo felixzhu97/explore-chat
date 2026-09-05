@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { io, type Socket } from "socket.io-client";
-import { API_BASE_URL } from "@/core/config/api";
+import { SOCKET_IO_URL } from "@/core/config/api";
 
 interface SocketState {
   socket: Socket | null;
@@ -47,7 +47,7 @@ export const connectSocket = createAsyncThunk(
     if (currentSocket && currentToken === token) return;
     currentSocket?.disconnect();
     currentToken = token;
-    const socket = io(API_BASE_URL, {
+    const socket = io(SOCKET_IO_URL, {
       transports: ["websocket", "polling"],
       auth: { token },
     });

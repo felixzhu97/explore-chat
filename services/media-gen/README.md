@@ -32,4 +32,4 @@ uvicorn main:app --host 0.0.0.0 --port 3456
 - **Video**: `POST /api/v1/videos:generate` → `{ job_id }`; `GET /api/v1/videoJobs/{video_job}` → `{ status, video_url? }`; `GET /output/video/{job_id}.mp4`
 - **Voice**: `POST /api/v1/voices:synthesize` body `{ text }` → `{ audio_url }`; `GET /output/voice/{job_id}.mp3`
 
-Server: set `MEDIA_GENERATION_API_URL=http://localhost:3456` in `services/server/.env` (service root; Nest appends `/api/v1/...`).
+Server: set `MEDIA_GENERATION_API_URL=http://localhost:3456` in application.yml `chat.upstreams.media-gen`.

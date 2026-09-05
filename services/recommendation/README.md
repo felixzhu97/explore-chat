@@ -7,7 +7,7 @@ Offline and online recommendation stack for WhatsChat:
 
 - Batch jobs for follow suggestions, explore hot list, and vector embeddings (LightFM + implicit + PyTorch towers)
 - PyTorch ranking models for Feed/Explore/Reels (user/post embeddings + engagement features)
-- FastAPI online service for recall/rank, called by the NestJS API server
+- FastAPI online service for recall/rank, called by the Spring Boot API
 
 ## Setup
 
@@ -51,7 +51,7 @@ python -m models.pytorch_towers
 
 ## Online ranking service (FastAPI)
 
-Run the FastAPI service (used by NestJS `RecommendationService`):
+Run the FastAPI service (used by Spring AI proxy):
 
 ```bash
 uvicorn main:app --host 0.0.0.0 --port 8000
@@ -67,7 +67,7 @@ By default it listens on `http://localhost:8000` and exposes:
 
 Environment variables:
 
-- `RECOMMENDATION_API_URL` (server `.env`) – NestJS → FastAPI base URL (default `http://localhost:8000`)
+- `RECOMMENDATION_API_URL` (application.yml `chat.upstreams`) – Spring → FastAPI base URL (default `http://localhost:8000`)
 - `VECTOR_BACKEND` – `redis` (default) or `faiss`
 - `FAISS_DIM`, `FAISS_INDEX_PATH`, `FAISS_IDS_PATH` – optional Faiss index configuration
 

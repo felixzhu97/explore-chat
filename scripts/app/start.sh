@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Local boot (docker-free): .env → migrate → packages → Web + API.
+# Local boot: Java API + Web (Nest removed).
 set -euo pipefail
 
 ENV=${1:-dev}
@@ -7,31 +7,31 @@ ENV=${1:-dev}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-SERVER_DIR="$ROOT_DIR/services/server"
-
-echo "ExploreChat ($ENV) — Node + SQLite (no Docker)"
-
-# .env
-if [ ! -f "$SERVER_DIR/.env" ]; then
-  cp "$SERVER_DIR/.env.example" "$SERVER_DIR/.env"
-  echo "Created services/server/.env"
-fi
-
 cd "$ROOT_DIR"
 
-# DB + shared types
-pnpm --filter whatschat-server db:generate
-pnpm --filter whatschat-server migrate:deploy
-pnpm --filter @whatschat/shared-types build
+echo "ExploreChat ($ENV) — Spring Boot + Next.js"
 
 if [[ "$ENV" == "prod" ]]; then
   export NODE_ENV=production
-  pnpm --filter whatschat-server build
-  exec pnpm --filter whatschat-server start
+  ./gradlew bootJar --quiet
+  exec java -jar build/libs/explore-chat-*.jar
 fi
 
-echo "Web http://localhost:4000  ·  API http://localhost:3001"
-exec pnpm exec turbo run dev \
-  --filter=whatschat-web \
-  --filter=whatschat-server \
-  --concurrency=23
+pnpm --filter @whatschat/shared-types build
+
+# Start Java API in background
+./gradlew bootRun --quiet &
+JAVA_PID=$!
+trap 'kill "$JAVA_PID" 2>/dev/null || true' EXIT
+
+# Wait for health
+for _ in $(seq 1 60); do
+  if curl -sf "http://localhost:9001/api/v1/health" >/dev/null 2>&1 \
+    || curl -sf "http://localhost:9001/actuator/health" >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
+
+echo "Web http://localhost:4000  ·  API http://localhost:9001  ·  Socket.IO http://localhost:9002"
+exec pnpm exec turbo run dev --filter=whatschat-web --concurrency=23
