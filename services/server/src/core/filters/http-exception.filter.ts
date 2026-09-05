@@ -5,6 +5,7 @@ import {
   HttpException,
 } from "@nestjs/common";
 import { Response } from "express";
+import { buildRpcStatus } from "@/core/aip/rpc-status";
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -20,12 +21,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const message =
       typeof exceptionResponse === "string"
         ? exceptionResponse
-        : (exceptionResponse as any).message || exception.message;
+        : (exceptionResponse as { message?: string | string[] }).message ||
+          exception.message;
 
-    response.status(status).json({
-      success: false,
-      message: Array.isArray(message) ? message.join(", ") : message,
-      timestamp: new Date().toISOString(),
-    });
+    const text = Array.isArray(message) ? message.join(", ") : String(message);
+
+    response.status(status).json(buildRpcStatus(status, text));
   }
 }
