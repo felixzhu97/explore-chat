@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { UsersService } from "../users.service";
-import { UserApi } from "@/profile/user.api";
+import { UserApi } from "@/profile/users.service";
 
 const createMockUserApi = (): Partial<UserApi> => ({
   getUsers: vi.fn(),

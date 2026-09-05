@@ -41,7 +41,7 @@ export default defineConfig({
         "src/chat/websocket.ts",
         "src/calls/web-rtc-config.ts",
         "src/chat/mock-data.ts",
-        "src/profile/mock-user.ts",
+        "src/profile/users.service.ts",
       ],
       thresholds: {
         global: {

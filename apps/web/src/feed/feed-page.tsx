@@ -16,7 +16,7 @@ import {
   POST_SAVE,
 } from "@whatschat/analytics";
 import { useTranslation } from "@/src/shared/i18n";
-import { mockUser } from "@/profile/mock-user";
+import { mockUser } from "@/profile/users.service";
 import type { FeedPost, StoryItem } from "@/shared/types";
 import { CenterColumn, FloatingMessagesBtn } from "@/layout/shell-styles";
 
