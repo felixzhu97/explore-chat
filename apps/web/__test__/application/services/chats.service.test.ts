@@ -1,47 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ChatsService } from "@/chat/services/chats.service";
 
-vi.mock("@/chat/services/chats.service", () => ({
-  mapApiChatRowToContact: vi.fn((chat: any) => ({
-    id: chat.id,
-    name: chat.name || "Chat",
-    avatar: chat.avatar || "",
-    lastMessage: chat.lastMessage?.content ?? "",
-    timestamp: chat.updatedAt ?? "",
-    unreadCount: 0,
-    isOnline: false,
-    isGroup: chat.type === "GROUP",
-  })),
-  mapApiMessageRowToMessage: vi.fn((msg: any) => ({
-    id: msg.id,
-    senderId: msg.senderId,
-    senderName: msg.sender?.username ?? "",
-    content: msg.content,
-    timestamp: msg.timestamp || msg.createdAt || new Date().toISOString(),
-    type: msg.type || "text",
-    status: "delivered",
-  })),
-  mapUnknownToContactCreate: vi.fn((data: any) => ({
-    id: data.id,
-    name: data.name || "Chat",
-    avatar: data.avatar || "",
-    lastMessage: data.lastMessage || "",
-    timestamp: data.timestamp || "",
-    unreadCount: 0,
-    isOnline: false,
-    isGroup: false,
-  })),
-  mapUnknownToMessageCreate: vi.fn((data: any) => ({
-    id: data.id,
-    senderId: data.senderId,
-    senderName: data.senderName || "",
-    content: data.content,
-    timestamp: data.timestamp || new Date().toISOString(),
-    type: data.type || "text",
-    status: data.status || "sent",
-  })),
-}));
-
 describe("ChatsService", () => {
   let mockChatApi: any;
   let chatsService: ChatsService;

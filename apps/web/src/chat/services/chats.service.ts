@@ -91,8 +91,8 @@ export class ChatApi {
   }
 }
 
-import type { Message } from "@/chat/message.model";
-import { mapMessage } from "@/chat/message.model";
+import type { Message } from "@/chat/services/messages.service";
+import { mapMessage } from "@/chat/services/messages.service";
 
 export type ApiChatRow = {
   id: string;

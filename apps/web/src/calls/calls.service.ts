@@ -1,3 +1,4 @@
+import { getAppStore } from "@/layout/store-access";
 export type CallType = "voice" | "video";
 export type CallStatus =
   | "incoming"
@@ -111,11 +112,18 @@ export const {
 export const callsReducer = callsSlice.reducer;
 export default callsReducer;
 
-import { store } from "@/layout/store";
-
 export class CallsService {
   private getState() {
-    return store.getState().calls;
+    return (
+      getAppStore().getState() as {
+        calls: {
+          calls: Call[];
+          activeCall: Call | null;
+          incomingCall: Call | null;
+          callHistory: Call[];
+        };
+      }
+    ).calls;
   }
 
   async startCall(contactId: string, type: "voice" | "video"): Promise<Call> {
@@ -129,8 +137,8 @@ export class CallsService {
       startTime: new Date().toISOString(),
     });
 
-    store.dispatch(addCall(call));
-    store.dispatch(setActiveCall(call));
+    getAppStore().dispatch(addCall(call));
+    getAppStore().dispatch(setActiveCall(call));
 
     return call;
   }
@@ -140,8 +148,8 @@ export class CallsService {
     const call = state.calls.find((c) => c.id === callId);
     if (call) {
       const endedCall = endCallRecord(call, new Date().toISOString(), duration);
-      store.dispatch(updateCall({ callId, call: endedCall }));
-      store.dispatch(setActiveCallNull());
+      getAppStore().dispatch(updateCall({ callId, call: endedCall }));
+      getAppStore().dispatch(setActiveCallNull());
     }
   }
 
@@ -150,9 +158,9 @@ export class CallsService {
     const call = state.calls.find((c) => c.id === callId);
     if (call) {
       const answeredCall = answerCall(call);
-      store.dispatch(updateCall({ callId, call: answeredCall }));
-      store.dispatch(setActiveCall(answeredCall));
-      store.dispatch(setIncomingCallNull());
+      getAppStore().dispatch(updateCall({ callId, call: answeredCall }));
+      getAppStore().dispatch(setActiveCall(answeredCall));
+      getAppStore().dispatch(setIncomingCallNull());
     }
   }
 
@@ -161,8 +169,8 @@ export class CallsService {
     const call = state.calls.find((c) => c.id === callId);
     if (call) {
       const missedCall = markCallMissed(call);
-      store.dispatch(updateCall({ callId, call: missedCall }));
-      store.dispatch(setIncomingCallNull());
+      getAppStore().dispatch(updateCall({ callId, call: missedCall }));
+      getAppStore().dispatch(setIncomingCallNull());
     }
   }
 

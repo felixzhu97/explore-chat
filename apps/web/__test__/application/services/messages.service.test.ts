@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MessagesService } from "@/chat/services/messages.service";
+import { bindAppStore } from "@/layout/store-access";
 
 const mockMessage = {
   id: "msg-1",
@@ -10,52 +11,30 @@ const mockMessage = {
   type: "text" as const,
   status: "sent" as const,
   isStarred: false,
-  toggleStar: vi.fn(() => ({ ...mockMessage, isStarred: true })),
-  edit: vi.fn(() => ({ ...mockMessage, content: "Edited" })),
 };
 
-vi.mock("@/layout/store", () => ({
-  store: {
-    getState: vi.fn(() => ({
-      messages: {
-        messages: { "contact-1": [mockMessage] },
-        currentUserId: "user-1",
-        searchResults: [],
-        starredMessages: [],
-        typingUsers: {},
-      },
-    })),
-    dispatch: vi.fn(),
-  },
-}));
-
-vi.mock("@/chat/messagesSlice", () => ({
-  addMessage: vi.fn(),
-  updateMessage: vi.fn(),
-  deleteMessage: vi.fn(),
-  deleteMessages: vi.fn(),
-  setTyping: vi.fn(),
-  setReplyingTo: vi.fn(),
-  setEditingMessage: vi.fn(),
-  setSearchResults: vi.fn(),
-  toggleStarMessage: vi.fn(),
-  toggleStarMessageAction: vi.fn(),
-  generateMessageId: vi.fn(() => "mock-id"),
-  canEditMessage: vi.fn(() => false),
-  getMessagesForContact: vi.fn(() => []),
-  getMessageById: vi.fn(() => mockMessage),
-  getLastMessage: vi.fn(() => mockMessage),
-  getUnreadCount: vi.fn(() => 0),
-  isUserTyping: vi.fn(() => false),
-  getStarredMessages: vi.fn(() => []),
-  searchMessages: vi.fn(() => []),
-}));
+const mockStore = {
+  getState: vi.fn(() => ({
+    messages: {
+      messages: { "contact-1": [mockMessage] },
+      currentUserId: "user-1",
+      searchResults: [],
+      starredMessages: [],
+      typingUsers: {},
+      selectedMessages: [],
+      replyingTo: null,
+      editingMessage: null,
+    },
+  })),
+  dispatch: vi.fn(),
+};
 
 describe("MessagesService", () => {
   let messagesService: MessagesService;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    bindAppStore(mockStore);
     messagesService = new MessagesService();
   });
 
@@ -84,7 +63,9 @@ describe("MessagesService", () => {
   describe("updateMessage", () => {
     it("should be callable", () => {
       expect(() =>
-        messagesService.updateMessage("contact-1", "msg-1", {}),
+        messagesService.updateMessage("contact-1", "msg-1", {
+          content: "Updated",
+        }),
       ).not.toThrow();
     });
   });
@@ -106,17 +87,17 @@ describe("MessagesService", () => {
   });
 
   describe("sendMessage", () => {
-    it("should be callable", () => {
-      expect(() =>
+    it("should be callable", async () => {
+      await expect(
         messagesService.sendMessage("contact-1", "Hello"),
-      ).not.toThrow();
+      ).resolves.not.toThrow();
     });
   });
 
   describe("editMessageContent", () => {
     it("should be callable", () => {
       expect(() =>
-        messagesService.editMessageContent("contact-1", "msg-1", "New content"),
+        messagesService.editMessageContent("contact-1", "msg-1", "Edited"),
       ).not.toThrow();
     });
   });
@@ -160,7 +141,7 @@ describe("MessagesService", () => {
   describe("updateMessageStatus", () => {
     it("should be callable", () => {
       expect(() =>
-        messagesService.updateMessageStatus("contact-1", "msg-1", "delivered"),
+        messagesService.updateMessageStatus("contact-1", "msg-1", "read"),
       ).not.toThrow();
     });
   });
@@ -181,7 +162,7 @@ describe("MessagesService", () => {
 
   describe("searchMessages", () => {
     it("should be callable", () => {
-      expect(() => messagesService.searchMessages("test")).not.toThrow();
+      expect(() => messagesService.searchMessages("hello")).not.toThrow();
     });
   });
 

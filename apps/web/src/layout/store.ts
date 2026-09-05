@@ -1,3 +1,4 @@
+import { bindAppStore } from "@/layout/store-access";
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistStore, persistReducer, PersistConfig } from "redux-persist";
 import { useDispatch, useSelector } from "react-redux";
@@ -5,7 +6,7 @@ import type { TypedUseSelectorHook } from "react-redux";
 import { getStorage } from "@/auth/storage";
 import callsReducer from "@/calls/calls.service";
 import { contactsReducer } from "@/chat/services/chats.service";
-import messagesReducer from "@/chat/messagesSlice";
+import { messagesReducer } from "@/chat/services/messages.service";
 import notificationsReducer from "@/layout/notificationsSlice";
 
 function createPersistStorage() {
@@ -60,3 +61,5 @@ export type AppDispatch = typeof store.dispatch;
 
 export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
+bindAppStore(store);

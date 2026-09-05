@@ -1,26 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { CallsService } from "@/calls/calls.service";
-import { store } from "@/layout/store";
+import { bindAppStore } from "@/layout/store-access";
 
-vi.mock("@/layout/store", () => ({
-  store: {
-    getState: vi.fn(() => ({
-      calls: {
-        calls: [],
-        callHistory: [],
-        activeCall: null,
-        incomingCall: null,
-      },
-    })),
-    dispatch: vi.fn(),
-  },
-}));
+const mockStore = {
+  getState: vi.fn(() => ({
+    calls: {
+      calls: [],
+      callHistory: [],
+      activeCall: null,
+      incomingCall: null,
+    },
+  })),
+  dispatch: vi.fn(),
+};
 
 describe("CallsService", () => {
   let callsService: CallsService;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    bindAppStore(mockStore);
     callsService = new CallsService();
   });
 
@@ -37,94 +36,61 @@ describe("CallsService", () => {
     it("should dispatch addCall and setActiveCall actions", async () => {
       await callsService.startCall("contact-1", "video");
 
-      expect(store.dispatch).toHaveBeenCalledTimes(2);
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(2);
     });
   });
 
   describe("endCall", () => {
-    it("should end a call with duration", async () => {
-      const call = await callsService.startCall("contact-1", "voice");
-
-      callsService.endCall(call.id, 120);
-
-      expect(store.dispatch).toHaveBeenCalled();
+    it("should be callable when call missing", () => {
+      expect(() => callsService.endCall("missing", 10)).not.toThrow();
     });
   });
 
   describe("answerCall", () => {
-    it("should answer an incoming call", async () => {
-      const call = await callsService.startCall("contact-1", "voice");
-
-      callsService.answerCall(call.id);
-
-      expect(store.dispatch).toHaveBeenCalled();
+    it("should be callable when call missing", () => {
+      expect(() => callsService.answerCall("missing")).not.toThrow();
     });
   });
 
   describe("declineCall", () => {
-    it("should decline an incoming call", async () => {
-      const call = await callsService.startCall("contact-1", "voice");
-
-      callsService.declineCall(call.id);
-
-      expect(store.dispatch).toHaveBeenCalled();
+    it("should be callable when call missing", () => {
+      expect(() => callsService.declineCall("missing")).not.toThrow();
     });
   });
 
   describe("getCallById", () => {
-    it("should return null when call not found", () => {
-      const call = callsService.getCallById("non-existent");
-      expect(call).toBeNull();
+    it("should return null when missing", () => {
+      expect(callsService.getCallById("missing")).toBeNull();
     });
   });
 
   describe("getCallsForContact", () => {
-    it("should return calls for contact", () => {
-      const calls = callsService.getCallsForContact("contact-1");
-      expect(Array.isArray(calls)).toBe(true);
+    it("should return empty array", () => {
+      expect(callsService.getCallsForContact("contact-1")).toEqual([]);
     });
   });
 
   describe("getMissedCalls", () => {
-    it("should return missed calls", () => {
-      const missedCalls = callsService.getMissedCalls();
-      expect(Array.isArray(missedCalls)).toBe(true);
+    it("should return empty array", () => {
+      expect(callsService.getMissedCalls()).toEqual([]);
     });
   });
 
   describe("getRecentCalls", () => {
-    it("should return recent calls with limit", () => {
-      const recentCalls = callsService.getRecentCalls(10);
-      expect(Array.isArray(recentCalls)).toBe(true);
-    });
-
-    it("should use default limit of 50", () => {
-      const recentCalls = callsService.getRecentCalls();
-      expect(Array.isArray(recentCalls)).toBe(true);
+    it("should return empty array", () => {
+      expect(callsService.getRecentCalls()).toEqual([]);
     });
   });
 
   describe("getCallStats", () => {
-    it("should return call statistics", () => {
-      const stats = callsService.getCallStats();
-
-      expect(stats).toHaveProperty("total");
-      expect(stats).toHaveProperty("missed");
-      expect(stats).toHaveProperty("answered");
-      expect(stats).toHaveProperty("totalDuration");
-      expect(stats).toHaveProperty("averageDuration");
-    });
-
-    it("should calculate correct average duration", () => {
-      const stats = callsService.getCallStats();
-
-      if (stats.answered > 0) {
-        expect(stats.averageDuration).toBe(
-          stats.totalDuration / stats.answered,
-        );
-      } else {
-        expect(stats.averageDuration).toBe(0);
-      }
+    it("should return zeroed stats", () => {
+      expect(callsService.getCallStats()).toEqual({
+        total: 0,
+        missed: 0,
+        answered: 0,
+        totalDuration: 0,
+        averageDuration: 0,
+      });
     });
   });
 });
