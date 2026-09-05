@@ -81,6 +81,8 @@ flowchart TB
 | Search Scope                    | 搜索范围         | Nest `type`：`posts` / `users` / `hashtags`；UI `all` 仅客户端聚合，勿作为 API type              |
 | Voice Gen Target Language       | 语音合成目标语言 | Voice Gen：`auto` / `zh` / `en`                                                                  |
 | Voice Translate Target Language | 语音翻译目标语言 | Voice translate：`zh` / `en`（无 `auto`）                                                        |
+| Client Message ID               | 客户端消息 ID    | 发送方生成的幂等键（`clientMsgId`）；服务端 ack 原样回传，用于乐观气泡对账                       |
+| Message Delivery Status         | 消息投递状态     | `sending`（仅客户端）→ `sent` → `delivered` → `read`；失败为 `failed`                            |
 
 ---
 

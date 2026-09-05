@@ -25,8 +25,10 @@ export type {
   ContactInfo,
   Attachment,
   Location,
+  SendMessagePayload,
+  ImWsEvent,
 } from "./message";
-export { MessageTypeValues } from "./message";
+export { MessageTypeValues, ImWsEvents } from "./message";
 export type {
   Contact,
   GroupMember as ContactGroupMember,

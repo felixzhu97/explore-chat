@@ -4,6 +4,8 @@ import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "@/core/database/prisma.service";
 import { CacheService } from "@/core/cache/cache.service";
 import { OfflineMessageQueueService } from "@/messages/application/offline-message-queue.service";
+import { MessagesService } from "@/messages/application/messages.service";
+import { ForbiddenException } from "@nestjs/common";
 import { Server, Socket } from "socket.io";
 
 vi.mock("@/core/config/config.service", () => ({
@@ -20,6 +22,7 @@ describe("ChatGateway", () => {
   let mockPrisma: Partial<PrismaService>;
   let mockCache: Partial<CacheService>;
   let mockOfflineQueue: Partial<OfflineMessageQueueService>;
+  let mockMessagesService: Partial<MessagesService>;
 
   const mockUser = {
     id: "user-1",
@@ -90,11 +93,16 @@ describe("ChatGateway", () => {
       enqueue: vi.fn(),
     };
 
+    mockMessagesService = {
+      createMessage: vi.fn(),
+    };
+
     chatGateway = new ChatGateway(
       mockJwtService as JwtService,
       mockPrisma as PrismaService,
       mockCache as CacheService,
       mockOfflineQueue as OfflineMessageQueueService,
+      mockMessagesService as MessagesService,
     );
 
     chatGateway.server = {
@@ -234,43 +242,34 @@ describe("ChatGateway", () => {
         chatId: "chat-1",
         senderId: "user-1",
         content: "Hello, World!",
+        status: "sent",
         sender: { id: "user-1", username: "testuser", avatar: null },
       };
-      mockPrisma.chatParticipant!.findUnique = vi
+      mockMessagesService.createMessage = vi
         .fn()
-        .mockResolvedValue({ chatId: "chat-1", userId: "user-1" });
-      mockPrisma.message!.create = vi.fn().mockResolvedValue(mockMessage);
-      mockPrisma.chatParticipant!.findMany = vi
-        .fn()
-        .mockResolvedValue([{ userId: "user-1" }, { userId: "user-2" }]);
+        .mockResolvedValue(mockMessage);
       vi.spyOn(chatGateway, "deliverToParticipants" as any).mockResolvedValue(
         undefined,
       );
 
       await chatGateway.handleMessage(socket as any, messageData);
 
-      expect(mockPrisma.message!.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          chatId: "chat-1",
-          senderId: "user-1",
-          type: expect.anything(),
-          content: "Hello, World!",
-        }),
-        include: {
-          sender: {
-            select: {
-              id: true,
-              username: true,
-              avatar: true,
-            },
-          },
-        },
+      expect(mockMessagesService.createMessage).toHaveBeenCalledWith({
+        chatId: "chat-1",
+        content: "Hello, World!",
+        type: "TEXT",
+        senderId: "user-1",
       });
+      expect(socket.emit).toHaveBeenCalledWith("message:sent", mockMessage);
     });
 
     it("should emit error when user is not participant", async () => {
       const socket = createMockSocket({ userId: "user-1" });
-      mockPrisma.chatParticipant!.findUnique = vi.fn().mockResolvedValue(null);
+      mockMessagesService.createMessage = vi
+        .fn()
+        .mockRejectedValue(
+          new ForbiddenException("No permission to send messages to this chat"),
+        );
 
       await chatGateway.handleMessage(socket as any, messageData);
 
