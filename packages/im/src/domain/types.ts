@@ -1,7 +1,8 @@
-import type { Message } from "@whatschat/shared-types";
+import type { ImWsEvent, Message } from "@whatschat/shared-types";
 
 export interface WebSocketMessage {
   type:
+    | ImWsEvent
     | "message"
     | "typing"
     | "call_offer"

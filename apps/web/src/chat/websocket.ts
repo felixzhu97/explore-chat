@@ -123,11 +123,29 @@ export class WebSocketAdapter implements IWebSocketAdapter {
           text: (data.content as string) ?? "",
           type: ((data.type as string) || "TEXT").toString().toLowerCase(),
           mediaUrl: data.mediaUrl as string | undefined,
+          clientMsgId: data.clientMsgId as string | undefined,
         },
         timestamp: new Date((data.createdAt as string) ?? Date.now()).getTime(),
       };
       this.handleMessage(message);
     });
+
+    this.ioSocket.on("message:sent", (data: Record<string, unknown>) => {
+      logSocket("Socket.IO event message:sent", data);
+      this.emit("message:sent", data);
+    });
+
+    this.ioSocket.on(
+      "message:delivered",
+      (payload: {
+        messageId: string;
+        chatId: string;
+        clientMsgId?: string;
+      }) => {
+        logSocket("Socket.IO event message:delivered", payload);
+        this.emit("message:delivered", payload);
+      },
+    );
 
     this.ioSocket.on(
       "message:typing",
@@ -147,10 +165,7 @@ export class WebSocketAdapter implements IWebSocketAdapter {
       "message:read",
       (payload: { messageId: string; userId: string }) => {
         logSocket("Socket.IO event message:read", payload);
-        this.emit("message_status", {
-          messageId: payload.messageId,
-          status: "read",
-        });
+        this.emit("message:read", payload);
       },
     );
 

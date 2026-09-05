@@ -387,29 +387,10 @@ export class MessagesService {
       content,
       timestamp: new Date().toISOString(),
       type,
-      status: "sending",
+      status: "sent",
     });
 
     getAppStore().dispatch(addMessage({ contactId, message }));
-
-    setTimeout(() => {
-      getAppStore().dispatch(
-        updateMessage({
-          contactId,
-          messageId: message.id,
-          updates: { status: "sent" },
-        }),
-      );
-      setTimeout(() => {
-        getAppStore().dispatch(
-          updateMessage({
-            contactId,
-            messageId: message.id,
-            updates: { status: "delivered" },
-          }),
-        );
-      }, 1000);
-    }, 500);
   }
 
   editMessageContent(

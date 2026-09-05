@@ -3,7 +3,10 @@ import type {
   ApiMessageLike,
   SocketMessagePayload,
 } from "../application/message-mapping.types";
-import { mapApiMessageToMessage, mapSocketPayloadToMessage } from "../application/mappers";
+import {
+  mapApiMessageToMessage,
+  mapSocketPayloadToMessage,
+} from "../application/mappers";
 
 describe("ApiMessageLike", () => {
   describe("when message has all fields", () => {
@@ -58,7 +61,7 @@ describe("ApiMessageLike", () => {
       };
 
       expect((message as { mediaUrl?: string }).mediaUrl).toBe(
-        "https://example.com/image.jpg"
+        "https://example.com/image.jpg",
       );
     });
 
@@ -100,7 +103,11 @@ describe("ApiMessageLike", () => {
 
   describe("message status values", () => {
     it("should accept all valid status values", () => {
-      const statuses: ApiMessageLike["status"][] = ["sent", "delivered", "read"];
+      const statuses: ApiMessageLike["status"][] = [
+        "sent",
+        "delivered",
+        "read",
+      ];
 
       statuses.forEach((status) => {
         const message: ApiMessageLike = {
@@ -208,7 +215,7 @@ describe("ApiMessageLike", () => {
   });
 
   describe("status edge cases", () => {
-    it("should default to delivered when status is undefined", () => {
+    it("should default to sent when status is undefined", () => {
       const message: ApiMessageLike = {
         id: "msg-no-status",
         senderId: "user-1",
@@ -216,11 +223,15 @@ describe("ApiMessageLike", () => {
       };
 
       const mapped = mapApiMessageToMessage(message);
-      expect(mapped.status).toBe("delivered");
+      expect(mapped.status).toBe("sent");
     });
 
     it("should preserve defined status values", () => {
-      const statuses: ApiMessageLike["status"][] = ["sent", "delivered", "read"];
+      const statuses: ApiMessageLike["status"][] = [
+        "sent",
+        "delivered",
+        "read",
+      ];
 
       statuses.forEach((status) => {
         const message: ApiMessageLike = {
@@ -507,7 +518,7 @@ describe("SocketMessagePayload", () => {
       expect(message.timestamp).toBe(new Date(timestamp).toISOString());
     });
 
-    it("should always map to text type regardless of data.type", () => {
+    it("should map data.type when provided", () => {
       const payload: SocketMessagePayload = {
         from: "user-1",
         data: {
@@ -517,7 +528,7 @@ describe("SocketMessagePayload", () => {
       };
 
       const message = mapSocketPayloadToMessage(payload);
-      expect(message.type).toBe("text");
+      expect(message.type).toBe("image");
     });
   });
 
