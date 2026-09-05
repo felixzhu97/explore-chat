@@ -26,10 +26,10 @@ uvicorn main:app --host 0.0.0.0 --port 3456
 - `EDGE_TTS_VOICE` (default: zh-CN-XiaoxiaoNeural)
 - `MEDIA_VIDEO_FORCE_LOCAL` (set `1` to try local video on macOS)
 
-## API
+## API (AIP REST)
 
-- **Image**: `POST /image/generate` → `{ jobId }`; `GET /image/generate/{jobId}` → `{ status, imageUrl? }`; `GET /output/image/{jobId}.png`
-- **Video**: `POST /video/generate` → `{ jobId }`; `GET /video/generate/{jobId}` → `{ status, videoUrl? }`; `GET /output/video/{jobId}.mp4`
-- **Voice**: `POST /voice/synthesize` body `{ text }` → `{ audioUrl }`; `GET /output/voice/{jobId}.mp3`
+- **Image**: `POST /api/v1/images:generate` → `{ job_id }`; `GET /api/v1/imageJobs/{image_job}` → `{ status, image_url? }`; `GET /output/image/{job_id}.png`
+- **Video**: `POST /api/v1/videos:generate` → `{ job_id }`; `GET /api/v1/videoJobs/{video_job}` → `{ status, video_url? }`; `GET /output/video/{job_id}.mp4`
+- **Voice**: `POST /api/v1/voices:synthesize` body `{ text }` → `{ audio_url }`; `GET /output/voice/{job_id}.mp3`
 
-Server: set `MEDIA_GENERATION_API_URL=http://localhost:3456` in `services/server/.env`.
+Server: set `MEDIA_GENERATION_API_URL=http://localhost:3456` in `services/server/.env` (service root; Nest appends `/api/v1/...`).

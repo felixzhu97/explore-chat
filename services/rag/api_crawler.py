@@ -16,7 +16,7 @@ from domain.schemas.document import CrawlRequest, CrawlResponse, ScrapeRequest, 
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/crawler", tags=["Crawler"])
+router = APIRouter(tags=["Crawler"])
 
 
 async def fetch_url(url: str, timeout: int = 30) -> dict:
@@ -43,7 +43,7 @@ async def fetch_url(url: str, timeout: int = 30) -> dict:
         }
 
 
-@router.post("/scrape", response_model=ScrapeResponse)
+@router.post("/webpages:scrape", response_model=ScrapeResponse)
 async def scrape_url(
     request: ScrapeRequest,
     processor: DocumentProcessor = Depends(rag_service.get_processor),
@@ -144,7 +144,7 @@ async def scrape_url(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/crawl", response_model=CrawlResponse)
+@router.post("/webpages:crawl", response_model=CrawlResponse)
 async def crawl_urls(
     request: CrawlRequest,
     processor: DocumentProcessor = Depends(rag_service.get_processor),

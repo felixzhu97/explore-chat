@@ -32,20 +32,10 @@ class DocumentInfo(BaseModel):
 
 
 class DocumentListResponse(BaseModel):
-    """List of documents response."""
+    """List of documents response (AIP-158)."""
 
     documents: list[DocumentInfo]
-    total: int
-    skip: int
-    limit: int
-
-
-class DocumentDeleteResponse(BaseModel):
-    """Delete document response."""
-
-    id: str
-    deleted: bool
-    chunks_deleted: int
+    next_page_token: Optional[str] = None
 
 
 class ScrapeRequest(BaseModel):

@@ -113,38 +113,38 @@ Configure via environment variables or `.env` file:
 
 > **Note**: Ensure your chunk size doesn't exceed the embedding model's context length (~2000 chars for nomic-embed-text).
 
-## API Endpoints
+## API Endpoints (AIP REST)
 
 ### Documents
 
 ```
-POST   /api/v1/documents/upload     Upload a document (multipart/form-data)
-GET    /api/v1/documents           List all documents
+POST   /api/v1/documents           Create/upload a document (multipart)
+GET    /api/v1/documents           List documents (page_size, page_token)
 GET    /api/v1/documents/{id}      Get document details
-DELETE /api/v1/documents/{id}      Delete a document and its chunks
+DELETE /api/v1/documents/{id}      Delete a document (204)
 ```
 
 ### Crawler
 
 ```
-POST   /api/v1/crawler/scrape      Scrape and index a single URL
-POST   /api/v1/crawler/crawl       Crawl and index multiple URLs
+POST   /api/v1/webpages:scrape     Scrape and index a single URL
+POST   /api/v1/webpages:crawl      Crawl and index multiple URLs
 ```
 
 ### Sync
 
 ```
-POST   /api/v1/sync/posts          Sync posts from database
-POST   /api/v1/sync/comments       Sync comments from database
-POST   /api/v1/sync/all           Sync all content types
+POST   /api/v1/posts:sync          Sync posts from database
+POST   /api/v1/comments:sync       Sync comments from database
+POST   /api/v1/resources:sync      Sync all content types
 ```
 
 ### Query
 
 ```
-POST   /api/v1/query               RAG query (non-streaming)
-POST   /api/v1/query/stream        RAG query (streaming, SSE)
-GET    /api/v1/query/collections   List available collections and their info
+POST   /api/v1/documents:query           RAG query (non-streaming)
+POST   /api/v1/documents:streamQuery     RAG query (streaming, SSE)
+GET    /api/v1/collections               List available collections
 ```
 
 ### Health
