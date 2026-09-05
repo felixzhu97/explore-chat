@@ -17,7 +17,10 @@ async def lifespan(_app: FastAPI):
     rec_service.app_state.clear()
 
 
+from aip import register_aip_exception_handlers
+
 app = FastAPI(title="Recommendation API", lifespan=lifespan)
+register_aip_exception_handlers(app)
 app.include_router(router)
 
 

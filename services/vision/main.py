@@ -13,7 +13,10 @@ async def lifespan(_app: FastAPI):
     yield
 
 
+from aip import register_aip_exception_handlers
+
 app = FastAPI(title="WhatsChat Vision", version="0.1.0", lifespan=lifespan)
+register_aip_exception_handlers(app)
 app.include_router(router)
 
 if __name__ == "__main__":
