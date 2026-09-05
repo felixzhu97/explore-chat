@@ -38,12 +38,18 @@ class QdrantService:
 
     def __init__(self) -> None:
         settings = get_settings()
-        self._client = QdrantClient(
-            url=settings.qdrant_url,
-            timeout=settings.qdrant_timeout,
-        )
+        url = (settings.qdrant_url or "").strip()
+        if url:
+            self._client = QdrantClient(
+                url=url,
+                timeout=settings.qdrant_timeout,
+            )
+            logger.info(f"Qdrant client initialized with URL: {url}")
+        else:
+            path = settings.qdrant_path
+            self._client = QdrantClient(path=path)
+            logger.info(f"Qdrant client initialized with local path: {path}")
         self._vector_size = settings.qdrant_vector_size
-        logger.info(f"Qdrant client initialized with URL: {settings.qdrant_url}")
 
     @property
     def client(self) -> QdrantClient:

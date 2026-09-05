@@ -1,7 +1,6 @@
-# Single-file compose for local dev (aligned with finpulse style).
+# NOT used by `pnpm dev` (docker-free SQLite stack).
+# Optional / CI / advanced experiments only.
 # Override via env: POSTGRES_*, REDIS_*, KAFKA_*.
-# Local drop-ins: Redpanda (Kafka API) for kafka, Scylla (CQL) for cassandra.
-# Postgres 18 — bumping major needs a new volume or `docker volume rm`.
 services:
   postgres:
     image: postgres:18-alpine

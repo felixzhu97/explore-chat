@@ -27,7 +27,7 @@ ExploreChat brings social connection into everyday life. Our mission is to help 
 
 - Real-time messaging (Socket.IO) and WebRTC voice/video calls
 - Social feed, Reels, stories, comments, likes, and saves
-- Explore grid and global search (Elasticsearch in local compose)
+- Explore grid and global search (SQLite FTS5)
 - Media upload and post creation
 - JWT authentication
 - AI text/image/video/voice flows proxied through Nest (including Explore AI BFF)
@@ -127,12 +127,11 @@ docs/
 
 ## Prerequisites
 
-| Tool                    | Version                                               |
-| ----------------------- | ----------------------------------------------------- |
-| Node.js                 | >= 22 (aligned with CI)                               |
-| pnpm                    | >= 10                                                 |
-| Docker + Docker Compose | Recent stable (Postgres, Redis, and other local deps) |
-| Git                     | Any recent version                                    |
+| Tool    | Version                 |
+| ------- | ----------------------- |
+| Node.js | >= 22 (aligned with CI) |
+| pnpm    | >= 10                   |
+| Git     | Any recent version      |
 
 Optional for AI / media flows: Ollama, and the Python services under `services/`.
 
@@ -145,10 +144,10 @@ pnpm install
 pnpm dev
 ```
 
-That single command ensures `.env`, starts the full local Docker stack
-(Postgres 18, Redis, Redpanda, ScyllaDB, Elasticsearch, MongoDB, Qdrant),
-runs migrations, builds shared types, and runs Web + API. It never runs
-`docker compose down`.
+That single command ensures `.env`, runs Prisma migrations against local
+**SQLite** (`file:./dev.db`), builds shared types, and runs Web + API.
+No Docker is required for the default local stack. Cache, feed fan-out,
+and search run in-process (memory + SQLite FTS5).
 
 | Service                  | Default URL                         |
 | ------------------------ | ----------------------------------- |
@@ -158,15 +157,17 @@ runs migrations, builds shared types, and runs Web + API. It never runs
 | Health                   | http://localhost:3001/api/v1/health |
 | Swagger (non-production) | http://localhost:3001/api/docs      |
 
-Local Kafka/CQL drop-ins: **Redpanda** (`KAFKA_BROKERS`) and **ScyllaDB**
-(`CASSANDRA_*`) — same Nest clients, lighter containers. Postgres major is
-pinned to 18 (`postgres_18_data` volume); bumping the image major needs a
-new volume or an explicit volume remove.
+Demo login after `pnpm --filter whatschat-server db:seed`:
+`cristiano@whatschat.com` / `123456`. Optional sample posts:
+`pnpm --filter whatschat-server db:seed:posts`.
 
-Apps only (infra already up): `pnpm dev:apps`.  
+Production can point `DATABASE_URL` at Postgres later — local default stays
+SQLite. Optional legacy compose file remains under
+`services/server/docker-compose.yml` for CI / advanced setups only.
+
+Apps only: `pnpm dev:apps`.  
 Admin / mobile: `pnpm start:admin`, `pnpm start:mobile:ios`, …  
-Stop helpers: `pnpm stop` (dev). Wipe volumes only with
-`./scripts/app/stop.sh --remove-volumes`.
+Stop helpers: `pnpm stop` (dev).
 
 More detail: [docs/developer/QUICKSTART.md](docs/developer/QUICKSTART.md).
 

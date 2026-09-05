@@ -15,7 +15,11 @@ WORKERS = int(os.getenv("WORKERS", "4"))
 
 UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", str(Path(__file__).parent / "uploads")))
 
-QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
+QDRANT_URL = os.getenv("QDRANT_URL", "")
+QDRANT_PATH = os.getenv(
+    "QDRANT_PATH",
+    str(Path(__file__).parent / "data" / "qdrant"),
+)
 QDRANT_TIMEOUT = int(os.getenv("QDRANT_TIMEOUT", "30"))
 QDRANT_VECTOR_SIZE = int(os.getenv("QDRANT_VECTOR_SIZE", "768"))
 
@@ -51,6 +55,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "")
 def ensure_directories() -> None:
     """Create necessary directories if they don't exist."""
     UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+    Path(QDRANT_PATH).mkdir(parents=True, exist_ok=True)
 
 
 @lru_cache
@@ -63,6 +68,7 @@ def get_settings() -> SimpleNamespace:
         workers=WORKERS,
         uploads_dir=UPLOADS_DIR,
         qdrant_url=QDRANT_URL,
+        qdrant_path=QDRANT_PATH,
         qdrant_timeout=QDRANT_TIMEOUT,
         qdrant_vector_size=QDRANT_VECTOR_SIZE,
         embedding_provider=EMBEDDING_PROVIDER,
