@@ -1,3 +1,3 @@
-export type { WebSocketMessage, ChatState } from "./types";
+export type { WebSocketMessage } from "./types";
 export type { IWebSocketAdapter } from "./websocket.adapter";
-export type { IChatsService, ChatListItem } from "./chats.service";
+export type { IChatsService } from "./chats.service";
