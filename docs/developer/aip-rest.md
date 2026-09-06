@@ -49,11 +49,10 @@ Shared types: `RpcStatus` / `ListQuery` / `ListResponse` in `@chat/shared-types`
 
 ## Python ML helpers (loopback)
 
-Same AIP rules apply to FastAPI helpers in sibling
+Optional FastAPI helpers live in sibling
 [explore-ml](https://github.com/felixzhu97/explore-ml) under
 `python_ml/{recommendation,vision,rag,media-gen}`.
 Clients still call the Spring API only; the API calls these over loopback with **snake_case** JSON.
-Canonical remap table: [explore-ml aip-rest](https://github.com/felixzhu97/explore-ml/blob/main/docs/developer/aip-rest.md).
 
 | Service        | Legacy                         | AIP                                      |
 | -------------- | ------------------------------ | ---------------------------------------- |
@@ -83,8 +82,6 @@ Each helper ships `aip/` (`rpc_status`, exception handlers, `page_token` for RAG
 - No protobuf → no `api-linter`
 - OpenAPI via Nest Swagger at `/api/docs` (non-production)
 - Spectral rules: [`.spectral.yml`](../../.spectral.yml) against [`openapi-aip-contract.yaml`](./openapi-aip-contract.yaml)
-- Chat: `pnpm check:aip-rest` (legacy envelope guard; Python paths move to explore-ml in a follow-up)
-- Explore ML: `bash scripts/check-aip-rest.sh` in [explore-ml](https://github.com/felixzhu97/explore-ml)
 
 ## Package layout note
 

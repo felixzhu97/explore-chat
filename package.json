@@ -27,7 +27,6 @@
     "setup": "bash scripts/setup/dev.sh",
     "setup:inline": "./gradlew classes",
     "start:server": "./gradlew bootRun",
-    "start:recommendation": "cd src/main/ml/recommendation && (test -d .venv && . .venv/bin/activate; celery -A celery_app worker -l info -B)",
     "start:mobile": "pnpm --filter react-native-app start",
     "start:mobile:ios": "pnpm --filter react-native-app ios",
     "start:mobile:android": "pnpm --filter react-native-app android",
@@ -39,7 +38,6 @@
     "test": "turbo run test",
     "test:java": "./gradlew checkstyleMain checkstyleTest test",
     "test:watch": "turbo run test:watch --concurrency=23",
-    "check:aip-rest": "bash scripts/check-aip-rest.sh",
     "lint:openapi": "pnpm dlx @stoplight/spectral-cli@6.15.0 lint docs/developer/openapi-aip-contract.yaml -r .spectral.yml"
   },
   "devDependencies": {

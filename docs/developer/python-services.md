@@ -16,8 +16,6 @@ Clients still call **Spring only**. Default ports are unchanged:
 ## Canonical docs
 
 - Layout & layering: [explore-ml python-services](https://github.com/felixzhu97/explore-ml/blob/main/docs/developer/python-services.md)
-- AIP REST remaps: [explore-ml aip-rest](https://github.com/felixzhu97/explore-ml/blob/main/docs/developer/aip-rest.md)
-- Local AIP guard in that repo: `bash scripts/check-aip-rest.sh`
 
 ## Start (from explore-ml)
 
@@ -30,4 +28,3 @@ uvicorn main:app --host 0.0.0.0 --port $PORT
 
 - https://github.com/felixzhu97/explore-ml
 - https://fastapi.tiangolo.com/
-- https://google.aip.dev/193

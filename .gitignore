@@ -82,12 +82,10 @@ Thumbs.db
 **/logs
 
 # Services
-services/media-gen/output/
 services/server/uploads/
 services/server/*.db
 services/server/prisma/*.db
 services/server/prisma/*.db-journal
-services/rag/data/
 
 celerybeat-schedule
 celerybeat-schedule.db
