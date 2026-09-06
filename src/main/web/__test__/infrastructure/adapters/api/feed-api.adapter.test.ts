@@ -61,52 +61,41 @@ describe("FeedApi", () => {
   });
 
   describe("getFeedGraphql", () => {
-    it("should fetch feed using GraphQL", async () => {
+    it("should fetch feed using REST", async () => {
       const mockResponse = {
-        data: {
-          feed: {
-            pageState: "cursor123",
-            entries: [
-              {
-                postId: "1",
-                authorId: "user1",
-                post: { postId: "1", caption: "Hello" },
-              },
-            ],
+        entries: [
+          {
+            postId: "1",
+            authorId: "user1",
+            post: { postId: "1", caption: "Hello" },
           },
-        },
+        ],
+        next_page_token: "cursor123",
       };
-      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+      (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
 
       const result = await adapter.getFeedGraphql(20);
 
-      expect(mockApiClient.post).toHaveBeenCalledWith(
+      expect(mockApiClient.get).toHaveBeenCalledWith(
         "/posts/feed?page_size=20",
-        expect.objectContaining({
-          query: expect.stringContaining("query Feed"),
-          variables: { limit: 20 },
-        }),
       );
       expect(result.entries).toHaveLength(1);
       expect(result.pageState).toBe("cursor123");
     });
 
-    it("should handle GraphQL errors", async () => {
-      const mockResponse = {
-        errors: [{ message: "GraphQL Error" }],
-      };
-      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        mockResponse,
+    it("should propagate API errors", async () => {
+      (mockApiClient.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+        new Error("Network Error"),
       );
 
-      await expect(adapter.getFeedGraphql(20)).rejects.toThrow("GraphQL Error");
+      await expect(adapter.getFeedGraphql(20)).rejects.toThrow("Network Error");
     });
 
     it("should return empty entries on malformed response", async () => {
-      const mockResponse = { data: {} };
-      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+      const mockResponse = {};
+      (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
 
@@ -116,19 +105,16 @@ describe("FeedApi", () => {
       expect(result.pageState).toBeUndefined();
     });
 
-    it("should include pageState in variables when provided", async () => {
-      const mockResponse = { data: { feed: { pageState: null, entries: [] } } };
-      (mockApiClient.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+    it("should include page_token when pageState is provided", async () => {
+      const mockResponse = { entries: [], next_page_token: undefined };
+      (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
 
       await adapter.getFeedGraphql(20, "cursor123");
 
-      expect(mockApiClient.post).toHaveBeenCalledWith(
-        "/posts/feed?page_size=20",
-        expect.objectContaining({
-          variables: { limit: 20, pageState: "cursor123" },
-        }),
+      expect(mockApiClient.get).toHaveBeenCalledWith(
+        "/posts/feed?page_size=20&page_token=cursor123",
       );
     });
   });

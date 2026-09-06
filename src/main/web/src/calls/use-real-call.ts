@@ -1,6 +1,6 @@
 "use client";
 
-import { useCall } from "@chat/im";
+import { useCall } from "@/calls/rtc";
 import { getWebRTCManager } from "@/calls/web-rtc-config";
 
 export function useRealCall() {

@@ -23,7 +23,7 @@ describe("VisionApi", () => {
 
   describe("suggestTags", () => {
     it("should suggest tags from uploaded image", async () => {
-      const mockResponse = { data: { labels: ["sunset", "beach", "ocean"] } };
+      const mockResponse = { labels: ["sunset", "beach", "ocean"] };
       (mockApiClient.upload as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -38,8 +38,8 @@ describe("VisionApi", () => {
       expect(result.labels).toEqual(["sunset", "beach", "ocean"]);
     });
 
-    it("should return empty array when labels not found in nested data", async () => {
-      const mockResponse = { data: {} };
+    it("should return empty array when labels not found", async () => {
+      const mockResponse = {};
       (mockApiClient.upload as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -63,9 +63,8 @@ describe("VisionApi", () => {
     });
 
     it("should return empty array for invalid response", async () => {
-      const mockResponse = { data: null };
       (mockApiClient.upload as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        mockResponse,
+        null,
       );
 
       const mockFile = new File(["image"], "photo.jpg", { type: "image/jpeg" });
@@ -75,7 +74,7 @@ describe("VisionApi", () => {
     });
 
     it("should handle empty labels array", async () => {
-      const mockResponse = { data: { labels: [] } };
+      const mockResponse = { labels: [] };
       (mockApiClient.upload as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -87,7 +86,7 @@ describe("VisionApi", () => {
     });
 
     it("should use file name in FormData", async () => {
-      const mockResponse = { data: { labels: [] } };
+      const mockResponse = { labels: [] };
       (mockApiClient.upload as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );

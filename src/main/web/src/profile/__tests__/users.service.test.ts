@@ -24,10 +24,7 @@ describe("UsersService", () => {
         { id: "user-1", username: "alice", email: "alice@example.com" },
         { id: "user-2", username: "bob", email: "bob@example.com" },
       ];
-      mockUserApi.getUsers = vi.fn().mockResolvedValue({
-        success: true,
-        data: mockUsers,
-      });
+      mockUserApi.getUsers = vi.fn().mockResolvedValue({ users: mockUsers });
 
       const result = await usersService.getUsers();
 
@@ -42,10 +39,7 @@ describe("UsersService", () => {
     });
 
     it("should return empty array when API returns null data", async () => {
-      mockUserApi.getUsers = vi.fn().mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockUserApi.getUsers = vi.fn().mockResolvedValue({ users: null });
 
       const result = await usersService.getUsers();
 
@@ -53,48 +47,39 @@ describe("UsersService", () => {
     });
 
     it("should return empty array when API returns empty array", async () => {
-      mockUserApi.getUsers = vi.fn().mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockUserApi.getUsers = vi.fn().mockResolvedValue({ users: [] });
 
       const result = await usersService.getUsers();
 
       expect(result).toEqual([]);
     });
 
-    it("should throw error when API returns failure", async () => {
-      mockUserApi.getUsers = vi.fn().mockResolvedValue({
-        success: false,
-        message: "Failed to fetch users",
-      });
+    it("should return empty array when users field is missing", async () => {
+      mockUserApi.getUsers = vi.fn().mockResolvedValue({});
 
-      await expect(usersService.getUsers()).rejects.toThrow();
+      const result = await usersService.getUsers();
+
+      expect(result).toEqual([]);
     });
 
     it("should pass pagination params to API", async () => {
-      mockUserApi.getUsers = vi.fn().mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockUserApi.getUsers = vi.fn().mockResolvedValue({ users: [] });
 
       await usersService.getUsers({ page: 2, limit: 20 });
 
       expect(mockUserApi.getUsers).toHaveBeenCalledWith({
-        page: 2,
-        limit: 20,
+        page_size: 20,
+        search: undefined,
       });
     });
 
     it("should pass search query to API", async () => {
-      mockUserApi.getUsers = vi.fn().mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockUserApi.getUsers = vi.fn().mockResolvedValue({ users: [] });
 
       await usersService.getUsers({ search: "alice" });
 
       expect(mockUserApi.getUsers).toHaveBeenCalledWith({
+        page_size: undefined,
         search: "alice",
       });
     });
@@ -107,10 +92,7 @@ describe("UsersService", () => {
         username: "alice",
         email: "alice@example.com",
       };
-      mockUserApi.getUserById = vi.fn().mockResolvedValue({
-        success: true,
-        data: mockUser,
-      });
+      mockUserApi.getUserById = vi.fn().mockResolvedValue(mockUser);
 
       const result = await usersService.getUserById("user-1");
 
@@ -124,23 +106,21 @@ describe("UsersService", () => {
     });
 
     it("should return null when API returns null data", async () => {
-      mockUserApi.getUserById = vi.fn().mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockUserApi.getUserById = vi.fn().mockResolvedValue(null);
 
       const result = await usersService.getUserById("nonexistent");
 
       expect(result).toBeNull();
     });
 
-    it("should throw error when API returns failure", async () => {
-      mockUserApi.getUserById = vi.fn().mockResolvedValue({
-        success: false,
-        message: "User not found",
-      });
+    it("should return null when API fails", async () => {
+      mockUserApi.getUserById = vi
+        .fn()
+        .mockRejectedValue(new Error("User not found"));
 
-      await expect(usersService.getUserById("nonexistent")).rejects.toThrow();
+      const result = await usersService.getUserById("nonexistent");
+
+      expect(result).toBeNull();
     });
   });
 
@@ -149,10 +129,7 @@ describe("UsersService", () => {
       const mockUsers = [
         { id: "user-1", username: "alice_smith", email: "alice@example.com" },
       ];
-      mockUserApi.searchUsers = vi.fn().mockResolvedValue({
-        success: true,
-        data: mockUsers,
-      });
+      mockUserApi.searchUsers = vi.fn().mockResolvedValue({ users: mockUsers });
 
       const result = await usersService.searchUsers("alice");
 
@@ -162,10 +139,7 @@ describe("UsersService", () => {
     });
 
     it("should return empty array when API returns null data", async () => {
-      mockUserApi.searchUsers = vi.fn().mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockUserApi.searchUsers = vi.fn().mockResolvedValue({ users: null });
 
       const result = await usersService.searchUsers("nonexistent");
 
@@ -173,34 +147,39 @@ describe("UsersService", () => {
     });
 
     it("should return empty array when API returns empty array", async () => {
-      mockUserApi.searchUsers = vi.fn().mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockUserApi.searchUsers = vi.fn().mockResolvedValue({ users: [] });
 
       const result = await usersService.searchUsers("xyz123");
 
       expect(result).toEqual([]);
     });
 
-    it("should throw error when API returns failure", async () => {
-      mockUserApi.searchUsers = vi.fn().mockResolvedValue({
-        success: false,
-        message: "Search failed",
-      });
+    it("should return empty array when users and hits are missing", async () => {
+      mockUserApi.searchUsers = vi.fn().mockResolvedValue({});
 
-      await expect(usersService.searchUsers("test")).rejects.toThrow();
+      const result = await usersService.searchUsers("test");
+
+      expect(result).toEqual([]);
     });
 
     it("should pass search query to API", async () => {
-      mockUserApi.searchUsers = vi.fn().mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockUserApi.searchUsers = vi.fn().mockResolvedValue({ users: [] });
 
       await usersService.searchUsers("john");
 
       expect(mockUserApi.searchUsers).toHaveBeenCalledWith("john");
+    });
+
+    it("should map hits when users is absent", async () => {
+      const mockHits = [
+        { id: "user-9", username: "hit_user", email: "hit@example.com" },
+      ];
+      mockUserApi.searchUsers = vi.fn().mockResolvedValue({ hits: mockHits });
+
+      const result = await usersService.searchUsers("hit");
+
+      expect(result).toHaveLength(1);
+      expect(result[0].username).toBe("hit_user");
     });
   });
 
@@ -211,10 +190,7 @@ describe("UsersService", () => {
         username: "alice",
         email: "alice@example.com",
       };
-      mockUserApi.getUserById = vi.fn().mockResolvedValue({
-        success: true,
-        data: existingUser,
-      });
+      mockUserApi.getUserById = vi.fn().mockResolvedValue(existingUser);
 
       const result = await usersService.updateUser("user-1", {
         name: "Alice Smith",
@@ -231,10 +207,7 @@ describe("UsersService", () => {
     });
 
     it("should throw error when user does not exist", async () => {
-      mockUserApi.getUserById = vi.fn().mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockUserApi.getUserById = vi.fn().mockResolvedValue(null);
 
       await expect(
         usersService.updateUser("nonexistent", { name: "New Name" }),
@@ -248,7 +221,7 @@ describe("UsersService", () => {
 
       await expect(
         usersService.updateUser("user-1", { name: "New Name" }),
-      ).rejects.toThrow();
+      ).rejects.toThrow("用户不存在");
     });
 
     it("should only update specified fields", async () => {
@@ -260,10 +233,7 @@ describe("UsersService", () => {
         avatar: "old-avatar.jpg",
         about: "Old about",
       };
-      mockUserApi.getUserById = vi.fn().mockResolvedValue({
-        success: true,
-        data: existingUser,
-      });
+      mockUserApi.getUserById = vi.fn().mockResolvedValue(existingUser);
 
       const result = await usersService.updateUser("user-1", {
         name: "Alice Updated",
