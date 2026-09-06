@@ -9,7 +9,7 @@ export interface ITextGenerateService {
     onChunk: (text: string) => void,
     model?: string,
   ): Promise<void>;
-  postChatStream?(
+  postChatStream(
     messages: Array<{ role: string; content: string }>,
     onChunk: (text: string) => void,
     opts?: { model?: string; provider?: string; sessionId?: string },
