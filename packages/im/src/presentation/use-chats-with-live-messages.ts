@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import type { Message } from "@chat/shared-types";
-import { ImWsEvents } from "@chat/shared-types";
+import type { Message } from "../domain/message";
+import { ImWsEvents } from "../domain/message";
 import type { IWebSocketAdapter } from "../domain/websocket.adapter";
 import type { IChatsService, ChatListItem } from "../domain/chats.service";
 import type {

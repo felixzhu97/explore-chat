@@ -1,7 +1,18 @@
-import {
-  PrimaryDestinations,
-  type PrimaryDestination,
-} from "@chat/shared-types";
+/**
+ * Canonical primary product destinations (Glossary Preferred Terms).
+ * Platform path / tab file names stay in each client.
+ */
+export const PrimaryDestinations = {
+  Feed: "feed",
+  Chat: "chat",
+  Reels: "reels",
+  Explore: "explore",
+  User: "user",
+  Search: "search",
+} as const;
+
+export type PrimaryDestination =
+  (typeof PrimaryDestinations)[keyof typeof PrimaryDestinations];
 
 /** Web path for each Primary Destination (platform-specific). */
 export const WebPrimaryDestinationPaths: Record<PrimaryDestination, string> = {

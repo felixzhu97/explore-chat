@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo } from "react";
 import debounce from "lodash/debounce";
-import { SearchScopes } from "@chat/shared-types";
+import { SearchScopes } from "@/feed/feed.api";
 import { FeedApi } from "@/feed/feed.api";
 import { getApiClient } from "@/auth/api-client";
 

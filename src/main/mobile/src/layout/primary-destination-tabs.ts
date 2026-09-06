@@ -1,7 +1,18 @@
-import {
-  PrimaryDestinations,
-  type PrimaryDestination,
-} from "@chat/shared-types";
+/**
+ * Canonical primary product destinations (Glossary Preferred Terms).
+ * Expo Router tab file names for each destination stay platform-specific.
+ */
+export const PrimaryDestinations = {
+  Feed: "feed",
+  Chat: "chat",
+  Reels: "reels",
+  Explore: "explore",
+  User: "user",
+  Search: "search",
+} as const;
+
+export type PrimaryDestination =
+  (typeof PrimaryDestinations)[keyof typeof PrimaryDestinations];
 
 /**
  * Expo Router tab file names for each Primary Destination (platform-specific).

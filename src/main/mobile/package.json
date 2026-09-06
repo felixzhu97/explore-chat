@@ -27,7 +27,6 @@
     "@types/lodash": "^4.17.16",
     "@chat/analytics": "workspace:*",
     "@chat/im": "workspace:*",
-    "@chat/shared-types": "workspace:*",
     "axios": "^1.8.4",
     "expo": "55.0.0",
     "expo-blur": "~55.0.0",
