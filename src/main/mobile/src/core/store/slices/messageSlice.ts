@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { Message } from "../domain/message";
+import type { Message } from "@/core/im/message";
 
+/** Projection cache only — delivery / dedupe rules live in chat/domain. */
 interface State {
   messages: Record<string, Message[]>;
 }

@@ -7,7 +7,7 @@ React Native + Expo（SDK 55+）客户端，与 Spring Boot API (`:9001`) 对接
 ## 技术栈
 
 - **路由**：expo-router（`(tabs)` + 独立 Stack 屏）
-- **状态**：Redux Toolkit、`feedApi`（RTK Query）、`@chat/im` 聊天与 RTC
+- **状态**：Redux Toolkit、`feedApi`（RTK Query）、本地 `chat` / `core/rtc`（对齐 `im-contract`）
 - **样式**：Emotion（`@emotion/native`）、主题（浅/深/系统，AsyncStorage）
 - **国际化**：i18next（`src/shared/i18n/locales/en.ts`、`zh.ts`）
 - **数据访问**：业务域文件夹（与 web 对齐）— `auth/`、`feed/`、`chat/` 等下的 `*.api.ts` / `*.model.ts`；`core/composition-root.ts` 工厂；GraphQL feed/reels 与 REST explore/search；与 RTK Query（`feed/feedApi.ts`）并存

@@ -2,7 +2,7 @@ import { useCall } from "../use-call";
 
 const mockUseRtcCall = jest.fn();
 
-jest.mock("@chat/im", () => ({
+jest.mock("@/core/rtc", () => ({
   useCall: (...args: unknown[]) => mockUseRtcCall(...args),
 }));
 

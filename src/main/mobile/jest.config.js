@@ -16,7 +16,6 @@ module.exports = {
     "^@/calls/(.*)$": "<rootDir>/src/calls/$1",
     "^@/secondary/(.*)$": "<rootDir>/src/secondary/$1",
     "^@/(.*)$": "<rootDir>/src/$1",
-    "^@chat/im$": "<rootDir>/src/__mocks__/@chat/im.ts",
   },
   transformIgnorePatterns: [
     'node_modules/(?!(jest-)?react-native|@react-native|@react-native-community|@react-navigation|expo|expo-modules-core|expo-.*|@expo|@expo/vector-icons|@unimodules|unimodules|react-navigation|@react-native-async-storage|@react-native-picker|lodash)/',

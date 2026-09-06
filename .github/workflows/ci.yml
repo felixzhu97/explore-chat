@@ -34,5 +34,5 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Spectral (AIP OpenAPI fragment)
+      - name: Spectral (IM OpenAPI contract)
         run: pnpm lint:openapi

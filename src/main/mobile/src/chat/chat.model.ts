@@ -1,4 +1,4 @@
-import type { Chat as DomainChat } from "@chat/im";
+import type { Chat as DomainChat } from "@/core/im/chat";
 import { toOptionalDate } from "@/shared/value-coercion";
 
 export enum ChatType {
@@ -88,6 +88,27 @@ export class ChatEntity implements Chat {
       updatedAt: updates.updatedAt ?? this.updatedAt,
       settings: updates.settings ?? this.settings,
     });
+  }
+
+  updateLastMessage(preview: {
+    messageId: string;
+    content: string;
+    at: Date;
+    senderId?: string;
+  }): void {
+    this.lastMessageId = preview.messageId;
+    this.lastMessageContent = preview.content;
+    this.lastMessageTime = preview.at;
+    if (preview.senderId != null) this.lastMessageSender = preview.senderId;
+    this.updatedAt = preview.at;
+  }
+
+  incrementUnreadCount(): void {
+    this.unreadCount += 1;
+  }
+
+  resetUnreadCount(): void {
+    this.unreadCount = 0;
   }
 
   toMap(): Record<string, unknown> {

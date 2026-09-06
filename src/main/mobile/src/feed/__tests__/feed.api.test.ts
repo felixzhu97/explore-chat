@@ -33,9 +33,7 @@ describe("FeedApi", () => {
 
   describe("getFeed", () => {
     it("returns empty posts when no data", async () => {
-      mockHttpClient.post.mockResolvedValue({
-        data: { data: { feed: null } },
-      });
+      mockHttpClient.get.mockResolvedValue({ data: {} });
 
       const result = await adapter.getFeed(10);
 
@@ -43,51 +41,46 @@ describe("FeedApi", () => {
       expect(result.nextPageState).toBeUndefined();
     });
 
-    it("returns posts from GraphQL response", async () => {
-      mockHttpClient.post.mockResolvedValue({
+    it("returns posts from REST response", async () => {
+      mockHttpClient.get.mockResolvedValue({
         data: {
-          data: {
-            feed: {
-              pageState: "cursor123",
-              entries: [
-                {
-                  postId: "post-1",
-                  post: {
-                    postId: "post-1",
-                    userId: "u1",
-                    createdAt: "2024-01-01",
-                  },
-                },
-              ],
+          next_page_token: "cursor123",
+          entries: [
+            {
+              postId: "post-1",
+              post: {
+                postId: "post-1",
+                userId: "u1",
+                createdAt: "2024-01-01",
+              },
             },
-          },
+          ],
         },
       });
 
       const result = await adapter.getFeed(10);
 
+      expect(mockHttpClient.get).toHaveBeenCalledWith(
+        "/posts/feed?page_size=10",
+      );
       expect(result.posts).toHaveLength(1);
       expect(result.nextPageState).toBe("cursor123");
     });
 
     it("filters out null posts", async () => {
-      mockHttpClient.post.mockResolvedValue({
+      mockHttpClient.get.mockResolvedValue({
         data: {
-          data: {
-            feed: {
-              entries: [
-                {
-                  postId: "post-1",
-                  post: {
-                    postId: "post-1",
-                    userId: "u1",
-                    createdAt: "2024-01-01",
-                  },
-                },
-                { postId: "post-2", post: null },
-              ],
+          entries: [
+            {
+              postId: "post-1",
+              post: {
+                postId: "post-1",
+                userId: "u1",
+                createdAt: "2024-01-01",
+              },
             },
-          },
+            { postId: "post-2", post: null },
+          ],
         },
       });
 
@@ -96,58 +89,66 @@ describe("FeedApi", () => {
       expect(result.posts).toHaveLength(1);
     });
 
-    it("throws on GraphQL errors", async () => {
-      mockHttpClient.post.mockResolvedValue({
-        data: { errors: [{ message: "Query failed" }] },
-      });
+    it("returns empty posts when entries missing", async () => {
+      mockHttpClient.get.mockResolvedValue({ data: { entries: undefined } });
 
-      await expect(adapter.getFeed(10)).rejects.toThrow("Query failed");
+      const result = await adapter.getFeed(10);
+
+      expect(result.posts).toEqual([]);
+      expect(result.nextPageState).toBeUndefined();
     });
 
     it("handles empty entries array", async () => {
-      mockHttpClient.post.mockResolvedValue({
-        data: { data: { feed: { entries: [] } } },
+      mockHttpClient.get.mockResolvedValue({
+        data: { entries: [] },
       });
 
       const result = await adapter.getFeed(10);
 
       expect(result.posts).toEqual([]);
     });
+
+    it("passes page_token when pageState provided", async () => {
+      mockHttpClient.get.mockResolvedValue({ data: { entries: [] } });
+
+      await adapter.getFeed(10, "token-abc");
+
+      expect(mockHttpClient.get).toHaveBeenCalledWith(
+        "/posts/feed?page_size=10&page_token=token-abc",
+      );
+    });
   });
 
   describe("getReels", () => {
-    it("returns reels from GraphQL response", async () => {
-      mockHttpClient.post.mockResolvedValue({
+    it("returns reels from REST response", async () => {
+      mockHttpClient.get.mockResolvedValue({
         data: {
-          data: {
-            reels: {
-              pageState: "reelCursor",
-              entries: [
-                {
-                  postId: "reel-1",
-                  post: {
-                    postId: "reel-1",
-                    userId: "u1",
-                    type: "VIDEO",
-                    createdAt: "2024-01-01",
-                  },
-                },
-              ],
+          next_page_token: "reelCursor",
+          entries: [
+            {
+              postId: "reel-1",
+              post: {
+                postId: "reel-1",
+                userId: "u1",
+                type: "VIDEO",
+                createdAt: "2024-01-01",
+              },
             },
-          },
+          ],
         },
       });
 
       const result = await adapter.getReels(10);
 
+      expect(mockHttpClient.get).toHaveBeenCalledWith(
+        "/posts/reels?page_size=10",
+      );
       expect(result.posts).toHaveLength(1);
       expect(result.nextPageState).toBe("reelCursor");
     });
 
     it("returns empty when no reels", async () => {
-      mockHttpClient.post.mockResolvedValue({
-        data: { data: { reels: null } },
-      });
+      mockHttpClient.get.mockResolvedValue({ data: {} });
 
       const result = await adapter.getReels(10);
 

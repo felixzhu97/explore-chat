@@ -50,6 +50,7 @@ export const connectSocket = createAsyncThunk(
     const socket = io(SOCKET_IO_URL, {
       transports: ["websocket", "polling"],
       auth: { token },
+      query: { token },
     });
     currentSocket = socket;
     socket.on("connect", () => {

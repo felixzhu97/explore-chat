@@ -37,11 +37,13 @@ export {
   updateChat,
   deleteChat,
   setSelectedChat,
+} from "@/core/store/slices/chatSlice";
+export {
   addMessage,
   updateMessage,
   deleteMessage,
   setMessages,
-} from "@chat/im";
+} from "@/core/store/slices/messageSlice";
 export { setThemeMode } from "@/core/store/slices/themeSlice";
 
 export { feedApi } from "@/feed/feedApi";
