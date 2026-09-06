@@ -1,4 +1,4 @@
-import type { RTCCallState } from "../domain/types";
+import type { RTCCallState } from "../domain/call-manager";
 
 export const ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun.l.google.com:19302" },

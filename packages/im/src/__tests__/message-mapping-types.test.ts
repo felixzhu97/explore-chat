@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type {
   ApiMessageLike,
   SocketMessagePayload,
-} from "../application/message-mapping.types";
+} from "../application/mappers";
 import {
   mapApiMessageToMessage,
   mapSocketPayloadToMessage,

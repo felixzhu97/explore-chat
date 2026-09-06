@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import type { WebSocketMessage, ChatState } from "../domain/types";
-import type { IWebSocketAdapter } from "../domain/websocket.adapter";
+import type { WebSocketMessage, IWebSocketAdapter } from "../domain/websocket.adapter";
 import type { ChatListItem, IChatsService } from "../domain/chats.service";
 
 describe("Domain Types", () => {
@@ -50,44 +49,6 @@ describe("Domain Types", () => {
       expect(message.from).toBeUndefined();
       expect(message.to).toBeUndefined();
       expect(message.timestamp).toBeUndefined();
-    });
-  });
-
-  describe("ChatState", () => {
-    it("should have correct initial structure", () => {
-      const state: ChatState = {
-        messages: [],
-        isTyping: false,
-        typingUsers: [],
-        isConnected: false,
-      };
-
-      expect(state.messages).toEqual([]);
-      expect(state.isTyping).toBe(false);
-      expect(state.typingUsers).toEqual([]);
-      expect(state.isConnected).toBe(false);
-    });
-
-    it("should allow messages to be populated", () => {
-      const mockMessage = {
-        id: "1",
-        senderId: "user1",
-        senderName: "User 1",
-        content: "Hello",
-        timestamp: new Date().toISOString(),
-        type: "text" as const,
-        status: "sent" as const,
-      };
-
-      const state: ChatState = {
-        messages: [mockMessage],
-        isTyping: false,
-        typingUsers: [],
-        isConnected: true,
-      };
-
-      expect(state.messages).toHaveLength(1);
-      expect(state.messages[0].content).toBe("Hello");
     });
   });
 });

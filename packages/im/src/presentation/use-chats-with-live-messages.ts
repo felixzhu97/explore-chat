@@ -8,7 +8,7 @@ import type { IChatsService, ChatListItem } from "../domain/chats.service";
 import type {
   ApiMessageLike,
   SocketMessagePayload,
-} from "../application/message-mapping.types";
+} from "../application/mappers";
 import {
   mapApiMessageToMessage,
   mapSocketPayloadToMessage,

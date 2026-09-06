@@ -1,4 +1,4 @@
-export type { ApiMessageLike, SocketMessagePayload } from "./message-mapping.types";
+export type { ApiMessageLike, SocketMessagePayload } from "./mappers";
 export {
   mapApiMessageToMessage,
   mapSocketPayloadToMessage,

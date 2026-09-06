@@ -36,7 +36,8 @@ List example:
 }
 ```
 
-Shared types: `RpcStatus` / `ListQuery` / `ListResponse` in `@chat/shared-types`.
+Shared types: `RpcStatus` in `src/main/web/src/auth/api-client.ts`
+and `src/main/ios/Chat/Core/Network/RpcStatus.swift`.
 
 ## Key path remaps
 

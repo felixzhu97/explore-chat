@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { CallManagerStub, getCallManagerStub } from "../rtc/infrastructure/call-manager-stub";
-import type { RTCCallState } from "../rtc/domain/types";
+import type { RTCCallState } from "../rtc/domain/call-manager";
 
 describe("RTCCallState", () => {
   describe("when state has all fields", () => {

@@ -9,7 +9,7 @@ import { MESSAGE_LIMIT } from "../application/constants";
 import type {
   ApiMessageLike,
   SocketMessagePayload,
-} from "../application/message-mapping.types";
+} from "../application/mappers";
 
 describe("Mappers", () => {
   describe("MESSAGE_LIMIT", () => {

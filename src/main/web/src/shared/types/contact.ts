@@ -12,6 +12,8 @@ export interface GroupMember {
   lastSeen?: string;
 }
 
+export type ContactGroupMember = GroupMember;
+
 export interface Contact {
   id: string;
   name: string;

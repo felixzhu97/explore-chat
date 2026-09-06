@@ -1,11 +1,14 @@
-import type { AuthTokens } from "@chat/shared-types";
 import type { User } from "./user.model";
 import type { ApiClient } from "@/auth/api-client";
 import { getAppComposition } from "@/layout/composition-root";
 import { getStorage, type AppStorage } from "@/auth/storage";
 import { mapUser, mergeUserProfile } from "./user.model";
 
-export type { AuthTokens };
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken?: string;
+  expiresIn: number;
+}
 
 export interface AuthState {
   user: User | null;
