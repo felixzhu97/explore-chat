@@ -7,8 +7,8 @@ import {
   type RTCMediaAdapter,
   type RTCPeerHandle,
   type RTCApiAdapter,
-  type WebSocketMessage,
-} from "@chat/im";
+} from "@/calls/rtc";
+import type { WebSocketMessage } from "@/shared/types/websocket.adapter";
 import { getWebSocketManager } from "@/chat/websocket";
 import { API_CONFIG } from "@/auth/api-client";
 

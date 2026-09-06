@@ -1,9 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ApiClient } from "@/auth/api-client";
-import type { ApiClient } from "@/auth/api-client";
+
+function mockJsonResponse(
+  body: unknown,
+  init: { ok?: boolean; status?: number } = {},
+) {
+  const { ok = true, status = ok ? 200 : 500 } = init;
+  return {
+    ok,
+    status,
+    text: () =>
+      Promise.resolve(body === undefined ? "" : JSON.stringify(body)),
+  };
+}
 
 describe("ApiClient", () => {
-  let adapter: ApiClient;
   let mockFetch: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
@@ -59,11 +70,8 @@ describe("ApiClient", () => {
 
   describe("get", () => {
     it("should make GET request successfully", async () => {
-      const mockResponse = { data: { id: "1" }, success: true };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      });
+      const mockResponse = { id: "1" };
+      mockFetch.mockResolvedValueOnce(mockJsonResponse(mockResponse));
 
       const adapter = new ApiClient("http://test.com");
       const result = await adapter.get("/test");
@@ -76,10 +84,7 @@ describe("ApiClient", () => {
     });
 
     it("should include Authorization header when token is set", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ data: {} }),
-      });
+      mockFetch.mockResolvedValueOnce(mockJsonResponse({}));
 
       const adapter = new ApiClient("http://test.com");
       adapter.setToken("Bearer-token");
@@ -98,11 +103,9 @@ describe("ApiClient", () => {
     });
 
     it("should throw error on HTTP error response", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-        json: () => Promise.resolve({ message: "Not found" }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        mockJsonResponse({ message: "Not found" }, { ok: false, status: 404 }),
+      );
 
       const adapter = new ApiClient("http://test.com");
 
@@ -113,7 +116,7 @@ describe("ApiClient", () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 500,
-        json: () => Promise.resolve({}),
+        text: () => Promise.resolve(""),
       });
 
       const adapter = new ApiClient("http://test.com");
@@ -126,11 +129,8 @@ describe("ApiClient", () => {
 
   describe("post", () => {
     it("should make POST request with data", async () => {
-      const mockResponse = { data: { id: "1" }, success: true };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      });
+      const mockResponse = { id: "1" };
+      mockFetch.mockResolvedValueOnce(mockJsonResponse(mockResponse));
 
       const adapter = new ApiClient("http://test.com");
       const postData = { name: "test" };
@@ -148,10 +148,7 @@ describe("ApiClient", () => {
     });
 
     it("should make POST request without data", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ success: true }),
-      });
+      mockFetch.mockResolvedValueOnce(mockJsonResponse({}));
 
       const adapter = new ApiClient("http://test.com");
       await adapter.post("/action");
@@ -168,10 +165,7 @@ describe("ApiClient", () => {
 
   describe("put", () => {
     it("should make PUT request with data", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ success: true }),
-      });
+      mockFetch.mockResolvedValueOnce(mockJsonResponse({}));
 
       const adapter = new ApiClient("http://test.com");
       const putData = { name: "updated" };
@@ -190,10 +184,7 @@ describe("ApiClient", () => {
 
   describe("patch", () => {
     it("should make PATCH request with data", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ success: true }),
-      });
+      mockFetch.mockResolvedValueOnce(mockJsonResponse({}));
 
       const adapter = new ApiClient("http://test.com");
       const patchData = { status: "active" };
@@ -212,10 +203,7 @@ describe("ApiClient", () => {
 
   describe("delete", () => {
     it("should make DELETE request", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ success: true }),
-      });
+      mockFetch.mockResolvedValueOnce(mockJsonResponse({}));
 
       const adapter = new ApiClient("http://test.com");
       await adapter.delete("/delete/1");
@@ -267,13 +255,9 @@ describe("ApiClient", () => {
   describe("upload", () => {
     it("should upload file with FormData", async () => {
       const mockResponse = {
-        data: { url: "http://example.com/file.jpg" },
-        success: true,
+        url: "http://example.com/file.jpg",
       };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      });
+      mockFetch.mockResolvedValueOnce(mockJsonResponse(mockResponse));
 
       const adapter = new ApiClient("http://test.com");
       const mockFile = new File(["content"], "test.jpg", {
@@ -295,10 +279,7 @@ describe("ApiClient", () => {
     });
 
     it("should include Authorization header for upload", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ success: true }),
-      });
+      mockFetch.mockResolvedValueOnce(mockJsonResponse({}));
 
       const adapter = new ApiClient("http://test.com");
       adapter.setToken("upload-token");
@@ -321,11 +302,12 @@ describe("ApiClient", () => {
     });
 
     it("should throw error on upload failure", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 413,
-        json: () => Promise.resolve({ message: "File too large" }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        mockJsonResponse(
+          { message: "File too large" },
+          { ok: false, status: 413 },
+        ),
+      );
 
       const adapter = new ApiClient("http://test.com");
       const mockFile = new File(["content"], "large.jpg", {

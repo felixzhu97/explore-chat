@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useChatsWithLiveMessages } from "@/chat/hooks/use-chats-with-live-messages";
 
-vi.mock("@chat/im", () => ({
+vi.mock("@/chat/hooks/use-chats-with-live-messages.impl", () => ({
   useChatsWithLiveMessages: vi.fn(() => ({
     chats: [],
     loading: false,

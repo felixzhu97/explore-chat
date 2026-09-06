@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { UserApi } from "@/profile/users.service";
 import type { ApiClient } from "@/auth/api-client";
-import type { ApiResponse } from "@/auth/api-client";
 
 describe("UserApi", () => {
   let adapter: UserApi;
@@ -24,7 +23,7 @@ describe("UserApi", () => {
 
   describe("getUsers", () => {
     it("should call get with users endpoint without params", async () => {
-      const mockResponse: ApiResponse = { success: true, data: [] };
+      const mockResponse = { users: [] };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -34,19 +33,19 @@ describe("UserApi", () => {
       expect(mockApiClient.get).toHaveBeenCalledWith("/users");
     });
 
-    it("should include pagination params when provided", async () => {
-      const mockResponse: ApiResponse = { success: true, data: [] };
+    it("should include page_size when provided", async () => {
+      const mockResponse = { users: [] };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
 
-      await adapter.getUsers({ page: 2, limit: 20 });
+      await adapter.getUsers({ page_size: 20 });
 
-      expect(mockApiClient.get).toHaveBeenCalledWith("/users?page=2&limit=20");
+      expect(mockApiClient.get).toHaveBeenCalledWith("/users?page_size=20");
     });
 
     it("should include search param when provided", async () => {
-      const mockResponse: ApiResponse = { success: true, data: [] };
+      const mockResponse = { users: [] };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -57,25 +56,22 @@ describe("UserApi", () => {
     });
 
     it("should include all params when provided", async () => {
-      const mockResponse: ApiResponse = { success: true, data: [] };
+      const mockResponse = { users: [] };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
 
-      await adapter.getUsers({ page: 1, limit: 10, search: "test" });
+      await adapter.getUsers({ page_size: 10, search: "test" });
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        "/users?page=1&limit=10&search=test",
+        "/users?page_size=10&search=test",
       );
     });
   });
 
   describe("getUserById", () => {
     it("should call get with user-specific endpoint", async () => {
-      const mockResponse: ApiResponse = {
-        success: true,
-        data: { id: "user-123" },
-      };
+      const mockResponse = { id: "user-123" };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -89,7 +85,7 @@ describe("UserApi", () => {
 
   describe("searchUsers", () => {
     it("should call get with encoded search query", async () => {
-      const mockResponse: ApiResponse = { success: true, data: [] };
+      const mockResponse = { users: [] };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -97,12 +93,12 @@ describe("UserApi", () => {
       await adapter.searchUsers("john doe");
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        "/users/search?q=john%20doe",
+        "/search?q=john%20doe&type=users&page_size=20",
       );
     });
 
     it("should encode special characters in search query", async () => {
-      const mockResponse: ApiResponse = { success: true, data: [] };
+      const mockResponse = { users: [] };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
@@ -110,19 +106,21 @@ describe("UserApi", () => {
       await adapter.searchUsers("user@example.com");
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        "/users/search?q=user%40example.com",
+        "/search?q=user%40example.com&type=users&page_size=20",
       );
     });
 
     it("should handle empty search query", async () => {
-      const mockResponse: ApiResponse = { success: true, data: [] };
+      const mockResponse = { users: [] };
       (mockApiClient.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockResponse,
       );
 
       await adapter.searchUsers("");
 
-      expect(mockApiClient.get).toHaveBeenCalledWith("/users/search?q=");
+      expect(mockApiClient.get).toHaveBeenCalledWith(
+        "/search?q=&type=users&page_size=20",
+      );
     });
   });
 });

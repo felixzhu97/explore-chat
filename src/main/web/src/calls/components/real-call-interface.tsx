@@ -13,7 +13,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
 import { styled } from "@/src/shared/utils/emotion";
-import type { RTCCallState } from "@chat/im";
+import type { RTCCallState } from "@/calls/rtc";
 
 interface RealCallInterfaceProps {
   callState: RTCCallState;

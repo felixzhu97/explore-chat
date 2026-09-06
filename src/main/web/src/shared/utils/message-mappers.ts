@@ -1,6 +1,6 @@
-export type { ApiMessageLike, SocketMessagePayload } from "@chat/im";
+export type { ApiMessageLike, SocketMessagePayload } from "./message-mappers.impl";
 export {
   mapApiMessageToMessage,
   mapSocketPayloadToMessage,
   mergeAndSortMessages,
-} from "@chat/im";
+} from "./message-mappers.impl";

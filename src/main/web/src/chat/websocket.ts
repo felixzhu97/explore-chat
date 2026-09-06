@@ -1,6 +1,9 @@
 "use client";
 
-import type { IWebSocketAdapter, WebSocketMessage } from "@chat/im";
+import type {
+  IWebSocketAdapter,
+  WebSocketMessage,
+} from "@/shared/types/websocket.adapter";
 import { io, Socket } from "socket.io-client";
 
 const SOCKET_DEBUG = process.env.NEXT_PUBLIC_SOCKET_DEBUG === "true";
@@ -91,6 +94,7 @@ export class WebSocketAdapter implements IWebSocketAdapter {
       transports: ["websocket", "polling"],
       withCredentials: true,
       auth: token ? { token } : undefined,
+      query: token ? { token } : undefined,
     });
 
     this.ioSocket.on("connect", () => {
