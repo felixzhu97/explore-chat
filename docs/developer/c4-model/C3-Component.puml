@@ -54,9 +54,9 @@ System_Boundary(chat, "Chat") {
 }
 
 Container_Ext(admin_app, "管理端", "Next.js", ":4001")
-Container_Ext(media_gen, "Media Gen", "Python", ":3456 可选")
-Container_Ext(vision, "Vision", "Python", ":8001 可选")
-Container_Ext(recommendation, "Recommendation", "Python", ":8000 可选")
+Container_Ext(media_gen, "Media Gen", "explore-ml", ":3456 可选")
+Container_Ext(vision, "Vision", "explore-ml", ":8001 可选")
+Container_Ext(recommendation, "Recommendation", "explore-ml", ":8000 可选")
 Container_Ext(ollama, "Ollama", "LLM", ":11434 可选")
 
 Rel(user_web, pages, "使用", "HTTPS")

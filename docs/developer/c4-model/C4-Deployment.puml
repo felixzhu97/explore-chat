@@ -32,10 +32,10 @@ Deployment_Node(dev_machine, "开发机", "macOS / Linux") {
   Deployment_Node(data, "数据", "文件") {
     ContainerDb(sqlite, "SQLite", "Liquibase/JPA", "data/explore-chat (H2)")
     Container(uploads, "uploads/", "本地目录", "媒体文件")
-    Container(qdrant_dir, "Qdrant path（可选）", "本地目录", "RAG src/main/ml/rag/data/qdrant")
+    Container(qdrant_dir, "Qdrant path（可选）", "本地目录", "explore-ml data/ 或 rag 本地 path")
   }
 
-  Deployment_Node(py_svcs, "Python 旁路（可选）", "venv") {
+  Deployment_Node(py_svcs, "explore-ml python_ml（可选）", "venv") {
     Container(rec, "Recommendation", "FastAPI", ":8000")
     Container(vision, "Vision", "FastAPI", ":8001")
     Container(rag, "RAG", "FastAPI", ":8002")
