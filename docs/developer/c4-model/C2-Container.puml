@@ -56,8 +56,9 @@ Rel(rag_svc, file_storage, "向量目录", "本地 path")
 
 note right of api_server
   根目录 Gradle + Spring Boot。
-  NestJS 已移除。
   Socket.IO = netty-socketio :9002。
+  IM wire SSoT: src/main/im-contract/openapi.yaml
+  （协议制品；非运行时容器；无共享 npm）。
 end note
 
 SHOW_LEGEND()

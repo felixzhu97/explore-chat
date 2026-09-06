@@ -24,13 +24,16 @@ Deployment_Node(dev_machine, "开发机", "macOS / Linux") {
     Container(web, "Web / Admin", "Next.js", "http://localhost:4000（Admin :4001）")
   }
 
-  Deployment_Node(node_procs, "Node 进程", "pnpm / turbo") {
-    Container(api, "API 服务", "Spring Boot", "HOST=0.0.0.0 PORT=9001")
+  Deployment_Node(jvm, "JVM 进程", "Gradle / Spring Boot") {
+    Container(api, "API 服务", "Spring Boot", "HOST=0.0.0.0 PORT=9001；Socket.IO :9002")
+  }
+
+  Deployment_Node(node_procs, "Node 进程", "pnpm") {
     Container(metro, "Expo Metro（可选）", "Expo Go", ":8081")
   }
 
   Deployment_Node(data, "数据", "文件") {
-    ContainerDb(sqlite, "SQLite", "Liquibase/JPA", "data/explore-chat (H2)")
+    ContainerDb(h2db, "H2 / Postgres", "JPA + Liquibase", "本地 H2 文件或 DATABASE_URL")
     Container(uploads, "uploads/", "本地目录", "媒体文件")
     Container(qdrant_dir, "Qdrant path（可选）", "本地目录", "explore-ml data/ 或 rag 本地 path")
   }
@@ -43,9 +46,9 @@ Deployment_Node(dev_machine, "开发机", "macOS / Linux") {
   }
 }
 
-Rel(web, api, "REST / Socket.IO", "localhost:9001")
-Rel(metro, api, "REST / WS", "localhost:9001")
-Rel(api, sqlite, "DATABASE_URL", "file:./dev.db")
+Rel(web, api, "REST / Socket.IO", "localhost:9001 / :9002")
+Rel(metro, api, "REST / WS", "localhost:9001 / :9002")
+Rel(api, h2db, "JPA", "H2 file 或 Postgres")
 Rel(api, uploads, "UPLOAD_DIR")
 Rel(api, rec, "HTTP", "可选")
 Rel(api, vision, "HTTP", "可选")

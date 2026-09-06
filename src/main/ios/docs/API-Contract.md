@@ -3,6 +3,15 @@
 Frozen against the Spring Boot API (`:9001`) and Socket.IO gateway (`:9002`).
 Swift clients must not invent alternate paths or event names.
 
+## IM wire contract (SSoT)
+
+Chat / Message / User shapes, `clientMsgId`, Message Delivery Status, and
+IM Socket.IO event names (`ImWsEvent`) are defined in:
+
+**[src/main/im-contract/openapi.yaml](../../im-contract/openapi.yaml)**
+
+Hand-write Swift models against that file. There is no codegen step.
+
 ## Bases
 
 | Channel | Default | Notes |
@@ -13,11 +22,8 @@ Swift clients must not invent alternate paths or event names.
 
 ## Errors (AIP-193 RpcStatus)
 
-```json
-{ "code": "UNAUTHENTICATED", "message": "...", "details": [] }
-```
-
-`code` is the `RpcCode` enum name (string), not a numeric gRPC status.
+See `RpcStatus` in the IM OpenAPI. `code` is the enum name (string), not a
+numeric gRPC status.
 
 ## REST (mobile surface)
 
@@ -68,6 +74,8 @@ Swift clients must not invent alternate paths or event names.
 
 ### Chats / Messages / Calls / Groups
 
+IM list/create shapes: see OpenAPI paths `/chats`, `/chats/{chat}/messages`.
+
 | Method | Path |
 | --- | --- |
 | GET/POST | `/chats` ; GET/PATCH/DELETE `/chats/{chat}` ; `:archive` / `:mute` |
@@ -85,16 +93,11 @@ Admin / Ads endpoints exist on the API but are out of scope for the consumer iOS
 
 ## Socket.IO events
 
-### Client → server
+IM event names: OpenAPI schema `ImWsEvent` (and generated Swift constants).
 
-`chat:join`, `chat:leave`, `message:send`, `message:typing`, `message:read`, `message:reaction`,
-`call:incoming`, `call:answer`, `call:reject`, `call:end`,
-`call:ice-candidate`, `call:offer`, `call:webrtc-answer`,
-`status:create`, `user:status`
+Additional (calls / status / notifications) — still used by the app, not all
+in the IM fragment:
 
-### Server → client
-
-`message:received`, `message:typing`, `message:read`, `message:reaction`,
 `call:incoming`, `call:answer`, `call:reject`, `call:end`,
 `call:ice-candidate`, `call:offer`, `call:webrtc-answer`,
 `status:create`, `user:status`, `notification:new`
@@ -104,7 +107,3 @@ Rooms: `user:{userId}`, `chat:{chatId}`.
 ## Pagination
 
 List endpoints accept `page_size` and opaque `page_token`; responses may include `next_page_token`.
-
-## User shape
-
-`id`, `username`, `email`, `phone?`, `avatar?`, `status?`, `isOnline?`

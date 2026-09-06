@@ -14,13 +14,13 @@ Chat 的架构视图。源文件为 `.puml`；PNG 可选。术语见 [Glossary](
 | ---------------------------------- | ---------- | --------------------------------------------------- |
 | `C1-Context.puml`                  | C1         | 系统上下文                                          |
 | `C2-Container.puml`                | C2         | 容器（Web / Admin / Mobile / Spring :9001 / 旁路） |
-| `C3-Component.puml`                | C3         | 组件（Web + iOS + Spring 合一）                 |
+| `C3-Component.puml`                | C3         | 组件（Web + Expo + iOS + Spring）               |
 | `C4-Code-Domain-Model.puml`        | Code       | 领域模型（对齐当前代码）                            |
-| `C4-Code-Domain-Model-Plan.puml`   | Code       | 领域模型规划差分（绿增 / 红删）                     |
+| `C4-Code-Domain-Model-Plan.puml`   | Code       | 规划差分（少 AR、简化命名；绿增/红删）              |
 | `C4-Deployment.puml`               | Deployment | 本地开发部署（含生产简述）                          |
 | `C4-Dynamic-Auth-Login.puml`       | Dynamic    | 登录 → JWT                                          |
-| `C4-Dynamic-Post-Create-Feed.puml` | Dynamic    | 发帖 → SQLite → fan-out → 读帖                      |
-| `C4-Dynamic-Search-FTS.puml`       | Dynamic    | 搜索（FTS5 / LIKE）                                 |
+| `C4-Dynamic-Post-Create-Feed.puml` | Dynamic    | 发帖 → JPA → fan-out → 读帖                         |
+| `C4-Dynamic-Search-FTS.puml`       | Dynamic    | 搜索（JPA LIKE；文件名历史遗留）                    |
 | `style.puml`                       | Shared     | 结构图规范副本（内联用）                            |
 
 ---
@@ -47,26 +47,23 @@ Chat 的架构视图。源文件为 `.puml`；PNG 可选。术语见 [Glossary](
 
 ![C4-Code-Domain-Model](png/C4-Code-Domain-Model.png)
 
-对齐 feature 包：`controller` / `service` / `domain` / `infra`（Nest module 在 feature 根），以及 `base/domain`、`base/infra` 与 Prisma SQLite（含 social 表）。
+对齐 Java feature 包：`controller` / `service` / `domain` / `infra` / `mapper`，以及
+`base/domain`（`AbstractImmutable` → `AbstractEntity` + `@Version`）。持久化：JPA + Liquibase（H2 / Postgres）。
 
-Message 写路径：`Chat.ensureParticipant` → `Message.assertSendableBy` → `MessageRepository.save`；删消息为 soft delete（`isDeleted`）。`PrismaMessageRepository` / `PrismaChatRepository` 继承 `AbstractPrismaRepository`；User 侧为 `PrismaUserRepository`。
+服务端：`Chat.createPrivate|createGroup`、`Message.send|edit|softDelete`；参与者校验在
+`ChatsService`；infra 为 `SpringData*Repository`。客户端 Local Chat Projection（Web / Expo，源码同构）：
+`ChatCatalog` / `ChatThread` / `Message` + VOs；wire SSoT：`src/main/im-contract/openapi.yaml`（无共享 npm）。
 
 ### Plan
 
 ![C4-Code-Domain-Model-Plan](png/C4-Code-Domain-Model-Plan.png)
 
-相对 as-built 的规划差分：绿 = 待实现新增，红 = 待实现删除。
+相对 as-built 的**规划差分**（绿增 / 红删）：少聚合根、简化命名与关系。
 
-DDD 内核（对齐 Nest + Prisma cuid / `createdAt` / `updatedAt`）：
-
-- `AbstractImmutable` → `AbstractEntity`（含计划中的 `version`）
-- `AbstractAggregateRoot`：User / Chat / Message / Group / Post
-- `AbstractParticipant`：ChatParticipant / GroupParticipant 共用成员字段
-- `AbstractEmbeddable`：无独立聚合身份的值对象
-
-Chat / Message 行为收敛：`ensureParticipant`、`assertSendableBy`、`MessageRepository`、Message Soft Delete（`delete()` → `isDeleted`）。
-
-infra：`AbstractPrismaRepository`（持有 PrismaClient）；`PrismaMessageRepository` 继承它并实现 `MessageRepository`。domain 端口保留，仅减实现样板。类框与 stereotype 为黑白灰。
+- 服务端 AR：`User` / `Chat` / `Post`；`Message` 降为 Chat 内 Entity；`Group` 降为 Entity（会话用 `Chat`）
+- 命名对齐 Glossary：`ChatUser→User`、`SocialPost→Post`、`ActivityNotification→Notification`
+- 客户端：仅 `ChatThread` 为 AR；`ChatCatalog` 为 ReadModel；消息实体 `ThreadMessage`
+- 行为收敛：`Chat.ensureParticipant`；可选服务端 `clientMsgId`
 
 ```bash
 cd docs/developer/c4-model && plantuml -tpng -o png C4-Code-Domain-Model-Plan.puml
@@ -78,7 +75,7 @@ cd docs/developer/c4-model && plantuml -tpng -o png C4-Code-Domain-Model-Plan.pu
 
 ![C4-Deployment](png/C4-Deployment.png)
 
-本地：`pnpm dev` → Web `:4000` + API `:9001` + `file:./dev.db`。生产拓扑以图内 note 简述；**不**默认 docker compose。
+本地：`pnpm` 启 Web `:4000` + Spring API `:9001` / Socket `:9002` + H2（或 `DATABASE_URL` Postgres）。生产拓扑以图内 note 简述；**不**默认 docker compose。
 
 ---
 
@@ -90,19 +87,19 @@ cd docs/developer/c4-model && plantuml -tpng -o png C4-Code-Domain-Model-Plan.pu
 
 ![C4-Dynamic-Auth-Login](png/C4-Dynamic-Auth-Login.png)
 
-用户提交凭据 → `POST /api/v1/auth/login` → 校验 SQLite 用户 → 签发 JWT。
+用户提交凭据 → `POST /api/v1/auth/login` → JPA 读 `chat_user` → 签发 JWT。
 
 ### Post Create → Feed
 
 ![C4-Dynamic-Post-Create-Feed](png/C4-Dynamic-Post-Create-Feed.png)
 
-发帖写入 `social_posts` → 进程内 fan-out `feed_entries` → 再 `GET` 同帖（避免空写 404）。
+发帖写入 `social_posts` → 进程内 fan-out `feed_entries` → 再 `GET` 同帖。
 
-### Search FTS
+### Search
 
 ![C4-Dynamic-Search-FTS](png/C4-Dynamic-Search-FTS.png)
 
-`/api/v1/search` 走 SQLite FTS5，失败时 LIKE 回退。
+`/api/v1/search`：`UserRepository` / `SocialPostRepository` / `HashtagRepository`（JPA LIKE / 过滤）；无 FTS5 / Elasticsearch。
 
 ---
 

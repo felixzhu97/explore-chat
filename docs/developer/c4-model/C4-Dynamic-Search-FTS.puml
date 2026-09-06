@@ -3,32 +3,40 @@
 skinparam backgroundColor #FFFFFF
 skinparam shadowing false
 
-title Dynamic — Search users / posts (FTS5)
+title Dynamic — Search users / posts / hashtags
 
 actor "用户" as user
 participant "Web / Mobile" as ui <<ui>>
 participant "SearchController" as searchCtrl <<java>>
-participant "SearchService" as searchSvc <<java>>
-database "SQLite\nFTS + tables" as db <<db>>
+participant "UserRepository" as userRepo <<java>>
+participant "SocialPostRepository" as postRepo <<java>>
+participant "HashtagRepository" as tagRepo <<java>>
+database "H2 / Postgres\nJPA" as db <<db>>
 
 == 搜索用户 ==
 user -> ui : 输入关键词
 ui -> searchCtrl : GET /api/v1/search?type=users&q=
-searchCtrl -> searchSvc : searchUsers
-searchSvc -> db : MATCH users_fts\n或 LIKE users.username
-db --> searchSvc : hits
-searchSvc --> ui : 200 hits
+searchCtrl -> userRepo : findByUsernameContainingIgnoreCase
+userRepo -> db : SELECT chat_user WHERE username LIKE
+db --> searchCtrl : hits
+searchCtrl --> ui : 200 users
 
 == 搜索帖子 ==
 ui -> searchCtrl : GET /api/v1/search?type=posts&q=
-searchCtrl -> searchSvc : searchPosts
-searchSvc -> db : MATCH posts_fts\n或 LIKE social_posts.caption
-db --> ui : 200 hits
+searchCtrl -> postRepo : listFeed + caption filter
+postRepo -> db : SELECT social_posts
+db --> ui : 200 posts
 
-note over searchSvc, db
+== 搜索标签 ==
+ui -> searchCtrl : GET /api/v1/search?type=hashtags&q=
+searchCtrl -> tagRepo : findByTagContainingIgnoreCase
+tagRepo -> db : SELECT hashtags WHERE tag LIKE
+db --> ui : 200 hashtags
+
+note over searchCtrl, db
   Preferred Term: Search Scope
   (posts / users / hashtags)。
-  无 Elasticsearch 依赖。
+  当前为 JPA LIKE / 内存过滤；无 Elasticsearch / FTS5。
 end note
 
 @enduml
