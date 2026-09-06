@@ -3,15 +3,18 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import type { Message } from "@chat/shared-types";
 import { ImWsEvents } from "@chat/shared-types";
-import type { IWebSocketAdapter, IChatsService, ChatListItem } from "../domain";
+import type { IWebSocketAdapter } from "../domain/websocket.adapter";
+import type { IChatsService, ChatListItem } from "../domain/chats.service";
+import type {
+  ApiMessageLike,
+  SocketMessagePayload,
+} from "../application/message-mapping.types";
 import {
-  type ApiMessageLike,
-  type SocketMessagePayload,
   mapApiMessageToMessage,
   mapSocketPayloadToMessage,
   mergeAndSortMessages,
-  MESSAGE_LIMIT,
-} from "../application";
+} from "../application/mappers";
+import { MESSAGE_LIMIT } from "../application/constants";
 
 export interface UseChatsWithLiveMessagesOptions {
   getChatsService: () => IChatsService;

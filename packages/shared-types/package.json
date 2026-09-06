@@ -11,11 +11,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
-    },
-    "./test-utils/domain-values": {
-      "types": "./src/test-utils/domain-values.ts",
-      "import": "./src/test-utils/domain-values.ts",
-      "require": "./src/test-utils/domain-values.ts"
     }
   },
   "scripts": {

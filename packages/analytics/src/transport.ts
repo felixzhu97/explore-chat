@@ -4,14 +4,6 @@ export interface IAnalyticsTransport {
   send(events: AnalyticsEvent[]): void | Promise<void>;
 }
 
-export class ConsoleTransport implements IAnalyticsTransport {
-  send(events: AnalyticsEvent[]): void {
-    events.forEach((e) => {
-      console.log("[analytics]", e.eventName, e.properties ?? {}, e.context ?? {});
-    });
-  }
-}
-
 export interface HttpTransportOptions {
   endpoint: string;
   getToken?: () => string | null;
