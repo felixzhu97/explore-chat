@@ -1,4 +1,4 @@
-import type { Chat as DomainChat } from "@chat/shared-types";
+import type { Chat as DomainChat } from "@chat/im";
 import { toOptionalDate } from "@/shared/value-coercion";
 
 export enum ChatType {

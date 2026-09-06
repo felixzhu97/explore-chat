@@ -1,5 +1,13 @@
-import type { SearchScope } from "@chat/shared-types";
 import type { ApiClient } from "@/auth/api-client";
+
+/** Search Scope values for GET /api/v1/search?type=. */
+export const SearchScopes = {
+  Posts: "posts",
+  Users: "users",
+  Hashtags: "hashtags",
+} as const;
+
+export type SearchScope = (typeof SearchScopes)[keyof typeof SearchScopes];
 
 export interface FeedEntryRes {
   postId: string;

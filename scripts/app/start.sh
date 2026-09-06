@@ -17,7 +17,8 @@ if [[ "$ENV" == "prod" ]]; then
   exec java -jar build/libs/explore-chat-*.jar
 fi
 
-pnpm --filter @chat/shared-types build
+pnpm --filter @chat/im build
+pnpm --filter @chat/analytics build
 
 # Start Java API in background
 ./gradlew bootRun --quiet &

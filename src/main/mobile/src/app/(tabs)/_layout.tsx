@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LiquidGlassBar } from "@/shared/components";
 import { useTheme } from "@/shared/theme";
 import { useTranslation } from "@/shared/i18n";
-import { PrimaryDestinations } from "@chat/shared-types";
+import { PrimaryDestinations } from "@/layout/primary-destination-tabs";
 import { useAuthStore } from "@/core/store/hooks";
 import { styled } from "@/shared/emotion";
 import { MobilePrimaryDestinationTabs } from "@/layout/primary-destination-tabs";

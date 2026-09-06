@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import type { Message } from "@chat/shared-types";
+import type { Message } from "../domain";
 import {
   mapApiMessageToMessage,
   mapSocketPayloadToMessage,

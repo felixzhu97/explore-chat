@@ -1,4 +1,4 @@
-import type { Message } from "@chat/shared-types";
+import type { Message } from "./message";
 
 export interface ChatListItem {
   id: string;

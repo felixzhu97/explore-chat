@@ -8,7 +8,7 @@ import {
 } from "@/core/store/hooks";
 import { mapServerMessagePayload } from "@/chat/message.mapper";
 import { Message } from "@/chat/message.model";
-import { ImWsEvents } from "@chat/shared-types";
+import { ImWsEvents } from "@chat/im";
 
 type OnMessageReceived = (message: Message) => void;
 type OnMessageSent = (message: Message) => void;

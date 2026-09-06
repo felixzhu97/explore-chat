@@ -1,4 +1,4 @@
-import type { User as DomainUser } from "@chat/shared-types";
+import type { User as DomainUser } from "@chat/im";
 import { toOptionalDate, toRequiredDate } from "@/shared/value-coercion";
 
 export interface User extends DomainUser {

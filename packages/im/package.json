@@ -30,7 +30,6 @@
   },
   "dependencies": {
     "@types/lodash": "^4.17.24",
-    "@chat/shared-types": "workspace:*",
     "lodash": "^4.17.23"
   },
   "devDependencies": {

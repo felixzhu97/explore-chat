@@ -88,7 +88,7 @@ src/main/java            Spring Boot API (:9001 HTTP, :9002 Socket.IO)
 src/main/web             Next.js (:4000)
 src/main/admin           Admin (:4001)
 src/main/mobile          Expo / React Native
-packages/                Shared types, IM, analytics (web / Expo)
+packages/                Shared IM and analytics (web / Expo)
 docs/                    Guideline, Glossary, developer, C4
 ```
 

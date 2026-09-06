@@ -3,8 +3,8 @@ import { usePathname } from "next/navigation";
 import {
   PrimaryDestinations,
   type PrimaryDestination,
-} from "@chat/shared-types";
-import { primaryDestinationFromPathname } from "./primary-destination-routes";
+  primaryDestinationFromPathname,
+} from "./primary-destination-routes";
 
 export type { PrimaryDestination };
 

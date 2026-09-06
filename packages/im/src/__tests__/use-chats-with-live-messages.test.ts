@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import type { IWebSocketAdapter } from "../domain/websocket.adapter";
 import type { IChatsService, ChatListItem } from "../domain/chats.service";
-import type { Message } from "@chat/shared-types";
+import type { Message } from "../domain";
 import { MESSAGE_LIMIT } from "../application/constants";
 
 const createMockChatsService = (): IChatsService => ({

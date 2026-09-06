@@ -1,4 +1,4 @@
-import type { Message } from "@chat/shared-types";
+import type { Message } from "../domain/message";
 import sortBy from "lodash/sortBy";
 import uniqBy from "lodash/uniqBy";
 

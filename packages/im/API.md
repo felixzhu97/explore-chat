@@ -307,7 +307,7 @@ interface UseChatsWithLiveMessagesOptions {
 
 ```tsx
 import { useChatsWithLiveMessages } from "@chat/im";
-import type { Message } from "@chat/shared-types";
+import type { Message } from "@chat/im";
 
 function ChatListPage({ contactId, userId }) {
   const { apiChats, messagesForSelected, isConnected, handleSendMessage } =

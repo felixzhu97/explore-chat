@@ -49,7 +49,6 @@
     "@types/lodash": "^4.17.24",
     "@chat/analytics": "workspace:*",
     "@chat/im": "workspace:*",
-    "@chat/shared-types": "workspace:*",
     "amazon-chime-sdk-js": "^3.0.0",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
