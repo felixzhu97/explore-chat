@@ -1,8 +1,21 @@
-import type {
-  VoiceGenTargetLanguage,
-  VoiceTranslateTargetLanguage,
-} from "@chat/shared-types";
 import type { ApiClient } from "@/auth/api-client";
+
+export const VoiceGenTargetLanguages = {
+  Auto: "auto",
+  Zh: "zh",
+  En: "en",
+} as const;
+
+export type VoiceGenTargetLanguage =
+  (typeof VoiceGenTargetLanguages)[keyof typeof VoiceGenTargetLanguages];
+
+export const VoiceTranslateTargetLanguages = {
+  Zh: "zh",
+  En: "en",
+} as const;
+
+export type VoiceTranslateTargetLanguage =
+  (typeof VoiceTranslateTargetLanguages)[keyof typeof VoiceTranslateTargetLanguages];
 
 export interface VoiceGenerateResponse {
   audioUrl: string;
@@ -13,7 +26,6 @@ export interface VoiceTranslateResponse {
   translatedText: string;
 }
 
-/** @deprecated Prefer VoiceGenTargetLanguage from @chat/shared-types */
 export type VoiceTargetLang = VoiceGenTargetLanguage;
 
 export class VoiceApi {

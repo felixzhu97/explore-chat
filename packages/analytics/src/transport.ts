@@ -1,4 +1,4 @@
-import type { AnalyticsEvent } from "./types";
+import type { AnalyticsEvent } from "./client";
 
 export interface IAnalyticsTransport {
   send(events: AnalyticsEvent[]): void | Promise<void>;

@@ -1,10 +1,25 @@
 import type { Message } from "@chat/shared-types";
 import sortBy from "lodash/sortBy";
 import uniqBy from "lodash/uniqBy";
-import type {
-  ApiMessageLike,
-  SocketMessagePayload,
-} from "./message-mapping.types";
+
+export interface ApiMessageLike {
+  id: string;
+  senderId: string;
+  senderName?: string;
+  content: string;
+  timestamp?: string;
+  type?: string;
+  status?: string;
+  createdAt?: string;
+  clientMsgId?: string;
+}
+
+export interface SocketMessagePayload {
+  from?: string;
+  to?: string;
+  data?: { id?: string; text?: string; type?: string; clientMsgId?: string };
+  timestamp?: number;
+}
 
 export function mapApiMessageToMessage(m: ApiMessageLike): Message {
   return {

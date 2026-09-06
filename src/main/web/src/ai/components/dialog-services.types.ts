@@ -1,7 +1,7 @@
 import type {
   VoiceGenTargetLanguage,
   VoiceTranslateTargetLanguage,
-} from "@chat/shared-types";
+} from "@/ai/apis/voice.api";
 
 export interface ITextGenerateService {
   postChatStream(

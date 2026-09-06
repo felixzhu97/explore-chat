@@ -1,5 +1,5 @@
 import type { ICallManager } from "../domain/call-manager";
-import type { RTCCallState } from "../domain/types";
+import type { RTCCallState } from "../domain/call-manager";
 import { INITIAL_CALL_STATE } from "../application/constants";
 
 type Listener = (data: unknown) => void;

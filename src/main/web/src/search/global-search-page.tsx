@@ -11,7 +11,7 @@ import {
   InstagramSpinnerWrap,
   InstagramSpinnerText,
 } from "@/shared/ui/instagram-spinner";
-import { SearchUiScopes, type SearchUiScope } from "@chat/shared-types";
+import { SearchUiScopes, type SearchUiScope } from "@/search/use-global-search";
 import { useGlobalSearch } from "@/search/use-global-search";
 import { useTranslation } from "@/src/shared/i18n";
 import { styled } from "@/src/shared/utils/emotion";

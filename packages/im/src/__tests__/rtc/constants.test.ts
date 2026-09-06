@@ -4,7 +4,7 @@ import {
   INITIAL_CALL_STATE,
   RTC_EVENTS,
 } from "../../rtc/application/constants";
-import type { RTCCallState } from "../../rtc/domain/types";
+import type { RTCCallState } from "../../rtc/domain/call-manager";
 
 describe("RTC Constants", () => {
   describe("ICE_SERVERS", () => {

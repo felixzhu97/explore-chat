@@ -1,5 +1,5 @@
 import type { ICallManager } from "../domain/call-manager";
-import type { RTCCallState } from "../domain/types";
+import type { RTCCallState } from "../domain/call-manager";
 import type { RTCCallConfig, RTCPeerHandle } from "../domain/adapters";
 import { ICE_SERVERS, INITIAL_CALL_STATE } from "../application/constants";
 import { sessionDescToPlain } from "../application/session-desc";

@@ -1,5 +1,25 @@
-export type { ApiResponse, Pagination } from "@chat/shared-types";
-import type { RpcStatus } from "@chat/shared-types";
+/** AIP-193 HTTP error body. */
+export interface RpcStatus {
+  code: string;
+  message: string;
+  details?: Array<{ "@type"?: string; [key: string]: unknown }>;
+}
+
+/** @deprecated Prefer resource bodies and {@link RpcStatus}. */
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+/** @deprecated Prefer AIP-158 page tokens. */
+export interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  hasMore: boolean;
+}
 
 export const API_CONFIG = {
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:9001/api/v1",

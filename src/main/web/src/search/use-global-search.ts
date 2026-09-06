@@ -2,19 +2,24 @@
 
 import { useState, useCallback, useEffect, useMemo } from "react";
 import debounce from "lodash/debounce";
-import {
-  SearchScopes,
-  SearchUiScopes,
-  type SearchUiScope,
-} from "@chat/shared-types";
+import { SearchScopes } from "@chat/shared-types";
 import { FeedApi } from "@/feed/feed.api";
 import { getApiClient } from "@/auth/api-client";
+
+export const SearchUiScopes = {
+  Posts: "posts",
+  Users: "users",
+  Hashtags: "hashtags",
+  All: "all",
+} as const;
+
+export type SearchUiScope =
+  (typeof SearchUiScopes)[keyof typeof SearchUiScopes];
 
 const api = new FeedApi(getApiClient());
 const LIMIT = 20;
 const DEBOUNCE_MS = 350;
 
-/** @deprecated Prefer SearchUiScope from @chat/shared-types */
 export type SearchType = SearchUiScope;
 
 export interface SearchHit {

@@ -1,4 +1,4 @@
-import type { CallType } from "@chat/shared-types";
+import type { CallType } from "@/calls/calls.service";
 
 export interface FileUpload {
   id: string;
