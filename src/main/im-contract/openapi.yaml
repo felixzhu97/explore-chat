@@ -1,0 +1,380 @@
+openapi: 3.0.3
+info:
+  title: Chat IM contract
+  version: 1.0.0
+  description: >
+    Language-neutral Published Language for Chat / Message / User wire shapes
+    and Socket.IO IM event names. Source of truth for codegen into
+    typescript/, java/, and swift/ under this package.
+servers:
+  - url: /api/v1
+paths:
+  /users:
+    get:
+      operationId: listUsers
+      parameters:
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: page_token
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListUsersResponse"
+        "400":
+          description: Invalid argument
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RpcStatus"
+  /chats:
+    get:
+      operationId: listChats
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListChatsResponse"
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RpcStatus"
+  /chats/{chat}/messages:
+    get:
+      operationId: listMessages
+      parameters:
+        - name: chat
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: page_token
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListMessagesResponse"
+        "400":
+          description: Invalid argument
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RpcStatus"
+    post:
+      operationId: createMessage
+      parameters:
+        - name: chat
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "400":
+          description: Invalid argument
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RpcStatus"
+components:
+  schemas:
+    RpcStatus:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - INVALID_ARGUMENT
+            - NOT_FOUND
+            - PERMISSION_DENIED
+            - UNAUTHENTICATED
+            - INTERNAL
+            - ALREADY_EXISTS
+            - UNAVAILABLE
+            - UNIMPLEMENTED
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+    MessageDeliveryStatus:
+      type: string
+      description: Message Delivery Status (Glossary); sending is client-only
+      enum:
+        - sending
+        - sent
+        - delivered
+        - read
+        - failed
+    MessageType:
+      type: string
+      enum:
+        - TEXT
+        - IMAGE
+        - VIDEO
+        - AUDIO
+        - FILE
+        - LOCATION
+        - CONTACT
+        - VOICE
+        - SYSTEM
+    ChatType:
+      type: string
+      enum:
+        - PRIVATE
+        - GROUP
+    ImWsEvent:
+      type: string
+      description: Socket.IO event names for the IM path
+      enum:
+        - message:send
+        - message:sent
+        - message:received
+        - message:delivered
+        - message:read
+        - message:typing
+        - message:reaction
+        - chat:join
+        - chat:leave
+      x-enum-varnames:
+        - MESSAGE_SEND
+        - MESSAGE_SENT
+        - MESSAGE_RECEIVED
+        - MESSAGE_DELIVERED
+        - MESSAGE_READ
+        - MESSAGE_TYPING
+        - MESSAGE_REACTION
+        - CHAT_JOIN
+        - CHAT_LEAVE
+    User:
+      type: object
+      required: [id, isOnline]
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        avatar:
+          type: string
+        status:
+          type: string
+        isOnline:
+          type: boolean
+        lastSeen:
+          type: string
+          description: ISO-8601 timestamp
+        createdAt:
+          type: string
+          description: ISO-8601 timestamp
+        updatedAt:
+          type: string
+          description: ISO-8601 timestamp
+    Message:
+      type: object
+      required: [id, senderId, type, content]
+      properties:
+        id:
+          type: string
+        chatId:
+          type: string
+        clientMsgId:
+          type: string
+          description: Client Message ID (Glossary); echoed on ack
+        senderId:
+          type: string
+        senderName:
+          type: string
+        senderAvatar:
+          type: string
+        type:
+          $ref: "#/components/schemas/MessageType"
+        content:
+          type: string
+        status:
+          $ref: "#/components/schemas/MessageDeliveryStatus"
+        mediaUrl:
+          type: string
+        thumbnailUrl:
+          type: string
+        fileName:
+          type: string
+        fileSize:
+          type: string
+        fileUrl:
+          type: string
+        duration:
+          type: number
+        latitude:
+          type: number
+        longitude:
+          type: number
+        locationName:
+          type: string
+        replyToMessageId:
+          type: string
+        replyToId:
+          type: string
+        replyToContent:
+          type: string
+        createdAt:
+          type: string
+          description: ISO-8601 timestamp
+        updatedAt:
+          type: string
+          description: ISO-8601 timestamp
+        timestamp:
+          type: string
+          description: ISO-8601 timestamp
+        isDeleted:
+          type: boolean
+        isEdited:
+          type: boolean
+    Chat:
+      type: object
+      required: [id, type]
+      properties:
+        id:
+          type: string
+        type:
+          $ref: "#/components/schemas/ChatType"
+        name:
+          type: string
+        avatar:
+          type: string
+        description:
+          type: string
+        participants:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        participantIds:
+          type: array
+          items:
+            type: string
+        lastMessage:
+          $ref: "#/components/schemas/Message"
+        lastMessageContent:
+          type: string
+        lastMessageTime:
+          type: string
+          description: ISO-8601 timestamp
+        lastMessageSender:
+          type: string
+        unreadCount:
+          type: integer
+        isMuted:
+          type: boolean
+        isPinned:
+          type: boolean
+        isArchived:
+          type: boolean
+        createdAt:
+          type: string
+          description: ISO-8601 timestamp
+        updatedAt:
+          type: string
+          description: ISO-8601 timestamp
+    SendMessageRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+        type:
+          $ref: "#/components/schemas/MessageType"
+        clientMsgId:
+          type: string
+        mediaUrl:
+          type: string
+        replyToMessageId:
+          type: string
+    SendMessagePayload:
+      type: object
+      description: C→S envelope for REST body or WS message:send
+      required: [chatId, content]
+      properties:
+        chatId:
+          type: string
+        content:
+          type: string
+        type:
+          $ref: "#/components/schemas/MessageType"
+        clientMsgId:
+          type: string
+        mediaUrl:
+          type: string
+        replyToMessageId:
+          type: string
+    ListUsersResponse:
+      type: object
+      required: [users]
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        next_page_token:
+          type: string
+    ListChatsResponse:
+      type: object
+      required: [chats]
+      properties:
+        chats:
+          type: array
+          items:
+            $ref: "#/components/schemas/Chat"
+    ListMessagesResponse:
+      type: object
+      required: [messages]
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+        next_page_token:
+          type: string
