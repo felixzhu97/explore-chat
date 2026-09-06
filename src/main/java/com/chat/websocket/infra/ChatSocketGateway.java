@@ -15,12 +15,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import jakarta.annotation.PostConstruct;
 import java.util.Map;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /** Socket.IO gateway mirroring Nest chat.gateway event names. */
 @Component
-@ConditionalOnBean(SocketIOServer.class)
+@ConditionalOnProperty(
+    prefix = "chat.socketio",
+    name = "enabled",
+    havingValue = "true",
+    matchIfMissing = true)
 public class ChatSocketGateway {
 
   private final SocketIOServer server;
@@ -275,6 +279,27 @@ public class ChatSocketGateway {
     String query = client.getHandshakeData().getSingleUrlParam("token");
     if (query != null && !query.isBlank()) {
       return query.startsWith("Bearer ") ? query.substring(7) : query;
+    }
+    Object auth = client.getHandshakeData().getAuthToken();
+    if (auth instanceof Map<?, ?> map) {
+      Object token = map.get("token");
+      if (token != null && !String.valueOf(token).isBlank()) {
+        return String.valueOf(token);
+      }
+    } else if (auth instanceof String s && !s.isBlank()) {
+      return s.startsWith("Bearer ") ? s.substring(7) : s;
+    } else if (auth != null) {
+      // Jackson / LinkedHashMap variants from Socket.IO auth payload
+      try {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> asMap = objectMapper.convertValue(auth, Map.class);
+        Object token = asMap.get("token");
+        if (token != null && !String.valueOf(token).isBlank()) {
+          return String.valueOf(token);
+        }
+      } catch (IllegalArgumentException ignored) {
+        // not a map-like auth payload
+      }
     }
     return null;
   }

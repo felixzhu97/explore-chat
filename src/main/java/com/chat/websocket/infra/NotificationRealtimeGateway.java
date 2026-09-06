@@ -2,11 +2,15 @@ package com.chat.websocket.infra;
 
 import com.corundumstudio.socketio.SocketIOServer;
 import java.util.Map;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnBean(SocketIOServer.class)
+@ConditionalOnProperty(
+    prefix = "chat.socketio",
+    name = "enabled",
+    havingValue = "true",
+    matchIfMissing = true)
 public class NotificationRealtimeGateway {
 
   private final SocketIOServer server;
