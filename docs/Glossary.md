@@ -22,8 +22,8 @@ This document defines the project **Ubiquitous Language**. English terms are the
 | -------------- | --------------- | -------------------------------- | -------------------- | ---------------------------------- | ---------------- | ------------------------------- | ------------------------------------------------ |
 | Auth           | 认证            | `com.chat.auth`                  | `auth/`              | `auth/`                            | 登录 / 注册      | `/api/v1/auth`                  | JWT                 |
 | User           | 用户            | `com.chat.users` / `ChatUser`                 | `profile/`           | `profile/`                         | 个人页           | `/api/v1/users`                 | 资料、搜索                                       |
-| Chat           | 聊天            | `com.chat.chats`                 | `chat/`              | `chat/`                            | 消息             | `/api/v1/chats`                 | 会话列表                                         |
-| Message        | 消息            | `com.chat.messages`              | `chat/`              | `chat/`                            | 私信             | `/api/v1/chats/{chat}/messages` | 子资源；实时经 Socket.IO `:9002`                 |
+| Chat           | 聊天            | `com.chat.chats`                 | `chat/`              | `chat/`                            | 消息             | `/api/v1/chats`                 | 会话列表；线缆契约 `src/main/im-contract/openapi.yaml` |
+| Message        | 消息            | `com.chat.messages`              | `chat/`              | `chat/`                            | 私信             | `/api/v1/chats/{chat}/messages` | 子资源；Socket.IO `:9002`；契约同上               |
 | Call           | 通话            | `com.chat.calls`                 | `calls/`             | `calls/` + `core/call`             | WebRTC UI        | `/api/v1/calls`                 | 信令 stub；媒体仍走 WebRTC                       |
 | Group          | 群组            | `com.chat.groups`           | `chat/group.model`   | `chat/`                            | 群组             | `/api/v1/groups`                | Java stub                                   |
 | Post           | 帖子            | `com.chat.post`                  | `feed/`              | `feed/`                            | 发帖 / 网格      | `/api/v1/posts`                 | mediaUrls、coverUrl                              |
@@ -85,8 +85,17 @@ flowchart TB
 | Search Scope                    | 搜索范围         | Nest `type`：`posts` / `users` / `hashtags`；UI `all` 仅客户端聚合，勿作为 API type                              |
 | Voice Gen Target Language       | 语音合成目标语言 | Voice Gen：`auto` / `zh` / `en`                                                                                  |
 | Voice Translate Target Language | 语音翻译目标语言 | Voice translate：`zh` / `en`（无 `auto`）                                                                        |
-| Client Message ID               | 客户端消息 ID    | 发送方生成的幂等键（`clientMsgId`）；服务端 ack 原样回传，用于乐观气泡对账                                       |
-| Message Delivery Status         | 消息投递状态     | `sending`（仅客户端）→ `sent` → `delivered` → `read`；失败为 `failed`                                            |
+| Client Message ID               | 客户端消息 ID    | 发送方生成的幂等键（`clientMsgId`）；服务端 ack 原样回传，用于乐观气泡对账；见 `im-contract` Message.clientMsgId |
+| Message Delivery Status         | 消息投递状态     | `sending`（仅客户端）→ `sent` → `delivered` → `read`；失败为 `failed`；OpenAPI `MessageDeliveryStatus`           |
+| Chat Id                         | 会话 ID          | 客户端/契约中的会话标识值对象；非空 string                                                                        |
+| Message Id                      | 消息 ID          | 服务端或临时乐观消息标识值对象                                                                                    |
+| Local Chat Projection           | 本地聊天投影     | 客户端会话/消息可读副本；权威仍在服务端 + IM Contract；UI 读投影                                                  |
+| Chat Thread                     | 聊天线程         | 客户端聚合根：单会话消息时间线；`hydrate` / `accept` / 投递迁移                                                    |
+| Chat Catalog                    | 会话目录         | 客户端聚合：会话列表与 lastMessage 预览                                                                            |
+| Hydrate                         | 灌库             | REST 拉取结果合并进 Chat Thread / Chat Catalog（聚合行为）                                                         |
+| Accept Live Message             | 接受实时消息     | Socket/乐观消息进入 Chat Thread（去重、Client Message ID 对账）                                                    |
+| Domain Event (client)           | 客户端领域事件   | 聚合产生的事实（如 `MessageAccepted`）；进程内 drain，不落网                                                       |
+| IM Contract                     | IM 契约          | 跨语言协议接口（非 SDK）：`src/main/im-contract/openapi.yaml`；各端手写 DTO 对照接入，无 codegen                 |
 | Abstract Immutable              | 不可变基类       | 领域内核：`id`（cuid String）、`createdAt`；对齐 Prisma；身份只落基类                                            |
 | Abstract Entity                 | 实体基类         | 继承 Abstract Immutable；`updatedAt`、计划中的 `version`；可变实体继承它                                         |
 | Abstract Aggregate Root         | 聚合根基类       | 继承 Abstract Entity；一致性边界（User / Chat / Message / Group / Post）                                         |
