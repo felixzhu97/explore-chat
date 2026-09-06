@@ -1,0 +1,7 @@
+# Xcode / SPM
+DerivedData/
+build/
+*.xcuserdata
+xcuserdata/
+.swiftpm/config
+.swiftpm/xcode
