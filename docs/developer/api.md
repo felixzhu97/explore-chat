@@ -133,11 +133,15 @@ GET ${API_PREFIX}/posts/feed  ·  GET ${API_PREFIX}/posts/reels
 
 ## Side services
 
-| Service        | Default port | Docs (legacy merged here) |
-| -------------- | ------------ | ------------------------- |
-| Recommendation | 8000         | Feed/Explore 排序与召回   |
-| Vision         | 8001         | 标签与 NSFW               |
-| RAG            | 8002         | 语义搜索 / 问答           |
-| Media Gen      | 3456         | 图片 / 视频 / 语音        |
+Optional helpers live in sibling
+[explore-ml](https://github.com/felixzhu97/explore-ml) (`python_ml/`).
 
-客户端应优先经 Nest API，而不是在浏览器硬编码旁路服务密钥。
+| Service        | Default port | Docs |
+| -------------- | ------------ | ---- |
+| Recommendation | 8000         | Feed/Explore 排序与召回 |
+| Vision         | 8001         | 标签与 NSFW |
+| RAG            | 8002         | 语义搜索 / 问答 |
+| Media Gen      | 3456         | 图片 / 视频 / 语音 |
+
+客户端应优先经 Spring API，而不是在浏览器硬编码旁路服务密钥。
+See [python-services.md](./python-services.md).

@@ -1,6 +1,6 @@
 # Chat
 
-`Chat` is a social messaging app you can use to share posts, browse Feed and Reels, message friends, and place calls. It is a pnpm + Turbo monorepo with a **Spring Boot API at the repo root**, Next.js web/admin under `src/main/web` and `src/main/admin`, Expo mobile under `src/main/mobile`, and optional Python side services under `src/main/ml`.
+`Chat` is a social messaging app you can use to share posts, browse Feed and Reels, message friends, and place calls. It is a pnpm + Turbo monorepo with a **Spring Boot API at the repo root**, Next.js web/admin under `src/main/web` and `src/main/admin`, Expo mobile under `src/main/mobile`, and optional Python side services in sibling [explore-ml](https://github.com/felixzhu97/explore-ml).
 
 Clients talk only to the Spring API over HTTPS and Socket.IO (plus WebRTC signaling). Optional AI, vision, recommendation, and RAG side services stay behind the API. Local Java defaults use H2 + Liquibase.
 
@@ -15,7 +15,7 @@ Clients talk only to the Spring API over HTTPS and Socket.IO (plus WebRTC signal
 - pnpm 10 or later
 - Git
 
-Optional: [Ollama](https://ollama.com/) and Python services under `src/main/ml/`. See [Guideline](docs/Guideline.md) and [Glossary](docs/Glossary.md).
+Optional: [Ollama](https://ollama.com/) and Python services in [explore-ml](https://github.com/felixzhu97/explore-ml) (`python_ml/`). See [Guideline](docs/Guideline.md) and [Glossary](docs/Glossary.md).
 
 ### Initial setup
 
@@ -77,7 +77,7 @@ pnpm test
 
 - [QUICKSTART](docs/developer/QUICKSTART.md)
 - [Guideline](docs/Guideline.md) · [Glossary](docs/Glossary.md)
-- [API notes](docs/developer/api.md) · [Python services](docs/developer/python-services.md)
+- [API notes](docs/developer/api.md) · [Python services](docs/developer/python-services.md) (→ [explore-ml](https://github.com/felixzhu97/explore-ml))
 - [C4 model](docs/developer/c4-model/README.md)
 - [User Story Map](docs/product-owner/User-Story-Map.md)
 
@@ -88,10 +88,11 @@ src/main/java            Spring Boot API (:9001 HTTP, :9002 Socket.IO)
 src/main/web             Next.js (:4000)
 src/main/admin           Admin (:4001)
 src/main/mobile          Expo / React Native
-src/main/ml              Python ML helpers (recommendation / vision / rag / media-gen)
 packages/                Shared types, IM, analytics (web / Expo)
 docs/                    Guideline, Glossary, developer, C4
 ```
+
+Optional ML helpers live in sibling [`explore-ml`](https://github.com/felixzhu97/explore-ml) under `python_ml/` (ports `:8000` / `:8001` / `:8002` / `:3456`).
 
 Java features use per-feature packages: `controller` → `service` → `domain` ← `infra`, plus `mapper`.
 

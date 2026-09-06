@@ -114,7 +114,7 @@ cd docs/developer/c4-model && plantuml -tpng -o png C4-Code-Domain-Model-Plan.pu
 | Mobile       | Expo / React Native (`src/main/mobile`)                                                        |
 | API          | Spring Boot；REST / Socket.IO；`:9001`                                         |
 | 持久化       | H2 / Postgres（JPA + Liquibase）                                                       |
-| 旁路（可选） | recommendation `:8000`、vision `:8001`、rag `:8002`（本地向量目录）、media-gen `:3456` |
+| 旁路（可选） | [explore-ml](https://github.com/felixzhu97/explore-ml) `python_ml/` — recommendation `:8000`、vision `:8001`、rag `:8002`、media-gen `:3456` |
 | AI           | 本地 Ollama；Explore AI 经 Spring BFF                                                  |
 
 限界上下文（Java）：`auth` / `users` / `post` / `comments` / `chats` / `search` / `notifications` / …
