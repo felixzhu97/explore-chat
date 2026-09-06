@@ -14,9 +14,7 @@ Chat 的架构视图。源文件为 `.puml`；PNG 可选。术语见 [Glossary](
 | ---------------------------------- | ---------- | --------------------------------------------------- |
 | `C1-Context.puml`                  | C1         | 系统上下文                                          |
 | `C2-Container.puml`                | C2         | 容器（Web / Admin / Mobile / Spring :9001 / 旁路） |
-| `C3-Component.puml`                | C3         | 组件（Web UI + 限界上下文）                     |
-| `C3-Component-Backend.puml`        | C3         | Spring 后端组件（controller → service → domain） |
-| `C3-Component-Frontend.puml`       | C3         | Web 前端组件                                    |
+| `C3-Component.puml`                | C3         | 组件（Web + iOS + Spring 合一）                 |
 | `C4-Code-Domain-Model.puml`        | Code       | 领域模型（对齐当前代码）                            |
 | `C4-Code-Domain-Model-Plan.puml`   | Code       | 领域模型规划差分（绿增 / 红删）                     |
 | `C4-Deployment.puml`               | Deployment | 本地开发部署（含生产简述）                          |
