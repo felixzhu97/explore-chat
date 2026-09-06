@@ -10,15 +10,15 @@ participant "Web / Mobile" as ui <<ui>>
 participant "AuthController" as authCtrl <<java>>
 participant "AuthService" as authSvc <<java>>
 participant "UsersService" as usersSvc <<java>>
-database "SQLite\nPrisma" as db <<db>>
+database "H2 / Postgres\nJPA" as db <<db>>
 
 == 登录 ==
 user -> ui : 提交 email / password
 ui -> authCtrl : POST /api/v1/auth/login
 authCtrl -> authSvc : login(credentials)
 authSvc -> usersSvc : findByEmail
-usersSvc -> db : SELECT users
-db --> usersSvc : User
+usersSvc -> db : SELECT chat_user
+db --> usersSvc : ChatUser
 authSvc -> authSvc : verify password + issue JWT
 authSvc --> authCtrl : accessToken / refreshToken
 authCtrl --> ui : 200 + tokens

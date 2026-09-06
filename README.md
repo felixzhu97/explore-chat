@@ -2,6 +2,8 @@
 
 `Chat` is a social messaging app you can use to share posts, browse Feed and Reels, message friends, and place calls. It is a pnpm + Turbo monorepo with a **Spring Boot API at the repo root**, Next.js web/admin under `src/main/web` and `src/main/admin`, Expo mobile under `src/main/mobile`, and optional Python side services in sibling [explore-ml](https://github.com/felixzhu97/explore-ml).
 
+Cross-language IM wire shapes are documented in [`src/main/im-contract/openapi.yaml`](src/main/im-contract/openapi.yaml) (protocol only). Web and mobile each keep their own chat/RTC client code aligned with that contract.
+
 Clients talk only to the Spring API over HTTPS and Socket.IO (plus WebRTC signaling). Optional AI, vision, recommendation, and RAG side services stay behind the API. Local Java defaults use H2 + Liquibase.
 
 **Live:** [https://whatschat-web.vercel.app](https://whatschat-web.vercel.app)

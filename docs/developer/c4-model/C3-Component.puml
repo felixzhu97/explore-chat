@@ -17,9 +17,10 @@ skinparam backgroundColor #FFFFFF
 skinparam shadowing false
 
 LAYOUT_WITH_LEGEND()
-title [C4 Level 3] Chat - 组件图（Web / iOS / Spring）
+title [C4 Level 3] Chat - 组件图（Web / Expo / iOS / Spring）
 
 Person(user_web, "Web 用户", "浏览器")
+Person(user_mobile, "移动端用户", "Expo / 模拟器")
 Person(user_ios, "iOS 用户", "SwiftUI 客户端")
 
 System_Boundary(chat, "Chat") {
@@ -27,10 +28,26 @@ System_Boundary(chat, "Chat") {
   Container_Boundary(web_app, "Web 应用 (src/main/web)") {
     Component(pages, "App Router 页面", "Next.js", "登录、主站、设置")
     Component(feed_ui, "Feed / Reels / Explore", "React", "帖子、互动、评论")
-    Component(chat_ui, "聊天与通话", "React + @chat/im", "私信、WebRTC UI")
-    Component(state, "状态层", "Redux Toolkit", "auth-session、消息、通知")
+    Component(chat_ui, "聊天 UI", "React hooks", "薄 controller；读投影快照")
+    Component(chat_domain, "Chat 领域", "domain/", "ChatThread ChatCatalog Message VO 事件")
+    Component(chat_svc, "ChatProjectionService", "service/", "编排 + drain 领域事件")
+    Component(chat_mapper, "ChatProjectionMapper", "mapper/", "DTO ↔ domain / rows")
+    Component(chat_infra, "聊天投影仓储", "infra/", "MemoryChatProjectionRepository")
+    Component(web_rtc, "RTC CallManager", "calls/rtc/", "domain + impl/stub + use-call")
+    Component(state, "状态层", "Redux Toolkit", "auth-session、旁路缓存")
     Component(api_client, "API 客户端", "Fetch", "REST /api/v1")
     Component(ws_client, "WebSocket 客户端", "Socket.IO", "实时消息与通知")
+  }
+
+  Container_Boundary(mobile_app, "Expo mobile (src/main/mobile)") {
+    Component(m_screens, "Screens / routes", "Expo Router", "chat-detail、Feed、通话")
+    Component(m_chat_domain, "Chat 领域", "chat/domain/", "与 Web 同构（源码复制）")
+    Component(m_chat_svc, "ChatThreadService", "chat/service/", "单线程 hydrate / accept / 发送")
+    Component(m_chat_mapper, "ChatThreadMapper", "chat/mapper/", "DTO ↔ domain")
+    Component(m_chat_infra, "聊天投影仓储", "chat/infra/", "MemoryChatProjectionRepository")
+    Component(m_im_dto, "IM wire DTO", "core/im/", "手写对齐 im-contract")
+    Component(m_rtc, "RTC CallManager", "core/rtc/", "domain + impl/stub + use-call")
+    Component(m_api, "API / Socket", "Fetch + Socket.IO", "REST :9001 / WS :9002")
   }
 
   Container_Boundary(ios_app, "iOS 应用 (src/main/ios)") {
@@ -46,11 +63,13 @@ System_Boundary(chat, "Chat") {
     Component(controllers, "REST 控制器", "Spring MVC", "auth users chats messages posts comments media search calls ai")
     Component(websocket, "Socket.IO", "netty-socketio", "chat / message 事件；:9002")
     Component(app_services, "应用服务", "@Service", "按 feature 编排；无业务规则外泄")
-    Component(domain_model, "领域模型", "JPA entities / VOs", "User Chat Message Post Comment Follow")
+    Component(domain_model, "领域模型", "JPA entities / VOs", "ChatUser Chat Message SocialPost …")
     Component(domain_repos, "仓储接口", "domain.repository", "UserRepository ChatRepository …")
-    Component(infra_adapters, "基础设施", "infra/", "JPA Jwt SocketIoConfig Upstream WebClient")
+    Component(infra_adapters, "基础设施", "infra/", "SpringData* Jwt SocketIoConfig WebClient")
     ComponentDb(jpa_store, "持久化", "H2 / Postgres", "Liquibase；ddl-auto validate")
   }
+
+  Container(im_contract, "IM Contract", "OpenAPI YAML", "src/main/im-contract/openapi.yaml；无 codegen / 无共享 npm")
 }
 
 Container_Ext(admin_app, "管理端", "Next.js", ":4001")
@@ -60,14 +79,38 @@ Container_Ext(recommendation, "Recommendation", "explore-ml", ":8000 可选")
 Container_Ext(ollama, "Ollama", "LLM", ":11434 可选")
 
 Rel(user_web, pages, "使用", "HTTPS")
+Rel(user_mobile, m_screens, "使用")
 Rel(user_ios, ios_root, "使用")
 Rel(pages, feed_ui, "渲染")
 Rel(pages, chat_ui, "渲染")
 Rel(feed_ui, state, "读写")
-Rel(chat_ui, ws_client, "实时")
+Rel(chat_ui, chat_svc, "调用")
+Rel(chat_svc, chat_domain, "编排")
+Rel(chat_svc, chat_mapper, "映射")
+Rel(chat_svc, chat_infra, "投影读写")
+Rel(chat_infra, chat_domain, "实现仓储")
+Rel(chat_ui, ws_client, "订阅/发送")
+Rel(chat_ui, web_rtc, "通话")
+Rel(web_rtc, ws_client, "信令")
 Rel(state, api_client, "副作用")
 Rel(api_client, controllers, "REST :9001")
 Rel(ws_client, websocket, "Socket.IO :9002")
+Rel(chat_svc, api_client, "Hydrate REST")
+
+Rel(m_screens, m_chat_svc, "调用")
+Rel(m_chat_svc, m_chat_domain, "编排")
+Rel(m_chat_svc, m_chat_mapper, "映射")
+Rel(m_chat_svc, m_chat_infra, "投影读写")
+Rel(m_chat_infra, m_chat_domain, "实现仓储")
+Rel(m_screens, m_api, "REST / WS")
+Rel(m_screens, m_rtc, "通话")
+Rel(m_rtc, m_api, "信令")
+Rel(m_im_dto, im_contract, "对齐字段", "手写")
+Rel(m_api, controllers, "REST :9001")
+Rel(m_api, websocket, "Socket.IO :9002")
+
+Rel(api_client, im_contract, "对齐字段", "手写")
+Rel(ws_client, im_contract, "事件名", "手写")
 
 Rel(ios_root, ios_features, "导航")
 Rel(ios_features, ios_api, "HTTP")
@@ -94,8 +137,14 @@ note right of api_server
   限界上下文见 Glossary Preferred Terms。
 end note
 
+note right of web_app
+  Local Chat Projection：UI 读投影；
+  权威在 Spring + IM Contract。
+end note
+
 note right of ios_app
   契约见 src/main/ios/docs/API-Contract.md。
+  本轮未改 Swift DDD 投影。
 end note
 
 SHOW_LEGEND()
