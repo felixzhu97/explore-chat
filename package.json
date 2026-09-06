@@ -38,7 +38,7 @@
     "test": "turbo run test",
     "test:java": "./gradlew checkstyleMain checkstyleTest test",
     "test:watch": "turbo run test:watch --concurrency=23",
-    "lint:openapi": "pnpm dlx @stoplight/spectral-cli@6.15.0 lint docs/developer/openapi-aip-contract.yaml -r .spectral.yml"
+    "lint:openapi": "pnpm dlx @stoplight/spectral-cli@6.15.0 lint src/main/im-contract/openapi.yaml -r .spectral.yml"
   },
   "devDependencies": {
     "prettier": "^3.6.0",

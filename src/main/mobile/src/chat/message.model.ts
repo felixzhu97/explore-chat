@@ -1,4 +1,4 @@
-import type { Message as DomainMessage } from "@chat/im";
+import type { Message as DomainMessage } from "@/core/im/message";
 import { toOptionalDate, toOptionalNumber } from "@/shared/value-coercion";
 
 export enum MessageType {

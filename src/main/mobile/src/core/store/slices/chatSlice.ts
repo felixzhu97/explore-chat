@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { Chat } from "../domain/chat";
+import type { Chat } from "@/core/im/chat";
 
+/** Projection cache only — catalog rules live in chat/domain ChatCatalog. */
 interface State {
   chats: Chat[];
   selectedChat: Chat | null;

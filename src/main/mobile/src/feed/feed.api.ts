@@ -182,7 +182,7 @@ export class FeedApi {
     try {
       const profileRes = await this.http.get<UserProfile>(`/users/${userId}`);
       const u = profileRes.data;
-      if (!u || typeof u !== "object") return null;
+      if (!u || typeof u !== "object" || !u.id) return null;
       return u as UserProfile;
     } catch {
       return null;

@@ -26,7 +26,6 @@
     "@reduxjs/toolkit": "^2.5.0",
     "@types/lodash": "^4.17.16",
     "@chat/analytics": "workspace:*",
-    "@chat/im": "workspace:*",
     "axios": "^1.8.4",
     "expo": "55.0.0",
     "expo-blur": "~55.0.0",

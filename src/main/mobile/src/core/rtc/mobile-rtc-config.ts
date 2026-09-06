@@ -5,7 +5,7 @@ import {
   type RTCMediaAdapter,
   type RTCPeerHandle,
   type RTCApiAdapter,
-} from "@chat/im";
+} from "@/core/rtc";
 import type { Socket } from "socket.io-client";
 import { apiClient } from "@/core/api-client";
 import { store } from "@/core/store/hooks";

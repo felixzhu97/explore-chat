@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import sortBy from "lodash/sortBy";
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -14,11 +13,11 @@ import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import {
   Message,
-  MessageType,
   MessageStatus,
   MessageEntity,
 } from "@/chat/message.model";
 import { Chat, ChatEntity, ChatType } from "@/chat/chat.model";
+import { ChatThreadService } from "@/chat/service/chat-thread.service";
 import { MessageBubble, ChatInputField, ChatAvatar } from "@/shared/components";
 import { styled } from "@/shared/emotion";
 import { useTheme } from "@/shared/theme";
@@ -131,16 +130,17 @@ export default function ChatDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [inputText, setInputText] = useState("");
   const flatListRef = useRef<FlatList>(null);
+  const threadServiceRef = useRef<ChatThreadService | null>(null);
+  const boundChatIdRef = useRef<string | undefined>(undefined);
+  if (params.chatId && boundChatIdRef.current !== params.chatId) {
+    threadServiceRef.current = new ChatThreadService(params.chatId);
+    boundChatIdRef.current = params.chatId;
+  }
 
   const onMessageReceived = useCallback(
     (message: Message) => {
-      if (message.chatId !== params.chatId) return;
-      setMessages((prev) => {
-        if (prev.some((m) => m.id === message.id)) return prev;
-        return sortBy([...prev, message], (m) =>
-          new Date(m.timestamp).getTime(),
-        );
-      });
+      if (message.chatId !== params.chatId || !threadServiceRef.current) return;
+      setMessages(threadServiceRef.current.acceptIncoming(message));
       setTimeout(
         () => flatListRef.current?.scrollToEnd({ animated: true }),
         100,
@@ -151,27 +151,8 @@ export default function ChatDetailScreen() {
 
   const onMessageSent = useCallback(
     (message: Message) => {
-      if (message.chatId !== params.chatId) return;
-      setMessages((prev) => {
-        const byClient =
-          message.clientMsgId != null
-            ? prev.find((m) => m.clientMsgId === message.clientMsgId)
-            : undefined;
-        if (byClient) {
-          return prev.map((m) =>
-            m.clientMsgId === message.clientMsgId
-              ? new MessageEntity({
-                  ...message,
-                  status: MessageStatus.Sent,
-                })
-              : m,
-          );
-        }
-        if (prev.some((m) => m.id === message.id)) return prev;
-        return sortBy([...prev, message], (m) =>
-          new Date(m.timestamp).getTime(),
-        );
-      });
+      if (message.chatId !== params.chatId || !threadServiceRef.current) return;
+      setMessages(threadServiceRef.current.applySent(message));
       setTimeout(
         () => flatListRef.current?.scrollToEnd({ animated: true }),
         100,
@@ -182,15 +163,8 @@ export default function ChatDetailScreen() {
 
   const onMessageDelivered = useCallback(
     (payload: { messageId: string; chatId: string; clientMsgId?: string }) => {
-      if (payload.chatId !== params.chatId) return;
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === payload.messageId ||
-          (payload.clientMsgId != null && m.clientMsgId === payload.clientMsgId)
-            ? new MessageEntity({ ...m, status: MessageStatus.Delivered })
-            : m,
-        ),
-      );
+      if (payload.chatId !== params.chatId || !threadServiceRef.current) return;
+      setMessages(threadServiceRef.current.applyDelivered(payload));
     },
     [params.chatId],
   );
@@ -227,7 +201,10 @@ export default function ChatDetailScreen() {
       .then(([c, list]) => {
         if (cancelled) return;
         if (c) setChat(c);
-        setMessages(list.reverse());
+        const hydrated =
+          threadServiceRef.current?.hydrateFromList(list.reverse()) ??
+          list.reverse();
+        setMessages(hydrated);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -247,53 +224,37 @@ export default function ChatDetailScreen() {
   const handleSend = useCallback(
     (text: string) => {
       const chatId = params.chatId;
-      if (!chatId || !text.trim()) return;
-      const clientMsgId = `cmsg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-      const optimistic = new MessageEntity({
-        id: clientMsgId,
-        clientMsgId,
-        chatId,
-        senderId: userId ?? "",
-        senderName: "我",
-        content: text.trim(),
-        type: MessageType.Text,
-        status: MessageStatus.Sending,
-        timestamp: new Date(),
-        isForwarded: false,
-        forwardedFrom: [],
-      });
-      setMessages((prev) =>
-        sortBy([...prev, optimistic], (m) => new Date(m.timestamp).getTime()),
-      );
+      if (!chatId || !text.trim() || !threadServiceRef.current) return;
+      const trimmed = text.trim();
+      const { clientMsgId, messages: next } =
+        threadServiceRef.current.sendOptimistic({
+          content: trimmed,
+          senderId: userId ?? "",
+        });
+      setMessages(next);
       setInputText("");
       analytics.track(SEND_MESSAGE, { chatId, type: "text" });
 
       if (connected) {
-        sendMessage(chatId, text.trim(), "TEXT", clientMsgId);
+        sendMessage(chatId, trimmed, "TEXT", clientMsgId);
       } else {
         getMessageApi()
-          .sendMessage(chatId, text.trim(), "TEXT", clientMsgId)
+          .sendMessage(chatId, trimmed, "TEXT", clientMsgId)
           .then((msg) => {
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.clientMsgId === clientMsgId
-                  ? new MessageEntity({
-                      ...msg,
-                      clientMsgId,
-                      status: MessageStatus.Sent,
-                    })
-                  : m,
+            if (!threadServiceRef.current) return;
+            setMessages(
+              threadServiceRef.current.applySent(
+                new MessageEntity({
+                  ...msg,
+                  clientMsgId,
+                  status: MessageStatus.Sent,
+                }),
               ),
             );
           })
           .catch(() => {
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.clientMsgId === clientMsgId
-                  ? new MessageEntity({ ...m, status: MessageStatus.Failed })
-                  : m,
-              ),
-            );
+            if (!threadServiceRef.current) return;
+            setMessages(threadServiceRef.current.markFailed(clientMsgId));
           });
       }
     },

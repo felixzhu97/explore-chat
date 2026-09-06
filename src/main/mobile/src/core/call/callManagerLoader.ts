@@ -1,12 +1,16 @@
 import Constants, { ExecutionEnvironment } from "expo-constants";
-import { getCallManagerStub, createCallManager } from "@chat/im";
+import {
+  getCallManagerStub,
+  createCallManager,
+  type ICallManager,
+} from "@/core/rtc";
 import { createMobileRTCConfig } from "../rtc/mobile-rtc-config";
 import type { CallState } from "./callTypes";
 
 export type { CallState } from "./callTypes";
-export type { ICallManager } from "@chat/im";
+export type { ICallManager };
 
-let cached: import("@chat/im").ICallManager | null = null;
+let cached: ICallManager | null = null;
 
 function isExpoGo(): boolean {
   try {
@@ -21,7 +25,7 @@ function isExpoGo(): boolean {
   }
 }
 
-export function getCallManager(): import("@chat/im").ICallManager {
+export function getCallManager(): ICallManager {
   if (cached) return cached;
   if (isExpoGo()) {
     cached = getCallManagerStub();
