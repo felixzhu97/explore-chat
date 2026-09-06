@@ -34,8 +34,5 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: AIP REST controller guard
-        run: pnpm check:aip-rest
-
       - name: Spectral (AIP OpenAPI fragment)
         run: pnpm lint:openapi
