@@ -154,6 +154,16 @@ public class SocialPost extends AbstractEntity {
   }
 
   /**
+   * Replaces the caption used by demo enrichment.
+   *
+   * @param caption new caption text
+   */
+  public void rewriteCaption(String caption) {
+    this.caption = caption;
+    touch();
+  }
+
+  /**
    * Replaces media payload used by demo enrichment and admin repair.
    *
    * @param mediaUrlsJson JSON array of media URLs
