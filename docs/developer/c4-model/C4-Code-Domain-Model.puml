@@ -18,318 +18,351 @@ legend right
   | <<Entity>> | Identity + lifecycle |
   | <<ValueObject>> | Immutable by value |
   | <<DomainService>> | Stateless domain / port |
+  | <<DomainEvent>> | Fact from aggregate (client) |
   | <<Repository>> | Outbound port in domain/ |
 endlegend
 
 note as N_LAYERS
   controller → service → domain ← infra (+ mapper)
-  Nest modules live at feature root.
-  Shared kernels: base/domain, base/infra.
-  Clients call Nest /api/v1 only.
-  Persist: Liquibase/JPA SQLite (users, chats, social_posts,
-  feed_entries, post_comments, activity_notifications).
-  Packages under src/main/java/com.chat.
+  Kernel: AbstractImmutable / AbstractEntity.
+  Persist: JPA + Liquibase (H2 / Postgres).
+  Java: src/main/java/com.chat.
+  TS clients (web/mobile, duplicated): Local Chat Projection
+  — ChatCatalog / ChatThread / Message + VOs.
+  No shared npm IM package.
+  Wire SSoT: src/main/im-contract/openapi.yaml
 end note
 
-package "base/domain" as pkg_base {
-  abstract class AbstractImmutable <<Abstract>> {
-    + id: String
-    + createdAt: Date
-  }
-  abstract class AbstractEntity <<Abstract>> {
-    + updatedAt: Date
-    + version: int
-  }
-  abstract class AbstractAggregateRoot <<Abstract>> {
-  }
-  abstract class AbstractParticipant <<Abstract>> {
-    + userId: String
-    + role: ParticipantRole
-    + joinedAt: Date
-  }
-  abstract class AbstractEmbeddable <<Abstract>> {
-  }
+abstract class AbstractImmutable <<Abstract>> {
+  + id: String
+  + createdAt: Instant
+}
+abstract class AbstractEntity <<Abstract>> {
+  + updatedAt: Instant
+  + version: long
+  # touch()
 }
 
 AbstractImmutable <|-- AbstractEntity
-AbstractEntity <|-- AbstractAggregateRoot
-AbstractEntity <|-- AbstractParticipant
 
-package "base/infra" as pkg_base_infra {
-  abstract class AbstractLiquibase/JPARepository <<Abstract>> {
-    + prisma: Liquibase/JPAService
-  }
+class ChatUser <<AggregateRoot>> {
+  String username
+  String email
+  String phone
+  String avatar
+  String status
+  boolean online
+  Instant lastSeen
+  --
+  {static} register(...)
+  updateProfile(...)
+  markOnline(online)
+}
+interface UserRepository <<Repository>> {
+  findById(id)
+  findByEmail(email)
+  findByUsername(username)
+  findByUsernameContainingIgnoreCase(q)
+  save(user)
 }
 
-package "users/domain" as pkg_users {
-  class User <<AggregateRoot>> {
-    String id
-    String username
-    String email
-    String phone
-    String avatar
-    String status
-    boolean isOnline
-    Date lastSeen
-    --
-    {static} create(data)
-    updateStatus(status)
-    setOnline(isOnline)
-  }
-  interface IUserRepository <<Repository>> {
-    findById(id)
-    findByEmail(email)
-    findByUsername(username)
-    save(user)
-  }
+class UserFollow <<Entity>> {
+  String id
+  String followerId
+  String followingId
+  Date createdAt
 }
 
-package "follow (UserFollow)" as pkg_follow {
-  class UserFollow <<Entity>> {
-    String id
-    String followerId
-    String followingId
-    Date createdAt
-  }
+ChatUser "1" o-- "0..*" UserFollow : follower
+ChatUser "1" o-- "0..*" UserFollow : following
+
+class Chat <<AggregateRoot>> {
+  ChatType type
+  String name
+  String avatar
+  boolean deleted
+  --
+  {static} createPrivate()
+  {static} createGroup(name)
+  rename(name)
+  softDelete()
 }
-
-User "1" o-- "0..*" UserFollow : follower
-User "1" o-- "0..*" UserFollow : following
-
-package "chats/domain" as pkg_chats {
-  class Chat <<AggregateRoot>> {
-    String id
-    ChatType type
-    String name
-    String avatar
-    int unreadCount
-    --
-    {static} create(data)
-    updateLastMessage(message)
-    incrementUnreadCount()
-    resetUnreadCount()
-    ensureParticipant(userId)
-  }
-  enum ChatType <<ValueObject>> {
-    PRIVATE
-    GROUP
-  }
-  class ChatParticipant <<Entity>> {
-    String userId
-    ParticipantRole role
-    boolean isArchived
-    boolean isMuted
-  }
-  interface ChatRepository <<Repository>> {
-    findById(id)
-    touchUpdatedAt(chatId)
-  }
+enum ChatType <<ValueObject>> {
+  PRIVATE
+  GROUP
+}
+class ChatParticipant <<Entity>> {
+  String chatId
+  String userId
+  String role
+  boolean archived
+  boolean muted
+  --
+  {static} join(chatId, userId, role)
+  archive(archived)
+  mute(muted)
+}
+interface ChatRepository <<Repository>> {
+  findById(id)
+  save(chat)
+}
+interface ChatParticipantRepository <<Repository>> {
+  findByChatId(chatId)
+  existsByChatIdAndUserId(chatId, userId)
+  save(participant)
 }
 
 Chat "1" *-- "1..*" ChatParticipant
 Chat --> ChatType
-Chat "1" o-- "0..1" Message : lastMessage
-ChatParticipant --> User
+ChatParticipant --> ChatUser
 
-package "messages/domain" as pkg_messages {
-  class Message <<AggregateRoot>> {
-    String id
-    String chatId
-    String senderId
-    MessageType type
-    String content
-    String mediaUrl
-    boolean isEdited
-    boolean isDeleted
-    String clientMsgId
-    --
-    {static} create(data)
-    assertSendableBy(senderId)
-    edit(content)
-    delete()
-    addReaction(userId, emoji)
-    markAsRead(userId)
-  }
-  enum MessageType <<ValueObject>> {
-    TEXT
-    IMAGE
-    VIDEO
-    AUDIO
-    FILE
-  }
-  class MessageReaction <<ValueObject>> {
-    String userId
-    String emoji
-  }
-  interface MessageRepository <<Repository>> {
-    save(message)
-    findById(id)
-    findByChatId(chatId, options)
-  }
-  note right of Message
-    Write path: load Chat → ensureParticipant
-    → Message.create/assertSendableBy
-    → MessageRepository.save.
-    Soft delete via delete() → isDeleted.
-    clientMsgId echoed on ack only.
-  end note
+class Message <<AggregateRoot>> {
+  String chatId
+  String senderId
+  String type
+  String content
+  String mediaUrl
+  boolean deleted
+  --
+  {static} send(chatId, senderId, content)
+  edit(content)
+  softDelete()
+}
+class MessageReaction <<Entity>> {
+  String messageId
+  String userId
+  String emoji
+}
+class MessageRead <<Entity>> {
+  String messageId
+  String userId
+}
+interface MessageRepository <<Repository>> {
+  save(message)
+  findById(id)
+  findByChatId(chatId, ...)
+}
+note right of Message
+  Participant checks live in ChatsService
+  (not Chat.ensureParticipant).
+  Soft delete: softDelete() → deleted.
+  clientMsgId is client Local Chat Projection only.
+end note
+
+class SpringDataMessageRepository {
+  save(message)
+  findById(id)
+  findByChatId(chatId, ...)
+}
+class SpringDataChatRepository {
+  findById(id)
+  save(chat)
+}
+class SpringDataChatParticipantRepository {
+  findByChatId(chatId)
+  existsByChatIdAndUserId(...)
+  save(participant)
 }
 
-package "messages/infra" as pkg_messages_infra {
-  class Liquibase/JPAMessageRepository {
-    save(message)
-    findById(id)
-    findByChatId(chatId, options)
-  }
-}
+SpringDataMessageRepository ..|> MessageRepository
+SpringDataChatRepository ..|> ChatRepository
+SpringDataChatParticipantRepository ..|> ChatParticipantRepository
 
-package "chats/infra" as pkg_chats_infra {
-  class Liquibase/JPAChatRepository {
-    findById(id)
-    touchUpdatedAt(chatId)
-  }
-}
-
-AbstractLiquibase/JPARepository <|-- Liquibase/JPAMessageRepository
-AbstractLiquibase/JPARepository <|-- Liquibase/JPAChatRepository
-Liquibase/JPAMessageRepository ..|> MessageRepository
-Liquibase/JPAChatRepository ..|> ChatRepository
-
-Chat "1" *-- "0..*" Message
-Message --> MessageType
-Message "1" *-- "0..*" MessageReaction
-Message --> User : senderId
+Chat "1" o-- "0..*" Message : chatId
+Message "1" o-- "0..*" MessageReaction
+Message "1" o-- "0..*" MessageRead
+Message --> ChatUser : senderId
 Message ..> MessageRepository
 Chat ..> ChatRepository
 
-package "groups/domain" as pkg_groups {
-  class Group <<AggregateRoot>> {
-    String id
-    String name
-    String creatorId
-    --
-    {static} create(data)
-    addParticipant(userId, addedBy, role)
-    removeParticipant(userId)
-  }
-  class GroupParticipant <<ValueObject>> {
-    String userId
-    ParticipantRole role
-  }
-  enum ParticipantRole <<ValueObject>> {
-    ADMIN
-    MEMBER
-  }
+class SocialGroup <<AggregateRoot>> {
+  String name
+  String creatorId
+  --
+  {static} create(...)
+}
+class GroupParticipant <<Entity>> {
+  String groupId
+  String userId
+  String role
 }
 
-Group "1" *-- "0..*" GroupParticipant
-GroupParticipant --> ParticipantRole
-ChatParticipant --> ParticipantRole
+SocialGroup "1" *-- "0..*" GroupParticipant
 
-package "post/domain" as pkg_post {
-  class Post <<AggregateRoot>> {
-    String postId
-    String userId
-    String caption
-    String type
-    String[] mediaUrls
-    String coverUrl
-    String location
-    Date createdAt
-    --
-    {static} create(input)
-  }
-  class FeedEntry <<ValueObject>> {
-    String postId
-    String authorId
-    Date createdAt
-  }
-  class EngagementCounts <<ValueObject>> {
-    int likeCount
-    int commentCount
-    int saveCount
-  }
-  interface IPostRepository <<Repository>> {
-    insertPost(input)
-    getPostById(postId)
-    getPostsByUserId(userId, limit)
-    deletePost(postId, userId)
-  }
-  interface IEngagementRepository <<Repository>> {
-    like(userId, postId)
-    unlike(userId, postId)
-    save(userId, postId)
-    unsave(userId, postId)
-    getEngagementCounts(postId)
-  }
+class SocialPost <<AggregateRoot>> {
+  String authorId
+  String caption
+  String type
+  String[] mediaUrls
+  String coverUrl
+  String location
+  --
+  {static} create(...)
+}
+class FeedEntry <<Entity>> {
+  String postId
+  String authorId
+}
+interface SocialPostRepository <<Repository>> {
+  save(post)
+  findById(postId)
+  listFeed(offset, limit)
 }
 
-Post --> User : author
-Post --> FeedEntry
-Post --> EngagementCounts
-Post "1" o-- "0..*" Comment
+SocialPost --> ChatUser : author
+SocialPost "1" o-- "0..*" FeedEntry
+SocialPost "1" o-- "0..*" Comment
 
-package "comments/domain" as pkg_comments {
-  class Comment <<Entity>> {
-    String id
-    String postId
-    String userId
-    String content
-    String parentId
-  }
-  interface ICommentRepository <<Repository>> {
-    insert(doc)
-    findByPostId(postId, limit, skip)
-    findById(id)
-    deleteOne(id, userId)
-  }
+class Comment <<Entity>> {
+  String postId
+  String userId
+  String content
+  String parentId
+}
+interface CommentRepository <<Repository>> {
+  save(comment)
+  findByPostId(postId, ...)
+  findById(id)
 }
 
-Comment --> User : author
+Comment --> ChatUser : author
 
-package "notifications/domain" as pkg_notifications {
-  class NotificationItem <<Entity>> {
-    String id
-    String recipientId
-    String actorId
-    NotificationType type
-    String postId
-    String commentId
-    Date createdAt
-    Date readAt
-  }
-  enum NotificationType <<ValueObject>> {
-    like
-    comment
-  }
-  interface INotificationRepository <<Repository>> {
-    upsertLike(...)
-    insertComment(...)
-    findByRecipient(...)
-    markRead(...)
-  }
+class ActivityNotification <<Entity>> {
+  String recipientId
+  String actorId
+  String type
+  String postId
+  String commentId
+  Instant readAt
+}
+interface ActivityNotificationRepository <<Repository>> {
+  save(...)
+  findByRecipient(...)
+  markRead(...)
 }
 
-NotificationItem --> NotificationType
-NotificationItem --> Post
+ActivityNotification --> SocialPost
 
-package "auth/domain" as pkg_auth {
-  interface IAuthService <<DomainService>> {
-    register(data)
-    login(data)
-    refresh(token)
-  }
-  class AuthTokens <<ValueObject>> {
-    String accessToken
-    String refreshToken
-  }
+interface AuthService <<DomainService>> {
+  register(data)
+  login(data)
+  refresh(token)
+}
+class AuthTokens <<ValueObject>> {
+  String accessToken
+  String refreshToken
 }
 
-IAuthService ..> User
-IAuthService ..> AuthTokens
+AuthService ..> ChatUser
+AuthService ..> AuthTokens
 
-N_LAYERS .. pkg_users
-N_LAYERS .. pkg_chats
-N_LAYERS .. pkg_post
+N_LAYERS .. ChatUser
+N_LAYERS .. Chat
+N_LAYERS .. SocialPost
+
+' --- Client Local Chat Projection (TS web/mobile) ---
+' Display name Message; alias ClientMessage avoids clash with Java Message.
+class ChatId <<ValueObject>> {
+  + value: String
+}
+class MessageId <<ValueObject>> {
+  + value: String
+}
+class ClientMsgId <<ValueObject>> {
+  + value: String
+}
+class SenderId <<ValueObject>> {
+  + value: String
+}
+class MessageBody <<ValueObject>> {
+  + text: String
+}
+class ChatTitle <<ValueObject>> {
+  + value: String
+}
+class AvatarURL <<ValueObject>> {
+  + value: String
+}
+class MessageDeliveryStatus <<ValueObject>> {
+  + sending, sent, delivered, read, failed
+  --
+  canTransition(to)
+}
+class ChatCatalog <<AggregateRoot>> {
+  chats: ChatSummaryProps[]
+  --
+  {static} empty()
+  {static} of(chats)
+  list()
+  replaceAll(summaries)
+  applyPreview(chatId, last)
+  pullDomainEvents()
+}
+class ChatThread <<AggregateRoot>> {
+  chatId: ChatId
+  --
+  {static} empty(chatId)
+  {static} rehydrate(chatId, messages)
+  hydrate(remote)
+  accept(incoming)
+  sendOptimistic(...)
+  markFailed(clientMsgId)
+  applyDelivery(id, status, ...)
+  timeline()
+  pullDomainEvents()
+}
+class "Message" as ClientMessage <<Entity>> {
+  id: MessageId
+  clientMsgId: ClientMsgId
+  status: MessageDeliveryStatus
+  --
+  {static} create(props)
+  promote(toServerId)
+  transition(to)
+  matchesIdentity(...)
+}
+class ThreadHydrated <<DomainEvent>>
+class MessageAccepted <<DomainEvent>>
+class LastMessageChanged <<DomainEvent>>
+class DeliveryStatusChanged <<DomainEvent>>
+class CatalogReplaced <<DomainEvent>>
+class ChatPreviewChanged <<DomainEvent>>
+interface ChatProjectionRepository <<Repository>> {
+  listChats()
+  upsertChats(rows)
+  listMessages(chatId)
+  replaceMessages(chatId, rows)
+  upsertMessage(row)
+}
+
+note as N_CLIENT
+  Local Chat Projection: UI reads client aggregates;
+  authority = Spring + IM Contract.
+  Catalog and Thread are separate aggregates;
+  ChatProjectionService / ChatThreadService
+  orchestrate (not Catalog⊃Thread).
+  Repository stores projection rows; rebuilds aggregates.
+  Domain Event (client): in-process drain only.
+end note
+
+ChatCatalog ..> ChatId
+ChatCatalog ..> ChatTitle
+ChatCatalog ..> AvatarURL
+ChatThread "1" *-- "0..*" ClientMessage
+ChatThread --> ChatId
+ClientMessage --> MessageId
+ClientMessage --> ClientMsgId
+ClientMessage --> MessageDeliveryStatus
+ClientMessage --> MessageBody
+ChatThread ..> ThreadHydrated
+ChatThread ..> MessageAccepted
+ChatThread ..> LastMessageChanged
+ChatThread ..> DeliveryStatusChanged
+ChatCatalog ..> CatalogReplaced
+ChatCatalog ..> ChatPreviewChanged
+ChatProjectionRepository ..> ChatCatalog : rows ↔
+ChatProjectionRepository ..> ClientMessage : rows ↔
+N_CLIENT .. ChatThread
+N_CLIENT .. ChatCatalog
 
 @enduml
