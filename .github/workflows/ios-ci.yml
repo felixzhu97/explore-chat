@@ -1,0 +1,34 @@
+name: ios-ci
+
+on:
+  push:
+    paths:
+      - "src/main/ios/**"
+      - ".github/workflows/ios-ci.yml"
+  pull_request:
+    paths:
+      - "src/main/ios/**"
+      - ".github/workflows/ios-ci.yml"
+
+jobs:
+  test:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: src/main/ios
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        run: xcodegen generate
+      - name: Build and test
+        run: |
+          set -euo pipefail
+          UDID=$(xcrun simctl list devices available | awk -F '[()]' '/iPhone/{print $2; exit}')
+          xcodebuild \
+            -project Chat.xcodeproj \
+            -scheme Chat \
+            -destination "platform=iOS Simulator,id=${UDID}" \
+            CODE_SIGNING_ALLOWED=NO \
+            test
