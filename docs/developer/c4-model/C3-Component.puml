@@ -17,101 +17,85 @@ skinparam backgroundColor #FFFFFF
 skinparam shadowing false
 
 LAYOUT_WITH_LEGEND()
-title [C4 Level 3] Chat - 组件图（Web + Nest）
+title [C4 Level 3] Chat - 组件图（Web / iOS / Spring）
 
-Person(user, "Web 用户", "浏览器客户端")
+Person(user_web, "Web 用户", "浏览器")
+Person(user_ios, "iOS 用户", "SwiftUI 客户端")
 
 System_Boundary(chat, "Chat") {
-  Container_Boundary(web_app, "Web 应用") {
+
+  Container_Boundary(web_app, "Web 应用 (src/main/web)") {
     Component(pages, "App Router 页面", "Next.js", "登录、主站、设置")
     Component(feed_ui, "Feed / Reels / Explore", "React", "帖子、互动、评论")
-    Component(chat_ui, "聊天与通话", "React + im", "私信、WebRTC UI")
+    Component(chat_ui, "聊天与通话", "React + @chat/im", "私信、WebRTC UI")
     Component(state, "状态层", "Redux Toolkit", "auth-session、消息、通知")
     Component(api_client, "API 客户端", "Fetch", "REST /api/v1")
     Component(ws_client, "WebSocket 客户端", "Socket.IO", "实时消息与通知")
   }
 
-  Container_Boundary(auth_bc, "auth") {
-    Component(auth_ctrl, "AuthController", "REST", "/api/v1/auth")
-    Component(auth_svc, "AuthService", "Service", "注册 / 登录 / refresh JWT")
+  Container_Boundary(ios_app, "iOS 应用 (src/main/ios)") {
+    Component(ios_root, "App / RootView / Tabs", "SwiftUI", "鉴权门禁、主 Tab、Call 覆盖层")
+    Component(ios_features, "Features", "SwiftUI", "Auth Feed Reels Explore Chat Profile Calls")
+    Component(ios_api, "APIClient", "URLSession", "REST /api/v1 + RpcStatus")
+    Component(ios_socket, "ChatSocketClient", "Socket.IO", "消息与通话信令")
+    Component(ios_rtc, "WebRTCSession", "AVFoundation", "offer / answer / ICE")
+    Component(ios_session, "SessionStore", "Keychain", "JWT 与当前用户")
   }
 
-  Container_Boundary(users_bc, "users") {
-    Component(users_ctrl, "UsersController", "REST", "资料与查询")
-    Component(users_svc, "UsersService", "Service", "用户用例")
-  }
-
-  Container_Boundary(post_bc, "post") {
-    Component(post_ctrl, "PostController", "REST", "发帖 / Feed / explore")
-    Component(post_svc, "PostService", "Service", "发帖、读帖、审核钩子")
-    Component(fanout_svc, "FeedFanoutService", "Service", "进程内写 feed_entries")
-    Component(post_repo, "Post / Feed / Engagement repos", "Prisma", "social_posts、feed_entries、likes")
-  }
-
-  Container_Boundary(comments_bc, "comments") {
-    Component(comment_ctrl, "CommentController", "REST", "帖子评论")
-    Component(comment_svc, "CommentService", "Service", "评论用例")
-    Component(comment_repo, "CommentRepository", "Prisma", "post_comments")
-  }
-
-  Container_Boundary(search_bc, "search") {
-    Component(search_ctrl, "SearchController", "REST", "/api/v1/search")
-    Component(search_svc, "SearchService", "Service", "FTS5 + LIKE")
-  }
-
-  Container_Boundary(realtime_bc, "chats / websocket") {
-    Component(graphql_api, "GraphQL", "Apollo", "feed / reels")
-    Component(websocket, "ChatGateway", "Socket.IO", "消息与通话信令")
-    Component(chat_svc, "Chats / Messages services", "Service", "会话与消息")
-  }
-
-  Container_Boundary(shared_infra, "core") {
-    Component(prisma, "PrismaService", "SQLite", "统一持久化")
-    Component(mem_cache, "RedisService (memory)", "In-process", "缓存 / seen / offline buffer")
+  Container_Boundary(api_server, "API 服务 (com.chat)") {
+    Component(controllers, "REST 控制器", "Spring MVC", "auth users chats messages posts comments media search calls ai")
+    Component(websocket, "Socket.IO", "netty-socketio", "chat / message 事件；:9002")
+    Component(app_services, "应用服务", "@Service", "按 feature 编排；无业务规则外泄")
+    Component(domain_model, "领域模型", "JPA entities / VOs", "User Chat Message Post Comment Follow")
+    Component(domain_repos, "仓储接口", "domain.repository", "UserRepository ChatRepository …")
+    Component(infra_adapters, "基础设施", "infra/", "JPA Jwt SocketIoConfig Upstream WebClient")
+    ComponentDb(jpa_store, "持久化", "H2 / Postgres", "Liquibase；ddl-auto validate")
   }
 }
 
+Container_Ext(admin_app, "管理端", "Next.js", ":4001")
 Container_Ext(media_gen, "Media Gen", "Python", ":3456 可选")
 Container_Ext(vision, "Vision", "Python", ":8001 可选")
-Container_Ext(explore_ai, "Explore AI", "外部", "BFF 可选")
+Container_Ext(recommendation, "Recommendation", "Python", ":8000 可选")
+Container_Ext(ollama, "Ollama", "LLM", ":11434 可选")
 
-Rel(user, pages, "使用", "HTTPS")
+Rel(user_web, pages, "使用", "HTTPS")
+Rel(user_ios, ios_root, "使用")
 Rel(pages, feed_ui, "渲染")
 Rel(pages, chat_ui, "渲染")
 Rel(feed_ui, state, "读写")
 Rel(chat_ui, ws_client, "实时")
 Rel(state, api_client, "副作用")
-Rel(api_client, auth_ctrl, "REST")
-Rel(api_client, post_ctrl, "REST")
-Rel(api_client, comment_ctrl, "REST")
-Rel(api_client, search_ctrl, "REST")
-Rel(api_client, graphql_api, "GraphQL")
-Rel(ws_client, websocket, "WebSocket")
+Rel(api_client, controllers, "REST :9001")
+Rel(ws_client, websocket, "Socket.IO :9002")
 
-Rel(auth_ctrl, auth_svc, "调用")
-Rel(auth_svc, users_svc, "用户")
-Rel(users_svc, prisma, "Prisma")
-Rel(post_ctrl, post_svc, "调用")
-Rel(post_svc, post_repo, "持久化")
-Rel(post_svc, fanout_svc, "fan-out")
-Rel(post_svc, search_svc, "indexPost")
-Rel(fanout_svc, post_repo, "写 Feed")
-Rel(fanout_svc, mem_cache, "清 Feed 缓存")
-Rel(comment_ctrl, comment_svc, "调用")
-Rel(comment_svc, comment_repo, "Prisma")
-Rel(search_ctrl, search_svc, "调用")
-Rel(search_svc, prisma, "FTS / LIKE")
-Rel(post_repo, prisma, "委托")
-Rel(comment_repo, prisma, "委托")
-Rel(websocket, chat_svc, "调用")
-Rel(chat_svc, prisma, "Prisma")
-Rel(post_svc, vision, "审核", "可选")
-Rel(post_svc, media_gen, "生成", "可选")
-Rel(auth_svc, explore_ai, "BFF", "可选")
+Rel(ios_root, ios_features, "导航")
+Rel(ios_features, ios_api, "HTTP")
+Rel(ios_features, ios_socket, "实时")
+Rel(ios_features, ios_session, "读写会话")
+Rel(ios_rtc, ios_socket, "信令")
+Rel(ios_api, controllers, "REST :9001")
+Rel(ios_socket, websocket, "Socket.IO :9002")
 
-note right of web_app
-  Mobile / Admin 与 Web 同调 Nest；
-  业务域目录见 Glossary。
+Rel(admin_app, controllers, "REST")
+Rel(controllers, app_services, "调用")
+Rel(websocket, app_services, "消息写路径")
+Rel(app_services, domain_repos, "依赖")
+Rel(app_services, domain_model, "编排")
+Rel(infra_adapters, domain_repos, "实现")
+Rel(infra_adapters, jpa_store, "JPA")
+Rel(app_services, media_gen, "HTTP", "可选")
+Rel(app_services, vision, "HTTP", "可选")
+Rel(app_services, recommendation, "HTTP", "可选")
+Rel(app_services, ollama, "HTTP", "可选")
+
+note right of api_server
+  分层：controller → service → domain ← infra (+ mapper)。
+  限界上下文见 Glossary Preferred Terms。
+end note
+
+note right of ios_app
+  契约见 src/main/ios/docs/API-Contract.md。
 end note
 
 SHOW_LEGEND()
