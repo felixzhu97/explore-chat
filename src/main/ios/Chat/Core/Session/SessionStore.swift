@@ -75,6 +75,18 @@ final class SessionStore: ObservableObject {
     }
   }
 
+  /// Stores an Explore IAM access token, then loads `/auth/me` from Chat.
+  func applyIam(accessToken: String, refreshToken: String?) async throws {
+    self.accessToken = accessToken
+    keychain.set(accessToken, forKey: tokenKey)
+    if let refreshToken { keychain.set(refreshToken, forKey: refreshKey) }
+    guard let api else {
+      throw URLError(.badURL)
+    }
+    let envelope: UserEnvelope = try await api.get("auth/me")
+    apply(user: envelope.user, token: accessToken, refresh: refreshToken)
+  }
+
   func clear() {
     user = nil
     accessToken = nil

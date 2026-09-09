@@ -8,6 +8,7 @@ struct LoginView: View {
   @State private var password = "123456"
   @State private var errorMessage: String?
   @State private var isLoading = false
+  @State private var isIamLoading = false
 
   var body: some View {
     ZStack {
@@ -33,6 +34,12 @@ struct LoginView: View {
             Task { await login() }
           }
           .padding(.top, 2)
+          PrimaryPillButton(
+            title: "Sign in with IAM",
+            isLoading: isIamLoading
+          ) {
+            Task { await loginWithIam() }
+          }
           Button("Forgot password?") {}
             .font(.system(size: 13))
             .foregroundStyle(Color(hex: 0x262626))
@@ -71,6 +78,23 @@ struct LoginView: View {
       session.apply(session: dto)
       environment.analytics.track("auth_login")
     } catch {
+      errorMessage = error.localizedDescription
+    }
+  }
+
+  private func loginWithIam() async {
+    isIamLoading = true
+    errorMessage = nil
+    defer { isIamLoading = false }
+    do {
+      let iam = IamAuthService(config: environment.config)
+      let tokens = try await iam.signIn()
+      try await session.applyIam(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken)
+      environment.analytics.track("auth_login_iam")
+    } catch {
+      if case IamAuthService.AuthError.cancelled = error {
+        return
+      }
       errorMessage = error.localizedDescription
     }
   }

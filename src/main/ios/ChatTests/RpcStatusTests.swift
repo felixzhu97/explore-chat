@@ -30,7 +30,11 @@ final class RpcStatusTests: XCTestCase {
   func testShouldBuildApiV1FromBaseURL() {
     let config = AppConfig(
       apiBaseURL: URL(string: "http://localhost:9001")!,
-      socketURL: URL(string: "http://localhost:9002")!
+      socketURL: URL(string: "http://localhost:9002")!,
+      iamIssuerURL: URL(string: "http://localhost:9100")!,
+      iamClientId: "explore-chat-ios",
+      iamRedirectURI: "com.explore.chat://oauth/callback",
+      iamCallbackScheme: "com.explore.chat"
     )
     XCTAssertEqual(config.apiV1.absoluteString, "http://localhost:9001/api/v1")
   }
