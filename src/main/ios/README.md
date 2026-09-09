@@ -1,45 +1,41 @@
 # Chat iOS (SwiftUI)
 
-Native iOS client for Chat. Talks to the Spring API (`:9001`) and Socket.IO (`:9002`).
+Native Chat client with password login and **in-app** Explore IAM Sign in
+(Authorization Code + PKCE via `ASWebAuthenticationSession`).
+
+The IAM button opens a **system auth sheet** over the app (Google / Apple OAuth
+style), not an external Safari hand-off.
 
 ## Requirements
 
-- Xcode 16+
-- iOS 17+ simulator or device
-- Running Java API (`./gradlew bootRun` from repo root)
+- Xcode 16+ / [XcodeGen](https://github.com/yonaskolb/XcodeGen)
+- iOS 17+
+- Explore IAM (`http://localhost:9100`) and Chat API (`http://localhost:9001`)
+  with `CHAT_IAM_ENABLED=true`
 
-## Generate & open
-
-```bash
-cd src/main/ios
-xcodegen generate
-open Chat.xcworkspace 2>/dev/null || open Chat.xcodeproj
-```
-
-## Configure
-
-Defaults: `http://localhost:9001` and `http://localhost:9002`.
-
-Override with env vars when launching tests / schemes:
-
-- `API_BASE_URL`
-- `SOCKET_IO_URL`
-
-On a physical device, use your Mac LAN IP instead of `localhost`.
-
-## Test
+## Open
 
 ```bash
 cd src/main/ios
-xcodegen generate
-xcodebuild test -scheme Chat -destination 'platform=iOS Simulator,name=iPhone 16' -quiet
+xcodegen generate   # if Chat.xcodeproj is missing
+open Chat.xcodeproj
 ```
 
-## Layout
+## Sign in with IAM (self-test)
 
-- `Chat/App` — root navigation
-- `Chat/Core` — network, keychain, socket, analytics, RTC signaling
-- `Chat/Features/*` — Auth, Feed, Reels, Explore, Chat, Profile, Calls, …
-- `docs/API-Contract.md` — frozen REST / Socket contract
+1. Start IAM (`:9100`) and Chat (`:9001`).
+2. On the login screen, tap **Sign in with IAM** (below the password form,
+   after the “or” divider).
+3. Complete login in the system sheet:
+   - client: `explore-chat-ios`
+   - redirect: `com.explore.chat://oauth/callback`
+   - demo: `demo` / `demo-password`
+4. The app exchanges the code with PKCE, stores the IAM access token, and
+   loads `/api/v1/auth/me`.
+5. Cancel the sheet — stay on login with no error toast.
+6. Password login (`alice@example.com` / `123456`) still works independently.
 
-See repo Glossary for Preferred Terms. Expo `src/main/mobile` remains the Android / legacy client.
+## URL scheme
+
+`CFBundleURLTypes` registers `com.explore.chat` in [`project.yml`](project.yml).
+Regenerate the Xcode project after changing URL types.
