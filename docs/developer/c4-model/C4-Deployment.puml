@@ -24,8 +24,13 @@ Deployment_Node(dev_machine, "开发机", "macOS / Linux") {
     Container(web, "Web / Admin", "Next.js", "http://localhost:4000（Admin :4001）")
   }
 
+  Deployment_Node(sim, "iOS Simulator", "Xcode") {
+    Container(ios, "Chat iOS", "SwiftUI", "PKCE → IAM；Bearer → :9001")
+  }
+
   Deployment_Node(jvm, "JVM 进程", "Gradle / Spring Boot") {
     Container(api, "API 服务", "Spring Boot", "HOST=0.0.0.0 PORT=9001；Socket.IO :9002")
+    Container(iam, "Explore IAM", "Spring Boot", "OIDC Provider :9100")
   }
 
   Deployment_Node(node_procs, "Node 进程", "pnpm") {
@@ -48,6 +53,9 @@ Deployment_Node(dev_machine, "开发机", "macOS / Linux") {
 
 Rel(web, api, "REST / Socket.IO", "localhost:9001 / :9002")
 Rel(metro, api, "REST / WS", "localhost:9001 / :9002")
+Rel(ios, iam, "OIDC + PKCE", "localhost:9100")
+Rel(ios, api, "Bearer REST", "localhost:9001")
+Rel(api, iam, "JWKS validate", "localhost:9100")
 Rel(api, h2db, "JPA", "H2 file 或 Postgres")
 Rel(api, uploads, "UPLOAD_DIR")
 Rel(api, rec, "HTTP", "可选")
