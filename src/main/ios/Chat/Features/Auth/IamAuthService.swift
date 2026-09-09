@@ -3,7 +3,14 @@ import AuthenticationServices
 import CryptoKit
 import UIKit
 
-/// Authorization Code + PKCE against Explore IAM for the Chat public client.
+/// In-app Explore IAM Sign in (Authorization Code + PKCE).
+///
+/// Uses `ASWebAuthenticationSession` — the same system auth sheet pattern as
+/// Sign in with Google / Apple OAuth — so login stays attached to the app
+/// instead of jumping to external Safari.
+///
+/// - Important: `prefersEphemeralWebBrowserSession = false` keeps SSO cookies
+///   so returning users rarely re-enter credentials.
 @MainActor
 final class IamAuthService: NSObject {
   struct Tokens: Sendable {
@@ -14,14 +21,26 @@ final class IamAuthService: NSObject {
 
   enum AuthError: LocalizedError {
     case missingCode
+    case stateMismatch
+    case authorizationDenied(String)
     case tokenExchangeFailed(String)
     case cancelled
+    case presentationFailed
 
     var errorDescription: String? {
       switch self {
-      case .missingCode: return "IAM login did not return an authorization code."
-      case .tokenExchangeFailed(let detail): return detail
-      case .cancelled: return "Sign in was cancelled."
+      case .missingCode:
+        return "Sign in did not return an authorization code. Try again."
+      case .stateMismatch:
+        return "Sign in could not be verified. Try again."
+      case .authorizationDenied(let detail):
+        return detail.isEmpty ? "Access was denied." : detail
+      case .tokenExchangeFailed(let detail):
+        return detail.isEmpty ? "Could not finish sign in." : detail
+      case .cancelled:
+        return "Sign in was cancelled."
+      case .presentationFailed:
+        return "Could not open the sign-in sheet. Try again."
       }
     }
   }
@@ -34,10 +53,13 @@ final class IamAuthService: NSObject {
   }
 
   func signIn() async throws -> Tokens {
-    let verifier = Self.randomVerifier()
-    let challenge = Self.challenge(for: verifier)
-    let state = Self.randomVerifier()
-    var components = URLComponents(url: config.iamIssuerURL.appendingPathComponent("oauth2/authorize"), resolvingAgainstBaseURL: false)!
+    let verifier = Pkce.randomVerifier()
+    let challenge = Pkce.challenge(for: verifier)
+    let state = Pkce.randomVerifier()
+    var components = URLComponents(
+      url: config.iamIssuerURL.appendingPathComponent("oauth2/authorize"),
+      resolvingAgainstBaseURL: false
+    )!
     components.queryItems = [
       URLQueryItem(name: "response_type", value: "code"),
       URLQueryItem(name: "client_id", value: config.iamClientId),
@@ -51,41 +73,57 @@ final class IamAuthService: NSObject {
       throw AuthError.tokenExchangeFailed("Invalid authorize URL")
     }
 
-    let callback = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<URL, Error>) in
+    let callback = try await presentAuthorization(url: authorizeURL)
+    let items = URLComponents(url: callback, resolvingAgainstBaseURL: false)?.queryItems ?? []
+    if let oauthError = items.first(where: { $0.name == "error" })?.value {
+      let description = items.first(where: { $0.name == "error_description" })?.value
+        ?? oauthError
+      throw AuthError.authorizationDenied(description.replacingOccurrences(of: "+", with: " "))
+    }
+    let returnedState = items.first(where: { $0.name == "state" })?.value
+    guard returnedState == state else { throw AuthError.stateMismatch }
+    let code = items.first(where: { $0.name == "code" })?.value
+    guard let code, !code.isEmpty else { throw AuthError.missingCode }
+    return try await exchange(code: code, verifier: verifier)
+  }
+
+  private func presentAuthorization(url: URL) async throws -> URL {
+    try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<URL, Error>) in
+      var resumed = false
+      let finish: (Result<URL, Error>) -> Void = { result in
+        guard !resumed else { return }
+        resumed = true
+        continuation.resume(with: result)
+      }
+
       let session = ASWebAuthenticationSession(
-        url: authorizeURL,
+        url: url,
         callbackURLScheme: config.iamCallbackScheme
-      ) { url, error in
+      ) { callbackURL, error in
         if let error {
           let ns = error as NSError
           if ns.domain == ASWebAuthenticationSessionErrorDomain,
              ns.code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
-            continuation.resume(throwing: AuthError.cancelled)
+            finish(.failure(AuthError.cancelled))
           } else {
-            continuation.resume(throwing: error)
+            finish(.failure(error))
           }
           return
         }
-        guard let url else {
-          continuation.resume(throwing: AuthError.missingCode)
+        guard let callbackURL else {
+          finish(.failure(AuthError.missingCode))
           return
         }
-        continuation.resume(returning: url)
+        finish(.success(callbackURL))
       }
       session.presentationContextProvider = self
+      // Shared cookies → Google-like SSO when the user already signed in to IAM.
       session.prefersEphemeralWebBrowserSession = false
       self.session = session
       if !session.start() {
-        continuation.resume(throwing: AuthError.tokenExchangeFailed("Could not start login session"))
+        finish(.failure(AuthError.presentationFailed))
       }
     }
-
-    let code = URLComponents(url: callback, resolvingAgainstBaseURL: false)?
-      .queryItems?
-      .first(where: { $0.name == "code" })?
-      .value
-    guard let code, !code.isEmpty else { throw AuthError.missingCode }
-    return try await exchange(code: code, verifier: verifier)
   }
 
   private func exchange(code: String, verifier: String) async throws -> Tokens {
@@ -118,25 +156,30 @@ final class IamAuthService: NSObject {
       idToken: json?["id_token"] as? String
     )
   }
+}
 
-  private static func randomVerifier() -> String {
+extension IamAuthService: ASWebAuthenticationPresentationContextProviding {
+  func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+    let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+    let foreground = scenes.first { $0.activationState == .foregroundActive } ?? scenes.first
+    if let key = foreground?.windows.first(where: \.isKeyWindow) {
+      return key
+    }
+    return foreground?.windows.first ?? ASPresentationAnchor()
+  }
+}
+
+/// PKCE helpers (S256). Kept local to Chat — no shared SPM with AI.
+enum Pkce {
+  static func randomVerifier() -> String {
     var bytes = [UInt8](repeating: 0, count: 32)
     _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
     return Data(bytes).base64URLEncodedString()
   }
 
-  private static func challenge(for verifier: String) -> String {
+  static func challenge(for verifier: String) -> String {
     let digest = SHA256.hash(data: Data(verifier.utf8))
     return Data(digest).base64URLEncodedString()
-  }
-}
-
-extension IamAuthService: ASWebAuthenticationPresentationContextProviding {
-  func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-    UIApplication.shared.connectedScenes
-      .compactMap { $0 as? UIWindowScene }
-      .flatMap(\.windows)
-      .first { $0.isKeyWindow } ?? ASPresentationAnchor()
   }
 }
 

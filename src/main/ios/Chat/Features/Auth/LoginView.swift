@@ -10,6 +10,8 @@ struct LoginView: View {
   @State private var isLoading = false
   @State private var isIamLoading = false
 
+  private var busy: Bool { isLoading || isIamLoading }
+
   var body: some View {
     ZStack {
       AppTheme.pageBackground.ignoresSafeArea()
@@ -26,6 +28,7 @@ struct LoginView: View {
               .font(.footnote)
               .foregroundStyle(AppTheme.likeRed)
               .frame(maxWidth: .infinity, alignment: .leading)
+              .accessibilityLabel(errorMessage)
           }
           PrimaryPillButton(
             title: L10n.t("login", language: settings.languageCode),
@@ -34,16 +37,26 @@ struct LoginView: View {
             Task { await login() }
           }
           .padding(.top, 2)
-          PrimaryPillButton(
+          .disabled(busy && !isLoading)
+
+          authDivider
+
+          // Google-style secondary provider button: outline + identity mark.
+          OutlinePillButton(
             title: "Sign in with IAM",
-            isLoading: isIamLoading
+            isLoading: isIamLoading,
+            systemImage: "person.badge.key.fill"
           ) {
             Task { await loginWithIam() }
           }
+          .disabled(busy && !isIamLoading)
+          .accessibilityHint("Opens an in-app sign-in sheet for Explore IAM")
+
           Button("Forgot password?") {}
             .font(.system(size: 13))
             .foregroundStyle(Color(hex: 0x262626))
             .padding(.top, 4)
+            .disabled(busy)
         }
         .padding(.horizontal, 24)
 
@@ -58,12 +71,28 @@ struct LoginView: View {
               .frame(height: 44)
           }
           .buttonStyle(ThemeOutlineButtonStyle(fullWidth: true))
+          .disabled(busy)
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 24)
       }
     }
     .toolbar(.hidden, for: .navigationBar)
+  }
+
+  private var authDivider: some View {
+    HStack(spacing: 12) {
+      Rectangle()
+        .fill(AppTheme.border.opacity(0.8))
+        .frame(height: 1)
+      Text("or")
+        .font(.system(size: 13, weight: .medium))
+        .foregroundStyle(AppTheme.secondaryText)
+      Rectangle()
+        .fill(AppTheme.border.opacity(0.8))
+        .frame(height: 1)
+    }
+    .padding(.vertical, 6)
   }
 
   private func login() async {

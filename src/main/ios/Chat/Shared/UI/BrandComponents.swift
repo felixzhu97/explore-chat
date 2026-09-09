@@ -59,23 +59,39 @@ struct PrimaryPillButton: View {
 
 struct OutlinePillButton: View {
   let title: String
+  var isLoading = false
+  var systemImage: String? = nil
   var action: () -> Void
 
   var body: some View {
     Button(action: action) {
-      Text(title)
-        .font(.system(size: 15, weight: .semibold))
-        .foregroundStyle(AppTheme.brandInk)
-        .frame(maxWidth: .infinity)
-        .frame(height: 44)
-        .background(AppTheme.brandPaper)
-        .overlay(
-          RoundedRectangle(cornerRadius: 10, style: .continuous)
-            .stroke(AppTheme.brandInk, lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+      ZStack {
+        if isLoading {
+          ProgressView()
+            .tint(AppTheme.brandInk)
+        } else {
+          HStack(spacing: 8) {
+            if let systemImage {
+              Image(systemName: systemImage)
+                .font(.system(size: 16, weight: .semibold))
+            }
+            Text(title)
+              .font(.system(size: 15, weight: .semibold))
+          }
+          .foregroundStyle(AppTheme.brandInk)
+        }
+      }
+      .frame(maxWidth: .infinity)
+      .frame(height: 44)
+      .background(AppTheme.brandPaper)
+      .overlay(
+        RoundedRectangle(cornerRadius: 10, style: .continuous)
+          .stroke(AppTheme.brandInk, lineWidth: 1)
+      )
+      .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
     .buttonStyle(.plain)
+    .disabled(isLoading)
   }
 }
 
