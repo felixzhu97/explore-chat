@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "chat.upstreams")
 public class UpstreamProperties {
 
-  private String mediaGen = "http://localhost:3456";
+  private String mediaGen = "http://localhost:8003";
   private String vision = "http://localhost:8001";
   private String recommendation = "http://localhost:8000";
   private String ollama = "http://localhost:11434";

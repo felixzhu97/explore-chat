@@ -63,9 +63,11 @@ pnpm test
 | App / service | Example |
 | ------------- | ------- |
 | Java API | [`src/main/resources/application.yml`](src/main/resources/application.yml) |
+| Explore IAM (optional) | `CHAT_IAM_ENABLED=true` · `CHAT_IAM_ISSUER_URI=http://localhost:9100` (native Sign in with IAM) |
 | Web | `NEXT_PUBLIC_API_URL=http://localhost:9001/api/v1` · `NEXT_PUBLIC_SOCKET_IO_URL=http://localhost:9002` |
 | Admin | `NEXT_PUBLIC_API_URL=http://localhost:9001/api/v1` |
 | Mobile (Expo) | `EXPO_PUBLIC_API_URL=http://localhost:9001` · `EXPO_PUBLIC_SOCKET_IO_URL=http://localhost:9002` |
+| iOS (native) | IAM client `explore-chat-ios` · redirect `com.explore.chat://oauth/callback` |
 
 ## Screenshots
 
