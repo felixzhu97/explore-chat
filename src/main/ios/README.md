@@ -3,6 +3,11 @@
 Native Chat client with password login and **in-app** Explore IAM Sign in
 (Authorization Code + PKCE via `ASWebAuthenticationSession`).
 
+Layout mirrors Apple’s [Food Truck](https://github.com/apple/sample-food-truck)
+sample: domain folders under `Chat/` (like `App/`), plus `Navigation/`,
+`General/`, and `Brand/`. Files inside each folder stay flat. Entry is
+`Chat/ExploreChatApp.swift`; keep `Assets.xcassets` and `Resources/` as bundles.
+
 The IAM button opens a **system auth sheet** over the app (Google / Apple OAuth
 style), not an external Safari hand-off.
 
