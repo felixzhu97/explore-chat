@@ -36,6 +36,10 @@ chat:
     refresh-secret: "dev-refresh-secret-change-me-32byte"
     access-ttl-seconds: 3600
     refresh-ttl-seconds: 604800
+  iam:
+    # Accept Explore IAM access tokens alongside Chat HS JWTs (native Sign in with IAM).
+    enabled: ${CHAT_IAM_ENABLED:true}
+    issuer-uri: ${CHAT_IAM_ISSUER_URI:http://localhost:9100}
   kafka:
     # Empty KAFKA_BROKERS disables Kafka (no-op publisher). Unset defaults to localhost:9092.
     brokers: ${KAFKA_BROKERS:localhost:9092}
@@ -55,7 +59,7 @@ chat:
     upload-dir: uploads
     public-base-url: http://localhost:9001/uploads
   upstreams:
-    media-gen: http://localhost:3456
+    media-gen: http://localhost:8003
     vision: http://localhost:8001
     recommendation: http://localhost:8000
     ollama: http://localhost:11434
