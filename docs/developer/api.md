@@ -141,7 +141,7 @@ Optional helpers live in sibling
 | Recommendation | 8000         | Feed/Explore 排序与召回 |
 | Vision         | 8001         | 标签与 NSFW |
 | RAG            | 8002         | 语义搜索 / 问答 |
-| Media Gen      | 3456         | 图片 / 视频 / 语音 |
+| Media Gen      | 8003         | 图片 / 视频 / 语音 |
 
 客户端应优先经 Spring API，而不是在浏览器硬编码旁路服务密钥。
 See [python-services.md](./python-services.md).

@@ -12,13 +12,14 @@ Chat 的架构视图。源文件为 `.puml`；PNG 可选。术语见 [Glossary](
 
 | 文件                               | 层级       | 说明                                                |
 | ---------------------------------- | ---------- | --------------------------------------------------- |
-| `C1-Context.puml`                  | C1         | 系统上下文                                          |
-| `C2-Container.puml`                | C2         | 容器（Web / Admin / Mobile / Spring :9001 / 旁路） |
-| `C3-Component.puml`                | C3         | 组件（Web + Expo + iOS + Spring）               |
+| `C1-Context.puml`                  | C1         | 系统上下文（含 Explore IAM）                    |
+| `C2-Container.puml`                | C2         | 容器（Web / Admin / Expo / SwiftUI iOS / Spring / IAM） |
+| `C3-Component.puml`                | C3         | 组件（Web + Expo + iOS + 双轨 JWT）             |
 | `C4-Code-Domain-Model.puml`        | Code       | 领域模型（对齐当前代码）                            |
 | `C4-Code-Domain-Model-Plan.puml`   | Code       | 规划差分（少 AR、简化命名；绿增/红删）              |
-| `C4-Deployment.puml`               | Deployment | 本地开发部署（含生产简述）                          |
-| `C4-Dynamic-Auth-Login.puml`       | Dynamic    | 登录 → JWT                                          |
+| `C4-Deployment.puml`               | Deployment | 本地开发（IAM :9100 + Chat :9001）              |
+| `C4-Dynamic-Auth-Login.puml`       | Dynamic    | 密码 HS JWT **或** IAM Sign in（alt）           |
+| `C4-Dynamic-IamSignIn.puml`        | Dynamic    | Chat iOS PKCE → IAM → Bearer `/auth/me`         |
 | `C4-Dynamic-Post-Create-Feed.puml` | Dynamic    | 发帖 → JPA → fan-out → 读帖                         |
 | `C4-Dynamic-Search-FTS.puml`       | Dynamic    | 搜索（JPA LIKE；文件名历史遗留）                    |
 | `style.puml`                       | Shared     | 结构图规范副本（内联用）                            |
@@ -75,7 +76,7 @@ cd docs/developer/c4-model && plantuml -tpng -o png C4-Code-Domain-Model-Plan.pu
 
 ![C4-Deployment](png/C4-Deployment.png)
 
-本地：`pnpm` 启 Web `:4000` + Spring API `:9001` / Socket `:9002` + H2（或 `DATABASE_URL` Postgres）。生产拓扑以图内 note 简述；**不**默认 docker compose。
+本地：`pnpm` 启 Web `:4000` + Spring API `:9001` / Socket `:9002` + Explore IAM `:9100` + H2（或 `DATABASE_URL` Postgres）。生产拓扑以图内 note 简述；**不**默认 docker compose。
 
 ---
 
@@ -87,7 +88,13 @@ cd docs/developer/c4-model && plantuml -tpng -o png C4-Code-Domain-Model-Plan.pu
 
 ![C4-Dynamic-Auth-Login](png/C4-Dynamic-Auth-Login.png)
 
-用户提交凭据 → `POST /api/v1/auth/login` → JPA 读 `chat_user` → 签发 JWT。
+密码路径：`POST /api/v1/auth/login` → HS JWT。IAM 路径：native PKCE → Bearer `GET /auth/me`。
+
+### IAM Sign In (native)
+
+![C4-Dynamic-IamSignIn](png/C4-Dynamic-IamSignIn.png)
+
+Chat iOS `IamAuthService` → Explore IAM → Bearer `/api/v1/auth/me` → 主 Tab。
 
 ### Post Create → Feed
 
@@ -111,7 +118,7 @@ cd docs/developer/c4-model && plantuml -tpng -o png C4-Code-Domain-Model-Plan.pu
 | Mobile       | Expo / React Native (`src/main/mobile`)                                                        |
 | API          | Spring Boot；REST / Socket.IO；`:9001`                                         |
 | 持久化       | H2 / Postgres（JPA + Liquibase）                                                       |
-| 旁路（可选） | [explore-ml](https://github.com/felixzhu97/explore-ml) `python_ml/` — recommendation `:8000`、vision `:8001`、rag `:8002`、media-gen `:3456` |
+| 旁路（可选） | [explore-ml](https://github.com/felixzhu97/explore-ml) `python_ml/` — recommendation `:8000`、vision `:8001`、rag `:8002`、media-gen `:8003` |
 | AI           | 本地 Ollama；Explore AI 经 Spring BFF                                                  |
 
 限界上下文（Java）：`auth` / `users` / `post` / `comments` / `chats` / `search` / `notifications` / …
