@@ -1,0 +1,33 @@
+@startuml C4-Dynamic-IamSignIn
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+
+title Dynamic — Chat iOS Sign in with Explore IAM (PKCE)
+
+actor "User" as user
+participant "Chat iOS\nIamAuthService" as ios <<ui>>
+participant "Explore IAM\n:9100" as iam <<java>>
+participant "Chat API\n:9001" as api <<java>>
+database "H2 / Postgres" as db <<db>>
+
+user -> ios: 1. Tap Sign in with IAM
+ios -> ios: 2. PKCE verifier / challenge / state
+ios -> iam: 3. ASWebAuthenticationSession\nGET /oauth2/authorize\nclient_id=explore-chat-ios
+iam --> ios: 4. /login SPA
+user -> iam: 5. demo / demo-password
+iam --> ios: 6. com.explore.chat://oauth/callback?code=
+ios -> iam: 7. POST /oauth2/token + code_verifier
+iam --> ios: 8. access_token (email/profile)
+ios -> api: 9. GET /api/v1/auth/me\nAuthorization: Bearer
+api -> iam: 10. JWKS / issuer validate
+api -> db: 11. IamUserProvisioner → ChatUser
+api --> ios: 12. 200 me
+ios --> user: 13. Navigate main tabs
+
+note over ios, api
+  Dual-track filter keeps password HS JWT.
+  Preferred client: explore-chat-ios.
+end note
+
+@enduml

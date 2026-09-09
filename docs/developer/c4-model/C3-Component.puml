@@ -53,19 +53,21 @@ System_Boundary(chat, "Chat") {
   Container_Boundary(ios_app, "iOS 应用 (src/main/ios)") {
     Component(ios_root, "App / RootView / Tabs", "SwiftUI", "鉴权门禁、主 Tab、Call 覆盖层")
     Component(ios_features, "Features", "SwiftUI", "Auth Feed Reels Explore Chat Profile Calls")
-    Component(ios_api, "APIClient", "URLSession", "REST /api/v1 + RpcStatus")
+    Component(ios_iam, "IamAuthService", "Swift", "PKCE · ASWebAuthenticationSession · explore-chat-ios")
+    Component(ios_api, "APIClient", "URLSession", "REST /api/v1 + RpcStatus · Bearer")
     Component(ios_socket, "ChatSocketClient", "Socket.IO", "消息与通话信令")
     Component(ios_rtc, "WebRTCSession", "AVFoundation", "offer / answer / ICE")
-    Component(ios_session, "SessionStore", "Keychain", "JWT 与当前用户")
+    Component(ios_session, "SessionStore", "Keychain", "Chat HS JWT 或 IAM access_token")
   }
 
   Container_Boundary(api_server, "API 服务 (com.chat)") {
     Component(controllers, "REST 控制器", "Spring MVC", "auth users chats messages posts comments media search calls ai")
     Component(websocket, "Socket.IO", "netty-socketio", "chat / message 事件；:9002")
-    Component(app_services, "应用服务", "@Service", "按 feature 编排；无业务规则外泄")
+    Component(app_services, "应用服务", "@Service", "按 feature 编排；含 IamUserProvisioner")
     Component(domain_model, "领域模型", "JPA entities / VOs", "ChatUser Chat Message SocialPost …")
     Component(domain_repos, "仓储接口", "domain.repository", "UserRepository ChatRepository …")
-    Component(infra_adapters, "基础设施", "infra/", "SpringData* Jwt SocketIoConfig WebClient")
+    Component(jwt_filter, "JwtAuthenticationFilter", "security", "双轨：Chat HS JWT 或 IAM JWT")
+    Component(infra_adapters, "基础设施", "infra/", "SpringData* Jwt SocketIoConfig WebClient IamJwtConfig")
     ComponentDb(jpa_store, "持久化", "H2 / Postgres", "Liquibase；ddl-auto validate")
   }
 
@@ -73,7 +75,8 @@ System_Boundary(chat, "Chat") {
 }
 
 Container_Ext(admin_app, "管理端", "Next.js", ":4001")
-Container_Ext(media_gen, "Media Gen", "explore-ml", ":3456 可选")
+Container_Ext(explore_iam, "Explore IAM", "OIDC / JWKS", ":9100")
+Container_Ext(media_gen, "Media Gen", "explore-ml", ":8003 可选")
 Container_Ext(vision, "Vision", "explore-ml", ":8001 可选")
 Container_Ext(recommendation, "Recommendation", "explore-ml", ":8000 可选")
 Container_Ext(ollama, "Ollama", "LLM", ":11434 可选")
@@ -113,6 +116,8 @@ Rel(api_client, im_contract, "对齐字段", "手写")
 Rel(ws_client, im_contract, "事件名", "手写")
 
 Rel(ios_root, ios_features, "导航")
+Rel(ios_features, ios_iam, "Sign in with IAM")
+Rel(ios_iam, explore_iam, "authorize + token PKCE", "HTTPS")
 Rel(ios_features, ios_api, "HTTP")
 Rel(ios_features, ios_socket, "实时")
 Rel(ios_features, ios_session, "读写会话")
@@ -121,6 +126,9 @@ Rel(ios_api, controllers, "REST :9001")
 Rel(ios_socket, websocket, "Socket.IO :9002")
 
 Rel(admin_app, controllers, "REST")
+Rel(controllers, jwt_filter, "Bearer 鉴权")
+Rel(jwt_filter, explore_iam, "IAM JWT JWKS", "HTTPS")
+Rel(jwt_filter, app_services, "IamUserProvisioner → ChatUser")
 Rel(controllers, app_services, "调用")
 Rel(websocket, app_services, "消息写路径")
 Rel(app_services, domain_repos, "依赖")
@@ -134,6 +142,7 @@ Rel(app_services, ollama, "HTTP", "可选")
 
 note right of api_server
   分层：controller → service → domain ← infra (+ mapper)。
+  Auth 双轨：password HS JWT 或 IAM Bearer。
   限界上下文见 Glossary Preferred Terms。
 end note
 

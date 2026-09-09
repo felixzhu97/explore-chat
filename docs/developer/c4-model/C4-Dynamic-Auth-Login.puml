@@ -3,30 +3,45 @@
 skinparam backgroundColor #FFFFFF
 skinparam shadowing false
 
-title Dynamic — Auth login → JWT
+title Dynamic — Auth login (password HS JWT or IAM Sign in)
 
 actor "用户" as user
-participant "Web / Mobile" as ui <<ui>>
+participant "Web / Mobile / iOS" as ui <<ui>>
 participant "AuthController" as authCtrl <<java>>
 participant "AuthService" as authSvc <<java>>
 participant "UsersService" as usersSvc <<java>>
+participant "Explore IAM\n:9100" as iam <<java>>
+participant "JwtAuthenticationFilter\n+ IamUserProvisioner" as jwt <<java>>
 database "H2 / Postgres\nJPA" as db <<db>>
 
-== 登录 ==
-user -> ui : 提交 email / password
-ui -> authCtrl : POST /api/v1/auth/login
-authCtrl -> authSvc : login(credentials)
-authSvc -> usersSvc : findByEmail
-usersSvc -> db : SELECT chat_user
-db --> usersSvc : ChatUser
-authSvc -> authSvc : verify password + issue JWT
-authSvc --> authCtrl : accessToken / refreshToken
-authCtrl --> ui : 200 + tokens
-ui --> user : 进入主站 / Feed
+alt Password login (Chat HS JWT)
+  user -> ui : 提交 email / password
+  ui -> authCtrl : POST /api/v1/auth/login
+  authCtrl -> authSvc : login(credentials)
+  authSvc -> usersSvc : findByEmail
+  usersSvc -> db : SELECT chat_user
+  db --> usersSvc : ChatUser
+  authSvc -> authSvc : verify password + issue JWT
+  authSvc --> authCtrl : accessToken / refreshToken
+  authCtrl --> ui : 200 + tokens
+  ui --> user : 进入主站 / Feed
+else IAM Sign in (native PKCE + Bearer)
+  user -> ui : Sign in with IAM
+  ui -> iam : authorize + PKCE\n(explore-chat-ios)
+  user -> iam : demo / demo-password
+  iam --> ui : code → access_token
+  ui -> authCtrl : GET /api/v1/auth/me\nAuthorization: Bearer (IAM)
+  authCtrl -> jwt : validate IAM JWT
+  jwt -> iam : JWKS (lazy)
+  jwt -> db : provision / link ChatUser
+  authCtrl --> ui : 200 me
+  ui --> user : 进入主站 / tabs
+end
 
 note over ui, db
   Preferred Term: Auth。
-  本地无需外部 IdP。
+  本地仍可无外部 IdP（密码路径）。
+  IAM 路径与 AI iOS 对称。
 end note
 
 @enduml
