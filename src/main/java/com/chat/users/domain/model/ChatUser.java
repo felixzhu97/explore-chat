@@ -58,6 +58,19 @@ public class ChatUser extends AbstractEntity {
   }
 
   /**
+   * Registers a user provisioned from Explore IAM (no password login until they set one).
+   *
+   * @param username unique username (often derived from IAM subject)
+   * @param email unique email from the IAM ID token / userinfo
+   * @param unusablePasswordHash random encoded hash so password login cannot succeed by guess
+   * @return a new {@code ChatUser}
+   */
+  public static ChatUser registerFromIam(
+      String username, String email, String unusablePasswordHash) {
+    return register(username, email, unusablePasswordHash);
+  }
+
+  /**
    * Updates mutable profile fields when non-null values are provided.
    *
    * @param username new username, or blank to keep current

@@ -36,6 +36,10 @@ targets:
         NSPhotoLibraryUsageDescription: Chat needs photos for posts and avatars.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
+        CFBundleURLTypes:
+          - CFBundleURLName: explore-chat-iam
+            CFBundleURLSchemes:
+              - com.explore.chat
         UIAppFonts:
           - GrandHotel-Regular.ttf
     settings:

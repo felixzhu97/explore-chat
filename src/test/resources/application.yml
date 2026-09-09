@@ -2,6 +2,8 @@ chat:
   socketio:
     enabled: false
   demo-seed: false
+  iam:
+    enabled: false
   kafka:
     brokers: []
 
