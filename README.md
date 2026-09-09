@@ -67,7 +67,7 @@ pnpm test
 | Web | `NEXT_PUBLIC_API_URL=http://localhost:9001/api/v1` · `NEXT_PUBLIC_SOCKET_IO_URL=http://localhost:9002` |
 | Admin | `NEXT_PUBLIC_API_URL=http://localhost:9001/api/v1` |
 | Mobile (Expo) | `EXPO_PUBLIC_API_URL=http://localhost:9001` · `EXPO_PUBLIC_SOCKET_IO_URL=http://localhost:9002` |
-| iOS (native) | IAM client `explore-chat-ios` · redirect `com.explore.chat://oauth/callback` |
+| iOS (native) | IAM client `explore-chat-ios` · redirect `com.explore.chat://oauth/callback` · in-app `ASWebAuthenticationSession` ([iOS README](src/main/ios/README.md)) |
 
 ## Screenshots
 
