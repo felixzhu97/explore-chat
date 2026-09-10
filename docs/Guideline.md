@@ -10,7 +10,7 @@ A social messaging product defines how people publish content, discover others, 
 
 **Keep one client-facing API boundary.**
 
-Web, Mobile, and Admin obtain Feed, Chat, Call, Media, and AI capabilities through Spring `/api/v1` (REST and Socket.IO). Never call media-gen, vision, recommendation, RAG, or Explore AI from the client. Upstream credentials stay on the server.
+Web, Mobile, and Admin obtain Feed, Chat, Call, Media, and AI capabilities through Spring `/api/v1` (REST and Socket.IO). Never call image-playground, speech, video, vision, recommendation, RAG, or Explore AI from the client. Upstream credentials stay on the server.
 
 **Keep people in control of conversation and publishing state.**
 

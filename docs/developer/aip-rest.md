@@ -52,28 +52,28 @@ and `src/main/ios/Chat/Core/Network/RpcStatus.swift`.
 
 Optional FastAPI helpers live in sibling
 [explore-ml](https://github.com/felixzhu97/explore-ml) under
-`python_ml/{recommendation,vision,rag,media-gen}`.
+`python_ml/{recommendation,vision,rag,image-playground,speech,video}`.
 Clients still call the Spring API only; the API calls these over loopback with **snake_case** JSON.
 
-| Service        | Legacy                         | AIP                                      |
-| -------------- | ------------------------------ | ---------------------------------------- |
-| recommendation | `POST /v1/feed/rank`           | `POST /api/v1/feeds:rank`                |
-| recommendation | `POST /v1/explore/rank`        | `POST /api/v1/explores:rank`             |
-| recommendation | `POST /v1/reels/rank`          | `POST /api/v1/reels:rank`                |
-| recommendation | `POST /v1/feed/recall`         | `POST /api/v1/feeds:recall`              |
-| vision         | `POST /predict`                | `POST /api/v1/images:predict`            |
-| vision         | `POST /moderate`               | `POST /api/v1/images:moderate`           |
-| vision         | `POST /moderate-video`         | `POST /api/v1/videos:moderate`           |
-| media-gen      | `POST /image/generate`         | `POST /api/v1/images:generate`           |
-| media-gen      | `GET /image/generate/{id}`     | `GET /api/v1/imageJobs/{image_job}`      |
-| media-gen      | `POST /video/generate`         | `POST /api/v1/videos:generate`           |
-| media-gen      | `GET /video/generate/{id}`     | `GET /api/v1/videoJobs/{video_job}`      |
-| media-gen      | `POST /voice/synthesize`       | `POST /api/v1/voices:synthesize`         |
-| rag            | `POST /api/v1/documents/upload`| `POST /api/v1/documents`                 |
-| rag            | list `skip`/`limit`            | `page_size` / `page_token`               |
-| rag            | `POST /api/v1/query`           | `POST /api/v1/documents:query`           |
-| rag            | `POST /api/v1/crawler/scrape`  | `POST /api/v1/webpages:scrape`           |
-| rag            | `POST /api/v1/sync/posts`      | `POST /api/v1/posts:sync`                |
+| Service          | Legacy                         | AIP                                      |
+| ---------------- | ------------------------------ | ---------------------------------------- |
+| recommendation   | `POST /v1/feed/rank`           | `POST /api/v1/feeds:rank`                |
+| recommendation   | `POST /v1/explore/rank`        | `POST /api/v1/explores:rank`             |
+| recommendation   | `POST /v1/reels/rank`          | `POST /api/v1/reels:rank`                |
+| recommendation   | `POST /v1/feed/recall`         | `POST /api/v1/feeds:recall`              |
+| vision           | `POST /predict`                | `POST /api/v1/images:predict`            |
+| vision           | `POST /moderate`               | `POST /api/v1/images:moderate`           |
+| vision           | `POST /moderate-video`         | `POST /api/v1/videos:moderate`           |
+| image-playground | `POST /image/generate`         | `POST /api/v1/images:generate`           |
+| image-playground | `GET /image/generate/{id}`     | `GET /api/v1/imageJobs/{image_job}`      |
+| video            | `POST /video/generate`         | `POST /api/v1/videos:generate`           |
+| video            | `GET /video/generate/{id}`     | `GET /api/v1/videoJobs/{video_job}`      |
+| speech           | `POST /voice/synthesize`       | `POST /api/v1/voices:synthesize`         |
+| rag              | `POST /api/v1/documents/upload`| `POST /api/v1/documents`                 |
+| rag              | list `skip`/`limit`            | `page_size` / `page_token`               |
+| rag              | `POST /api/v1/query`           | `POST /api/v1/documents:query`           |
+| rag              | `POST /api/v1/crawler/scrape`  | `POST /api/v1/webpages:scrape`           |
+| rag              | `POST /api/v1/sync/posts`      | `POST /api/v1/posts:sync`                |
 
 Each helper ships `aip/` (`rpc_status`, exception handlers, `page_token` for RAG lists).
 `/health` and `/metrics` stay unversioned.

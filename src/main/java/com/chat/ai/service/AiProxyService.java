@@ -27,7 +27,15 @@ public class AiProxyService {
   }
 
   public Map<?, ?> generateImage(Map<String, Object> body) {
-    return postJson(upstreams.getMediaGen() + "/api/v1/images:generate", body);
+    return postJson(upstreams.getImagePlayground() + "/api/v1/images:generate", body);
+  }
+
+  public Map<?, ?> synthesizeVoice(Map<String, Object> body) {
+    return postJson(upstreams.getSpeech() + "/api/v1/voices:synthesize", body);
+  }
+
+  public Map<?, ?> generateVideo(Map<String, Object> body) {
+    return postJson(upstreams.getVideo() + "/api/v1/videos:generate", body);
   }
 
   public Map<?, ?> chatOllama(Map<String, Object> body) {

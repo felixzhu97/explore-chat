@@ -32,6 +32,16 @@ public class AiController {
     return aiProxyService.generateImage(body);
   }
 
+  @PostMapping("voices:synthesize")
+  public Map<?, ?> voice(@RequestBody Map<String, Object> body) {
+    return aiProxyService.synthesizeVoice(body);
+  }
+
+  @PostMapping("videos:generate")
+  public Map<?, ?> video(@RequestBody Map<String, Object> body) {
+    return aiProxyService.generateVideo(body);
+  }
+
   @PostMapping("ai/chat")
   public Map<?, ?> chat(@RequestBody Map<String, Object> body) {
     return aiProxyService.chatOllama(body);
