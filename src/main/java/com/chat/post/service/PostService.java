@@ -78,7 +78,7 @@ public class PostService {
     createdPayload.put("userId", authorId);
     createdPayload.put("createdAt", post.getCreatedAt().toString());
     createdPayload.put("caption", post.getCaption());
-    createdPayload.put("type", post.getPostType());
+    createdPayload.put("type", post.getPostType().name());
     chatEventPublisher.sendPostCreated(createdPayload);
     chatEventPublisher.sendFeedFanout(createdPayload);
     return toClientPost(post, authorId);
@@ -308,7 +308,7 @@ public class PostService {
     body.put("authorId", post.getAuthorId());
     body.put("userId", post.getAuthorId());
     body.put("caption", post.getCaption());
-    body.put("type", post.getPostType());
+    body.put("type", post.getPostType().name());
     body.put("mediaUrls", parseMediaUrls(post.getMediaUrls()));
     body.put("coverUrl", post.getCoverUrl());
     body.put("location", post.getLocation());

@@ -2,6 +2,8 @@ package com.chat.ads.domain.model;
 
 import com.chat.base.domain.AbstractEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -16,8 +18,10 @@ public class AdCampaign extends AbstractEntity {
 
   private String accountId;
   private String name;
-  private String status;
   private long budget;
+
+  @Enumerated(EnumType.STRING)
+  private AdCampaignStatus status;
 
   private AdCampaign(
       String id,
@@ -30,7 +34,7 @@ public class AdCampaign extends AbstractEntity {
     this.accountId = accountId;
     this.name = name;
     this.budget = budget;
-    this.status = "draft";
+    this.status = AdCampaignStatus.draft;
   }
 
   /**
@@ -48,13 +52,13 @@ public class AdCampaign extends AbstractEntity {
 
   /** Marks the campaign as active. */
   public void activate() {
-    this.status = "active";
+    this.status = AdCampaignStatus.active;
     touch();
   }
 
   /** Marks the campaign as draft. */
   public void draft() {
-    this.status = "draft";
+    this.status = AdCampaignStatus.draft;
     touch();
   }
 }

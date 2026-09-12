@@ -2,6 +2,8 @@ package com.chat.ads.domain.model;
 
 import com.chat.base.domain.AbstractEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -16,14 +18,16 @@ public class AdAccount extends AbstractEntity {
 
   private String ownerId;
   private String name;
-  private String status;
+
+  @Enumerated(EnumType.STRING)
+  private AdAccountStatus status;
 
   private AdAccount(
       String id, Instant createdAt, Instant updatedAt, String ownerId, String name) {
     super(id, createdAt, updatedAt);
     this.ownerId = ownerId;
     this.name = name;
-    this.status = "active";
+    this.status = AdAccountStatus.active;
   }
 
   /**
@@ -40,13 +44,13 @@ public class AdAccount extends AbstractEntity {
 
   /** Marks the account as active. */
   public void activate() {
-    this.status = "active";
+    this.status = AdAccountStatus.active;
     touch();
   }
 
   /** Marks the account as draft. */
   public void draft() {
-    this.status = "draft";
+    this.status = AdAccountStatus.draft;
     touch();
   }
 }

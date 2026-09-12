@@ -2,6 +2,10 @@ package com.chat.post.domain.model;
 
 import com.chat.base.domain.AbstractEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -14,12 +18,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 public class SocialPost extends AbstractEntity {
 
+  @NotBlank
   private String authorId;
+
+  @Size(max = 2048)
   private String caption;
+
+  @Size(max = 4096)
   private String mediaUrls;
-  private String postType;
+
+  @Enumerated(EnumType.STRING)
+  private MediaType postType;
+
+  @Size(max = 1024)
   private String coverUrl;
+
+  @Size(max = 256)
   private String location;
+
   private boolean hidden;
   private long likeCount;
   private long commentCount;
@@ -31,14 +47,14 @@ public class SocialPost extends AbstractEntity {
       String authorId,
       String caption,
       String mediaUrls,
-      String postType,
+      MediaType postType,
       String coverUrl,
       String location) {
     super(id, createdAt, updatedAt);
     this.authorId = authorId;
     this.caption = caption;
     this.mediaUrls = mediaUrls == null ? "[]" : mediaUrls;
-    this.postType = postType == null || postType.isBlank() ? "TEXT" : postType;
+    this.postType = postType == null ? MediaType.TEXT : postType;
     this.coverUrl = coverUrl;
     this.location = location;
     this.hidden = false;
@@ -99,7 +115,7 @@ public class SocialPost extends AbstractEntity {
         authorId,
         caption,
         mediaUrlsJson,
-        postType,
+        parseMediaType(postType),
         coverUrl,
         location);
   }
@@ -150,7 +166,7 @@ public class SocialPost extends AbstractEntity {
    * @return {@code true} when {@code postType} is {@code VIDEO} or {@code REEL}
    */
   public boolean isReel() {
-    return "VIDEO".equalsIgnoreCase(postType) || "REEL".equalsIgnoreCase(postType);
+    return postType == MediaType.VIDEO || postType == MediaType.REEL;
   }
 
   /**
@@ -173,9 +189,16 @@ public class SocialPost extends AbstractEntity {
   public void replaceMedia(String mediaUrlsJson, String postType, String coverUrl) {
     this.mediaUrls = mediaUrlsJson == null || mediaUrlsJson.isBlank() ? "[]" : mediaUrlsJson;
     if (postType != null && !postType.isBlank()) {
-      this.postType = postType;
+      this.postType = parseMediaType(postType);
     }
     this.coverUrl = coverUrl;
     touch();
+  }
+
+  private static MediaType parseMediaType(String postType) {
+    if (postType == null || postType.isBlank()) {
+      return MediaType.TEXT;
+    }
+    return MediaType.valueOf(postType.trim().toUpperCase());
   }
 }
