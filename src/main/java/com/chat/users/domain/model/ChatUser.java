@@ -2,6 +2,10 @@ package com.chat.users.domain.model;
 
 import com.chat.base.domain.AbstractEntity;
 import jakarta.persistence.Entity;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
@@ -16,12 +20,28 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 public class ChatUser extends AbstractEntity {
 
+  @NotBlank
+  @Size(max = 128)
   private String username;
+
+  @NotBlank
+  @Email
+  @Size(max = 320)
   private String email;
+
+  @Size(max = 64)
   private String phone;
+
+  @NotNull
+  @Size(max = 255)
   private String passwordHash;
+
+  @Size(max = 1024)
   private String avatar;
+
+  @Size(max = 512)
   private String status;
+
   private boolean online;
   private Instant lastSeen;
   private boolean disabled;
