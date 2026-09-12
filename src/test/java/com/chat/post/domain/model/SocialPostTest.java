@@ -41,4 +41,11 @@ class SocialPostTest {
     assertTrue(SocialPost.create("u1", "r", "[]", "REEL", null, null).isReel());
     assertFalse(SocialPost.create("u1", "t", "[]", "TEXT", null, null).isReel());
   }
+
+  @Test
+  @DisplayName("should default post type to TEXT when blank")
+  void shouldDefaultPostTypeToTextWhenBlank() {
+    SocialPost post = SocialPost.create("u1", "hello", "[]", "", null, null);
+    assertEquals(MediaType.TEXT, post.getPostType());
+  }
 }

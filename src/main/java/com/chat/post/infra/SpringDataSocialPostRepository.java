@@ -82,7 +82,9 @@ public interface SpringDataSocialPostRepository
       """
       select p from SocialPost p
       where p.hidden = false
-        and (p.postType = 'VIDEO' or p.postType = 'REEL')
+        and p.postType in (
+            com.chat.post.domain.model.MediaType.VIDEO,
+            com.chat.post.domain.model.MediaType.REEL)
       order by p.createdAt desc
       """)
   List<SocialPost> findReelsPage(Pageable pageable);
@@ -91,7 +93,9 @@ public interface SpringDataSocialPostRepository
       """
       select count(p) from SocialPost p
       where p.hidden = false
-        and (p.postType = 'VIDEO' or p.postType = 'REEL')
+        and p.postType in (
+            com.chat.post.domain.model.MediaType.VIDEO,
+            com.chat.post.domain.model.MediaType.REEL)
       """)
   long countReelPosts();
 

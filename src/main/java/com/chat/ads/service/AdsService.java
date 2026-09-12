@@ -88,7 +88,7 @@ public class AdsService {
     body.put("id", account.getId());
     body.put("ownerId", account.getOwnerId());
     body.put("name", account.getName());
-    body.put("status", account.getStatus());
+    body.put("status", account.getStatus().name());
     return body;
   }
 
@@ -97,7 +97,7 @@ public class AdsService {
     body.put("id", campaign.getId());
     body.put("accountId", campaign.getAccountId());
     body.put("name", campaign.getName());
-    body.put("status", campaign.getStatus());
+    body.put("status", campaign.getStatus().name());
     body.put("budget", campaign.getBudget());
     return body;
   }
@@ -109,7 +109,7 @@ public class AdsService {
     body.put("headline", creative.getHeadline());
     body.put("body", creative.getBody());
     body.put("mediaUrl", creative.getMediaUrl());
-    body.put("status", creative.getStatus());
+    body.put("status", creative.getStatus().name());
     return body;
   }
 }

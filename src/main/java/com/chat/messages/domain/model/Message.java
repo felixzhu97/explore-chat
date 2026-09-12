@@ -2,6 +2,11 @@ package com.chat.messages.domain.model;
 
 import com.chat.base.domain.AbstractEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -14,11 +19,22 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 public class Message extends AbstractEntity {
 
+  @NotBlank
   private String chatId;
+
+  @NotBlank
   private String senderId;
-  private String type;
+
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  private MessageType type;
+
+  @Size(max = 4096)
   private String content;
+
+  @Size(max = 1024)
   private String mediaUrl;
+
   private boolean deleted;
 
   private Message(
@@ -31,7 +47,7 @@ public class Message extends AbstractEntity {
     super(id, createdAt, updatedAt);
     this.chatId = chatId;
     this.senderId = senderId;
-    this.type = "TEXT";
+    this.type = MessageType.TEXT;
     this.content = content;
     this.deleted = false;
   }

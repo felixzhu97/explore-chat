@@ -139,7 +139,7 @@ public class MessagesService {
     body.put("id", message.getId());
     body.put("chatId", message.getChatId());
     body.put("senderId", message.getSenderId());
-    body.put("type", message.getType());
+    body.put("type", message.getType().name());
     body.put("content", message.getContent());
     body.put("mediaUrl", message.getMediaUrl());
     body.put("createTime", message.getCreatedAt().toString());
