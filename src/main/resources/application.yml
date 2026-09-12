@@ -59,7 +59,9 @@ chat:
     upload-dir: uploads
     public-base-url: http://localhost:9001/uploads
   upstreams:
-    media-gen: http://localhost:8003
+    image-playground: ${IMAGE_PLAYGROUND_API_URL:http://localhost:8003}
+    speech: ${SPEECH_API_URL:http://localhost:8004}
+    video: ${VIDEO_API_URL:http://localhost:8005}
     vision: http://localhost:8001
     recommendation: http://localhost:8000
     ollama: http://localhost:11434

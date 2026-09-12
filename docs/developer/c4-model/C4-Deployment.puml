@@ -47,7 +47,9 @@ Deployment_Node(dev_machine, "开发机", "macOS / Linux") {
     Container(rec, "Recommendation", "FastAPI", ":8000")
     Container(vision, "Vision", "FastAPI", ":8001")
     Container(rag, "RAG", "FastAPI", ":8002")
-    Container(media, "Media Gen", "FastAPI", ":8003")
+    Container(image_playground, "Image Playground", "FastAPI", ":8003")
+    Container(speech, "Speech", "FastAPI", ":8004")
+    Container(video, "Video", "FastAPI", ":8005")
   }
 }
 
@@ -61,7 +63,9 @@ Rel(api, uploads, "UPLOAD_DIR")
 Rel(api, rec, "HTTP", "可选")
 Rel(api, vision, "HTTP", "可选")
 Rel(api, rag, "HTTP", "可选")
-Rel(api, media, "HTTP", "可选")
+Rel(api, image_playground, "HTTP", "可选")
+Rel(api, speech, "HTTP", "可选")
+Rel(api, video, "HTTP", "可选")
 Rel(rag, qdrant_dir, "path=", "本地")
 
 note as N_PROD

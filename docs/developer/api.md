@@ -125,9 +125,9 @@ GET ${API_PREFIX}/posts/feed  ·  GET ${API_PREFIX}/posts/reels
 | Prefix    | Upstream              |
 | --------- | --------------------- |
 | `/vision` | Vision 服务 `:8001`   |
-| `/image`  | Media Gen / Replicate |
-| `/video`  | Media Gen             |
-| `/voice`  | Media Gen TTS         |
+| `/image`  | Image Playground `:8003` |
+| `/video`  | Video `:8005`         |
+| `/voice`  | Speech `:8004`        |
 
 ---
 
@@ -136,12 +136,14 @@ GET ${API_PREFIX}/posts/feed  ·  GET ${API_PREFIX}/posts/reels
 Optional helpers live in sibling
 [explore-ml](https://github.com/felixzhu97/explore-ml) (`python_ml/`).
 
-| Service        | Default port | Docs |
-| -------------- | ------------ | ---- |
-| Recommendation | 8000         | Feed/Explore 排序与召回 |
-| Vision         | 8001         | 标签与 NSFW |
-| RAG            | 8002         | 语义搜索 / 问答 |
-| Media Gen      | 8003         | 图片 / 视频 / 语音 |
+| Service          | Default port | Docs |
+| ---------------- | ------------ | ---- |
+| Recommendation   | 8000         | Feed/Explore 排序与召回 |
+| Vision           | 8001         | 标签与 NSFW |
+| RAG              | 8002         | 语义搜索 / 问答 |
+| Image Playground | 8003         | 图片生成 |
+| Speech           | 8004         | 语音合成 / ASR |
+| Video            | 8005         | 视频生成 |
 
 客户端应优先经 Spring API，而不是在浏览器硬编码旁路服务密钥。
 See [python-services.md](./python-services.md).

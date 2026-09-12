@@ -2,16 +2,18 @@
 
 Optional FastAPI helpers used by this Spring API over loopback live in
 sibling **[explore-ml](https://github.com/felixzhu97/explore-ml)** under
-`python_ml/{recommendation,vision,rag,media-gen}`.
+`python_ml/{recommendation,vision,rag,image-playground,speech,video}`.
 
 Clients still call **Spring only**. Default ports are unchanged:
 
-| Service        | Default port | Nest / Spring env          |
-| -------------- | ------------ | -------------------------- |
-| recommendation | 8000         | `RECOMMENDATION_API_URL`   |
-| vision         | 8001         | `VISION_SERVICE_URL`       |
-| rag            | 8002         | `RAG_SERVICE_URL`          |
-| media-gen      | 8003         | `MEDIA_GENERATION_API_URL` |
+| Service          | Default port | Nest / Spring env            |
+| ---------------- | ------------ | ---------------------------- |
+| recommendation   | 8000         | `RECOMMENDATION_API_URL`     |
+| vision           | 8001         | `VISION_SERVICE_URL`         |
+| rag              | 8002         | `RAG_SERVICE_URL`            |
+| image-playground | 8003         | `IMAGE_PLAYGROUND_API_URL`   |
+| speech           | 8004         | `SPEECH_API_URL`             |
+| video            | 8005         | `VIDEO_API_URL`              |
 
 ## Canonical docs
 

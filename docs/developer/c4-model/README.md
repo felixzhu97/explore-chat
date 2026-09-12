@@ -118,7 +118,7 @@ Chat iOS `IamAuthService` → Explore IAM → Bearer `/api/v1/auth/me` → 主 T
 | Mobile       | Expo / React Native (`src/main/mobile`)                                                        |
 | API          | Spring Boot；REST / Socket.IO；`:9001`                                         |
 | 持久化       | H2 / Postgres（JPA + Liquibase）                                                       |
-| 旁路（可选） | [explore-ml](https://github.com/felixzhu97/explore-ml) `python_ml/` — recommendation `:8000`、vision `:8001`、rag `:8002`、media-gen `:8003` |
+| 旁路（可选） | [explore-ml](https://github.com/felixzhu97/explore-ml) `python_ml/` — recommendation `:8000`、vision `:8001`、rag `:8002`、image-playground `:8003`、speech `:8004`、video `:8005` |
 | AI           | 本地 Ollama；Explore AI 经 Spring BFF                                                  |
 
 限界上下文（Java）：`auth` / `users` / `post` / `comments` / `chats` / `search` / `notifications` / …
