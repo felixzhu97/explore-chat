@@ -1,6 +1,6 @@
 package com.chat.auth.domain.model;
 
-import com.chat.base.domain.AbstractImmutable;
+import com.chat.base.domain.AbstractEntity;
 import jakarta.persistence.Entity;
 import java.time.Instant;
 import java.util.UUID;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
-public class PasswordResetToken extends AbstractImmutable {
+public class PasswordResetToken extends AbstractEntity {
 
   private String userId;
   private String token;
@@ -20,8 +20,13 @@ public class PasswordResetToken extends AbstractImmutable {
   private boolean used;
 
   private PasswordResetToken(
-      String id, Instant createdAt, String userId, String token, Instant expiresAt) {
-    super(id, createdAt);
+      String id,
+      Instant createdAt,
+      Instant updatedAt,
+      String userId,
+      String token,
+      Instant expiresAt) {
+    super(id, createdAt, updatedAt);
     this.userId = userId;
     this.token = token;
     this.expiresAt = expiresAt;
@@ -37,13 +42,15 @@ public class PasswordResetToken extends AbstractImmutable {
    * @return a new {@code PasswordResetToken}
    */
   public static PasswordResetToken issue(String userId, String token, Instant expiresAt) {
+    Instant now = Instant.now();
     return new PasswordResetToken(
-        UUID.randomUUID().toString(), Instant.now(), userId, token, expiresAt);
+        UUID.randomUUID().toString(), now, now, userId, token, expiresAt);
   }
 
   /** Marks the token as consumed. */
   public void markUsed() {
     this.used = true;
+    touch();
   }
 
   /**

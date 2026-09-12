@@ -1,6 +1,6 @@
 package com.chat.chats.domain.model;
 
-import com.chat.base.domain.AbstractImmutable;
+import com.chat.base.domain.AbstractEntity;
 import jakarta.persistence.Entity;
 import java.time.Instant;
 import java.util.UUID;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
-public class ChatParticipant extends AbstractImmutable {
+public class ChatParticipant extends AbstractEntity {
 
   private String chatId;
   private String userId;
@@ -21,8 +21,13 @@ public class ChatParticipant extends AbstractImmutable {
   private boolean muted;
 
   private ChatParticipant(
-      String id, Instant createdAt, String chatId, String userId, String role) {
-    super(id, createdAt);
+      String id,
+      Instant createdAt,
+      Instant updatedAt,
+      String chatId,
+      String userId,
+      String role) {
+    super(id, createdAt, updatedAt);
     this.chatId = chatId;
     this.userId = userId;
     this.role = role;
@@ -39,8 +44,9 @@ public class ChatParticipant extends AbstractImmutable {
    * @return a new {@code ChatParticipant}
    */
   public static ChatParticipant join(String chatId, String userId, String role) {
+    Instant now = Instant.now();
     return new ChatParticipant(
-        UUID.randomUUID().toString(), Instant.now(), chatId, userId, role);
+        UUID.randomUUID().toString(), now, now, chatId, userId, role);
   }
 
   /**
@@ -50,6 +56,7 @@ public class ChatParticipant extends AbstractImmutable {
    */
   public void archive(boolean archived) {
     this.archived = archived;
+    touch();
   }
 
   /**
@@ -59,5 +66,6 @@ public class ChatParticipant extends AbstractImmutable {
    */
   public void mute(boolean muted) {
     this.muted = muted;
+    touch();
   }
 }
