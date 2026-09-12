@@ -1,6 +1,6 @@
 package com.chat.notifications.domain.model;
 
-import com.chat.base.domain.AbstractImmutable;
+import com.chat.base.domain.AbstractEntity;
 import jakarta.persistence.Entity;
 import java.time.Instant;
 import java.util.UUID;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
-public class ActivityNotification extends AbstractImmutable {
+public class ActivityNotification extends AbstractEntity {
 
   private String userId;
   private String type;
@@ -20,8 +20,13 @@ public class ActivityNotification extends AbstractImmutable {
   private boolean read;
 
   private ActivityNotification(
-      String id, Instant createdAt, String userId, String type, String payload) {
-    super(id, createdAt);
+      String id,
+      Instant createdAt,
+      Instant updatedAt,
+      String userId,
+      String type,
+      String payload) {
+    super(id, createdAt, updatedAt);
     this.userId = userId;
     this.type = type;
     this.payload = payload;
@@ -37,12 +42,14 @@ public class ActivityNotification extends AbstractImmutable {
    * @return a new {@code ActivityNotification}
    */
   public static ActivityNotification create(String userId, String type, String payload) {
+    Instant now = Instant.now();
     return new ActivityNotification(
-        UUID.randomUUID().toString(), Instant.now(), userId, type, payload);
+        UUID.randomUUID().toString(), now, now, userId, type, payload);
   }
 
   /** Marks the notification as read. */
   public void markRead() {
     this.read = true;
+    touch();
   }
 }
