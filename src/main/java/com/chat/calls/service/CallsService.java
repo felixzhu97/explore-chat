@@ -80,7 +80,7 @@ public class CallsService {
     body.put("peerUserId", call.getCalleeId());
     body.put("calleeId", call.getCalleeId());
     body.put("type", call.getCallType());
-    body.put("status", call.getStatus());
+    body.put("status", call.getStatus().name());
     body.put("createTime", call.getCreatedAt().toString());
     return body;
   }
