@@ -9,6 +9,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpHeaders;
@@ -21,7 +23,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Dual-track Bearer auth: Chat HS access tokens, or Explore IAM JWTs mapped to {@link ChatUser}.
+ * Dual-track Bearer auth: Chat HS access tokens ({@code ROLE_USER} only), or Explore IAM JWTs with
+ * GitHub-style {@code SCOPE_*} authorities plus {@code ROLE_USER}.
  */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -80,12 +83,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.clearContext();
         return;
       }
-      var auth =
-          new UsernamePasswordAuthenticationToken(
-              user.getId(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+      List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+      for (String scope : scopesFrom(jwt)) {
+        authorities.add(new SimpleGrantedAuthority("SCOPE_" + scope));
+      }
+      if (authorities.isEmpty()) {
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+      }
+      var auth = new UsernamePasswordAuthenticationToken(user.getId(), null, authorities);
       SecurityContextHolder.getContext().setAuthentication(auth);
     } catch (RuntimeException ignored) {
       SecurityContextHolder.clearContext();
     }
+  }
+
+  /** Parses space-delimited {@code scope} or list {@code scp} claims from an IAM JWT. */
+  public static List<String> scopesFrom(Jwt jwt) {
+    Object scopeClaim = jwt.getClaims().get("scope");
+    if (scopeClaim instanceof String scopeString && !scopeString.isBlank()) {
+      return Arrays.stream(scopeString.split("\\s+")).filter(s -> !s.isBlank()).toList();
+    }
+    Object scp = jwt.getClaims().get("scp");
+    if (scp instanceof List<?> list) {
+      return list.stream().map(Object::toString).filter(s -> !s.isBlank()).toList();
+    }
+    return List.of();
   }
 }

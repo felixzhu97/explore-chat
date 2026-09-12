@@ -64,7 +64,10 @@ final class IamAuthService: NSObject {
       URLQueryItem(name: "response_type", value: "code"),
       URLQueryItem(name: "client_id", value: config.iamClientId),
       URLQueryItem(name: "redirect_uri", value: config.iamRedirectURI),
-      URLQueryItem(name: "scope", value: "openid profile email"),
+      URLQueryItem(
+        name: "scope",
+        value: "openid profile email write:chat_messaging write:chat_social admin:chat"
+      ),
       URLQueryItem(name: "code_challenge", value: challenge),
       URLQueryItem(name: "code_challenge_method", value: "S256"),
       URLQueryItem(name: "state", value: state),

@@ -12,6 +12,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Chat API security: public auth endpoints; IAM module scopes for messaging / social / admin when
+ * Bearer is an Explore IAM JWT.
+ *
+ * @see <a
+ *     href="https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps">GitHub
+ *     OAuth scopes</a>
+ */
 @Configuration
 public class SecurityConfig {
 
@@ -39,6 +47,21 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/refreshToken")
                     .permitAll()
+                    .requestMatchers("/api/v1/admin/**")
+                    .hasAuthority("SCOPE_admin:chat")
+                    .requestMatchers(
+                        "/api/v1/chats/**",
+                        "/api/v1/calls/**",
+                        "/api/v1/media/**",
+                        "/api/v1/notifications/**")
+                    .hasAnyAuthority("ROLE_USER", "SCOPE_write:chat_messaging")
+                    .requestMatchers(
+                        "/api/v1/posts/**",
+                        "/api/v1/users/**",
+                        "/api/v1/groups/**",
+                        "/api/v1/status/**",
+                        "/api/v1/search/**")
+                    .hasAnyAuthority("ROLE_USER", "SCOPE_write:chat_social")
                     .requestMatchers("/api/v1/**")
                     .authenticated()
                     .anyRequest()
