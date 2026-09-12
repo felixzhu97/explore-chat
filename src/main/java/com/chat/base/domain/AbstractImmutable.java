@@ -1,5 +1,6 @@
 package com.chat.base.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import java.time.Instant;
@@ -7,6 +8,7 @@ import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 /** Immutable aggregate root base with identity and creation timestamp. */
 @MappedSuperclass
@@ -17,6 +19,8 @@ public abstract class AbstractImmutable {
   @Id
   private String id;
 
+  @CreationTimestamp
+  @Column(nullable = false, updatable = false)
   private Instant createdAt;
 
   /**
