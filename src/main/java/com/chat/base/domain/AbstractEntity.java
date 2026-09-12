@@ -7,6 +7,7 @@ import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UpdateTimestamp;
 
 /** Mutable aggregate root base with optimistic locking and last-modified timestamp. */
 @MappedSuperclass
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 public abstract class AbstractEntity extends AbstractImmutable {
 
+  @UpdateTimestamp
   private Instant updatedAt;
 
   @Version
@@ -31,7 +33,10 @@ public abstract class AbstractEntity extends AbstractImmutable {
     this.updatedAt = Objects.requireNonNull(updatedAt, "updatedAt");
   }
 
-  /** Updates {@code updatedAt} to the current instant. */
+  /**
+   * Updates {@code updatedAt} to the current instant. Hibernate {@link UpdateTimestamp} also
+   * refreshes this field on flush.
+   */
   protected void touch() {
     this.updatedAt = Instant.now();
   }
