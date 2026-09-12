@@ -1,10 +1,13 @@
 package com.chat.websocket.infra;
 
+import com.chat.auth.service.IamUserProvisioner;
 import com.chat.auth.service.JwtTokenService;
 import com.chat.calls.service.CallsService;
 import com.chat.common.messaging.ChatEventPublisher;
+import com.chat.common.security.JwtAuthenticationFilter;
 import com.chat.messages.service.MessagesService;
 import com.chat.status.service.StatusService;
+import com.chat.users.domain.model.ChatUser;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
@@ -14,8 +17,12 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import jakarta.annotation.PostConstruct;
+import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Component;
 
 /** Socket.IO gateway mirroring Nest chat.gateway event names. */
@@ -29,6 +36,8 @@ public class ChatSocketGateway {
 
   private final SocketIOServer server;
   private final JwtTokenService jwtTokenService;
+  private final ObjectProvider<JwtDecoder> iamJwtDecoder;
+  private final ObjectProvider<IamUserProvisioner> iamUserProvisioner;
   private final MessagesService messagesService;
   private final CallsService callsService;
   private final StatusService statusService;
@@ -38,12 +47,16 @@ public class ChatSocketGateway {
   public ChatSocketGateway(
       SocketIOServer server,
       JwtTokenService jwtTokenService,
+      ObjectProvider<JwtDecoder> iamJwtDecoder,
+      ObjectProvider<IamUserProvisioner> iamUserProvisioner,
       MessagesService messagesService,
       CallsService callsService,
       StatusService statusService,
       ChatEventPublisher chatEventPublisher) {
     this.server = server;
     this.jwtTokenService = jwtTokenService;
+    this.iamJwtDecoder = iamJwtDecoder;
+    this.iamUserProvisioner = iamUserProvisioner;
     this.messagesService = messagesService;
     this.callsService = callsService;
     this.statusService = statusService;
@@ -78,15 +91,42 @@ public class ChatSocketGateway {
         client.disconnect();
         return;
       }
-      try {
-        Claims claims = jwtTokenService.parseAccess(token);
-        String userId = claims.getSubject();
-        client.set("userId", userId);
-        client.joinRoom("user:" + userId);
-      } catch (RuntimeException ex) {
+      String userId = resolveUserId(token);
+      if (userId == null) {
         client.disconnect();
+        return;
       }
+      client.set("userId", userId);
+      client.joinRoom("user:" + userId);
     };
+  }
+
+  private String resolveUserId(String token) {
+    try {
+      Claims claims = jwtTokenService.parseAccess(token);
+      return claims.getSubject();
+    } catch (RuntimeException ignored) {
+      // Fall through to Explore IAM JWT.
+    }
+    JwtDecoder decoder = iamJwtDecoder.getIfAvailable();
+    IamUserProvisioner provisioner = iamUserProvisioner.getIfAvailable();
+    if (decoder == null || provisioner == null) {
+      return null;
+    }
+    try {
+      Jwt jwt = decoder.decode(token);
+      List<String> scopes = JwtAuthenticationFilter.scopesFrom(jwt);
+      if (!scopes.contains("write:chat_messaging")) {
+        return null;
+      }
+      ChatUser user = provisioner.resolve(jwt);
+      if (user.isDeleted() || user.isDisabled()) {
+        return null;
+      }
+      return user.getId();
+    } catch (RuntimeException ignored) {
+      return null;
+    }
   }
 
   private DisconnectListener onDisconnect() {
