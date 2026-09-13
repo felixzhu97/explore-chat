@@ -9,7 +9,7 @@ updates:
         patterns:
           - "*"
     commit-message:
-      prefix: "ci"
+      prefix: "chore"
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
