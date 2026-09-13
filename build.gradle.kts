@@ -1,7 +1,7 @@
 plugins {
     java
     checkstyle
-    id("org.springframework.boot") version "4.1.0"
+    id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
     id("jacoco")
 }
@@ -33,11 +33,11 @@ dependencies {
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.springframework.boot:spring-boot-starter-kafka")
 
-    implementation("io.jsonwebtoken:jjwt-api:0.12.6")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
+    implementation("io.jsonwebtoken:jjwt-api:0.13.0")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
 
-    implementation("com.corundumstudio.socketio:netty-socketio:2.0.12")
+    implementation("com.corundumstudio.socketio:netty-socketio:2.0.14")
 
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
@@ -52,7 +52,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.springframework.kafka:spring-kafka-test")
-    testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.5.0")
 }
 
 checkstyle {
