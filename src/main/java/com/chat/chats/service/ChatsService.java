@@ -191,7 +191,7 @@ public class ChatsService {
       last.put("id", message.getId());
       last.put("chatId", message.getChatId());
       last.put("senderId", message.getSenderId());
-      last.put("type", message.getType());
+      last.put("type", message.getType().name());
       last.put("content", message.getContent());
       last.put("createdAt", message.getCreatedAt().toString());
       body.put("lastMessage", last);

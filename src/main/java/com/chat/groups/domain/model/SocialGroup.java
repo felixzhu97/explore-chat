@@ -2,6 +2,8 @@ package com.chat.groups.domain.model;
 
 import com.chat.base.domain.AbstractEntity;
 import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
@@ -15,9 +17,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 public class SocialGroup extends AbstractEntity {
 
+  @NotBlank
+  @Size(max = 256)
   private String name;
+
+  @Size(max = 1024)
   private String description;
+
+  @Size(max = 1024)
   private String avatar;
+
+  @NotBlank
   private String ownerId;
 
   private SocialGroup(
