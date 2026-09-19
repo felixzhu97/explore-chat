@@ -2,6 +2,8 @@ package com.chat.calls.domain.model;
 
 import com.chat.base.domain.AbstractEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -17,7 +19,9 @@ public class VoiceCall extends AbstractEntity {
   private String callerId;
   private String calleeId;
   private String callType;
-  private String status;
+
+  @Enumerated(EnumType.STRING)
+  private CallStatus status;
 
   private VoiceCall(
       String id,
@@ -30,7 +34,7 @@ public class VoiceCall extends AbstractEntity {
     this.callerId = callerId;
     this.calleeId = calleeId;
     this.callType = callType == null ? "audio" : callType;
-    this.status = "ringing";
+    this.status = CallStatus.ringing;
   }
 
   /**
@@ -52,10 +56,10 @@ public class VoiceCall extends AbstractEntity {
    * @throws IllegalStateException when the call is not ringing
    */
   public void answer() {
-    if (!"ringing".equals(status)) {
+    if (status != CallStatus.ringing) {
       throw new IllegalStateException("Call is not ringing");
     }
-    this.status = "answered";
+    this.status = CallStatus.answered;
     touch();
   }
 
@@ -65,16 +69,16 @@ public class VoiceCall extends AbstractEntity {
    * @throws IllegalStateException when the call is not ringing
    */
   public void reject() {
-    if (!"ringing".equals(status)) {
+    if (status != CallStatus.ringing) {
       throw new IllegalStateException("Call is not ringing");
     }
-    this.status = "rejected";
+    this.status = CallStatus.rejected;
     touch();
   }
 
   /** Ends the call regardless of prior status. */
   public void end() {
-    this.status = "ended";
+    this.status = CallStatus.ended;
     touch();
   }
 }
