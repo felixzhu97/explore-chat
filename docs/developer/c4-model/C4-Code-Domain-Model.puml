@@ -24,7 +24,8 @@ endlegend
 
 note as N_LAYERS
   controller → service → domain ← infra (+ mapper)
-  Kernel: AbstractImmutable / AbstractEntity.
+  Kernel: AbstractImmutable / AbstractEntity (@CreationTimestamp / @UpdateTimestamp).
+  Bean Validation on aggregate fields; typed enums for status/type.
   Persist: JPA + Liquibase (H2 / Postgres).
   Java: src/main/java/com.chat.
   TS clients (web/mobile, duplicated): Local Chat Projection
@@ -35,10 +36,10 @@ end note
 
 abstract class AbstractImmutable <<Abstract>> {
   + id: String
-  + createdAt: Instant
+  + createdAt: Instant @CreationTimestamp
 }
 abstract class AbstractEntity <<Abstract>> {
-  + updatedAt: Instant
+  + updatedAt: Instant @UpdateTimestamp
   + version: long
   # touch()
 }
@@ -119,7 +120,7 @@ ChatParticipant --> ChatUser
 class Message <<AggregateRoot>> {
   String chatId
   String senderId
-  String type
+  MessageType type
   String content
   String mediaUrl
   boolean deleted
@@ -127,6 +128,9 @@ class Message <<AggregateRoot>> {
   {static} send(chatId, senderId, content)
   edit(content)
   softDelete()
+}
+enum MessageType <<Enum>> {
+  TEXT
 }
 class MessageReaction <<Entity>> {
   String messageId
@@ -192,12 +196,34 @@ SocialGroup "1" *-- "0..*" GroupParticipant
 class SocialPost <<AggregateRoot>> {
   String authorId
   String caption
-  String type
+  MediaType postType
   String[] mediaUrls
   String coverUrl
   String location
   --
   {static} create(...)
+}
+enum MediaType <<Enum>> {
+  TEXT
+  IMAGE
+  VIDEO
+  REEL
+}
+class VoiceCall <<AggregateRoot>> {
+  String callerId
+  String calleeId
+  CallStatus status
+  --
+  {static} start(callerId, calleeId)
+  answer()
+  reject()
+  end()
+}
+enum CallStatus <<Enum>> {
+  ringing
+  answered
+  rejected
+  ended
 }
 class FeedEntry <<Entity>> {
   String postId
