@@ -26,6 +26,12 @@
                 <constraints nullable="false"/>
             </column>
             <column name="last_seen" type="timestamp"/>
+            <column name="disabled" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
             <column name="created_at" type="timestamp">
                 <constraints nullable="false"/>
             </column>
@@ -48,6 +54,9 @@
             </column>
             <column name="name" type="varchar(256)"/>
             <column name="avatar" type="varchar(1024)"/>
+            <column name="deleted" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
             <column name="created_at" type="timestamp">
                 <constraints nullable="false"/>
             </column>
@@ -83,6 +92,12 @@
             <column name="created_at" type="timestamp">
                 <constraints nullable="false"/>
             </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
         <createIndex tableName="chat_participant" indexName="idx_chat_participant_user">
             <column name="user_id"/>
@@ -110,7 +125,7 @@
             <column name="type" type="varchar(32)">
                 <constraints nullable="false"/>
             </column>
-            <column name="content" type="varchar(255)"/>
+            <column name="content" type="varchar(4096)"/>
             <column name="media_url" type="varchar(1024)"/>
             <column name="deleted" type="boolean" defaultValueBoolean="false">
                 <constraints nullable="false"/>
@@ -139,8 +154,16 @@
             <column name="author_id" type="varchar(36)">
                 <constraints nullable="false"/>
             </column>
-            <column name="caption" type="varchar(255)"/>
-            <column name="media_urls" type="varchar(255)"/>
+            <column name="caption" type="varchar(2048)"/>
+            <column name="post_type" type="varchar(32)" defaultValue="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="media_urls" type="varchar(4096)"/>
+            <column name="cover_url" type="varchar(1024)"/>
+            <column name="hidden" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="location" type="varchar(256)"/>
             <column name="like_count" type="bigint" defaultValueNumeric="0">
                 <constraints nullable="false"/>
             </column>
@@ -230,26 +253,17 @@
             <column name="created_at" type="timestamp">
                 <constraints nullable="false"/>
             </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
         <createIndex tableName="activity_notification" indexName="idx_activity_notification_user">
             <column name="user_id"/>
             <column name="created_at"/>
         </createIndex>
-    </changeSet>
-
-    <changeSet id="0.1-social-post-columns" author="felix.zhu">
-        <addColumn tableName="social_post">
-            <column name="post_type" type="varchar(32)" defaultValue="TEXT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="cover_url" type="varchar(1024)"/>
-            <column name="hidden" type="boolean" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-            <column name="location" type="varchar(256)"/>
-        </addColumn>
-        <modifyDataType tableName="social_post" columnName="caption" newDataType="varchar(2048)"/>
-        <modifyDataType tableName="social_post" columnName="media_urls" newDataType="varchar(4096)"/>
     </changeSet>
 
     <changeSet id="0.1-post-like" author="felix.zhu">
@@ -487,17 +501,6 @@
             constraintName="uk_blocked_user"/>
     </changeSet>
 
-    <changeSet id="0.1-chat-user-flags" author="felix.zhu">
-        <addColumn tableName="chat_user">
-            <column name="disabled" type="boolean" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-            <column name="deleted" type="boolean" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-        </addColumn>
-    </changeSet>
-
     <changeSet id="0.1-password-reset-token" author="felix.zhu">
         <createTable tableName="password_reset_token">
             <column name="id" type="varchar(36)">
@@ -516,6 +519,12 @@
                 <constraints nullable="false"/>
             </column>
             <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -550,6 +559,12 @@
                 <constraints nullable="false"/>
             </column>
             <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -676,18 +691,6 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-    </changeSet>
-
-    <changeSet id="0.1-chat-deleted" author="felix.zhu">
-        <addColumn tableName="chat">
-            <column name="deleted" type="boolean" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-        </addColumn>
-    </changeSet>
-
-    <changeSet id="0.1-message-content-widen" author="felix.zhu">
-        <modifyDataType tableName="message" columnName="content" newDataType="varchar(4096)"/>
     </changeSet>
 </databaseChangeLog>
 
