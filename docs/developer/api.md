@@ -122,28 +122,29 @@ GET ${API_PREFIX}/posts/feed  ·  GET ${API_PREFIX}/posts/reels
 
 ## Vision / Image / Video / Voice
 
-| Prefix    | Upstream              |
-| --------- | --------------------- |
-| `/vision` | Vision 服务 `:8001`   |
-| `/image`  | Image Playground `:8003` |
-| `/video`  | Video `:8005`         |
-| `/voice`  | Speech `:8004`        |
+| Prefix    | Upstream（Explore ML `:8000`） |
+| --------- | ------------------------------ |
+| `/vision` | vision 模块                    |
+| `/image`  | image_playground 模块          |
+| `/video`  | video 模块                     |
+| `/voice`  | speech 模块                    |
 
 ---
 
 ## Side services
 
-Optional helpers live in sibling
-[explore-ml](https://github.com/felixzhu97/explore-ml) (`python_ml/`).
+Optional modules live in sibling
+[explore-ml](https://github.com/felixzhu97/explore-ml) (`python_ml/`), served
+by one app on `:8000` (`EXPLORE_ML_API_URL`).
 
-| Service          | Default port | Docs |
-| ---------------- | ------------ | ---- |
-| Recommendation   | 8000         | Feed/Explore 排序与召回 |
-| Vision           | 8001         | 标签与 NSFW |
-| RAG              | 8002         | 语义搜索 / 问答 |
-| Image Playground | 8003         | 图片生成 |
-| Speech           | 8004         | 语音合成 / ASR |
-| Video            | 8005         | 视频生成 |
+| Module           | Docs |
+| ---------------- | ---- |
+| recommendation   | Feed/Explore 排序与召回 |
+| vision           | 标签与 NSFW |
+| rag              | 语义搜索 / 问答 |
+| image_playground | 图片生成 |
+| speech           | 语音合成 / ASR |
+| video            | 视频生成 |
 
 客户端应优先经 Spring API，而不是在浏览器硬编码旁路服务密钥。
 See [python-services.md](./python-services.md).
