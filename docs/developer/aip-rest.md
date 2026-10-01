@@ -52,8 +52,8 @@ and `src/main/ios/Chat/Core/Network/RpcStatus.swift`.
 
 Optional FastAPI helpers live in sibling
 [explore-ml](https://github.com/felixzhu97/explore-ml) under
-`python_ml/{recommendation,vision,rag,image-playground,speech,video}`.
-Clients still call the Spring API only; the API calls these over loopback with **snake_case** JSON.
+`python_ml/{recommendation,vision,rag,image_playground,speech,video}`, served by
+one app on `:8000`. Clients still call the Spring API only; the API calls these over loopback with **snake_case** JSON.
 
 | Service          | Legacy                         | AIP                                      |
 | ---------------- | ------------------------------ | ---------------------------------------- |
@@ -64,8 +64,8 @@ Clients still call the Spring API only; the API calls these over loopback with *
 | vision           | `POST /predict`                | `POST /api/v1/images:predict`            |
 | vision           | `POST /moderate`               | `POST /api/v1/images:moderate`           |
 | vision           | `POST /moderate-video`         | `POST /api/v1/videos:moderate`           |
-| image-playground | `POST /image/generate`         | `POST /api/v1/images:generate`           |
-| image-playground | `GET /image/generate/{id}`     | `GET /api/v1/imageJobs/{image_job}`      |
+| image_playground | `POST /image/generate`         | `POST /api/v1/images:generate`           |
+| image_playground | `GET /image/generate/{id}`     | `GET /api/v1/imageJobs/{image_job}`      |
 | video            | `POST /video/generate`         | `POST /api/v1/videos:generate`           |
 | video            | `GET /video/generate/{id}`     | `GET /api/v1/videoJobs/{video_job}`      |
 | speech           | `POST /voice/synthesize`       | `POST /api/v1/voices:synthesize`         |
@@ -76,7 +76,7 @@ Clients still call the Spring API only; the API calls these over loopback with *
 | rag              | `POST /api/v1/sync/posts`      | `POST /api/v1/posts:sync`                |
 
 Each helper ships `aip/` (`rpc_status`, exception handlers, `page_token` for RAG lists).
-`/health` and `/metrics` stay unversioned.
+`GET /health` stays unversioned and reports every module in one response.
 
 ## Validation
 

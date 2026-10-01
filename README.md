@@ -96,7 +96,7 @@ packages/                Shared IM and analytics (web / Expo)
 docs/                    Guideline, Glossary, developer, C4
 ```
 
-Optional ML helpers live in sibling [`explore-ml`](https://github.com/felixzhu97/explore-ml) under `python_ml/` (ports `:8000`–`:8005`).
+Optional ML helpers live in sibling [`explore-ml`](https://github.com/felixzhu97/explore-ml) under `python_ml/`, served as one app on `:8000` (`EXPLORE_ML_API_URL`).
 
 Java features use per-feature packages: `controller` → `service` → `domain` ← `infra`, plus `mapper`.
 

@@ -76,11 +76,7 @@ System_Boundary(chat, "Chat") {
 
 Container_Ext(admin_app, "管理端", "Next.js", ":4001")
 Container_Ext(explore_iam, "Explore IAM", "OIDC / JWKS", ":9100")
-Container_Ext(image_playground, "Image Playground", "explore-ml", ":8003 可选")
-Container_Ext(speech_svc, "Speech", "explore-ml", ":8004 可选")
-Container_Ext(video_svc, "Video", "explore-ml", ":8005 可选")
-Container_Ext(vision, "Vision", "explore-ml", ":8001 可选")
-Container_Ext(recommendation, "Recommendation", "explore-ml", ":8000 可选")
+Container_Ext(explore_ml, "Explore ML", "explore-ml", ":8000 可选；EXPLORE_ML_API_URL")
 Container_Ext(ollama, "Ollama", "LLM", ":11434 可选")
 
 Rel(user_web, pages, "使用", "HTTPS")
@@ -137,11 +133,7 @@ Rel(app_services, domain_repos, "依赖")
 Rel(app_services, domain_model, "编排")
 Rel(infra_adapters, domain_repos, "实现")
 Rel(infra_adapters, jpa_store, "JPA")
-Rel(app_services, image_playground, "HTTP", "可选")
-Rel(app_services, speech_svc, "HTTP", "可选")
-Rel(app_services, video_svc, "HTTP", "可选")
-Rel(app_services, vision, "HTTP", "可选")
-Rel(app_services, recommendation, "HTTP", "可选")
+Rel(app_services, explore_ml, "AiProxyService /api/v1", "可选")
 Rel(app_services, ollama, "HTTP", "可选")
 
 note right of api_server
