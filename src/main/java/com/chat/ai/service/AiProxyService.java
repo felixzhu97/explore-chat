@@ -19,23 +19,23 @@ public class AiProxyService {
   }
 
   public Map<?, ?> rankFeed(Map<String, Object> body) {
-    return postJson(upstreams.getRecommendation() + "/api/v1/feeds:rank", body);
+    return postJson(upstreams.getExploreMl() + "/api/v1/feeds:rank", body);
   }
 
   public Map<?, ?> predictImage(Map<String, Object> body) {
-    return postJson(upstreams.getVision() + "/api/v1/images:predict", body);
+    return postJson(upstreams.getExploreMl() + "/api/v1/images:predict", body);
   }
 
   public Map<?, ?> generateImage(Map<String, Object> body) {
-    return postJson(upstreams.getImagePlayground() + "/api/v1/images:generate", body);
+    return postJson(upstreams.getExploreMl() + "/api/v1/images:generate", body);
   }
 
   public Map<?, ?> synthesizeVoice(Map<String, Object> body) {
-    return postJson(upstreams.getSpeech() + "/api/v1/voices:synthesize", body);
+    return postJson(upstreams.getExploreMl() + "/api/v1/voices:synthesize", body);
   }
 
   public Map<?, ?> generateVideo(Map<String, Object> body) {
-    return postJson(upstreams.getVideo() + "/api/v1/videos:generate", body);
+    return postJson(upstreams.getExploreMl() + "/api/v1/videos:generate", body);
   }
 
   public Map<?, ?> chatOllama(Map<String, Object> body) {
