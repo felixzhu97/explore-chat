@@ -2,7 +2,7 @@ package com.chat.search.controller;
 
 import com.chat.post.domain.model.Hashtag;
 import com.chat.post.domain.repository.HashtagRepository;
-import com.chat.post.domain.repository.SocialPostRepository;
+import com.chat.post.domain.repository.PostRepository;
 import com.chat.users.domain.repository.UserRepository;
 import com.chat.users.mapper.UserMapper;
 import java.util.HashMap;
@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class SearchController {
 
   private final UserRepository userRepository;
-  private final SocialPostRepository socialPostRepository;
+  private final PostRepository socialPostRepository;
   private final HashtagRepository hashtagRepository;
 
   public SearchController(
       UserRepository userRepository,
-      SocialPostRepository socialPostRepository,
+      PostRepository socialPostRepository,
       HashtagRepository hashtagRepository) {
     this.userRepository = userRepository;
     this.socialPostRepository = socialPostRepository;

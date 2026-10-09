@@ -16,12 +16,12 @@ import com.chat.groups.domain.repository.GroupParticipantRepository;
 import com.chat.groups.domain.repository.SocialGroupRepository;
 import com.chat.messages.domain.model.Message;
 import com.chat.messages.domain.repository.MessageRepository;
+import com.chat.post.domain.model.Post;
 import com.chat.post.domain.model.PostLike;
 import com.chat.post.domain.model.PostSave;
-import com.chat.post.domain.model.SocialPost;
 import com.chat.post.domain.repository.PostLikeRepository;
+import com.chat.post.domain.repository.PostRepository;
 import com.chat.post.domain.repository.PostSaveRepository;
-import com.chat.post.domain.repository.SocialPostRepository;
 import com.chat.status.domain.model.UserStatus;
 import com.chat.status.domain.repository.UserStatusRepository;
 import com.chat.users.domain.model.User;
@@ -75,7 +75,7 @@ public class DemoDataLoader implements ApplicationRunner {
   };
 
   private final UserRepository userRepository;
-  private final SocialPostRepository postRepository;
+  private final PostRepository postRepository;
   private final PostLikeRepository postLikeRepository;
   private final PostSaveRepository postSaveRepository;
   private final UserFollowRepository followRepository;
@@ -91,7 +91,7 @@ public class DemoDataLoader implements ApplicationRunner {
 
   public DemoDataLoader(
       UserRepository userRepository,
-      SocialPostRepository postRepository,
+      PostRepository postRepository,
       PostLikeRepository postLikeRepository,
       PostSaveRepository postSaveRepository,
       UserFollowRepository followRepository,
@@ -144,16 +144,16 @@ public class DemoDataLoader implements ApplicationRunner {
     final User alice = users.get(0);
     final User bob = users.get(1);
 
-    SocialPost first = null;
-    SocialPost last = null;
+    Post first = null;
+    Post last = null;
     for (int i = 0; i < users.size(); i++) {
       User author = users.get(i);
       String caption = FEED_CAPTIONS[i % FEED_CAPTIONS.length];
       String image = FEED_IMAGES[i % FEED_IMAGES.length];
       boolean reel = i % 5 == 2;
-      SocialPost post =
+      Post post =
           postRepository.save(
-              SocialPost.create(
+              Post.create(
                   author.getId(),
                   caption,
                   json(image),
@@ -166,10 +166,10 @@ public class DemoDataLoader implements ApplicationRunner {
       last = post;
     }
 
-    first.applyLike();
+    first.addLike();
     postRepository.save(first);
-    postLikeRepository.save(PostLike.of(first.getId(), bob.getId()));
-    postSaveRepository.save(PostSave.of(last.getId(), alice.getId()));
+    postLikeRepository.save(PostLike.createLike(first.getId(), bob.getId()));
+    postSaveRepository.save(PostSave.createSave(last.getId(), alice.getId()));
 
     for (int i = 1; i < users.size(); i++) {
       seedFollow(alice.getId(), users.get(i).getId());
@@ -199,9 +199,9 @@ public class DemoDataLoader implements ApplicationRunner {
   }
 
   private void enrichFeedMedia() {
-    List<SocialPost> posts = postRepository.listFeed(0, 50);
+    List<Post> posts = postRepository.listFeed(0, 50);
     int index = 0;
-    for (SocialPost post : posts) {
+    for (Post post : posts) {
       String caption = FEED_CAPTIONS[index % FEED_CAPTIONS.length];
       String url = FEED_IMAGES[index % FEED_IMAGES.length];
       post.rewriteCaption(caption);
@@ -238,7 +238,7 @@ public class DemoDataLoader implements ApplicationRunner {
 
   private void seedFollow(String followerId, String followingId) {
     if (followRepository.findByFollowerIdAndFollowingId(followerId, followingId).isEmpty()) {
-      followRepository.save(UserFollow.of(followerId, followingId));
+      followRepository.save(UserFollow.createFollow(followerId, followingId));
     }
   }
 

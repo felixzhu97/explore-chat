@@ -1,11 +1,11 @@
 package com.chat.comments.service;
 
-import com.chat.comments.domain.model.PostComment;
-import com.chat.comments.domain.repository.PostCommentRepository;
+import com.chat.comments.domain.model.Comment;
+import com.chat.comments.domain.repository.CommentRepository;
 import com.chat.common.messaging.ChatEventPublisher;
 import com.chat.notifications.service.NotificationsService;
-import com.chat.post.domain.model.SocialPost;
-import com.chat.post.domain.repository.SocialPostRepository;
+import com.chat.post.domain.model.Post;
+import com.chat.post.domain.repository.PostRepository;
 import com.chat.users.domain.repository.UserRepository;
 import java.util.HashMap;
 import java.util.List;
@@ -18,15 +18,15 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class CommentsService {
 
-  private final PostCommentRepository comments;
-  private final SocialPostRepository posts;
+  private final CommentRepository comments;
+  private final PostRepository posts;
   private final UserRepository userRepository;
   private final ChatEventPublisher chatEventPublisher;
   private final NotificationsService notificationsService;
 
   public CommentsService(
-      PostCommentRepository comments,
-      SocialPostRepository posts,
+      CommentRepository comments,
+      PostRepository posts,
       UserRepository userRepository,
       ChatEventPublisher chatEventPublisher,
       NotificationsService notificationsService) {
@@ -39,11 +39,11 @@ public class CommentsService {
 
   @Transactional
   public Map<String, Object> create(String postId, String authorId, String content) {
-    SocialPost post =
+    Post post =
         posts
             .findById(postId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
-    PostComment comment = comments.save(PostComment.create(postId, authorId, content));
+    Comment comment = comments.save(Comment.create(postId, authorId, content));
     post.incrementComments();
     posts.save(post);
     Map<String, Object> response = toResponse(comment);
@@ -66,7 +66,7 @@ public class CommentsService {
 
   @Transactional
   public void delete(String postId, String commentId, String userId) {
-    PostComment comment =
+    Comment comment =
         comments
             .findById(commentId)
             .orElseThrow(
@@ -87,7 +87,7 @@ public class CommentsService {
             });
   }
 
-  private Map<String, Object> toResponse(PostComment comment) {
+  private Map<String, Object> toResponse(Comment comment) {
     Map<String, Object> body = new HashMap<>();
     body.put("id", comment.getId());
     body.put("postId", comment.getPostId());

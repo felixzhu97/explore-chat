@@ -12,11 +12,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/** Social feed post with caption, media, and engagement counters. */
+/** Feed Post with caption, media, and engagement counters (maps to {@code social_post}). */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
-public class SocialPost extends AbstractEntity {
+public class Post extends AbstractEntity {
 
   @NotBlank
   private String authorId;
@@ -40,7 +40,7 @@ public class SocialPost extends AbstractEntity {
   private long likeCount;
   private long commentCount;
 
-  private SocialPost(
+  private Post(
       String id,
       Instant createdAt,
       Instant updatedAt,
@@ -68,9 +68,9 @@ public class SocialPost extends AbstractEntity {
    * @param authorId author user id
    * @param caption post caption
    * @param mediaUrlsJson JSON array of media URLs
-   * @return a new {@code SocialPost}
+   * @return a new {@code Post}
    */
-  public static SocialPost create(String authorId, String caption, String mediaUrlsJson) {
+  public static Post create(String authorId, String caption, String mediaUrlsJson) {
     return create(authorId, caption, mediaUrlsJson, "TEXT", null, null);
   }
 
@@ -82,9 +82,9 @@ public class SocialPost extends AbstractEntity {
    * @param mediaUrlsJson JSON array of media URLs
    * @param postType post type such as {@code TEXT} or {@code VIDEO}
    * @param coverUrl optional cover image URL
-   * @return a new {@code SocialPost}
+   * @return a new {@code Post}
    */
-  public static SocialPost create(
+  public static Post create(
       String authorId, String caption, String mediaUrlsJson, String postType, String coverUrl) {
     return create(authorId, caption, mediaUrlsJson, postType, coverUrl, null);
   }
@@ -98,9 +98,9 @@ public class SocialPost extends AbstractEntity {
    * @param postType post type such as {@code TEXT} or {@code VIDEO}
    * @param coverUrl optional cover image URL
    * @param location optional location label
-   * @return a new {@code SocialPost}
+   * @return a new {@code Post}
    */
-  public static SocialPost create(
+  public static Post create(
       String authorId,
       String caption,
       String mediaUrlsJson,
@@ -108,7 +108,7 @@ public class SocialPost extends AbstractEntity {
       String coverUrl,
       String location) {
     Instant now = Instant.now();
-    return new SocialPost(
+    return new Post(
         UUID.randomUUID().toString(),
         now,
         now,
@@ -121,7 +121,7 @@ public class SocialPost extends AbstractEntity {
   }
 
   /** Increments the like counter. */
-  public void applyLike() {
+  public void addLike() {
     likeCount++;
     touch();
   }
