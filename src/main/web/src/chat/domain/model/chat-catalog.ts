@@ -1,5 +1,5 @@
 import type { ClientDomainEvent } from "@/chat/domain/event";
-import { ChatId, ChatTitle, AvatarURL } from "@/chat/domain/vo";
+import { ChatId, ChatTitle, AvatarURL } from "@/chat/domain/model";
 
 export type ChatSummaryProps = {
   id: ChatId;

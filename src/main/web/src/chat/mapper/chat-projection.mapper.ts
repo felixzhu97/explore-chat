@@ -8,7 +8,7 @@ import {
   ClientMsgId,
   MessageId,
   type DeliveryStatusValue,
-} from "@/chat/domain/vo";
+} from "@/chat/domain/model";
 import type { ChatListItem } from "@/chat/chats.service.types";
 import type { Message as UiMessage } from "@/shared/types/message";
 import type {
@@ -18,8 +18,8 @@ import type {
 
 export function mapApiMessageToIncoming(m: ApiMessageLike): IncomingMessageProps {
   return {
-    id: MessageId.create(m.id),
-    chatId: ChatId.create(
+    id: MessageId.createId(m.id),
+    chatId: ChatId.createId(
       (m as { chatId?: string }).chatId ?? "unknown",
     ),
     senderId: m.senderId,
@@ -31,7 +31,7 @@ export function mapApiMessageToIncoming(m: ApiMessageLike): IncomingMessageProps
     type: m.type?.toLowerCase() ?? "text",
     status: (m.status as DeliveryStatusValue | undefined) ?? "sent",
     ...(m.clientMsgId != null && {
-      clientMsgId: ClientMsgId.create(m.clientMsgId),
+      clientMsgId: ClientMsgId.createId(m.clientMsgId),
     }),
     ...((m as { mediaUrl?: string }).mediaUrl != null && {
       mediaUrl: (m as { mediaUrl?: string }).mediaUrl,
@@ -48,15 +48,15 @@ export function mapSocketToIncoming(
   const chatId = p.to ?? fallbackChatId;
   if (!chatId) return null;
   return {
-    id: MessageId.create(p.data?.id ?? `live-${Date.now()}`),
-    chatId: ChatId.create(chatId),
+    id: MessageId.createId(p.data?.id ?? `live-${Date.now()}`),
+    chatId: ChatId.createId(chatId),
     senderId: p.from,
     content: p.data?.text ?? "",
     createdAt: new Date(p.timestamp ?? Date.now()).toISOString(),
     type: (p.data?.type ?? "text").toLowerCase() || "text",
     status: "delivered",
     ...(p.data?.clientMsgId != null && {
-      clientMsgId: ClientMsgId.create(p.data.clientMsgId),
+      clientMsgId: ClientMsgId.createId(p.data.clientMsgId),
     }),
   };
 }
@@ -79,7 +79,7 @@ export function mapDomainMessageToUi(m: Message): UiMessage {
 
 export function mapChatListItemToSummary(item: ChatListItem): ChatSummaryProps {
   return {
-    id: ChatId.create(item.id),
+    id: ChatId.createId(item.id),
     name: ChatTitle.optional(item.name),
     avatar: AvatarURL.optional(item.avatar),
     lastMessage:

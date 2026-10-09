@@ -1,5 +1,5 @@
-import type { ChatId, ClientMsgId, MessageId } from "@/chat/domain/vo";
-import type { DeliveryStatusValue } from "@/chat/domain/vo";
+import type { ChatId, ClientMsgId, MessageId } from "@/chat/domain/model";
+import type { DeliveryStatusValue } from "@/chat/domain/model";
 
 export type ClientDomainEvent =
   | { type: "ThreadHydrated"; chatId: string; messageIds: string[] }

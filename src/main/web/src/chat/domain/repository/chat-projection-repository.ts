@@ -1,4 +1,4 @@
-import type { DeliveryStatusValue } from "@/chat/domain/vo";
+import type { DeliveryStatusValue } from "@/chat/domain/model";
 
 export type ChatProjectionRow = {
   id: string;

@@ -6,7 +6,7 @@ import {
   ClientMsgId,
   MessageId,
   type DeliveryStatusValue,
-} from "@/chat/domain/vo";
+} from "@/chat/domain/model";
 import type { ChatListItem } from "@/chat/chats.service.types";
 import type { IChatsService } from "@/chat/chats.service.types";
 import {
@@ -61,7 +61,7 @@ export class ChatProjectionService {
   }
 
   async refreshThread(chatId: string): Promise<UiMessage[]> {
-    const id = ChatId.create(chatId);
+    const id = ChatId.createId(chatId);
     let thread = this.threads.get(chatId);
     if (!thread) {
       const stored = await this.repo.listMessages(chatId);
@@ -69,7 +69,7 @@ export class ChatProjectionService {
         id,
         stored.map((r) =>
           Message.create({
-            id: MessageId.create(r.id),
+            id: MessageId.createId(r.id),
             chatId: r.chatId,
             senderId: r.senderId,
             content: r.content,
@@ -77,7 +77,7 @@ export class ChatProjectionService {
             status: r.status,
             type: r.type,
             ...(r.clientMsgId != null && {
-              clientMsgId: ClientMsgId.create(r.clientMsgId),
+              clientMsgId: ClientMsgId.createId(r.clientMsgId),
             }),
             mediaUrl: r.mediaUrl,
             senderName: r.senderName,
@@ -127,10 +127,10 @@ export class ChatProjectionService {
   }): void {
     const thread = this.ensureThread(data.chatId);
     thread.applyDelivery(
-      MessageId.create(data.id),
+      MessageId.createId(data.id),
       "sent",
       data.clientMsgId != null
-        ? ClientMsgId.create(data.clientMsgId)
+        ? ClientMsgId.createId(data.clientMsgId)
         : undefined,
       data.content,
     );
@@ -145,17 +145,17 @@ export class ChatProjectionService {
   }): void {
     const thread = this.ensureThread(data.chatId);
     thread.applyDelivery(
-      MessageId.create(data.messageId),
+      MessageId.createId(data.messageId),
       data.status,
       data.clientMsgId != null
-        ? ClientMsgId.create(data.clientMsgId)
+        ? ClientMsgId.createId(data.clientMsgId)
         : undefined,
     );
     void this.persistThread(thread);
   }
 
   applyReadAck(messageId: string): void {
-    const mid = MessageId.create(messageId);
+    const mid = MessageId.createId(messageId);
     for (const thread of this.threads.values()) {
       thread.applyDelivery(mid, "read");
       void this.persistThread(thread);
@@ -186,14 +186,14 @@ export class ChatProjectionService {
   markSendFailed(chatId: string, clientMsgId: string): void {
     const thread = this.threads.get(chatId);
     if (!thread) return;
-    thread.markFailed(ClientMsgId.create(clientMsgId));
+    thread.markFailed(ClientMsgId.createId(clientMsgId));
     void this.persistThread(thread);
   }
 
   private ensureThread(chatId: string): ChatThread {
     let thread = this.threads.get(chatId);
     if (!thread) {
-      thread = ChatThread.empty(ChatId.create(chatId));
+      thread = ChatThread.empty(ChatId.createId(chatId));
       this.threads.set(chatId, thread);
     }
     return thread;
@@ -216,7 +216,7 @@ export class ChatProjectionService {
           e.type === "LastMessageChanged" ? e.messageId : e.lastMessageId;
         const content = e.content;
         const at = e.at;
-        this.catalog.applyPreview(ChatId.create(chatId), {
+        this.catalog.applyPreview(ChatId.createId(chatId), {
           messageId,
           content,
           at,
