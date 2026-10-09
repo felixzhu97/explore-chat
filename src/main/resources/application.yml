@@ -13,7 +13,7 @@ spring:
     hibernate:
       ddl-auto: validate
       naming:
-        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        physical-strategy: com.chat.common.config.ChatPhysicalNamingStrategy
     open-in-view: false
     properties:
       hibernate:

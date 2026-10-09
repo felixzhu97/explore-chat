@@ -38,7 +38,7 @@ public class MessagesService {
   @Transactional
   public Map<String, Object> send(String chatId, String senderId, String content) {
     chatsService.ensureParticipant(chatId, senderId);
-    Message message = messageRepository.save(Message.send(chatId, senderId, content));
+    Message message = messageRepository.save(Message.createMessage(chatId, senderId, content));
     return toResponse(message);
   }
 
@@ -118,7 +118,7 @@ public class MessagesService {
   @Transactional
   public void delete(String messageId, String userId) {
     Message message = requireOwned(messageId, userId);
-    message.softDelete();
+    message.markDeleted();
     messageRepository.save(message);
   }
 

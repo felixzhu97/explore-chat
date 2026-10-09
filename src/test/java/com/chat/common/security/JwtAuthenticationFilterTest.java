@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 
 import com.chat.auth.service.IamUserProvisioner;
 import com.chat.auth.service.JwtTokenService;
-import com.chat.users.domain.model.ChatUser;
+import com.chat.users.domain.model.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -64,7 +64,7 @@ class JwtAuthenticationFilterTest {
             .expiresAt(Instant.now().plusSeconds(60))
             .build();
     when(decoder.decode("iam-token")).thenReturn(jwt);
-    ChatUser user = ChatUser.register("alice", "a@b.com", "hash");
+    User user = User.createUser("alice", "a@b.com", "hash");
     when(provisioner.resolve(jwt)).thenReturn(user);
 
     filter.doFilter(request, response, filterChain);

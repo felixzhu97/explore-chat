@@ -60,7 +60,7 @@ public class Message extends AbstractEntity {
    * @param content message body
    * @return a new {@code Message}
    */
-  public static Message send(String chatId, String senderId, String content) {
+  public static Message createMessage(String chatId, String senderId, String content) {
     Instant now = Instant.now();
     return new Message(UUID.randomUUID().toString(), now, now, chatId, senderId, content);
   }
@@ -76,7 +76,7 @@ public class Message extends AbstractEntity {
   }
 
   /** Marks the message deleted and clears its content. */
-  public void softDelete() {
+  public void markDeleted() {
     this.deleted = true;
     this.content = "";
     touch();

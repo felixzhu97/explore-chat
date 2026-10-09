@@ -5,7 +5,7 @@ import com.chat.auth.domain.model.RevokedToken;
 import com.chat.auth.domain.repository.PasswordResetTokenRepository;
 import com.chat.auth.domain.repository.RevokedTokenRepository;
 import com.chat.users.controller.UserResponse;
-import com.chat.users.domain.model.ChatUser;
+import com.chat.users.domain.model.User;
 import com.chat.users.domain.repository.UserRepository;
 import com.chat.users.mapper.UserMapper;
 import io.jsonwebtoken.Claims;
@@ -49,7 +49,7 @@ public class AuthService {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "User already exists");
     }
     String name = username == null || username.isBlank() ? email : username;
-    ChatUser user = ChatUser.register(name, email, passwordEncoder.encode(password));
+    User user = User.createUser(name, email, passwordEncoder.encode(password));
     if (phone != null && !phone.isBlank()) {
       user.updateProfile(null, phone, null, null);
     }
@@ -59,7 +59,7 @@ public class AuthService {
 
   @Transactional(readOnly = true)
   public Map<String, Object> login(String email, String password) {
-    ChatUser user =
+    User user =
         userRepository
             .findByEmail(email)
             .orElseThrow(
@@ -83,7 +83,7 @@ public class AuthService {
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
       }
       String userId = claims.getSubject();
-      ChatUser user =
+      User user =
           userRepository
               .findById(userId)
               .orElseThrow(
@@ -102,7 +102,7 @@ public class AuthService {
 
   @Transactional
   public void changePassword(String userId, String currentPassword, String newPassword) {
-    ChatUser user =
+    User user =
         userRepository
             .findById(userId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
@@ -115,7 +115,7 @@ public class AuthService {
 
   @Transactional
   public Map<String, Object> forgotPassword(String email) {
-    ChatUser user =
+    User user =
         userRepository
             .findByEmail(email)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
@@ -139,7 +139,7 @@ public class AuthService {
     if (!reset.isValid(Instant.now())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reset token expired");
     }
-    ChatUser user =
+    User user =
         userRepository
             .findById(reset.getUserId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
@@ -175,7 +175,7 @@ public class AuthService {
     return jti != null && revokedTokenRepository.existsByJti(jti);
   }
 
-  private Map<String, Object> authBody(ChatUser user) {
+  private Map<String, Object> authBody(User user) {
     UserResponse response = UserMapper.toResponse(user);
     return Map.of(
         "user",

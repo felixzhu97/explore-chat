@@ -3,7 +3,7 @@ package com.chat.admin.service;
 import com.chat.messages.domain.repository.MessageRepository;
 import com.chat.post.domain.model.SocialPost;
 import com.chat.post.domain.repository.SocialPostRepository;
-import com.chat.users.domain.model.ChatUser;
+import com.chat.users.domain.model.User;
 import com.chat.users.domain.repository.UserRepository;
 import com.chat.users.mapper.UserMapper;
 import java.util.HashMap;
@@ -57,7 +57,7 @@ public class AdminService {
 
   @Transactional
   public Map<String, Object> disableUser(String userId) {
-    ChatUser user =
+    User user =
         userRepository
             .findById(userId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));

@@ -1,25 +1,25 @@
 package com.chat.users.domain.repository;
 
-import com.chat.users.domain.model.ChatUser;
+import com.chat.users.domain.model.User;
 import java.util.List;
 import java.util.Optional;
 
-/** Persistence port for {@link com.chat.users.domain.model.ChatUser} aggregates. */
+/** Persistence port for {@link com.chat.users.domain.model.User} aggregates. */
 public interface UserRepository {
 
-  ChatUser save(ChatUser user);
+  User save(User user);
 
-  Optional<ChatUser> findById(String id);
+  Optional<User> findById(String id);
 
-  Optional<ChatUser> findByEmail(String email);
+  Optional<User> findByEmail(String email);
 
-  Optional<ChatUser> findByUsername(String username);
+  Optional<User> findByUsername(String username);
 
-  List<ChatUser> findByUsernameContainingIgnoreCase(String query);
+  List<User> findByUsernameContainingIgnoreCase(String query);
 
-  List<ChatUser> listRecent(int limit);
+  List<User> listRecent(int limit);
 
-  List<ChatUser> listAll(int limit);
+  List<User> listAll(int limit);
 
   long countAll();
 }

@@ -4,7 +4,7 @@ import com.chat.follow.domain.model.UserFollow;
 import com.chat.follow.domain.repository.UserFollowRepository;
 import com.chat.users.controller.UserResponse;
 import com.chat.users.domain.model.BlockedUser;
-import com.chat.users.domain.model.ChatUser;
+import com.chat.users.domain.model.User;
 import com.chat.users.domain.repository.BlockedUserRepository;
 import com.chat.users.domain.repository.UserRepository;
 import com.chat.users.mapper.UserMapper;
@@ -37,7 +37,7 @@ public class UsersService {
 
   @Transactional(readOnly = true)
   public UserResponse getById(String id) {
-    ChatUser user =
+    User user =
         userRepository
             .findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
@@ -47,7 +47,7 @@ public class UsersService {
   @Transactional
   public UserResponse updateProfile(
       String id, String username, String phone, String status, String avatar) {
-    ChatUser user =
+    User user =
         userRepository
             .findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
@@ -75,7 +75,7 @@ public class UsersService {
         .map(BlockedUser::getBlockedId)
         .forEach(exclude::add);
     List<Map<String, Object>> users = new ArrayList<>();
-    for (ChatUser u : userRepository.listRecent(Math.max(limit * 3, 10))) {
+    for (User u : userRepository.listRecent(Math.max(limit * 3, 10))) {
       if (exclude.contains(u.getId()) || u.isDeleted() || u.isDisabled()) {
         continue;
       }
@@ -125,11 +125,11 @@ public class UsersService {
 
   @Transactional
   public void delete(String userId) {
-    ChatUser user =
+    User user =
         userRepository
             .findById(userId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-    user.softDelete();
+    user.markDeleted();
     userRepository.save(user);
   }
 }

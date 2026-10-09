@@ -62,7 +62,7 @@ public class Chat extends AbstractEntity {
   }
 
   /** Marks the chat as soft-deleted. */
-  public void softDelete() {
+  public void markDeleted() {
     this.deleted = true;
     touch();
   }
