@@ -3,7 +3,7 @@ export class ChatId {
   private constructor(value: string) {
     this.value = value;
   }
-  static create(raw: string): ChatId {
+  static createId(raw: string): ChatId {
     const v = raw.trim();
     if (!v) throw new Error("ChatId must be non-empty");
     return new ChatId(v);
@@ -18,7 +18,7 @@ export class MessageId {
   private constructor(value: string) {
     this.value = value;
   }
-  static create(raw: string): MessageId {
+  static createId(raw: string): MessageId {
     const v = raw.trim();
     if (!v) throw new Error("MessageId must be non-empty");
     return new MessageId(v);
@@ -33,7 +33,7 @@ export class ClientMsgId {
   private constructor(value: string) {
     this.value = value;
   }
-  static create(raw: string): ClientMsgId {
+  static createId(raw: string): ClientMsgId {
     const v = raw.trim();
     if (!v) throw new Error("ClientMsgId must be non-empty");
     return new ClientMsgId(v);
@@ -48,7 +48,7 @@ export class SenderId {
   private constructor(value: string) {
     this.value = value;
   }
-  static create(raw: string): SenderId {
+  static createId(raw: string): SenderId {
     const v = raw.trim();
     if (!v) throw new Error("SenderId must be non-empty");
     return new SenderId(v);
@@ -60,7 +60,7 @@ export class MessageBody {
   private constructor(text: string) {
     this.text = text;
   }
-  static create(raw: string): MessageBody {
+  static createBody(raw: string): MessageBody {
     return new MessageBody(raw.trim());
   }
 }
@@ -85,7 +85,7 @@ export class MessageDeliveryStatus {
   private constructor(value: DeliveryStatusValue) {
     this.value = value;
   }
-  static of(value: DeliveryStatusValue): MessageDeliveryStatus {
+  static createStatus(value: DeliveryStatusValue): MessageDeliveryStatus {
     return new MessageDeliveryStatus(value);
   }
   canTransition(to: MessageDeliveryStatus): boolean {
