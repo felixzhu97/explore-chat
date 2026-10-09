@@ -52,13 +52,13 @@ class User <<AggregateRoot>> {
   status
   online
   --
-  {static} register(...)
+  {static} createUser(...)
   updateProfile(...)
   markOnline(online)
 }
 note right of User
-  <color:#1A7F37>Rename ChatUser → User</color>
-  (Glossary Preferred Term).
+  <color:#1A7F37>Glossary Preferred Term: User</color>
+  (was ChatUser).
 end note
 
 class Follow <<Entity>> {
@@ -76,7 +76,7 @@ class Chat <<AggregateRoot>> {
   {static} createPrivate()
   {static} createGroup(name)
   rename(name)
-  softDelete()
+  markDeleted()
   <color:#1A7F37>+ ensureParticipant(userId)</color>
 }
 
@@ -86,7 +86,7 @@ class Participant <<Entity>> {
   archived
   muted
   --
-  {static} join(...)
+  {static} createParticipant(...)
   archive / mute
 }
 note right of Participant
@@ -102,15 +102,15 @@ class Message <<Entity>> {
   deleted
   <color:#1A7F37>+ clientMsgId?</color>
   --
-  {static} send(...)
+  {static} createMessage(...)
   edit(content)
-  softDelete()
+  markDeleted()
 }
 note right of Message
   <color:#CF222E>Demote: was AggregateRoot</color>
   <color:#1A7F37>→ Entity inside Chat</color>
   Write path: Chat.ensureParticipant
-  then Message.send → save.
+  then Message.createMessage → save.
 end note
 
 class Reaction <<Entity>> {
@@ -146,7 +146,8 @@ class Post <<AggregateRoot>> {
   {static} create(...)
 }
 note right of Post
-  <color:#1A7F37>Rename SocialPost → Post</color>
+  <color:#1A7F37>Glossary Preferred Term: Post</color>
+  (was SocialPost).
 end note
 
 class Comment <<Entity>> {
@@ -172,8 +173,8 @@ class Notification <<Entity>> {
   readAt?
 }
 note right of Notification
-  <color:#1A7F37>Rename ActivityNotification
-  → Notification</color>
+  <color:#1A7F37>Glossary Preferred Term: Notification</color>
+  (was ActivityNotification).
   Not an AggregateRoot.
 end note
 Notification --> Post
@@ -183,7 +184,8 @@ class Group <<Entity>> {
   creatorId
 }
 note right of Group
-  <color:#CF222E>Demote SocialGroup AggregateRoot</color>
+  <color:#CF222E>Demote Group AggregateRoot</color>
+  (was SocialGroup)
   <color:#1A7F37>→ Entity / Chat.type=GROUP</color>
   Prefer Chat for messaging groups.
 end note
