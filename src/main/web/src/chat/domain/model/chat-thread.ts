@@ -6,7 +6,7 @@ import {
   MessageDeliveryStatus,
   MessageId,
   type DeliveryStatusValue,
-} from "@/chat/domain/model";
+} from "./value-objects";
 
 function sortByCreatedAt(a: Message, b: Message): number {
   return a.createdAt.localeCompare(b.createdAt);

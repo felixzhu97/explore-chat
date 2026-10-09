@@ -3,7 +3,7 @@ import {
   MessageDeliveryStatus,
   MessageId,
   type DeliveryStatusValue,
-} from "@/chat/domain/model";
+} from "./value-objects";
 
 export class Message {
   private constructor(
