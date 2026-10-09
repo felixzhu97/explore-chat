@@ -28,7 +28,7 @@ note as N_PLAN
   Base: C4-Code-Domain-Model.puml (as-built).
   Goals: fewer AggregateRoots, clearer edges,
   Glossary names (User / Chat / Message / Post).
-  Flat diagram — no package wrappers.
+  Prefer business-domain packages (see as-built).
   Wire SSoT: src/main/im-contract/openapi.yaml
 end note
 
