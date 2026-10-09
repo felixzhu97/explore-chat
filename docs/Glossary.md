@@ -14,6 +14,36 @@ This document defines the project **Ubiquitous Language**. English terms are the
 2. **Code sync**: Domain model changes must update the corresponding glossary entry
 3. **Preferred term**: Use the **Preferred Term (English)** column for code, API, Jira keys, commits, and technical docs
 
+### Naming | 命名
+
+Classes (entities, value objects, aggregates, services, DTOs) are nouns for
+what the thing is. Fields, parameters, and locals are plain nouns for what
+they hold. Methods are a verb plus a noun: `createUser`, `createMessage`,
+`createParticipant`, `createCall`, `parseId`, `generateId`, `markDeleted`.
+The same concept uses one word in Java, the database (snake_case), and the
+web/mobile client. Framework names stay as the framework defines them
+(`save`, `findById`, Lombok `getX()`).
+
+Domain types live under `domain.model` only (entities, aggregates, value
+objects, events). There is no `domain.vo` package. Repository ports stay in
+`domain.repository`. Soft delete uses `markDeleted` (sets `deleted` /
+`isDeleted`); do not invent parallel synonyms.
+
+| Concept | Canonical class | Physical table (Liquibase 0.1) | Notes |
+| --- | --- | --- | --- |
+| Signed-in person | `User` | `chat_user` | SQL `user` reserved; class stays `User` |
+| Conversation | `Chat` | `chat` | — |
+| Instant message | `Message` | `message` | — |
+| Feed item | `Post` | `social_post` | was `SocialPost` |
+| Post reply | `Comment` | `post_comment` | was `PostComment` |
+| Social circle | `Group` | `social_group` | was `SocialGroup` |
+| Realtime call | `Call` | `voice_call` | was `VoiceCall` |
+| In-app notice | `Notification` | `activity_notification` | was `ActivityNotification` |
+
+Do not put `@Table` on domain types; table names are fixed in
+`db/changelog/0.1.xml` (`createTable` only — edit the baseline, no alter
+migrations).
+
 ---
 
 ## 2. Business Domains | 业务域总览
@@ -21,19 +51,19 @@ This document defines the project **Ubiquitous Language**. English terms are the
 | Preferred Term | 中文            | Code / Package (Java)            | Web (`src/main/web/src`) | Mobile (Expo) (`src/main/mobile/src`)  | Frontend Surface | API Prefix                      | Notes                                            |
 | -------------- | --------------- | -------------------------------- | -------------------- | ---------------------------------- | ---------------- | ------------------------------- | ------------------------------------------------ |
 | Auth           | 认证            | `com.chat.auth`                  | `auth/`              | `auth/`                            | 登录 / 注册      | `/api/v1/auth`                  | Chat HS JWT (`ROLE_USER`) + Explore IAM Bearer (`SCOPE_write:chat_*` / `SCOPE_admin:chat`) |
-| User           | 用户            | `com.chat.users` / `ChatUser`                 | `profile/`           | `profile/`                         | 个人页           | `/api/v1/users`                 | 资料、搜索                                       |
+| User           | 用户            | `com.chat.users` / `User`                    | `profile/`           | `profile/`                         | 个人页           | `/api/v1/users`                 | 资料、搜索；表 `chat_user`                       |
 | Chat           | 聊天            | `com.chat.chats`                 | `chat/`              | `chat/`                            | 消息             | `/api/v1/chats`                 | 会话列表；线缆契约 `src/main/im-contract/openapi.yaml` |
 | Message        | 消息            | `com.chat.messages`              | `chat/`              | `chat/`                            | 私信             | `/api/v1/chats/{chat}/messages` | 子资源；Socket.IO `:9002`；契约同上               |
-| Call           | 通话            | `com.chat.calls`                 | `calls/`             | `calls/` + `core/call`             | WebRTC UI        | `/api/v1/calls`                 | 信令 stub；媒体仍走 WebRTC                       |
-| Group          | 群组            | `com.chat.groups`           | `chat/group.model`   | `chat/`                            | 群组             | `/api/v1/groups`                | Java stub                                   |
-| Post           | 帖子            | `com.chat.post`                  | `feed/`              | `feed/`                            | 发帖 / 网格      | `/api/v1/posts`                 | mediaUrls、coverUrl                              |
+| Call           | 通话            | `com.chat.calls` / `Call`        | `calls/`             | `calls/` + `core/call`             | WebRTC UI        | `/api/v1/calls`                 | 表 `voice_call`；媒体仍走 WebRTC                       |
+| Group          | 群组            | `com.chat.groups` / `Group` | `chat/group.model`   | `chat/`                            | 群组             | `/api/v1/groups`                | 表 `social_group`                              |
+| Post           | 帖子            | `com.chat.post` / `Post`         | `feed/`              | `feed/`                            | 发帖 / 网格      | `/api/v1/posts`                 | 表 `social_post`；mediaUrls、coverUrl                              |
 | Feed           | 信息流          | `com.chat.post`   | `feed/`              | `feed/`                            | 首页 Feed        | REST `GET /posts/feed`     | Query `feed` 在切流完成前仍可走 Spring API             |
 | Reels          | 短视频          | `com.chat.post`          | `reels/`             | `reels/`                           | Reels Tab        | `/api/v1/posts/reels`               | REST reels                                    |
 | Explore        | 探索            | `com.chat.post`      | `explore/`           | `explore/`                         | 探索网格         | `/api/v1/posts/explore`         |                                                  |
-| Comment        | 评论            | `com.chat.comments`              | `feed/components/`   | `feed/` / `app/post-comments`      | 评论弹窗         | `/api/v1/posts/{post}/comments` | 子资源                                           |
+| Comment        | 评论            | `com.chat.comments` / `Comment`  | `feed/components/`   | `feed/` / `app/post-comments`      | 评论弹窗         | `/api/v1/posts/{post}/comments` | 表 `post_comment`                                           |
 | Follow         | 关注            | `com.chat.follow`                | `profile/`           | `profile/`                         | 粉丝 / 关注      | `/api/v1/users/{user}:follow`   | AIP-136 custom method                            |
 | Search         | 搜索            | `com.chat.search`                | `search/`            | — (embedded in `explore/`)         | 全局搜索         | `/api/v1/search`                |                                                  |
-| Notification   | 通知            | `com.chat.notifications`         | `layout/`            | `secondary/` / `app/notifications` | 通知抽屉         | `/api/v1/notifications`         | WS `notification:new`                            |
+| Notification   | 通知            | `com.chat.notifications` / `Notification` | `layout/`     | `secondary/` / `app/notifications` | 通知抽屉         | `/api/v1/notifications`         | 表 `activity_notification`；WS `notification:new` |
 | Media          | 媒体上传        | `com.chat.media`                 | `ai/apis/file.api`   | `feed/` (upload via RTK)           | 发帖上传         | `/api/v1/media`                 | 本地盘 / 对象存储                                |
 | Status         | 状态            | `com.chat.status`           | `secondary/pages/`   | `feed/` (story via feedApi)        | Status UI        | `/api/v1/status`                | 24h 状态                                         |
 | Image Gen      | 图片生成        | `com.chat.ai` → explore-ml image_playground | `ai/apis/image.api`  | —                                  | 生成对话框       | `/api/v1/images:generate`       | API → explore-ml `:8000`                         |
@@ -102,7 +132,7 @@ flowchart TB
 | Abstract Aggregate Root         | 聚合根基类       | 继承 Abstract Entity；一致性边界（User / Chat / Message / Group / Post）                                         |
 | Abstract Participant            | 参与者基类       | 继承 Abstract Entity；`userId` / `role` / `joinedAt`；Chat 与 Group 参与者共用                                   |
 | Abstract Embeddable             | 嵌入值对象基类   | 无独立表身份的值对象内核                                                                                         |
-| Soft Delete                     | 软删除           | Message 等领域：`isDeleted` + `delete()`；不物理删行                                                             |
+| Soft Delete                     | 软删除           | Message 等领域：`deleted` / `isDeleted` + `markDeleted()`；不物理删行                                            |
 | Ensure Participant              | 确保参与者       | Chat 聚合校验 userId 是否为会话参与者                                                                            |
 | Assert Sendable By              | 断言可发送       | Message / Chat 侧规则：发送方须有权发往该会话                                                                    |
 | Abstract Prisma Repository      | Prisma 仓储基类  | infra 通用基类，持有 PrismaClient；各 `*Repository` 实现继承它以减样板；domain 不依赖 Prisma                     |
