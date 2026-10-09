@@ -36,7 +36,7 @@ public class FollowService {
         .findById(followingId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     if (follows.findByFollowerIdAndFollowingId(followerId, followingId).isEmpty()) {
-      follows.save(UserFollow.of(followerId, followingId));
+      follows.save(UserFollow.createFollow(followerId, followingId));
       notificationsService.create(followingId, "FOLLOW", "{\"userId\":\"" + followerId + "\"}");
     }
     return Map.of("following", true, "userId", followingId);

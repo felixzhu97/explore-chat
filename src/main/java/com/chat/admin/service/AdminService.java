@@ -1,8 +1,8 @@
 package com.chat.admin.service;
 
 import com.chat.messages.domain.repository.MessageRepository;
-import com.chat.post.domain.model.SocialPost;
-import com.chat.post.domain.repository.SocialPostRepository;
+import com.chat.post.domain.model.Post;
+import com.chat.post.domain.repository.PostRepository;
 import com.chat.users.domain.model.User;
 import com.chat.users.domain.repository.UserRepository;
 import com.chat.users.mapper.UserMapper;
@@ -18,12 +18,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class AdminService {
 
   private final UserRepository userRepository;
-  private final SocialPostRepository socialPostRepository;
+  private final PostRepository socialPostRepository;
   private final MessageRepository messageRepository;
 
   public AdminService(
       UserRepository userRepository,
-      SocialPostRepository socialPostRepository,
+      PostRepository socialPostRepository,
       MessageRepository messageRepository) {
     this.userRepository = userRepository;
     this.socialPostRepository = socialPostRepository;
@@ -67,7 +67,7 @@ public class AdminService {
 
   @Transactional
   public Map<String, Object> hidePost(String postId) {
-    SocialPost post = requirePost(postId);
+    Post post = requirePost(postId);
     post.hide();
     socialPostRepository.save(post);
     return Map.of("id", post.getId(), "hidden", true);
@@ -75,7 +75,7 @@ public class AdminService {
 
   @Transactional
   public Map<String, Object> unhidePost(String postId) {
-    SocialPost post = requirePost(postId);
+    Post post = requirePost(postId);
     post.unhide();
     socialPostRepository.save(post);
     return Map.of("id", post.getId(), "hidden", false);
@@ -92,7 +92,7 @@ public class AdminService {
         messageRepository.countAll());
   }
 
-  private SocialPost requirePost(String id) {
+  private Post requirePost(String id) {
     return socialPostRepository
         .findById(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));

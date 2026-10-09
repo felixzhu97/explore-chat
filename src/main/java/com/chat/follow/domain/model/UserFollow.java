@@ -30,7 +30,7 @@ public class UserFollow extends AbstractImmutable {
    * @param followingId followed user id
    * @return a new {@code UserFollow}
    */
-  public static UserFollow of(String followerId, String followingId) {
+  public static UserFollow createFollow(String followerId, String followingId) {
     return new UserFollow(UUID.randomUUID().toString(), Instant.now(), followerId, followingId);
   }
 }

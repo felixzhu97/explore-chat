@@ -6,15 +6,15 @@ import com.chat.follow.domain.model.UserFollow;
 import com.chat.follow.domain.repository.UserFollowRepository;
 import com.chat.notifications.service.NotificationsService;
 import com.chat.post.domain.model.Hashtag;
+import com.chat.post.domain.model.Post;
 import com.chat.post.domain.model.PostHashtag;
 import com.chat.post.domain.model.PostLike;
 import com.chat.post.domain.model.PostSave;
-import com.chat.post.domain.model.SocialPost;
 import com.chat.post.domain.repository.HashtagRepository;
 import com.chat.post.domain.repository.PostHashtagRepository;
 import com.chat.post.domain.repository.PostLikeRepository;
+import com.chat.post.domain.repository.PostRepository;
 import com.chat.post.domain.repository.PostSaveRepository;
-import com.chat.post.domain.repository.SocialPostRepository;
 import com.chat.users.domain.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +35,7 @@ public class PostService {
 
   private static final Pattern HASHTAG = Pattern.compile("#([A-Za-z0-9_]{1,64})");
 
-  private final SocialPostRepository socialPostRepository;
+  private final PostRepository socialPostRepository;
   private final PostLikeRepository postLikeRepository;
   private final PostSaveRepository postSaveRepository;
   private final UserFollowRepository followRepository;
@@ -46,7 +46,7 @@ public class PostService {
   private final NotificationsService notificationsService;
 
   public PostService(
-      SocialPostRepository socialPostRepository,
+      PostRepository socialPostRepository,
       PostLikeRepository postLikeRepository,
       PostSaveRepository postSaveRepository,
       UserFollowRepository followRepository,
@@ -69,9 +69,9 @@ public class PostService {
   @Transactional
   public Map<String, Object> create(
       String authorId, String caption, String mediaUrlsJson, String type, String coverUrl) {
-    SocialPost post =
+    Post post =
         socialPostRepository.save(
-            SocialPost.create(authorId, caption, mediaUrlsJson, type, coverUrl, null));
+            Post.create(authorId, caption, mediaUrlsJson, type, coverUrl, null));
     indexHashtags(post.getId(), post.getCaption());
     Map<String, Object> createdPayload = new HashMap<>();
     createdPayload.put("postId", post.getId());
@@ -108,7 +108,7 @@ public class PostService {
   public Map<String, Object> reels(String userId, Integer pageSize, String pageToken) {
     int size = PageTokens.clampPageSize(pageSize);
     int offset = PageTokens.offsetFrom(pageToken);
-    List<SocialPost> posts = socialPostRepository.listReels(offset, size);
+    List<Post> posts = socialPostRepository.listReels(offset, size);
     long total = socialPostRepository.countReels();
     return entriesBody(posts, offset, size, total, userId);
   }
@@ -126,10 +126,10 @@ public class PostService {
 
   @Transactional
   public Map<String, Object> like(String id, String userId) {
-    SocialPost post = require(id);
+    Post post = require(id);
     if (postLikeRepository.findByPostIdAndUserId(id, userId).isEmpty()) {
-      post.applyLike();
-      postLikeRepository.save(PostLike.of(id, userId));
+      post.addLike();
+      postLikeRepository.save(PostLike.createLike(id, userId));
       socialPostRepository.save(post);
       if (!post.getAuthorId().equals(userId)) {
         notificationsService.create(
@@ -143,7 +143,7 @@ public class PostService {
 
   @Transactional
   public Map<String, Object> unlike(String id, String userId) {
-    SocialPost post = require(id);
+    Post post = require(id);
     postLikeRepository
         .findByPostIdAndUserId(id, userId)
         .ifPresent(
@@ -157,23 +157,23 @@ public class PostService {
 
   @Transactional
   public Map<String, Object> save(String id, String userId) {
-    SocialPost post = require(id);
+    Post post = require(id);
     if (postSaveRepository.findByPostIdAndUserId(id, userId).isEmpty()) {
-      postSaveRepository.save(PostSave.of(id, userId));
+      postSaveRepository.save(PostSave.createSave(id, userId));
     }
     return toClientPost(post, userId);
   }
 
   @Transactional
   public Map<String, Object> unsave(String id, String userId) {
-    SocialPost post = require(id);
+    Post post = require(id);
     postSaveRepository.findByPostIdAndUserId(id, userId).ifPresent(postSaveRepository::delete);
     return toClientPost(post, userId);
   }
 
   @Transactional
   public void delete(String id, String userId) {
-    SocialPost post = require(id);
+    Post post = require(id);
     if (!post.getAuthorId().equals(userId)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not post author");
     }
@@ -186,14 +186,14 @@ public class PostService {
 
   @Transactional
   public Map<String, Object> hide(String id) {
-    SocialPost post = require(id);
+    Post post = require(id);
     post.hide();
     return toClientPost(socialPostRepository.save(post), null);
   }
 
   @Transactional
   public Map<String, Object> unhide(String id) {
-    SocialPost post = require(id);
+    Post post = require(id);
     post.unhide();
     return toClientPost(socialPostRepository.save(post), null);
   }
@@ -212,7 +212,7 @@ public class PostService {
       if (!postHashtagRepository.existsByPostIdAndHashtagId(postId, hashtag.getId())) {
         hashtag.incrementPostCount();
         hashtagRepository.save(hashtag);
-        postHashtagRepository.save(PostHashtag.of(postId, hashtag.getId()));
+        postHashtagRepository.save(PostHashtag.createHashtagLink(postId, hashtag.getId()));
       }
     }
   }
@@ -221,7 +221,7 @@ public class PostService {
       Integer pageSize, String pageToken, String authorId, String viewerId) {
     int size = PageTokens.clampPageSize(pageSize);
     int offset = PageTokens.offsetFrom(pageToken);
-    List<SocialPost> posts =
+    List<Post> posts =
         authorId == null
             ? socialPostRepository.listFeed(offset, size)
             : socialPostRepository.listByAuthor(authorId, offset, size);
@@ -247,7 +247,7 @@ public class PostService {
       String viewerId) {
     int size = PageTokens.clampPageSize(pageSize);
     int offset = PageTokens.offsetFrom(pageToken);
-    List<SocialPost> posts;
+    List<Post> posts;
     long total;
     if (explore) {
       posts = socialPostRepository.listExploreExcluding(excludeAuthors, offset, size);
@@ -263,9 +263,9 @@ public class PostService {
   }
 
   private Map<String, Object> entriesBody(
-      List<SocialPost> posts, int offset, int size, long total, String viewerId) {
+      List<Post> posts, int offset, int size, long total, String viewerId) {
     List<Map<String, Object>> entries = new ArrayList<>();
-    for (SocialPost post : posts) {
+    for (Post post : posts) {
       Map<String, Object> entry = new HashMap<>();
       entry.put("postId", post.getId());
       entry.put("authorId", post.getAuthorId());
@@ -288,13 +288,13 @@ public class PostService {
     return ids;
   }
 
-  private SocialPost require(String id) {
+  private Post require(String id) {
     return socialPostRepository
         .findById(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
   }
 
-  private Map<String, Object> toClientPost(SocialPost post, String viewerId) {
+  private Map<String, Object> toClientPost(Post post, String viewerId) {
     boolean liked =
         viewerId != null
             && postLikeRepository.findByPostIdAndUserId(post.getId(), viewerId).isPresent();

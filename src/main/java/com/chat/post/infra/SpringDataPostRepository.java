@@ -1,7 +1,7 @@
 package com.chat.post.infra;
 
-import com.chat.post.domain.model.SocialPost;
-import com.chat.post.domain.repository.SocialPostRepository;
+import com.chat.post.domain.model.Post;
+import com.chat.post.domain.repository.PostRepository;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
@@ -12,86 +12,86 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SpringDataSocialPostRepository
-    extends JpaRepository<SocialPost, String>, SocialPostRepository {
+public interface SpringDataPostRepository
+    extends JpaRepository<Post, String>, PostRepository {
 
   @Query(
       """
-      select p from SocialPost p
+      select p from Post p
       where p.hidden = false
       order by p.createdAt desc
       """)
-  List<SocialPost> findFeedPage(Pageable pageable);
+  List<Post> findFeedPage(Pageable pageable);
 
   @Query(
       """
-      select p from SocialPost p
+      select p from Post p
       where p.authorId = :authorId and p.hidden = false
       order by p.createdAt desc
       """)
-  List<SocialPost> findByAuthorPage(@Param("authorId") String authorId, Pageable pageable);
+  List<Post> findByAuthorPage(@Param("authorId") String authorId, Pageable pageable);
 
   @Query(
       """
-      select p from SocialPost p
+      select p from Post p
       where p.hidden = false and p.authorId in :authorIds
       order by p.createdAt desc
       """)
-  List<SocialPost> findFeedForAuthorsPage(
+  List<Post> findFeedForAuthorsPage(
       @Param("authorIds") Collection<String> authorIds, Pageable pageable);
 
   @Query(
       """
-      select count(p) from SocialPost p
+      select count(p) from Post p
       where p.hidden = false and p.authorId in :authorIds
       """)
   long countFeedForAuthorsQuery(@Param("authorIds") Collection<String> authorIds);
 
   @Query(
       """
-      select p from SocialPost p
+      select p from Post p
       where p.hidden = false and p.authorId not in :authorIds
       order by p.likeCount desc, p.createdAt desc
       """)
-  List<SocialPost> findExploreExcludingPage(
+  List<Post> findExploreExcludingPage(
       @Param("authorIds") Collection<String> authorIds, Pageable pageable);
 
   @Query(
       """
-      select count(p) from SocialPost p
+      select count(p) from Post p
       where p.hidden = false and p.authorId not in :authorIds
       """)
   long countExploreExcludingAuthors(@Param("authorIds") Collection<String> authorIds);
 
   @Query(
       """
-      select p from SocialPost p
+      select p from Post p
       where p.hidden = false
       order by p.likeCount desc, p.createdAt desc
       """)
-  List<SocialPost> findExploreAllPage(Pageable pageable);
+  List<Post> findExploreAllPage(Pageable pageable);
 
   @Query(
       """
-      select count(p) from SocialPost p
+      select count(p) from Post p
       where p.hidden = false
       """)
   long countExploreAll();
 
   @Query(
       """
-      select p from SocialPost p
+      select p from Post p
       where p.hidden = false
         and p.postType in (
             com.chat.post.domain.model.MediaType.VIDEO,
             com.chat.post.domain.model.MediaType.REEL)
       order by p.createdAt desc
       """)
-  List<SocialPost> findReelsPage(Pageable pageable);
+  List<Post> findReelsPage(Pageable pageable);
 
   @Query(
       """
-      select count(p) from SocialPost p
+      select count(p) from Post p
       where p.hidden = false
         and p.postType in (
             com.chat.post.domain.model.MediaType.VIDEO,
@@ -104,19 +104,19 @@ public interface SpringDataSocialPostRepository
   long countByHiddenFalse();
 
   @Override
-  default List<SocialPost> listFeed(int offset, int limit) {
+  default List<Post> listFeed(int offset, int limit) {
     int size = Math.max(limit, 1);
     return findFeedPage(PageRequest.of(offset / size, size));
   }
 
   @Override
-  default List<SocialPost> listByAuthor(String authorId, int offset, int limit) {
+  default List<Post> listByAuthor(String authorId, int offset, int limit) {
     int size = Math.max(limit, 1);
     return findByAuthorPage(authorId, PageRequest.of(offset / size, size));
   }
 
   @Override
-  default List<SocialPost> listFeedForAuthors(
+  default List<Post> listFeedForAuthors(
       Collection<String> authorIds, int offset, int limit) {
     if (authorIds == null || authorIds.isEmpty()) {
       return List.of();
@@ -126,7 +126,7 @@ public interface SpringDataSocialPostRepository
   }
 
   @Override
-  default List<SocialPost> listExploreExcluding(
+  default List<Post> listExploreExcluding(
       Collection<String> authorIds, int offset, int limit) {
     int size = Math.max(limit, 1);
     Pageable page = PageRequest.of(offset / size, size);
@@ -137,7 +137,7 @@ public interface SpringDataSocialPostRepository
   }
 
   @Override
-  default List<SocialPost> listReels(int offset, int limit) {
+  default List<Post> listReels(int offset, int limit) {
     int size = Math.max(limit, 1);
     return findReelsPage(PageRequest.of(offset / size, size));
   }
@@ -179,7 +179,7 @@ public interface SpringDataSocialPostRepository
   }
 
   @Override
-  default void delete(SocialPost post) {
+  default void delete(Post post) {
     deleteById(post.getId());
   }
 }

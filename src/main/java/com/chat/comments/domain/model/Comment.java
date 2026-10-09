@@ -8,17 +8,17 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/** Comment left by a user on a social post. */
+/** Comment left by a user on a Post (maps to {@code post_comment}). */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
-public class PostComment extends AbstractEntity {
+public class Comment extends AbstractEntity {
 
   private String postId;
   private String authorId;
   private String content;
 
-  private PostComment(
+  private Comment(
       String id,
       Instant createdAt,
       Instant updatedAt,
@@ -37,10 +37,10 @@ public class PostComment extends AbstractEntity {
    * @param postId target post id
    * @param authorId author user id
    * @param content comment body
-   * @return a new {@code PostComment}
+   * @return a new {@code Comment}
    */
-  public static PostComment create(String postId, String authorId, String content) {
+  public static Comment create(String postId, String authorId, String content) {
     Instant now = Instant.now();
-    return new PostComment(UUID.randomUUID().toString(), now, now, postId, authorId, content);
+    return new Comment(UUID.randomUUID().toString(), now, now, postId, authorId, content);
   }
 }

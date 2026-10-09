@@ -30,7 +30,7 @@ public class PostHashtag extends AbstractImmutable {
    * @param hashtagId hashtag id
    * @return a new {@code PostHashtag}
    */
-  public static PostHashtag of(String postId, String hashtagId) {
+  public static PostHashtag createHashtagLink(String postId, String hashtagId) {
     return new PostHashtag(UUID.randomUUID().toString(), Instant.now(), postId, hashtagId);
   }
 }

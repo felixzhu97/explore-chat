@@ -30,7 +30,7 @@ public class PostSave extends AbstractImmutable {
    * @param userId saving user id
    * @return a new {@code PostSave}
    */
-  public static PostSave of(String postId, String userId) {
+  public static PostSave createSave(String postId, String userId) {
     return new PostSave(UUID.randomUUID().toString(), Instant.now(), postId, userId);
   }
 }

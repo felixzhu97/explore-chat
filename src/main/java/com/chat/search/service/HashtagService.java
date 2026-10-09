@@ -42,7 +42,7 @@ public class HashtagService {
       if (!postHashtagRepository.existsByPostIdAndHashtagId(postId, hashtag.getId())) {
         hashtag.incrementPostCount();
         hashtagRepository.save(hashtag);
-        postHashtagRepository.save(PostHashtag.of(postId, hashtag.getId()));
+        postHashtagRepository.save(PostHashtag.createHashtagLink(postId, hashtag.getId()));
       }
     }
   }

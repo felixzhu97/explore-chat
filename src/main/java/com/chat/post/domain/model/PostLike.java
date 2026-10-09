@@ -30,7 +30,7 @@ public class PostLike extends AbstractImmutable {
    * @param userId liking user id
    * @return a new {@code PostLike}
    */
-  public static PostLike of(String postId, String userId) {
+  public static PostLike createLike(String postId, String userId) {
     return new PostLike(UUID.randomUUID().toString(), Instant.now(), postId, userId);
   }
 }

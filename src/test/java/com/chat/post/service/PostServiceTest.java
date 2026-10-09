@@ -13,12 +13,12 @@ import com.chat.common.messaging.ChatEventPublisher;
 import com.chat.follow.domain.repository.UserFollowRepository;
 import com.chat.notifications.service.NotificationsService;
 import com.chat.post.domain.model.PostLike;
-import com.chat.post.domain.model.SocialPost;
+import com.chat.post.domain.model.Post;
 import com.chat.post.domain.repository.HashtagRepository;
 import com.chat.post.domain.repository.PostHashtagRepository;
 import com.chat.post.domain.repository.PostLikeRepository;
 import com.chat.post.domain.repository.PostSaveRepository;
-import com.chat.post.domain.repository.SocialPostRepository;
+import com.chat.post.domain.repository.PostRepository;
 import com.chat.users.domain.repository.UserRepository;
 import java.util.Map;
 import java.util.Optional;
@@ -33,7 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PostServiceTest {
 
-  @Mock private SocialPostRepository socialPostRepository;
+  @Mock private PostRepository socialPostRepository;
   @Mock private PostLikeRepository postLikeRepository;
   @Mock private PostSaveRepository postSaveRepository;
   @Mock private UserFollowRepository followRepository;
@@ -56,14 +56,14 @@ class PostServiceTest {
   @Test
   @DisplayName("should apply like and notify author when user likes post")
   void shouldApplyLikeAndNotifyAuthorWhenUserLikesPost() {
-    SocialPost post = SocialPost.create("author-1", "caption", "[]");
-    PostLike like = PostLike.of(post.getId(), "viewer-1");
+    Post post = Post.create("author-1", "caption", "[]");
+    PostLike like = PostLike.createLike(post.getId(), "viewer-1");
     when(socialPostRepository.findById(post.getId())).thenReturn(Optional.of(post));
     when(postLikeRepository.findByPostIdAndUserId(post.getId(), "viewer-1"))
         .thenReturn(Optional.empty())
         .thenReturn(Optional.of(like));
     when(postLikeRepository.save(any(PostLike.class))).thenReturn(like);
-    when(socialPostRepository.save(any(SocialPost.class)))
+    when(socialPostRepository.save(any(Post.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
     Map<String, Object> result = postService.like(post.getId(), "viewer-1");
@@ -76,7 +76,7 @@ class PostServiceTest {
   @Test
   @DisplayName("should publish post created and feed fanout when creating post")
   void shouldPublishPostCreatedAndFeedFanoutWhenCreatingPost() {
-    when(socialPostRepository.save(any(SocialPost.class)))
+    when(socialPostRepository.save(any(Post.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
     when(hashtagRepository.findByTag(any())).thenReturn(Optional.empty());
     when(hashtagRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -94,13 +94,13 @@ class PostServiceTest {
   @Test
   @DisplayName("should not notify when author likes own post")
   void shouldNotNotifyWhenAuthorLikesOwnPost() {
-    SocialPost post = SocialPost.create("author-1", "caption", "[]");
+    Post post = Post.create("author-1", "caption", "[]");
     when(socialPostRepository.findById(post.getId())).thenReturn(Optional.of(post));
     when(postLikeRepository.findByPostIdAndUserId(post.getId(), "author-1"))
         .thenReturn(Optional.empty());
     when(postLikeRepository.save(any(PostLike.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
-    when(socialPostRepository.save(any(SocialPost.class)))
+    when(socialPostRepository.save(any(Post.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
     postService.like(post.getId(), "author-1");
