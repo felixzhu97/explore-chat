@@ -30,7 +30,7 @@ public class BlockedUser extends AbstractImmutable {
    * @param blockedId user being blocked
    * @return a new {@code BlockedUser}
    */
-  public static BlockedUser of(String blockerId, String blockedId) {
+  public static BlockedUser createBlock(String blockerId, String blockedId) {
     return new BlockedUser(UUID.randomUUID().toString(), Instant.now(), blockerId, blockedId);
   }
 }

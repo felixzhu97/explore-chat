@@ -82,7 +82,7 @@ public class MessagesService {
             .orElseGet(
                 () ->
                     reactionRepository.save(
-                        MessageReaction.of(messageId, userId, reactionEmoji)));
+                        MessageReaction.createReaction(messageId, userId, reactionEmoji)));
     Map<String, Object> body = new HashMap<>();
     body.put("id", reaction.getId());
     body.put("messageId", messageId);
@@ -103,7 +103,7 @@ public class MessagesService {
     MessageRead read =
         readRepository
             .findByMessageIdAndUserId(messageId, userId)
-            .orElseGet(() -> readRepository.save(MessageRead.of(messageId, userId)));
+            .orElseGet(() -> readRepository.save(MessageRead.createRead(messageId, userId)));
     return Map.of(
         "messageId",
         messageId,

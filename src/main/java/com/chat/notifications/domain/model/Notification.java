@@ -8,18 +8,18 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/** In-app activity notification delivered to a user. */
+/** In-app activity notification delivered to a user (maps to {@code activity_notification}). */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
-public class ActivityNotification extends AbstractEntity {
+public class Notification extends AbstractEntity {
 
   private String userId;
   private String type;
   private String payload;
   private boolean read;
 
-  private ActivityNotification(
+  private Notification(
       String id,
       Instant createdAt,
       Instant updatedAt,
@@ -39,12 +39,11 @@ public class ActivityNotification extends AbstractEntity {
    * @param userId recipient user id
    * @param type notification type
    * @param payload serialized notification payload
-   * @return a new {@code ActivityNotification}
+   * @return a new {@code Notification}
    */
-  public static ActivityNotification create(String userId, String type, String payload) {
+  public static Notification create(String userId, String type, String payload) {
     Instant now = Instant.now();
-    return new ActivityNotification(
-        UUID.randomUUID().toString(), now, now, userId, type, payload);
+    return new Notification(UUID.randomUUID().toString(), now, now, userId, type, payload);
   }
 
   /** Marks the notification as read. */

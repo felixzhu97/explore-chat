@@ -1,7 +1,7 @@
 package com.chat.notifications.service;
 
-import com.chat.notifications.domain.model.ActivityNotification;
-import com.chat.notifications.domain.repository.ActivityNotificationRepository;
+import com.chat.notifications.domain.model.Notification;
+import com.chat.notifications.domain.repository.NotificationRepository;
 import com.chat.websocket.infra.NotificationRealtimeGateway;
 import java.util.HashMap;
 import java.util.List;
@@ -15,11 +15,11 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class NotificationsService {
 
-  private final ActivityNotificationRepository notifications;
+  private final NotificationRepository notifications;
   private final ObjectProvider<NotificationRealtimeGateway> realtimeGateway;
 
   public NotificationsService(
-      ActivityNotificationRepository notifications,
+      NotificationRepository notifications,
       ObjectProvider<NotificationRealtimeGateway> realtimeGateway) {
     this.notifications = notifications;
     this.realtimeGateway = realtimeGateway;
@@ -28,7 +28,7 @@ public class NotificationsService {
   @Transactional
   public Map<String, Object> create(String userId, String type, String payload) {
     Map<String, Object> response =
-        toResponse(notifications.save(ActivityNotification.create(userId, type, payload)));
+        toResponse(notifications.save(Notification.create(userId, type, payload)));
     NotificationRealtimeGateway gateway = realtimeGateway.getIfAvailable();
     if (gateway != null) {
       gateway.publishNew(userId, response);
@@ -47,7 +47,7 @@ public class NotificationsService {
 
   @Transactional
   public void markRead(String id, String userId) {
-    ActivityNotification notification =
+    Notification notification =
         notifications
             .findById(id)
             .orElseThrow(
@@ -61,8 +61,7 @@ public class NotificationsService {
 
   @Transactional
   public void markAllRead(String userId) {
-    for (ActivityNotification notification :
-        notifications.findByUserIdOrderByCreatedAtDesc(userId)) {
+    for (Notification notification : notifications.findByUserIdOrderByCreatedAtDesc(userId)) {
       notification.markRead();
       notifications.save(notification);
     }
@@ -75,7 +74,7 @@ public class NotificationsService {
     }
   }
 
-  private Map<String, Object> toResponse(ActivityNotification notification) {
+  private Map<String, Object> toResponse(Notification notification) {
     Map<String, Object> body = new HashMap<>();
     body.put("id", notification.getId());
     body.put("type", notification.getType());

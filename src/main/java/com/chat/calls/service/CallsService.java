@@ -1,7 +1,7 @@
 package com.chat.calls.service;
 
-import com.chat.calls.domain.model.VoiceCall;
-import com.chat.calls.domain.repository.VoiceCallRepository;
+import com.chat.calls.domain.model.Call;
+import com.chat.calls.domain.repository.CallRepository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,51 +13,51 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class CallsService {
 
-  private final VoiceCallRepository voiceCallRepository;
+  private final CallRepository callRepository;
 
-  public CallsService(VoiceCallRepository voiceCallRepository) {
-    this.voiceCallRepository = voiceCallRepository;
+  public CallsService(CallRepository callRepository) {
+    this.callRepository = callRepository;
   }
 
   @Transactional
   public Map<String, Object> invite(String callerId, String calleeId, String callType) {
-    VoiceCall call = voiceCallRepository.save(VoiceCall.invite(callerId, calleeId, callType));
+    Call call = callRepository.save(Call.createCall(callerId, calleeId, callType));
     return toResponse(call);
   }
 
   @Transactional
   public Map<String, Object> answer(String callId) {
-    VoiceCall call = require(callId);
+    Call call = require(callId);
     try {
       call.answer();
     } catch (IllegalStateException ex) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage());
     }
-    return toResponse(voiceCallRepository.save(call));
+    return toResponse(callRepository.save(call));
   }
 
   @Transactional
   public Map<String, Object> reject(String callId) {
-    VoiceCall call = require(callId);
+    Call call = require(callId);
     try {
       call.reject();
     } catch (IllegalStateException ex) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage());
     }
-    return toResponse(voiceCallRepository.save(call));
+    return toResponse(callRepository.save(call));
   }
 
   @Transactional
   public Map<String, Object> end(String callId) {
-    VoiceCall call = require(callId);
+    Call call = require(callId);
     call.end();
-    return toResponse(voiceCallRepository.save(call));
+    return toResponse(callRepository.save(call));
   }
 
   @Transactional(readOnly = true)
   public Map<String, Object> list(String userId) {
     List<Map<String, Object>> items =
-        voiceCallRepository.findByParticipant(userId).stream().map(this::toResponse).toList();
+        callRepository.findByParticipant(userId).stream().map(this::toResponse).toList();
     return Map.of("calls", items);
   }
 
@@ -66,13 +66,13 @@ public class CallsService {
     return toResponse(require(callId));
   }
 
-  private VoiceCall require(String id) {
-    return voiceCallRepository
+  private Call require(String id) {
+    return callRepository
         .findById(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Call not found"));
   }
 
-  private Map<String, Object> toResponse(VoiceCall call) {
+  private Map<String, Object> toResponse(Call call) {
     Map<String, Object> body = new HashMap<>();
     body.put("id", call.getId());
     body.put("initiatorId", call.getCallerId());

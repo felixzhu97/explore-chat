@@ -10,10 +10,10 @@ import com.chat.chats.domain.repository.ChatParticipantRepository;
 import com.chat.chats.domain.repository.ChatRepository;
 import com.chat.follow.domain.model.UserFollow;
 import com.chat.follow.domain.repository.UserFollowRepository;
+import com.chat.groups.domain.model.Group;
 import com.chat.groups.domain.model.GroupParticipant;
-import com.chat.groups.domain.model.SocialGroup;
 import com.chat.groups.domain.repository.GroupParticipantRepository;
-import com.chat.groups.domain.repository.SocialGroupRepository;
+import com.chat.groups.domain.repository.GroupRepository;
 import com.chat.messages.domain.model.Message;
 import com.chat.messages.domain.repository.MessageRepository;
 import com.chat.post.domain.model.Post;
@@ -83,7 +83,7 @@ public class DemoDataLoader implements ApplicationRunner {
   private final ChatParticipantRepository participantRepository;
   private final MessageRepository messageRepository;
   private final UserStatusRepository statusRepository;
-  private final SocialGroupRepository groupRepository;
+  private final GroupRepository groupRepository;
   private final GroupParticipantRepository groupParticipantRepository;
   private final AdAccountRepository adAccountRepository;
   private final AnalyticsEventRepository analyticsEventRepository;
@@ -99,7 +99,7 @@ public class DemoDataLoader implements ApplicationRunner {
       ChatParticipantRepository participantRepository,
       MessageRepository messageRepository,
       UserStatusRepository statusRepository,
-      SocialGroupRepository groupRepository,
+      GroupRepository groupRepository,
       GroupParticipantRepository groupParticipantRepository,
       AdAccountRepository adAccountRepository,
       AnalyticsEventRepository analyticsEventRepository,
@@ -187,9 +187,11 @@ public class DemoDataLoader implements ApplicationRunner {
     statusRepository.save(
         UserStatus.create(alice.getId(), FEED_CAPTIONS[0], FEED_IMAGES[0], "IMAGE"));
 
-    SocialGroup group = groupRepository.save(SocialGroup.create("demo", alice.getId(), "demo"));
-    groupParticipantRepository.save(GroupParticipant.join(group.getId(), alice.getId(), "owner"));
-    groupParticipantRepository.save(GroupParticipant.join(group.getId(), bob.getId(), "member"));
+    Group group = groupRepository.save(Group.create("demo", alice.getId(), "demo"));
+    groupParticipantRepository.save(
+        GroupParticipant.createParticipant(group.getId(), alice.getId(), "owner"));
+    groupParticipantRepository.save(
+        GroupParticipant.createParticipant(group.getId(), bob.getId(), "member"));
 
     adAccountRepository.save(AdAccount.create(alice.getId(), "demo"));
     analyticsEventRepository.save(

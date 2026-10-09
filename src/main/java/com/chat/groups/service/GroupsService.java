@@ -1,9 +1,9 @@
 package com.chat.groups.service;
 
+import com.chat.groups.domain.model.Group;
 import com.chat.groups.domain.model.GroupParticipant;
-import com.chat.groups.domain.model.SocialGroup;
 import com.chat.groups.domain.repository.GroupParticipantRepository;
-import com.chat.groups.domain.repository.SocialGroupRepository;
+import com.chat.groups.domain.repository.GroupRepository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +15,11 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class GroupsService {
 
-  private final SocialGroupRepository groupRepository;
+  private final GroupRepository groupRepository;
   private final GroupParticipantRepository participantRepository;
 
   public GroupsService(
-      SocialGroupRepository groupRepository, GroupParticipantRepository participantRepository) {
+      GroupRepository groupRepository, GroupParticipantRepository participantRepository) {
     this.groupRepository = groupRepository;
     this.participantRepository = participantRepository;
   }
@@ -33,15 +33,14 @@ public class GroupsService {
 
   @Transactional
   public Map<String, Object> create(String ownerId, String name, String description) {
-    SocialGroup group =
-        groupRepository.save(SocialGroup.create(name, ownerId, description));
-    participantRepository.save(GroupParticipant.join(group.getId(), ownerId, "owner"));
+    Group group = groupRepository.save(Group.create(name, ownerId, description));
+    participantRepository.save(GroupParticipant.createParticipant(group.getId(), ownerId, "owner"));
     return toResponse(group);
   }
 
   @Transactional(readOnly = true)
   public Map<String, Object> get(String groupId) {
-    SocialGroup group = require(groupId);
+    Group group = require(groupId);
     Map<String, Object> body = toResponse(group);
     body.put(
         "participants",
@@ -57,19 +56,19 @@ public class GroupsService {
 
   @Transactional
   public Map<String, Object> addMember(String groupId, String actorId, String userId) {
-    SocialGroup group = require(groupId);
+    Group group = require(groupId);
     if (!group.getOwnerId().equals(actorId)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not group owner");
     }
     if (participantRepository.findByGroupIdAndUserId(groupId, userId).isEmpty()) {
-      participantRepository.save(GroupParticipant.join(groupId, userId, "member"));
+      participantRepository.save(GroupParticipant.createParticipant(groupId, userId, "member"));
     }
     return get(groupId);
   }
 
   @Transactional
   public Map<String, Object> removeMember(String groupId, String actorId, String userId) {
-    SocialGroup group = require(groupId);
+    Group group = require(groupId);
     if (!group.getOwnerId().equals(actorId) && !actorId.equals(userId)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed");
     }
@@ -81,7 +80,7 @@ public class GroupsService {
 
   @Transactional
   public void delete(String groupId, String actorId) {
-    SocialGroup group = require(groupId);
+    Group group = require(groupId);
     if (!group.getOwnerId().equals(actorId)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not group owner");
     }
@@ -91,13 +90,13 @@ public class GroupsService {
     groupRepository.delete(group);
   }
 
-  private SocialGroup require(String id) {
+  private Group require(String id) {
     return groupRepository
         .findById(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
   }
 
-  private Map<String, Object> toResponse(SocialGroup group) {
+  private Map<String, Object> toResponse(Group group) {
     Map<String, Object> body = new HashMap<>();
     body.put("id", group.getId());
     body.put("name", group.getName());

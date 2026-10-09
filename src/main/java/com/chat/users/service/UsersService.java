@@ -112,7 +112,7 @@ public class UsersService {
         .findById(blockedId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     if (blockedUserRepository.findByBlockerIdAndBlockedId(blockerId, blockedId).isEmpty()) {
-      blockedUserRepository.save(BlockedUser.of(blockerId, blockedId));
+      blockedUserRepository.save(BlockedUser.createBlock(blockerId, blockedId));
     }
   }
 

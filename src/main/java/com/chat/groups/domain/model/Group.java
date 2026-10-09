@@ -11,11 +11,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/** Social group owned by a user with optional description. */
+/** Social group owned by a user with optional description (maps to {@code social_group}). */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
-public class SocialGroup extends AbstractEntity {
+public class Group extends AbstractEntity {
 
   @NotBlank
   @Size(max = 256)
@@ -30,7 +30,7 @@ public class SocialGroup extends AbstractEntity {
   @NotBlank
   private String ownerId;
 
-  private SocialGroup(
+  private Group(
       String id, Instant createdAt, Instant updatedAt, String name, String ownerId) {
     super(id, createdAt, updatedAt);
     this.name = Objects.requireNonNull(name);
@@ -43,11 +43,11 @@ public class SocialGroup extends AbstractEntity {
    * @param name group name
    * @param ownerId owner user id
    * @param description optional description
-   * @return a new {@code SocialGroup}
+   * @return a new {@code Group}
    */
-  public static SocialGroup create(String name, String ownerId, String description) {
+  public static Group create(String name, String ownerId, String description) {
     Instant now = Instant.now();
-    SocialGroup group = new SocialGroup(UUID.randomUUID().toString(), now, now, name, ownerId);
+    Group group = new Group(UUID.randomUUID().toString(), now, now, name, ownerId);
     group.description = description;
     return group;
   }

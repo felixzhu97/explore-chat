@@ -10,11 +10,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/** Voice or video call session between two users. */
+/** Voice or video call session between two users (maps to {@code voice_call}). */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
-public class VoiceCall extends AbstractEntity {
+public class Call extends AbstractEntity {
 
   private String callerId;
   private String calleeId;
@@ -23,7 +23,7 @@ public class VoiceCall extends AbstractEntity {
   @Enumerated(EnumType.STRING)
   private CallStatus status;
 
-  private VoiceCall(
+  private Call(
       String id,
       Instant createdAt,
       Instant updatedAt,
@@ -43,11 +43,11 @@ public class VoiceCall extends AbstractEntity {
    * @param callerId caller user id
    * @param calleeId callee user id
    * @param callType call media type such as {@code audio}
-   * @return a new {@code VoiceCall}
+   * @return a new {@code Call}
    */
-  public static VoiceCall invite(String callerId, String calleeId, String callType) {
+  public static Call createCall(String callerId, String calleeId, String callType) {
     Instant now = Instant.now();
-    return new VoiceCall(UUID.randomUUID().toString(), now, now, callerId, calleeId, callType);
+    return new Call(UUID.randomUUID().toString(), now, now, callerId, calleeId, callType);
   }
 
   /**
