@@ -30,7 +30,7 @@ public class MessageRead extends AbstractImmutable {
    * @param userId reader user id
    * @return a new {@code MessageRead}
    */
-  public static MessageRead of(String messageId, String userId) {
+  public static MessageRead createRead(String messageId, String userId) {
     return new MessageRead(UUID.randomUUID().toString(), Instant.now(), messageId, userId);
   }
 }

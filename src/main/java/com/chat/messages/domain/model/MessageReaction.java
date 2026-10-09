@@ -34,7 +34,7 @@ public class MessageReaction extends AbstractImmutable {
    * @param emoji reaction emoji
    * @return a new {@code MessageReaction}
    */
-  public static MessageReaction of(String messageId, String userId, String emoji) {
+  public static MessageReaction createReaction(String messageId, String userId, String emoji) {
     return new MessageReaction(
         UUID.randomUUID().toString(), Instant.now(), messageId, userId, emoji);
   }

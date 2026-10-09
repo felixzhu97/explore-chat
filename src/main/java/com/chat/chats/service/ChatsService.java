@@ -5,10 +5,10 @@ import com.chat.chats.domain.model.ChatParticipant;
 import com.chat.chats.domain.model.ChatType;
 import com.chat.chats.domain.repository.ChatParticipantRepository;
 import com.chat.chats.domain.repository.ChatRepository;
+import com.chat.groups.domain.model.Group;
 import com.chat.groups.domain.model.GroupParticipant;
-import com.chat.groups.domain.model.SocialGroup;
 import com.chat.groups.domain.repository.GroupParticipantRepository;
-import com.chat.groups.domain.repository.SocialGroupRepository;
+import com.chat.groups.domain.repository.GroupRepository;
 import com.chat.messages.domain.model.Message;
 import com.chat.messages.domain.repository.MessageRepository;
 import com.chat.users.domain.repository.UserRepository;
@@ -25,7 +25,7 @@ public class ChatsService {
 
   private final ChatRepository chatRepository;
   private final ChatParticipantRepository participantRepository;
-  private final SocialGroupRepository socialGroupRepository;
+  private final GroupRepository groupRepository;
   private final GroupParticipantRepository groupParticipantRepository;
   private final UserRepository userRepository;
   private final MessageRepository messageRepository;
@@ -33,13 +33,13 @@ public class ChatsService {
   public ChatsService(
       ChatRepository chatRepository,
       ChatParticipantRepository participantRepository,
-      SocialGroupRepository socialGroupRepository,
+      GroupRepository groupRepository,
       GroupParticipantRepository groupParticipantRepository,
       UserRepository userRepository,
       MessageRepository messageRepository) {
     this.chatRepository = chatRepository;
     this.participantRepository = participantRepository;
-    this.socialGroupRepository = socialGroupRepository;
+    this.groupRepository = groupRepository;
     this.groupParticipantRepository = groupParticipantRepository;
     this.userRepository = userRepository;
     this.messageRepository = messageRepository;
@@ -61,9 +61,9 @@ public class ChatsService {
     Chat chat = chatRepository.save(Chat.createGroup(name));
     participantRepository.save(
         ChatParticipant.createParticipant(chat.getId(), creatorId, "OWNER"));
-    SocialGroup group =
-        socialGroupRepository.save(SocialGroup.create(name, creatorId, null));
-    groupParticipantRepository.save(GroupParticipant.join(group.getId(), creatorId, "owner"));
+    Group group = groupRepository.save(Group.create(name, creatorId, null));
+    groupParticipantRepository.save(
+        GroupParticipant.createParticipant(group.getId(), creatorId, "owner"));
     if (memberIds != null) {
       for (String memberId : memberIds) {
         if (memberId == null || memberId.equals(creatorId)) {
@@ -71,7 +71,8 @@ public class ChatsService {
         }
         participantRepository.save(
             ChatParticipant.createParticipant(chat.getId(), memberId, "MEMBER"));
-        groupParticipantRepository.save(GroupParticipant.join(group.getId(), memberId, "member"));
+        groupParticipantRepository.save(
+            GroupParticipant.createParticipant(group.getId(), memberId, "member"));
       }
     }
     Map<String, Object> body = toResponse(chat, creatorId);

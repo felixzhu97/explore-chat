@@ -27,14 +27,14 @@ public class GroupParticipant extends AbstractImmutable {
   }
 
   /**
-   * Adds a user to a group with the given role.
+   * Creates a group participant with the given role.
    *
    * @param groupId group id
    * @param userId participant user id
    * @param role participant role, defaults to {@code member}
    * @return a new {@code GroupParticipant}
    */
-  public static GroupParticipant join(String groupId, String userId, String role) {
+  public static GroupParticipant createParticipant(String groupId, String userId, String role) {
     return new GroupParticipant(
         UUID.randomUUID().toString(),
         Instant.now(),
