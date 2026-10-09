@@ -24,7 +24,7 @@ import com.chat.post.domain.repository.PostSaveRepository;
 import com.chat.post.domain.repository.SocialPostRepository;
 import com.chat.status.domain.model.UserStatus;
 import com.chat.status.domain.repository.UserStatusRepository;
-import com.chat.users.domain.model.ChatUser;
+import com.chat.users.domain.model.User;
 import com.chat.users.domain.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,16 +122,16 @@ public class DemoDataLoader implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
-    List<ChatUser> users = ensureDemoUsers();
+    List<User> users = ensureDemoUsers();
     if (postRepository.countAll() == 0) {
       seedFresh(users);
     }
     enrichFeedMedia();
   }
 
-  private List<ChatUser> ensureDemoUsers() {
+  private List<User> ensureDemoUsers() {
     String hash = passwordEncoder.encode("123456");
-    List<ChatUser> users = new ArrayList<>(DEMO_USERS.length);
+    List<User> users = new ArrayList<>(DEMO_USERS.length);
     for (String name : DEMO_USERS) {
       String label = capitalize(name);
       users.add(ensureUser(name, name + "@example.com", hash, "", avatar(label)));
@@ -140,14 +140,14 @@ public class DemoDataLoader implements ApplicationRunner {
     return users;
   }
 
-  private void seedFresh(List<ChatUser> users) {
-    final ChatUser alice = users.get(0);
-    final ChatUser bob = users.get(1);
+  private void seedFresh(List<User> users) {
+    final User alice = users.get(0);
+    final User bob = users.get(1);
 
     SocialPost first = null;
     SocialPost last = null;
     for (int i = 0; i < users.size(); i++) {
-      ChatUser author = users.get(i);
+      User author = users.get(i);
       String caption = FEED_CAPTIONS[i % FEED_CAPTIONS.length];
       String image = FEED_IMAGES[i % FEED_IMAGES.length];
       boolean reel = i % 5 == 2;
@@ -177,10 +177,12 @@ public class DemoDataLoader implements ApplicationRunner {
     seedFollow(bob.getId(), alice.getId());
 
     Chat chat = chatRepository.save(Chat.createPrivate());
-    participantRepository.save(ChatParticipant.join(chat.getId(), alice.getId(), "MEMBER"));
-    participantRepository.save(ChatParticipant.join(chat.getId(), bob.getId(), "MEMBER"));
-    messageRepository.save(Message.send(chat.getId(), bob.getId(), "hi"));
-    messageRepository.save(Message.send(chat.getId(), alice.getId(), "hello"));
+    participantRepository.save(
+        ChatParticipant.createParticipant(chat.getId(), alice.getId(), "MEMBER"));
+    participantRepository.save(
+        ChatParticipant.createParticipant(chat.getId(), bob.getId(), "MEMBER"));
+    messageRepository.save(Message.createMessage(chat.getId(), bob.getId(), "hi"));
+    messageRepository.save(Message.createMessage(chat.getId(), alice.getId(), "hello"));
 
     statusRepository.save(
         UserStatus.create(alice.getId(), FEED_CAPTIONS[0], FEED_IMAGES[0], "IMAGE"));
@@ -214,7 +216,7 @@ public class DemoDataLoader implements ApplicationRunner {
     log.info("Enriched feed captions and city/map/meditation media");
   }
 
-  private ChatUser ensureUser(
+  private User ensureUser(
       String username, String email, String hash, String status, String avatarUrl) {
     return userRepository
         .findByEmail(email)
@@ -228,7 +230,7 @@ public class DemoDataLoader implements ApplicationRunner {
               if (userRepository.findByUsername(username).isPresent()) {
                 return userRepository.findByUsername(username).orElseThrow();
               }
-              ChatUser created = userRepository.save(ChatUser.register(username, email, hash));
+              User created = userRepository.save(User.createUser(username, email, hash));
               created.updateProfile(null, null, status, avatarUrl);
               return userRepository.save(created);
             });

@@ -48,8 +48,10 @@ public class ChatsService {
   @Transactional
   public Map<String, Object> createPrivate(String creatorId, String peerUserId) {
     Chat chat = chatRepository.save(Chat.createPrivate());
-    participantRepository.save(ChatParticipant.join(chat.getId(), creatorId, "MEMBER"));
-    participantRepository.save(ChatParticipant.join(chat.getId(), peerUserId, "MEMBER"));
+    participantRepository.save(
+        ChatParticipant.createParticipant(chat.getId(), creatorId, "MEMBER"));
+    participantRepository.save(
+        ChatParticipant.createParticipant(chat.getId(), peerUserId, "MEMBER"));
     return toResponse(chat, creatorId);
   }
 
@@ -57,7 +59,8 @@ public class ChatsService {
   public Map<String, Object> createGroupChat(
       String creatorId, String name, List<String> memberIds) {
     Chat chat = chatRepository.save(Chat.createGroup(name));
-    participantRepository.save(ChatParticipant.join(chat.getId(), creatorId, "OWNER"));
+    participantRepository.save(
+        ChatParticipant.createParticipant(chat.getId(), creatorId, "OWNER"));
     SocialGroup group =
         socialGroupRepository.save(SocialGroup.create(name, creatorId, null));
     groupParticipantRepository.save(GroupParticipant.join(group.getId(), creatorId, "owner"));
@@ -66,7 +69,8 @@ public class ChatsService {
         if (memberId == null || memberId.equals(creatorId)) {
           continue;
         }
-        participantRepository.save(ChatParticipant.join(chat.getId(), memberId, "MEMBER"));
+        participantRepository.save(
+            ChatParticipant.createParticipant(chat.getId(), memberId, "MEMBER"));
         groupParticipantRepository.save(GroupParticipant.join(group.getId(), memberId, "member"));
       }
     }
@@ -152,7 +156,7 @@ public class ChatsService {
         chatRepository
             .findById(chatId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat not found"));
-    chat.softDelete();
+    chat.markDeleted();
     chatRepository.save(chat);
   }
 

@@ -1,6 +1,6 @@
 package com.chat.users.infra;
 
-import com.chat.users.domain.model.ChatUser;
+import com.chat.users.domain.model.User;
 import com.chat.users.domain.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
@@ -11,29 +11,29 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SpringDataUserRepository extends JpaRepository<ChatUser, String>, UserRepository {
+public interface SpringDataUserRepository extends JpaRepository<User, String>, UserRepository {
 
   @Override
-  Optional<ChatUser> findByEmail(String email);
+  Optional<User> findByEmail(String email);
 
   @Override
-  Optional<ChatUser> findByUsername(String username);
+  Optional<User> findByUsername(String username);
 
   @Override
   @Query(
       """
-      select u from ChatUser u
+      select u from User u
       where lower(u.username) like lower(concat('%', :query, '%'))
       """)
-  List<ChatUser> findByUsernameContainingIgnoreCase(@Param("query") String query);
+  List<User> findByUsernameContainingIgnoreCase(@Param("query") String query);
 
   @Override
-  default List<ChatUser> listRecent(int limit) {
+  default List<User> listRecent(int limit) {
     return findAll(PageRequest.of(0, Math.max(limit, 1))).getContent();
   }
 
   @Override
-  default List<ChatUser> listAll(int limit) {
+  default List<User> listAll(int limit) {
     return findAll(PageRequest.of(0, Math.max(limit, 1))).getContent();
   }
 

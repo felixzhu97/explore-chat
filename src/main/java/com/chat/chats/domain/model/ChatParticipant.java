@@ -43,7 +43,7 @@ public class ChatParticipant extends AbstractEntity {
    * @param role participant role
    * @return a new {@code ChatParticipant}
    */
-  public static ChatParticipant join(String chatId, String userId, String role) {
+  public static ChatParticipant createParticipant(String chatId, String userId, String role) {
     Instant now = Instant.now();
     return new ChatParticipant(
         UUID.randomUUID().toString(), now, now, chatId, userId, role);

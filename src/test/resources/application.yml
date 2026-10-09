@@ -16,5 +16,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+      naming:
+        physical-strategy: com.chat.common.config.ChatPhysicalNamingStrategy
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml

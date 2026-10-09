@@ -2,7 +2,7 @@ package com.chat.common.security;
 
 import com.chat.auth.service.IamUserProvisioner;
 import com.chat.auth.service.JwtTokenService;
-import com.chat.users.domain.model.ChatUser;
+import com.chat.users.domain.model.User;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -78,7 +78,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
     try {
       Jwt jwt = decoder.decode(token);
-      ChatUser user = provisioner.resolve(jwt);
+      User user = provisioner.resolve(jwt);
       if (user.isDeleted() || user.isDisabled()) {
         SecurityContextHolder.clearContext();
         return;

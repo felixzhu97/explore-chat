@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.chat.users.domain.model.ChatUser;
+import com.chat.users.domain.model.User;
 import com.chat.users.domain.repository.UserRepository;
 import java.time.Instant;
 import java.util.Optional;
@@ -30,10 +30,10 @@ class IamUserProvisionerTest {
 
   @Test
   void shouldReturnExistingUserWhenEmailMatches() {
-    ChatUser existing = ChatUser.register("alice", "alice@example.com", "hash");
+    User existing = User.createUser("alice", "alice@example.com", "hash");
     when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.of(existing));
 
-    ChatUser resolved = provisioner.resolve(iamJwt("sub-1", "alice@example.com"));
+    User resolved = provisioner.resolve(iamJwt("sub-1", "alice@example.com"));
 
     assertThat(resolved).isSameAs(existing);
   }
@@ -42,11 +42,11 @@ class IamUserProvisionerTest {
   void shouldCreateUserWhenIamSubjectIsNew() {
     when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
     when(passwordEncoder.encode(anyString())).thenReturn("unusable");
-    when(userRepository.save(any(ChatUser.class))).thenAnswer(inv -> inv.getArgument(0));
+    when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    ChatUser created = provisioner.resolve(iamJwt("sub-xyz", "new@example.com"));
+    User created = provisioner.resolve(iamJwt("sub-xyz", "new@example.com"));
 
-    ArgumentCaptor<ChatUser> captor = ArgumentCaptor.forClass(ChatUser.class);
+    ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
     verify(userRepository).save(captor.capture());
     assertThat(captor.getValue().getEmail()).isEqualTo("new@example.com");
     assertThat(captor.getValue().getUsername()).startsWith("iam:");
@@ -57,9 +57,9 @@ class IamUserProvisionerTest {
   void shouldCreateSyntheticEmailWhenEmailClaimMissing() {
     when(userRepository.findByUsername("iam:sub-only")).thenReturn(Optional.empty());
     when(passwordEncoder.encode(anyString())).thenReturn("unusable");
-    when(userRepository.save(any(ChatUser.class))).thenAnswer(inv -> inv.getArgument(0));
+    when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    ChatUser created = provisioner.resolve(iamJwt("sub-only", null));
+    User created = provisioner.resolve(iamJwt("sub-only", null));
 
     assertThat(created.getUsername()).isEqualTo("iam:sub-only");
     assertThat(created.getEmail()).contains("@users.explore.iam");

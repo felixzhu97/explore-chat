@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
-public class ChatUser extends AbstractEntity {
+public class User extends AbstractEntity {
 
   @NotBlank
   @Size(max = 128)
@@ -47,7 +47,7 @@ public class ChatUser extends AbstractEntity {
   private boolean disabled;
   private boolean deleted;
 
-  private ChatUser(
+  private User(
       String id,
       Instant createdAt,
       Instant updatedAt,
@@ -65,29 +65,29 @@ public class ChatUser extends AbstractEntity {
   }
 
   /**
-   * Registers a new user with credentials.
+   * Creates a new user with credentials.
    *
    * @param username unique username
    * @param email unique email
    * @param passwordHash encoded password
-   * @return a new {@code ChatUser}
+   * @return a new {@code User}
    */
-  public static ChatUser register(String username, String email, String passwordHash) {
+  public static User createUser(String username, String email, String passwordHash) {
     Instant now = Instant.now();
-    return new ChatUser(UUID.randomUUID().toString(), now, now, username, email, passwordHash);
+    return new User(UUID.randomUUID().toString(), now, now, username, email, passwordHash);
   }
 
   /**
-   * Registers a user provisioned from Explore IAM (no password login until they set one).
+   * Creates a user provisioned from Explore IAM (no password login until they set one).
    *
    * @param username unique username (often derived from IAM subject)
    * @param email unique email from the IAM ID token / userinfo
    * @param unusablePasswordHash random encoded hash so password login cannot succeed by guess
-   * @return a new {@code ChatUser}
+   * @return a new {@code User}
    */
-  public static ChatUser registerFromIam(
+  public static User createUserFromIam(
       String username, String email, String unusablePasswordHash) {
-    return register(username, email, unusablePasswordHash);
+    return createUser(username, email, unusablePasswordHash);
   }
 
   /**
@@ -137,7 +137,7 @@ public class ChatUser extends AbstractEntity {
   }
 
   /** Marks the user as soft-deleted. */
-  public void softDelete() {
+  public void markDeleted() {
     this.deleted = true;
     touch();
   }

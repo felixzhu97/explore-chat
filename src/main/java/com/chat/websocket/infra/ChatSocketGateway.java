@@ -7,7 +7,7 @@ import com.chat.common.messaging.ChatEventPublisher;
 import com.chat.common.security.JwtAuthenticationFilter;
 import com.chat.messages.service.MessagesService;
 import com.chat.status.service.StatusService;
-import com.chat.users.domain.model.ChatUser;
+import com.chat.users.domain.model.User;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
@@ -119,7 +119,7 @@ public class ChatSocketGateway {
       if (!scopes.contains("write:chat_messaging")) {
         return null;
       }
-      ChatUser user = provisioner.resolve(jwt);
+      User user = provisioner.resolve(jwt);
       if (user.isDeleted() || user.isDisabled()) {
         return null;
       }

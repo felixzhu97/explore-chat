@@ -1,6 +1,6 @@
 package com.chat.auth.service;
 
-import com.chat.users.domain.model.ChatUser;
+import com.chat.users.domain.model.User;
 import com.chat.users.domain.repository.UserRepository;
 import java.util.Locale;
 import java.util.UUID;
@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Finds or creates a {@link ChatUser} for an Explore IAM access token. */
+/** Finds or creates a {@link User} for an Explore IAM access token. */
 @Service
 public class IamUserProvisioner {
 
@@ -30,7 +30,7 @@ public class IamUserProvisioner {
    * @return persisted Chat user
    */
   @Transactional
-  public ChatUser resolve(Jwt jwt) {
+  public User resolve(Jwt jwt) {
     String subject = jwt.getSubject();
     if (subject == null || subject.isBlank()) {
       throw new IllegalArgumentException("IAM JWT subject is required");
@@ -49,9 +49,9 @@ public class IamUserProvisioner {
         .orElseGet(() -> create(username, syntheticEmail(subject)));
   }
 
-  private ChatUser create(String username, String email) {
+  private User create(String username, String email) {
     String hash = passwordEncoder.encode(UUID.randomUUID().toString());
-    return userRepository.save(ChatUser.registerFromIam(username, email, hash));
+    return userRepository.save(User.createUserFromIam(username, email, hash));
   }
 
   static String usernameFor(String subject) {
