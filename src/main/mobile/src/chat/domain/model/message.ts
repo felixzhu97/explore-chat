@@ -3,7 +3,7 @@ import {
   MessageDeliveryStatus,
   MessageId,
   type DeliveryStatusValue,
-} from "@/chat/domain/vo";
+} from "./value-objects";
 
 export class Message {
   private constructor(
@@ -37,7 +37,7 @@ export class Message {
       props.senderId,
       props.content,
       props.createdAt,
-      MessageDeliveryStatus.of(props.status ?? "sent"),
+      MessageDeliveryStatus.createStatus(props.status ?? "sent"),
       props.type ?? "text",
       props.clientMsgId,
       props.mediaUrl,
@@ -61,7 +61,7 @@ export class Message {
   promote(toServerId: MessageId, createdAt?: string): void {
     this._id = toServerId;
     if (createdAt) this._createdAt = createdAt;
-    const sent = MessageDeliveryStatus.of("sent");
+    const sent = MessageDeliveryStatus.createStatus("sent");
     if (this._status.canTransition(sent) || this._status.value === "sending") {
       this._status = sent;
     }

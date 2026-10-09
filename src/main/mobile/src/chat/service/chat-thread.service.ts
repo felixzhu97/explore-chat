@@ -1,5 +1,5 @@
 import { ChatThread } from "@/chat/domain/model";
-import { ChatId, ClientMsgId, MessageId } from "@/chat/domain/vo";
+import { ChatId, ClientMsgId, MessageId } from "@/chat/domain/model";
 import type { Message } from "@/chat/message.model";
 import {
   mapDomainMessageToEntity,
@@ -11,7 +11,7 @@ export class ChatThreadService {
   private thread: ChatThread;
 
   constructor(chatId: string) {
-    this.thread = ChatThread.empty(ChatId.create(chatId));
+    this.thread = ChatThread.empty(ChatId.createId(chatId));
   }
 
   hydrateFromList(messages: Message[]): Message[] {
@@ -28,10 +28,10 @@ export class ChatThreadService {
 
   applySent(message: Message): Message[] {
     this.thread.applyDelivery(
-      MessageId.create(message.id),
+      MessageId.createId(message.id),
       "sent",
       message.clientMsgId != null
-        ? ClientMsgId.create(message.clientMsgId)
+        ? ClientMsgId.createId(message.clientMsgId)
         : undefined,
       message.content,
     );
@@ -44,10 +44,10 @@ export class ChatThreadService {
     clientMsgId?: string;
   }): Message[] {
     this.thread.applyDelivery(
-      MessageId.create(payload.messageId),
+      MessageId.createId(payload.messageId),
       "delivered",
       payload.clientMsgId != null
-        ? ClientMsgId.create(payload.clientMsgId)
+        ? ClientMsgId.createId(payload.clientMsgId)
         : undefined,
     );
     this.thread.pullDomainEvents();
@@ -69,7 +69,7 @@ export class ChatThreadService {
   }
 
   markFailed(clientMsgId: string): Message[] {
-    this.thread.markFailed(ClientMsgId.create(clientMsgId));
+    this.thread.markFailed(ClientMsgId.createId(clientMsgId));
     this.thread.pullDomainEvents();
     return this.timeline();
   }

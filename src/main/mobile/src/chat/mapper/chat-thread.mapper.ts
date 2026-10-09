@@ -10,7 +10,7 @@ import {
   ClientMsgId,
   MessageId,
   type DeliveryStatusValue,
-} from "@/chat/domain/vo";
+} from "@/chat/domain/model";
 import type { IncomingMessageProps } from "@/chat/domain/event";
 
 const statusMap: Record<DeliveryStatusValue, MessageStatus> = {
@@ -41,8 +41,8 @@ export function mapDomainMessageToEntity(m: DomainMessage): Message {
 
 export function mapUiMessageToIncoming(message: Message): IncomingMessageProps {
   return {
-    id: MessageId.create(message.id),
-    chatId: ChatId.create(message.chatId),
+    id: MessageId.createId(message.id),
+    chatId: ChatId.createId(message.chatId),
     senderId: message.senderId,
     content: message.content,
     createdAt:
@@ -52,7 +52,7 @@ export function mapUiMessageToIncoming(message: Message): IncomingMessageProps {
     type: message.type,
     status: message.status as DeliveryStatusValue,
     ...(message.clientMsgId != null && {
-      clientMsgId: ClientMsgId.create(message.clientMsgId),
+      clientMsgId: ClientMsgId.createId(message.clientMsgId),
     }),
   };
 }

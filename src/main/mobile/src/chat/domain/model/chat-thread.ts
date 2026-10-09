@@ -6,7 +6,7 @@ import {
   MessageDeliveryStatus,
   MessageId,
   type DeliveryStatusValue,
-} from "@/chat/domain/vo";
+} from "./value-objects";
 
 function sortByCreatedAt(a: Message, b: Message): number {
   return a.createdAt.localeCompare(b.createdAt);
@@ -126,11 +126,11 @@ export class ChatThread {
     mediaUrl?: string;
     senderName?: string;
   }): { clientMsgId: ClientMsgId; message: Message } {
-    const clientMsgId = ClientMsgId.create(
+    const clientMsgId = ClientMsgId.createId(
       `cmsg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
     );
     const message = Message.create({
-      id: MessageId.create(clientMsgId.value),
+      id: MessageId.createId(clientMsgId.value),
       chatId: this.chatId.value,
       senderId: props.senderId,
       content: props.content,
@@ -154,7 +154,7 @@ export class ChatThread {
   markFailed(clientMsgId: ClientMsgId): void {
     const msg = this.messages.find((m) => m.clientMsgId?.equals(clientMsgId));
     if (!msg) return;
-    if (msg.transition(MessageDeliveryStatus.of("failed"))) {
+    if (msg.transition(MessageDeliveryStatus.createStatus("failed"))) {
       this.events.push({
         type: "DeliveryStatusChanged",
         chatId: this.chatId.value,
@@ -183,7 +183,7 @@ export class ChatThread {
     if (status === "sent" && msg.status.value === "sending") {
       msg.promote(messageId);
     } else {
-      msg.transition(MessageDeliveryStatus.of(status));
+      msg.transition(MessageDeliveryStatus.createStatus(status));
     }
     this.events.push({
       type: "DeliveryStatusChanged",
