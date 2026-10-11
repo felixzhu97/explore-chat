@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="0.1-chat-user" author="felix.zhu">
+    <changeSet id="5061cb47-7f1d-5471-9096-8ac973380472" author="felix.zhu">
         <createTable tableName="chat_user">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -44,7 +44,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="0.1-chat" author="felix.zhu">
+    <changeSet id="c9dfb0c8-123e-5ecd-a57c-e790d73ff05b" author="felix.zhu">
         <createTable tableName="chat">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -69,7 +69,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="0.1-chat-participant" author="felix.zhu">
+    <changeSet id="23a2d627-9db7-5c1d-912d-74c22083a8b7" author="felix.zhu">
         <createTable tableName="chat_participant">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -111,7 +111,7 @@
             constraintName="uk_chat_participant_chat_user"/>
     </changeSet>
 
-    <changeSet id="0.1-message" author="felix.zhu">
+    <changeSet id="30db18c8-19d7-5b38-b3f8-de6f1c57a6fa" author="felix.zhu">
         <createTable tableName="message">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -146,7 +146,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="0.1-social-post" author="felix.zhu">
+    <changeSet id="d05f15e5-3a24-5020-9239-7234dc97e222" author="felix.zhu">
         <createTable tableName="social_post">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -185,7 +185,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="0.1-post-comment" author="felix.zhu">
+    <changeSet id="d96ac87b-a6d4-5bac-8f88-780bfc3c3cb0" author="felix.zhu">
         <createTable tableName="post_comment">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -214,7 +214,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="0.1-user-follow" author="felix.zhu">
+    <changeSet id="1ab7b9eb-b5a1-54ea-b5c6-aa31bb53fb8c" author="felix.zhu">
         <createTable tableName="user_follow">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -235,7 +235,7 @@
             constraintName="uk_user_follow_pair"/>
     </changeSet>
 
-    <changeSet id="0.1-activity-notification" author="felix.zhu">
+    <changeSet id="549f6f82-961d-5c16-9d2e-14c46a08f544" author="felix.zhu">
         <createTable tableName="activity_notification">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -266,7 +266,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="0.1-post-like" author="felix.zhu">
+    <changeSet id="87c485e8-9010-5e5f-8a26-0bdf9f46bd7d" author="felix.zhu">
         <createTable tableName="post_like">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -287,7 +287,7 @@
             constraintName="uk_post_like_post_user"/>
     </changeSet>
 
-    <changeSet id="0.1-post-save" author="felix.zhu">
+    <changeSet id="d6f9b09d-f81d-5073-929f-06643f1f40c7" author="felix.zhu">
         <createTable tableName="post_save">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -308,7 +308,7 @@
             constraintName="uk_post_save_post_user"/>
     </changeSet>
 
-    <changeSet id="0.1-message-reaction" author="felix.zhu">
+    <changeSet id="7d33aa3c-4728-5964-99c4-755043bc7ca0" author="felix.zhu">
         <createTable tableName="message_reaction">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -332,7 +332,7 @@
             constraintName="uk_message_reaction"/>
     </changeSet>
 
-    <changeSet id="0.1-message-read" author="felix.zhu">
+    <changeSet id="a1d66587-48a7-5cde-ab13-39c09a9fb2ea" author="felix.zhu">
         <createTable tableName="message_read">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -353,7 +353,7 @@
             constraintName="uk_message_read"/>
     </changeSet>
 
-    <changeSet id="0.1-voice-call" author="felix.zhu">
+    <changeSet id="5014661d-6348-5b10-8e09-6005ee57111a" author="felix.zhu">
         <createTable tableName="voice_call">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -382,7 +382,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="0.1-user-status" author="felix.zhu">
+    <changeSet id="24f3ddb4-8432-5f24-aa02-3d2d5fe70950" author="felix.zhu">
         <createTable tableName="user_status">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -410,7 +410,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="0.1-status-view" author="felix.zhu">
+    <changeSet id="6767d02f-be89-5a1a-b818-1dd62a89106a" author="felix.zhu">
         <createTable tableName="status_view">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -431,7 +431,7 @@
             constraintName="uk_status_view"/>
     </changeSet>
 
-    <changeSet id="0.1-social-group" author="felix.zhu">
+    <changeSet id="5aa52db8-52c7-53c7-888e-b206355a3eac" author="felix.zhu">
         <createTable tableName="social_group">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -456,7 +456,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="0.1-group-participant" author="felix.zhu">
+    <changeSet id="6ca7289d-db05-5d99-ab5a-ae697f8032d3" author="felix.zhu">
         <createTable tableName="group_participant">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -480,7 +480,7 @@
             constraintName="uk_group_participant"/>
     </changeSet>
 
-    <changeSet id="0.1-blocked-user" author="felix.zhu">
+    <changeSet id="2acadfb6-b975-58f1-b316-8a997c81b803" author="felix.zhu">
         <createTable tableName="blocked_user">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -501,7 +501,7 @@
             constraintName="uk_blocked_user"/>
     </changeSet>
 
-    <changeSet id="0.1-password-reset-token" author="felix.zhu">
+    <changeSet id="47ea04b1-1c24-55ef-81e9-55a52e716271" author="felix.zhu">
         <createTable tableName="password_reset_token">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -530,7 +530,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="0.1-revoked-token" author="felix.zhu">
+    <changeSet id="7a80f97e-a961-5667-8851-6a88bf79fdd3" author="felix.zhu">
         <createTable tableName="revoked_token">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -547,7 +547,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="0.1-hashtag" author="felix.zhu">
+    <changeSet id="82c99e67-fedd-50eb-b9ce-028743eee7f7" author="felix.zhu">
         <createTable tableName="hashtag">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -570,7 +570,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="0.1-post-hashtag" author="felix.zhu">
+    <changeSet id="10e8e359-60e0-53b6-ac74-742aa2605832" author="felix.zhu">
         <createTable tableName="post_hashtag">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -591,7 +591,7 @@
             constraintName="uk_post_hashtag"/>
     </changeSet>
 
-    <changeSet id="0.1-analytics-event" author="felix.zhu">
+    <changeSet id="0a4c6a1a-f975-55ab-8d2c-588d309e076d" author="felix.zhu">
         <createTable tableName="analytics_event">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -610,7 +610,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="0.1-ad-account" author="felix.zhu">
+    <changeSet id="fc311b9e-b84f-5d85-9e18-5060c599cf22" author="felix.zhu">
         <createTable tableName="ad_account">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -636,7 +636,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="0.1-ad-campaign" author="felix.zhu">
+    <changeSet id="21693e4f-8834-5f51-a93f-962dff2a7b0a" author="felix.zhu">
         <createTable tableName="ad_campaign">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -665,7 +665,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="0.1-ad-creative" author="felix.zhu">
+    <changeSet id="60bccb91-5d95-5229-8433-e01cb5ca4480" author="felix.zhu">
         <createTable tableName="ad_creative">
             <column name="id" type="varchar(36)">
                 <constraints primaryKey="true" nullable="false"/>
