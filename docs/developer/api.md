@@ -105,18 +105,19 @@ GET ${API_PREFIX}/posts/feed  ·  GET ${API_PREFIX}/posts/reels
 
 ## AI / Explore AI BFF
 
-| Prefix          | Description                                    |
-| --------------- | ---------------------------------------------- |
-| `/ai`           | 本地 Ollama 聊天等                             |
+| Prefix / Path | Description |
+| --- | --- |
+| `/ai/chat` | 本地 Ollama 聊天 |
 | `/ai/explore/*` | **Explore AI BFF** — 浏览器不得直连 Explore AI |
+| `GET /ai/explore/agents` | 列出 Gallery Agents（转发 `GET /api/agents`） |
+| `POST /ai/explore/agents/{type}/invoke` | 同步调用 Agent（body `{ "message": "..." }`） |
 
-启用条件（服务端）：
+启用条件（服务端 `chat.upstreams`）：
 
-- `EXPLORE_AI_ENABLED=true`
-- `EXPLORE_AI_BASE_URL`
-- `EXPLORE_AI_SERVICE_KEY`
+- `EXPLORE_AI_BASE_URL`（默认 `http://127.0.0.1:9000`）
+- `EXPLORE_AI_SERVICE_KEY`（与 Explore AI `app.service-auth.api-key` 相同；缺省则 BFF 返回 503）
 
-上游使用服务间头：`X-Service-Key`、`X-Client-Id`（UUID）。SSE 响应需兼容 `data:` 行。
+上游服务间头：`X-Service-Key`、`X-Client-Id`（由登录主体映射的稳定 UUID）。用户直连 A2A 仍需 IAM Bearer + `write:ai_agent`。
 
 ---
 

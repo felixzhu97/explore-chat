@@ -63,4 +63,5 @@ chat:
   upstreams:
     explore-ml: ${EXPLORE_ML_API_URL:http://localhost:8000}
     ollama: http://localhost:11434
-    explore-ai: ""
+    explore-ai: ${EXPLORE_AI_BASE_URL:http://127.0.0.1:9000}
+    explore-ai-service-key: ${EXPLORE_AI_SERVICE_KEY:}
