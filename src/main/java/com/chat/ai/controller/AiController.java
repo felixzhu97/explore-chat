@@ -1,10 +1,15 @@
 package com.chat.ai.controller;
 
 import com.chat.ai.service.AiProxyService;
+import java.util.List;
 import java.util.Map;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -45,5 +50,28 @@ public class AiController {
   @PostMapping("ai/chat")
   public Map<?, ?> chat(@RequestBody Map<String, Object> body) {
     return aiProxyService.chatOllama(body);
+  }
+
+  /** Lists Explore AI Gallery agents (BFF; browser must not call Explore AI directly). */
+  @GetMapping("ai/explore/agents")
+  public List<Map<String, Object>> listExploreAgents(
+      @RequestParam(value = "lang", required = false) String lang, Authentication authentication) {
+    return aiProxyService.listExploreAgents(clientId(authentication), lang);
+  }
+
+  /** Invokes one Explore AI Gallery agent via the Chat BFF. */
+  @PostMapping("ai/explore/agents/{agentType}/invoke")
+  public Map<String, Object> invokeExploreAgent(
+      @PathVariable String agentType,
+      @RequestBody Map<String, Object> body,
+      @RequestParam(value = "lang", required = false) String lang,
+      Authentication authentication) {
+    Object message = body == null ? null : body.get("message");
+    return aiProxyService.invokeExploreAgent(
+        agentType, message == null ? "" : String.valueOf(message), clientId(authentication), lang);
+  }
+
+  private static String clientId(Authentication authentication) {
+    return authentication == null ? null : authentication.getName();
   }
 }
