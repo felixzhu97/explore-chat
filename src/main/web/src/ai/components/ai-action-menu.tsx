@@ -3,6 +3,7 @@
 import { Button } from "@/shared/ui/button";
 import { Card } from "@/shared/ui/card";
 import {
+  Bot,
   FileText,
   Image as ImageIcon,
   MessageCircle,
@@ -13,6 +14,7 @@ import { styled } from "@/src/shared/utils/emotion";
 
 interface AiActionMenuProps {
   onSmartReply?: () => void;
+  onAskAgent?: () => void;
   onGenerateText?: () => void;
   onGenerateImage?: () => void;
   onGenerateVideo?: () => void;
@@ -81,8 +83,15 @@ const SmartReplyIconStyled = styled(MessageCircle)`
   color: #22c55e;
 `;
 
+const AgentIconStyled = styled(Bot)`
+  height: 1.5rem;
+  width: 1.5rem;
+  color: #0066cc;
+`;
+
 export function AiActionMenu({
   onSmartReply,
+  onAskAgent,
   onGenerateText,
   onGenerateImage,
   onGenerateVideo,
@@ -90,6 +99,7 @@ export function AiActionMenu({
 }: AiActionMenuProps) {
   const count = [
     onSmartReply,
+    onAskAgent,
     onGenerateText,
     onGenerateImage,
     onGenerateVideo,
@@ -104,6 +114,12 @@ export function AiActionMenu({
           <MenuOptionButton variant="ghost" size="sm" onClick={onSmartReply}>
             <SmartReplyIconStyled />
             <OptionLabel>智能回复</OptionLabel>
+          </MenuOptionButton>
+        )}
+        {onAskAgent != null && (
+          <MenuOptionButton variant="ghost" size="sm" onClick={onAskAgent}>
+            <AgentIconStyled />
+            <OptionLabel>Ask Agent</OptionLabel>
           </MenuOptionButton>
         )}
         {onGenerateText != null && (

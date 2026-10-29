@@ -12,6 +12,7 @@ import { AddFriendDialog } from "@/chat/components/add-friend-dialog";
 import { AdvancedSearchDialog } from "@/search/advanced-search-dialog";
 import { VideoGenerateDialog } from "@/ai/components/video-generate-dialog";
 import { TextGenerateDialog } from "@/ai/components/text-generate-dialog";
+import { AskAgentDialog } from "@/ai/components/ask-agent-dialog";
 import { ImageGenerateDialog } from "@/ai/components/image-generate-dialog";
 import { VoiceGenerateDialog } from "@/ai/components/voice-generate-dialog";
 import { useSharedRealCall } from "@/layout/real-call-context";
@@ -153,6 +154,7 @@ export function MessagesPage() {
   );
   const [showVideoDialog, setShowVideoDialog] = useState(false);
   const [showTextDialog, setShowTextDialog] = useState(false);
+  const [showAskAgentDialog, setShowAskAgentDialog] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [showVoiceDialog, setShowVoiceDialog] = useState(false);
 
@@ -319,6 +321,25 @@ export function MessagesPage() {
     setShowTextDialog(true);
   };
 
+  const handleAskAgentClick = () => {
+    analytics.track(AI_ACTION, {
+      action: "agent",
+      step: "open",
+      chatId: chatIdForAnalytics,
+    });
+    setShowAskAgentDialog(true);
+  };
+
+  const handleAskAgentSuccess = (content: string) => {
+    analytics.track(AI_ACTION, {
+      action: "agent",
+      step: "send_to_chat",
+      chatId: chatIdForAnalytics,
+    });
+    handleSendMessageWrapper(content, "text");
+    setShowAskAgentDialog(false);
+  };
+
   const handleTextGenerateSuccess = (content: string) => {
     analytics.track(AI_ACTION, {
       action: "text",
@@ -455,6 +476,9 @@ export function MessagesPage() {
               onSmartReplyClick={
                 chatsWithLive.isApiChat ? handleSmartReplyClick : undefined
               }
+              onAskAgentClick={
+                chatsWithLive.isApiChat ? handleAskAgentClick : undefined
+              }
               onGenerateVideoClick={
                 chatsWithLive.isApiChat ? handleGenerateVideoClick : undefined
               }
@@ -519,6 +543,13 @@ export function MessagesPage() {
             chatId: chatIdForAnalytics,
           })
         }
+        service={aiApi}
+      />
+
+      <AskAgentDialog
+        isOpen={showAskAgentDialog}
+        onClose={() => setShowAskAgentDialog(false)}
+        onSuccess={handleAskAgentSuccess}
         service={aiApi}
       />
 
