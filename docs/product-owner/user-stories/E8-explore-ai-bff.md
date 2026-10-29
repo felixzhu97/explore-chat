@@ -4,7 +4,7 @@
 
 ## 背景
 
-Chat 通过 Nest BFF 代理 Explore AI，避免浏览器直连上游并暴露服务凭证。
+Chat 通过 Spring BFF 代理 Explore AI，避免浏览器直连上游并暴露服务凭证。对标 Agentforce Service Agent：消息页可 Ask Agent。
 
 ---
 
@@ -16,11 +16,17 @@ Chat 通过 Nest BFF 代理 Explore AI，避免浏览器直连上游并暴露服
 
 ### 验收标准
 
-1. **Scenario** 客户端只调用 Chat API
-   **GIVEN** Explore AI BFF 已启用且服务端配置了上游地址与服务密钥  
+1. **Scenario** 客户端只调用 Chat API  
+   **GIVEN** Explore AI BFF 已配置 `EXPLORE_AI_BASE_URL` 与 `EXPLORE_AI_SERVICE_KEY`  
    **WHEN** 用户触发经 BFF 暴露的 AI 能力  
    **THEN** 浏览器请求指向 Chat API（`/api/v1/ai/explore/*`）  
    **AND** 上游服务密钥不出现在客户端
+
+2. **Scenario** Gallery list + invoke  
+   **GIVEN** 同上且用户已登录  
+   **WHEN** 调用 `GET /api/v1/ai/explore/agents` 与 `POST /api/v1/ai/explore/agents/{type}/invoke`  
+   **THEN** Chat 以 `X-Service-Key` + `X-Client-Id` 转发 Explore AI 并返回 JSON  
+   **AND** 未配置 service key 时返回 503
 
 ### 状态
 
