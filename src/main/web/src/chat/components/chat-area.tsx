@@ -27,6 +27,7 @@ interface ChatAreaProps {
     options?: { mediaUrl?: string },
   ) => void;
   onSmartReplyClick?: () => void;
+  onAskAgentClick?: () => void;
   onGenerateVideoClick?: () => void;
   onGenerateTextClick?: () => void;
   onGenerateImageClick?: () => void;
@@ -93,6 +94,7 @@ export function ChatArea({
   onCancelEdit,
   onRecordingChange,
   onSmartReplyClick,
+  onAskAgentClick,
   onGenerateVideoClick,
   onGenerateTextClick,
   onGenerateImageClick,
@@ -158,6 +160,7 @@ export function ChatArea({
         onCancelEdit={onCancelEdit}
         onRecordingChange={onRecordingChange}
         onSmartReplyClick={onSmartReplyClick}
+        onAskAgentClick={onAskAgentClick}
         onGenerateVideoClick={onGenerateVideoClick}
         onGenerateTextClick={onGenerateTextClick}
         onGenerateImageClick={onGenerateImageClick}

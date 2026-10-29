@@ -31,6 +31,7 @@ interface MessageInputProps {
   onCancelEdit: () => void;
   onRecordingChange: (isRecording: boolean) => void;
   onSmartReplyClick?: () => void;
+  onAskAgentClick?: () => void;
   onGenerateVideoClick?: () => void;
   onGenerateTextClick?: () => void;
   onGenerateImageClick?: () => void;
@@ -169,6 +170,7 @@ export function MessageInput({
   onCancelEdit,
   onRecordingChange,
   onSmartReplyClick,
+  onAskAgentClick,
   onGenerateVideoClick,
   onGenerateTextClick,
   onGenerateImageClick,
@@ -178,6 +180,7 @@ export function MessageInput({
   const [showAiMenu, setShowAiMenu] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const hasAiActions =
+    onAskAgentClick != null ||
     onGenerateTextClick != null ||
     onGenerateImageClick != null ||
     onGenerateVideoClick != null ||
@@ -331,6 +334,14 @@ export function MessageInput({
                       ? () => {
                           setShowAiMenu(false);
                           onSmartReplyClick();
+                        }
+                      : undefined
+                  }
+                  onAskAgent={
+                    onAskAgentClick
+                      ? () => {
+                          setShowAiMenu(false);
+                          onAskAgentClick();
                         }
                       : undefined
                   }

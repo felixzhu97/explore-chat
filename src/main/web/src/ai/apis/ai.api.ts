@@ -9,6 +9,20 @@ export interface AiChatResponse {
   content: string;
 }
 
+export interface ExploreAgentSummary {
+  type: string;
+  name: string;
+  description?: string;
+  healthy?: boolean;
+  tools?: string[];
+}
+
+export interface ExploreAgentInvokeResponse {
+  type: string;
+  message: string;
+  reply: string;
+}
+
 export class AiApi {
   constructor(private apiClient: ApiClient) {}
 
@@ -20,6 +34,25 @@ export class AiApi {
       messages,
       ...(model != null && { model }),
     });
+  }
+
+  /** Lists Explore AI Gallery agents via Chat BFF. */
+  async listExploreAgents(lang?: string): Promise<ExploreAgentSummary[]> {
+    const query = lang != null && lang !== "" ? `?lang=${encodeURIComponent(lang)}` : "";
+    return this.apiClient.get<ExploreAgentSummary[]>(`/ai/explore/agents${query}`);
+  }
+
+  /** Invokes one Explore AI Gallery agent via Chat BFF. */
+  async invokeExploreAgent(
+    agentType: string,
+    message: string,
+    lang?: string,
+  ): Promise<ExploreAgentInvokeResponse> {
+    const query = lang != null && lang !== "" ? `?lang=${encodeURIComponent(lang)}` : "";
+    return this.apiClient.post<ExploreAgentInvokeResponse>(
+      `/ai/explore/agents/${encodeURIComponent(agentType)}/invoke${query}`,
+      { message },
+    );
   }
 
   async postChatStream(
