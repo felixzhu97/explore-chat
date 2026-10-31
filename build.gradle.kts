@@ -1,7 +1,7 @@
 plugins {
     java
     checkstyle
-    id("org.springframework.boot") version "4.1.1"
+    id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
     id("jacoco")
 }
@@ -52,7 +52,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.springframework.kafka:spring-kafka-test")
-    testImplementation("com.tngtech.archunit:archunit-junit5:1.5.0")
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.5.1")
 }
 
 checkstyle {
