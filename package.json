@@ -24,6 +24,7 @@
     "dev:api": "./gradlew bootRun",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lint": "turbo run lint",
+    "lint:boundaries": "depcruise packages src/main/web src/main/admin src/main/mobile --config .dependency-cruiser.cjs",
     "setup": "bash scripts/setup/dev.sh",
     "setup:inline": "./gradlew classes",
     "start:server": "./gradlew bootRun",
@@ -41,11 +42,12 @@
     "lint:openapi": "pnpm dlx @stoplight/spectral-cli@6.15.0 lint src/main/im-contract/openapi.yaml -r .spectral.yml",
     "verify": "pnpm verify:docs && pnpm verify:server && pnpm verify:web",
     "verify:server": "./gradlew checkstyleMain checkstyleTest test --no-daemon",
-    "verify:web": "pnpm --filter './packages/**' build && pnpm check-types && pnpm lint && pnpm test && pnpm lint:openapi",
+    "verify:web": "pnpm --filter './packages/**' build && pnpm check-types && pnpm lint && pnpm lint:boundaries && pnpm test && pnpm lint:openapi",
     "verify:docs": "node scripts/check-doc-links.mjs",
     "prepare": "husky"
   },
   "devDependencies": {
+    "dependency-cruiser": "^17.4.3",
     "husky": "^9.1.7",
     "prettier": "^3.6.0",
     "turbo": "^2.5.4",

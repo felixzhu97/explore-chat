@@ -79,3 +79,16 @@ export type KnownEventPayloadMap = {
   [POST_LIKE]: PostLikePayload;
   [POST_SAVE]: PostSavePayload;
 };
+
+export interface EventContext {
+  userId?: string;
+  sessionId?: string;
+  platform?: string;
+}
+
+export interface AnalyticsEvent {
+  eventName: string;
+  properties?: Record<string, unknown>;
+  timestamp: number;
+  context?: EventContext;
+}

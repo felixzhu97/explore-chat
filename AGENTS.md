@@ -33,7 +33,7 @@ Start here, then follow links. This file is a map; detail lives in `docs/`.
 |------|---------|
 | Verify everything (run before every commit) | `pnpm verify` |
 | API only: style, tests, ArchUnit | `pnpm verify:server` |
-| Clients only: build packages, types, lint, tests, OpenAPI lint | `pnpm verify:web` |
+| Clients only: build packages, types, lint, package boundaries, tests, OpenAPI lint | `pnpm verify:web` |
 | Docs only: relative Markdown links | `pnpm verify:docs` |
 | Start API (:9001) and web (:4000), wait for health | `pnpm dev` (stop with `pnpm stop`) |
 | API only | `pnpm dev:api` |
@@ -49,9 +49,12 @@ Start here, then follow links. This file is a map; detail lives in `docs/`.
 3. The API stays the source of truth for Chat and Message history;
    Socket.IO events are reconciled with durable reads.
 4. API changes update `src/main/im-contract/openapi.yaml` in the same PR.
-5. Never log message content, Media, tokens, emails or IPs.
+5. `packages/*` never import from apps; web, admin and mobile never
+   import from each other; no import cycles (dependency-cruiser).
+6. Never log message content, Media, tokens, emails or IPs.
 
-When an ArchUnit rule fails, its message ends with `Fix:` — do that.
+When an ArchUnit or dependency-cruiser rule fails, its message ends with
+`Fix:` — do that.
 Never add lines to `src/test/resources/archunit_store/`; it only shrinks.
 
 ## Conventions

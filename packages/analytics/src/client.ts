@@ -1,19 +1,13 @@
-import type { KnownEventName, KnownEventPayloadMap } from "./events";
+import type {
+  AnalyticsEvent,
+  EventContext,
+  KnownEventName,
+  KnownEventPayloadMap,
+} from "./events";
 import type { IAnalyticsTransport } from "./transport";
 import isEmpty from "lodash/isEmpty";
 
-export interface EventContext {
-  userId?: string;
-  sessionId?: string;
-  platform?: string;
-}
-
-export interface AnalyticsEvent {
-  eventName: string;
-  properties?: Record<string, unknown>;
-  timestamp: number;
-  context?: EventContext;
-}
+export type { AnalyticsEvent, EventContext } from "./events";
 
 export interface AnalyticsConfig {
   transport: IAnalyticsTransport;
