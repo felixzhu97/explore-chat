@@ -15,7 +15,7 @@ Start here, then follow links. This file is a map; detail lives in `docs/`.
 | `src/main/java/com/chat/common/` | Shared kernel |
 | `src/main/resources/` | `application*.yml`, DB migrations |
 | `src/main/im-contract/openapi.yaml` | IM API contract, linted by Spectral |
-| `src/test/java/com/chat/ArchitectureTest.java` | ArchUnit rules — the mechanical form of the hard rules below |
+| `src/test/java/com/chat/architecture/` | ArchUnit rules — the mechanical form of the hard rules below |
 | `src/main/web/` | Next.js web app (`chat-web`, :4000) |
 | `src/main/admin/` | Next.js admin (`chat-admin`, :4001) |
 | `src/main/mobile/` | Expo React Native app |
@@ -51,6 +51,7 @@ Start here, then follow links. This file is a map; detail lives in `docs/`.
 5. Never log message content, Media, tokens, emails or IPs.
 
 When an ArchUnit rule fails, its message ends with `Fix:` — do that.
+Never add lines to `src/test/resources/archunit_store/`; it only shrinks.
 
 ## Conventions
 

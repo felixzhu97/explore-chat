@@ -1,0 +1,3 @@
+Method <com.chat.users.service.UsersService.getById(java.lang.String)> has return type <com.chat.users.controller.UserResponse> in (UsersService.java:0)
+Method <com.chat.users.service.UsersService.search(java.lang.String, int)> has generic return type <java.util.List<com.chat.users.controller.UserResponse>> with type argument depending on <com.chat.users.controller.UserResponse> in (UsersService.java:0)
+Method <com.chat.users.service.UsersService.updateProfile(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)> has return type <com.chat.users.controller.UserResponse> in (UsersService.java:0)

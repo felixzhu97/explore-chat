@@ -1,0 +1,3 @@
+Method <com.chat.auth.service.AuthService.logout(java.lang.String)> calls method <java.util.Date.toInstant()> in (AuthService.java:165)
+Method <com.chat.auth.service.JwtTokenService.build(javax.crypto.SecretKey, java.lang.String, java.lang.String, java.lang.String, long)> calls method <java.util.Date.from(java.time.Instant)> in (JwtTokenService.java:58)
+Method <com.chat.auth.service.JwtTokenService.build(javax.crypto.SecretKey, java.lang.String, java.lang.String, java.lang.String, long)> calls method <java.util.Date.from(java.time.Instant)> in (JwtTokenService.java:59)
