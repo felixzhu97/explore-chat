@@ -35,4 +35,5 @@ jobs:
       - name: Lint and test
         env:
           GRADLE_OPTS: -Dorg.gradle.internal.test.binary.results-store=false
+        # = pnpm verify:server
         run: ./gradlew checkstyleMain checkstyleTest test --no-daemon

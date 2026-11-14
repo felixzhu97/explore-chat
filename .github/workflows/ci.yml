@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 
 jobs:
   ci:
@@ -25,14 +24,5 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm --filter './packages/**' build
-
-      - name: Type check
-        run: pnpm check-types
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Spectral (IM OpenAPI contract)
-        run: pnpm lint:openapi
+      - name: Build packages, type check, lint, test, OpenAPI contract
+        run: pnpm verify:web
