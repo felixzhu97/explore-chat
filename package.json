@@ -39,9 +39,10 @@
     "test:java": "./gradlew checkstyleMain checkstyleTest test",
     "test:watch": "turbo run test:watch --concurrency=23",
     "lint:openapi": "pnpm dlx @stoplight/spectral-cli@6.15.0 lint src/main/im-contract/openapi.yaml -r .spectral.yml",
-    "verify": "pnpm verify:server && pnpm verify:web",
+    "verify": "pnpm verify:docs && pnpm verify:server && pnpm verify:web",
     "verify:server": "./gradlew checkstyleMain checkstyleTest test --no-daemon",
     "verify:web": "pnpm --filter './packages/**' build && pnpm check-types && pnpm lint && pnpm test && pnpm lint:openapi",
+    "verify:docs": "node scripts/check-doc-links.mjs",
     "prepare": "husky"
   },
   "devDependencies": {

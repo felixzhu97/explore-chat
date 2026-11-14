@@ -34,6 +34,7 @@ Start here, then follow links. This file is a map; detail lives in `docs/`.
 | Verify everything (run before every commit) | `pnpm verify` |
 | API only: style, tests, ArchUnit | `pnpm verify:server` |
 | Clients only: build packages, types, lint, tests, OpenAPI lint | `pnpm verify:web` |
+| Docs only: relative Markdown links | `pnpm verify:docs` |
 | Start API (:9001) and web (:4000), wait for health | `pnpm dev` (stop with `pnpm stop`) |
 | API only | `pnpm dev:api` |
 | Admin only | `pnpm start:admin` |
@@ -67,3 +68,8 @@ Never add lines to `src/test/resources/archunit_store/`; it only shrinks.
 - Multi-step plan: `docs/developer/exec-plans/` (see its README)
 - Known debt: `docs/developer/tech-debt.md`
 - Module health: `docs/developer/quality.md`
+
+## Agents
+
+Team agent definitions in `.cursor/agents/` are synced from the
+`public` meta-repo — edit them there, not here.

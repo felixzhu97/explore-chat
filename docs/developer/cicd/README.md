@@ -6,8 +6,8 @@ Chat 使用 GitHub Actions。
 
 | Workflow | 文件                                                                        | 说明                                          |
 | -------- | --------------------------------------------------------------------------- | --------------------------------------------- |
-| CI       | [`.github/workflows/ci.yml`](../../../.github/workflows/ci.yml)             | install → build packages → check-types → lint |
-| Coverage | [`.github/workflows/coverage.yml`](../../../.github/workflows/coverage.yml) | 覆盖率                                        |
+| CI       | [`.github/workflows/ci.yml`](../../../.github/workflows/ci.yml)             | `pnpm verify:web`：build packages → check-types → lint → test → OpenAPI |
+| Java CI  | [`.github/workflows/java-ci.yml`](../../../.github/workflows/java-ci.yml)   | `pnpm verify:server`：checkstyle → test（含 ArchUnit） |
 | CodeQL   | —                                                                           | **计划中**（见 `cicd-codeql.puml`）           |
 
 ## 图

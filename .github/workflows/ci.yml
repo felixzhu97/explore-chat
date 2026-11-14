@@ -24,5 +24,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Relative Markdown links
+        run: pnpm verify:docs
+
       - name: Build packages, type check, lint, test, OpenAPI contract
         run: pnpm verify:web

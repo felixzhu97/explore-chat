@@ -8,6 +8,8 @@ ENV=${1:-dev}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$ROOT_DIR"
+# A system HTTP proxy would otherwise answer the localhost health check with 502.
+export NO_PROXY="localhost,127.0.0.1${NO_PROXY:+,$NO_PROXY}" no_proxy="localhost,127.0.0.1${no_proxy:+,$no_proxy}"
 
 echo "Chat ($ENV) — Spring Boot + Next.js"
 
