@@ -1,4 +1,10 @@
-# Chat
+# explore-chat
+
+> **Moved.** Development continues in
+> [explore-workspace](https://github.com/felixzhu97/explore-workspace) under
+> `chat/`. This repository is archived; please open new issues and pull
+> requests there.
+
 
 `Chat` is a social messaging app you can use to share posts, browse Feed and Reels, message friends, and place calls. It is a pnpm + Turbo monorepo with a **Spring Boot API at the repo root**, Next.js web/admin under `src/main/web` and `src/main/admin`, Expo mobile under `src/main/mobile`, and optional Python side services in sibling [explore-ml](https://github.com/felixzhu97/explore-ml).
 
